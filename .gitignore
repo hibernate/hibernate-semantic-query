@@ -1,12 +1,26 @@
-*.class
+# IntelliJ specific files/directories
+out
+.idea
+*.ipr
+*.iws
+*.iml
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Eclipse specific files/directories
+.classpath
+.project
+.settings
+.metadata
+bin
 
-# Package Files #
-*.jar
-*.war
-*.ear
+# NetBeans specific files/directories
+.nbattrs
+
+# Gradle work directory
+.gradle
+build/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Typically *NIX text editors, by default, append '~' to files on saving to make backups
+*~

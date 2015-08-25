@@ -1,0 +1,129 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+		maven {
+			name 'jboss-nexus'
+			url "http://repository.jboss.org/nexus/content/groups/public/"
+		}
+		maven {
+			name "jboss-snapshots"
+			url "http://snapshots.jboss.org/maven2/"
+		}
+	}
+	dependencies {
+		classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
+		classpath 'org.hibernate.build.gradle:gradle-animalSniffer-plugin:1.0.1.Final'
+	}
+}
+
+apply plugin: 'idea'
+
+idea {
+	project {
+		jdkName = '1.6'
+		languageLevel = '1.6'
+
+		vcs = 'Git'
+	}
+}
+
+subprojects { subproject ->
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+
+	apply plugin: 'java'
+
+	apply plugin: 'maven-publish'
+	apply plugin: 'maven-publish-auth'
+
+	apply plugin: 'org.hibernate.build.gradle.animalSniffer'
+	apply plugin: 'idea'
+
+	sourceCompatibility = 1.6
+
+	group = 'org.hibernate'
+	version = '1.0.0-SNAPSHOT'
+
+	configurations {
+		provided {
+			// todo : need to make sure these are non-exported
+			description = 'Non-exported compile-time dependencies.'
+		}
+	}
+
+	dependencies {
+		compile 'org.jboss.logging:jboss-logging:3.3.0.Final'
+		provided 'org.jboss.logging:jboss-logging-annotations:2.0.0.Final'
+
+		animalSnifferSignature 'org.codehaus.mojo.signature:java16:1.0@signature'
+
+		testCompile group: 'junit', name: 'junit', version: '4.11'
+
+		testRuntime 'log4j:log4j:1.2.17'
+	}
+
+	task compile
+	tasks.withType( JavaCompile ).each {
+		tasks.compile.dependsOn it
+		it.options.compilerArgs += [
+				"-nowarn",
+				"-encoding", "UTF-8"
+		]
+	}
+
+	idea {
+		module {
+			jdkName = sourceCompatibility
+
+			excludeDirs = [file( ".gradle" )]
+			excludeDirs += file( "$buildDir/classes" )
+			excludeDirs += file( "$buildDir/packages" )
+			excludeDirs += file( "$buildDir/dependency-cache" )
+			excludeDirs += file( "$buildDir/libs" )
+			excludeDirs += file( "$buildDir/reports" )
+			excludeDirs += file( "$buildDir/resources" )
+			excludeDirs += file( "$buildDir/test-results" )
+			excludeDirs += file( "$buildDir/tmp" )
+
+			downloadSources = true
+		}
+	}
+
+	publishing {
+		publications {
+			mavenJava( MavenPublication ) {
+				from components.java
+
+				artifact( sourcesJar ) {
+					classifier 'sources'
+				}
+			}
+		}
+		repositories {
+			if ( (project.version as String).endsWith( '-SNAPSHOT' ) ) {
+				maven {
+					name 'jboss-snapshots-repository'
+					url 'https://repository.jboss.org/nexus/content/repositories/snapshots'
+				}
+			}
+			else {
+				maven {
+					name 'jboss-releases-repository'
+					url 'https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/'
+				}
+			}
+		}
+	}
+
+	task sourcesJar(type: Jar, dependsOn: compileJava) {
+		from sourceSets.main.allSource
+		classifier = 'sources'
+	}
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = 2.4
+}

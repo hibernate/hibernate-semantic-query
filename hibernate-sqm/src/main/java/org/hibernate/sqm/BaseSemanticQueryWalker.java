@@ -67,8 +67,6 @@ import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.SelectList;
-import org.hibernate.sqm.query.select.SelectListItem;
 import org.hibernate.sqm.query.select.Selection;
 
 /**
@@ -153,32 +151,21 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 
 	@Override
 	public SelectClause visitSelectClause(SelectClause selectClause) {
-		visitSelection( selectClause.getSelection() );
+		for ( Selection selection : selectClause.getSelections() ) {
+			visitSelection( selection );
+		}
 		return selectClause;
 	}
 
 	@Override
 	public Selection visitSelection(Selection selection) {
-		return (Selection) selection.accept( this );
+		selection.getExpression().accept( this );
+		return selection;
 	}
 
 	@Override
 	public DynamicInstantiation visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation) {
 		return dynamicInstantiation;
-	}
-
-	@Override
-	public SelectList visitSelectList(SelectList selectList) {
-		for ( SelectListItem selectListItem : selectList.getSelectListItems() ) {
-			visitSelectListItem( selectListItem );
-		}
-		return selectList;
-	}
-
-	@Override
-	public SelectListItem visitSelectListItem(SelectListItem selectListItem) {
-		selectListItem.getSelectedExpression().accept( this );
-		return selectListItem;
 	}
 
 	@Override

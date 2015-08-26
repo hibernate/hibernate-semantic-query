@@ -26,11 +26,11 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class DynamicInstantiation implements Selection, Expression {
+public class DynamicInstantiation implements Expression {
 	private final Class instantiationTarget;
 	private final BasicTypeDescriptor typeDescriptor;
 
-	private List<AliasedDynamicInstantiationArgument> aliasedArguments;
+	private List<DynamicInstantiationArgument> arguments;
 
 	public DynamicInstantiation(Class instantiationTarget) {
 		this.instantiationTarget = instantiationTarget;
@@ -39,15 +39,15 @@ public class DynamicInstantiation implements Selection, Expression {
 
 	public DynamicInstantiation(
 			final Class instantiationTarget,
-			List<AliasedDynamicInstantiationArgument> aliasedArguments) {
+			List<DynamicInstantiationArgument> arguments) {
 		this( instantiationTarget );
-		this.aliasedArguments = aliasedArguments;
+		this.arguments = arguments;
 	}
 
 	public DynamicInstantiation(
 			Class instantiationTarget,
-			AliasedDynamicInstantiationArgument... aliasedArguments) {
-		this( instantiationTarget, Arrays.asList( aliasedArguments ) );
+			DynamicInstantiationArgument... arguments) {
+		this( instantiationTarget, Arrays.asList( arguments ) );
 	}
 
 	@Override
@@ -59,19 +59,19 @@ public class DynamicInstantiation implements Selection, Expression {
 		return instantiationTarget;
 	}
 
-	public List<AliasedDynamicInstantiationArgument> getAliasedArguments() {
-		return aliasedArguments;
+	public List<DynamicInstantiationArgument> getArguments() {
+		return arguments;
 	}
 
-	public void addArgument(AliasedDynamicInstantiationArgument argument) {
-		if ( aliasedArguments == null ) {
-			aliasedArguments = new ArrayList<AliasedDynamicInstantiationArgument>();
+	public void addArgument(DynamicInstantiationArgument argument) {
+		if ( arguments == null ) {
+			arguments = new ArrayList<DynamicInstantiationArgument>();
 		}
-		aliasedArguments.add( argument );
+		arguments.add( argument );
 	}
 
 	public void addArgument(Expression argument, String alias) {
-		addArgument( new AliasedDynamicInstantiationArgument( argument, alias ) );
+		addArgument( new DynamicInstantiationArgument( argument, alias ) );
 	}
 
 	public void addArgument(Expression argument) {

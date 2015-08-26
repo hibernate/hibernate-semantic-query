@@ -13,8 +13,25 @@
  */
 package org.hibernate.sqm.query.select;
 
+import org.hibernate.sqm.query.expression.Expression;
+
 /**
  * @author Steve Ebersole
  */
-public interface DynamicInstantiationArgument {
+public class DynamicInstantiationArgument implements AliasedExpression {
+	private final Expression selectExpression;
+	private final String alias;
+
+	public DynamicInstantiationArgument(Expression selectExpression, String alias) {
+		this.selectExpression = selectExpression;
+		this.alias = alias;
+	}
+
+	public Expression getExpression() {
+		return selectExpression;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
 }

@@ -13,31 +13,50 @@
  */
 package org.hibernate.sqm.query.select;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
+ * The semantic select clause.  Defined as a list of individual selections.
+ *
  * @author Steve Ebersole
  */
 public class SelectClause {
 	private final boolean distinct;
-	private final Selection selection;
+	private List<Selection> selections;
 
-	private Map<String, SelectItemExpression> stringSelectItemExpressionsByAlias;
-
-	public SelectClause(Selection selection, boolean distinct) {
-		this.selection = selection;
+	public SelectClause(boolean distinct) {
 		this.distinct = distinct;
 	}
 
-	public SelectClause(Selection selection) {
-		this( selection, false );
+	public SelectClause(boolean distinct, List<Selection> selections) {
+		this.distinct = distinct;
+		this.selections = selections;
+	}
+
+	public SelectClause(boolean distinct, Selection... selections) {
+		this( distinct, Arrays.asList( selections ) );
 	}
 
 	public boolean isDistinct() {
 		return distinct;
 	}
 
-	public Selection getSelection() {
-		return selection;
+	public List<Selection> getSelections() {
+		if ( selections == null ) {
+			return Collections.emptyList();
+		}
+		else {
+			return Collections.unmodifiableList( selections );
+		}
+	}
+
+	public void addSelection(Selection selection) {
+		if ( selections == null ) {
+			selections = new ArrayList<Selection>();
+		}
+		selections.add( selection );
 	}
 }

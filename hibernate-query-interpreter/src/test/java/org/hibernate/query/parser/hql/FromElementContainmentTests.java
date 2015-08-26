@@ -9,8 +9,7 @@ package org.hibernate.query.parser.hql;
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
-import org.hibernate.sqm.query.select.SelectList;
-import org.hibernate.sqm.query.select.SelectListItem;
+import org.hibernate.sqm.query.select.Selection;
 
 import org.junit.Test;
 
@@ -27,11 +26,9 @@ public class FromElementContainmentTests {
 		final String query = "select o from Entity o";
 		final ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
 		SelectStatement statement = (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
-		assertThat( statement.getQuerySpec().getSelectClause().getSelection(), instanceOf( SelectList.class ) );
-		SelectList selectList = (SelectList) statement.getQuerySpec().getSelectClause().getSelection();
-		assertEquals( 1, selectList.getSelectListItems().size() );
-		SelectListItem item = selectList.getSelectListItems().get( 0 );
-		assertThat( item.getSelectedExpression(), instanceOf( FromElementReferenceExpression.class ) );
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		assertThat( selection.getExpression(), instanceOf( FromElementReferenceExpression.class ) );
 	}
 
 	@Test

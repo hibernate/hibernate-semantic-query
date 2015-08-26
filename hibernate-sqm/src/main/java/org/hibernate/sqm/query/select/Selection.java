@@ -13,14 +13,33 @@
  */
 package org.hibernate.sqm.query.select;
 
-import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.query.expression.Expression;
 
 /**
- * Represents the "object level view" of the query selection.  For a given query there
- * is just one Selection although that Selection might contain multiple "selection items".
+ * Represents an individual selection within a select clause.
  *
  * @author Steve Ebersole
  */
-public interface Selection {
-	<T> T accept(SemanticQueryWalker<T> walker);
+public class Selection implements AliasedExpression {
+	private final Expression selectExpression;
+	private final String alias;
+
+	public Selection(Expression selectExpression, String alias) {
+		this.selectExpression = selectExpression;
+		this.alias = alias;
+	}
+
+	public Selection(Expression selectExpression) {
+		this( selectExpression, null );
+	}
+
+	@Override
+	public Expression getExpression() {
+		return selectExpression;
+	}
+
+	@Override
+	public String getAlias() {
+		return alias;
+	}
 }

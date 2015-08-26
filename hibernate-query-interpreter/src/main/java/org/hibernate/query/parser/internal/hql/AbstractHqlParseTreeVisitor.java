@@ -87,11 +87,9 @@ import org.hibernate.sqm.query.predicate.OrPredicate;
 import org.hibernate.sqm.query.predicate.Predicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.AliasedDynamicInstantiationArgument;
+import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.SelectList;
-import org.hibernate.sqm.query.select.SelectListItem;
 import org.hibernate.sqm.query.select.Selection;
 
 import org.jboss.logging.Logger;
@@ -211,44 +209,53 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new QuerySpec( getCurrentFromClause(), selectClause, whereClause );
 	}
 
-	protected SelectClause buildInferredSelectClause(FromClause fromClause) {
-		// for now, this is slightly different than the legacy behavior where
-		// the root and each non-fetched-join was selected.  For now, here, we simply
-		// select the root
-		return new SelectClause(
-				new SelectList(
-						new SelectListItem(
-								new FromElementReferenceExpression(
-										fromClause.getFromElementSpaces().get( 0 ).getRoot()
-								)
-						)
-				)
-		);
-	}
-
 	@Override
 	public FromClause visitFromClause(HqlParser.FromClauseContext ctx) {
 		return getCurrentFromClause();
 	}
 
+	protected SelectClause buildInferredSelectClause(FromClause fromClause) {
+		// for now, this is slightly different than the legacy behavior where
+		// the root and each non-fetched-join was selected.  For now, here, we simply
+		// select the root
+		final SelectClause selectClause = new SelectClause( true );
+		selectClause.addSelection(
+				new Selection(
+						new FromElementReferenceExpression(
+								fromClause.getFromElementSpaces().get( 0 ).getRoot()
+						)
+				)
+		);
+		return selectClause;
+	}
+
 	@Override
 	public SelectClause visitSelectClause(HqlParser.SelectClauseContext ctx) {
-		return new SelectClause(
-				visitSelection( ctx.selection() ),
-				ctx.distinctKeyword() != null
-		);
+		final SelectClause selectClause = new SelectClause( ctx.distinctKeyword() != null );
+		for ( HqlParser.SelectionContext selectionContext : ctx.selectionList().selection() ) {
+			selectClause.addSelection( visitSelection( selectionContext ) );
+		}
+		return selectClause;
 	}
 
 	@Override
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
+		return new Selection(
+				visitSelectExpression( ctx.selectExpression() ),
+				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
+		);
+	}
+
+	@Override
+	public Expression visitSelectExpression(HqlParser.SelectExpressionContext ctx) {
 		if ( ctx.dynamicInstantiation() != null ) {
 			return visitDynamicInstantiation( ctx.dynamicInstantiation() );
 		}
 		else if ( ctx.jpaSelectObjectSyntax() != null ) {
 			return visitJpaSelectObjectSyntax( ctx.jpaSelectObjectSyntax() );
 		}
-		else if ( ctx.selectItemList() != null ) {
-			return visitSelectItemList( ctx.selectItemList() );
+		else if ( ctx.expression() != null ) {
+			return (Expression) ctx.expression().accept( this );
 		}
 
 		throw new ParsingException( "Unexpected selection rule type : " + ctx );
@@ -275,8 +282,8 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public AliasedDynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
-		return new AliasedDynamicInstantiationArgument(
+	public DynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
+		return new DynamicInstantiationArgument(
 				visitDynamicInstantiationArgExpression( ctx.dynamicInstantiationArgExpression() ),
 				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
 		);
@@ -295,34 +302,13 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Selection visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
+	public FromElementReferenceExpression visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
 		final String alias = ctx.IDENTIFIER().getText();
 		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( alias );
 		if ( fromElement == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );
 		}
-		return new SelectList(
-				new SelectListItem(
-						new FromElementReferenceExpression( fromElement )
-				)
-		);
-	}
-
-	@Override
-	public SelectList visitSelectItemList(HqlParser.SelectItemListContext ctx) {
-		final SelectList selectList = new SelectList();
-		for ( HqlParser.SelectItemContext selectItemContext : ctx.selectItem() ) {
-			selectList.addSelectListItem( visitSelectItem( selectItemContext ) );
-		}
-		return selectList;
-	}
-
-	@Override
-	public SelectListItem visitSelectItem(HqlParser.SelectItemContext ctx) {
-		return new SelectListItem(
-				(Expression) ctx.expression().accept( this ),
-				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
-		);
+		return new FromElementReferenceExpression( fromElement );
 	}
 
 	@Override

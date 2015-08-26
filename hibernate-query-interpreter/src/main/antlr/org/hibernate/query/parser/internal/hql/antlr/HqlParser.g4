@@ -128,13 +128,24 @@ querySpec
 // SELECT clause
 
 selectClause
-	:	selectKeyword distinctKeyword? selection
+	:	selectKeyword distinctKeyword? selectionList
+	;
+
+selectionList
+	: selection (COMMA selection)*
 	;
 
 selection
+	// I have noticed that without this predicate, Antlr will sometimes
+	// interpret `select a.b from Something ...` as `from` being the
+	// select-expression alias
+	: selectExpression (asKeyword? {!doesUpcomingTokenMatchAny("from")}? IDENTIFIER)?
+	;
+
+selectExpression
 	:	dynamicInstantiation
 	|	jpaSelectObjectSyntax
-	|	selectItemList
+	|	expression
 	;
 
 dynamicInstantiation
@@ -171,17 +182,6 @@ dynamicInstantiationArgExpression
 
 jpaSelectObjectSyntax
 	:	objectKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
-	;
-
-selectItemList
-	:	selectItem (COMMA selectItem)*
-	;
-
-selectItem
-	// I have noticed thaty without this predicate, Antlr will sometimes
-	// interpret `select a.b from Something ...` as `from` being the
-	// select-expression alias
-	: expression (asKeyword? {!doesUpcomingTokenMatchAny("from")}? IDENTIFIER)?
 	;
 
 

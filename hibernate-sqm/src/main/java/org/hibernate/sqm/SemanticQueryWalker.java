@@ -67,8 +67,6 @@ import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.SelectList;
-import org.hibernate.sqm.query.select.SelectListItem;
 import org.hibernate.sqm.query.select.Selection;
 
 /**
@@ -104,10 +102,6 @@ public interface SemanticQueryWalker<T> {
 	T visitSelection(Selection selection);
 
 	T visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation);
-
-	T visitSelectList(SelectList selectList);
-
-	T visitSelectListItem(SelectListItem selectListItem);
 
 	T visitWhereClause(WhereClause whereClause);
 

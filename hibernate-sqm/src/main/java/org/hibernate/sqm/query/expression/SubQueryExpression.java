@@ -16,7 +16,7 @@ package org.hibernate.sqm.query.expression;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.select.SelectList;
+import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
 
 /**
@@ -28,18 +28,16 @@ public class SubQueryExpression implements Expression {
 
 	public SubQueryExpression(QuerySpec querySpec) {
 		this.querySpec = querySpec;
-		this.typeDescriptor = determineTypeDescriptor( querySpec.getSelectClause().getSelection() );
+		this.typeDescriptor = determineTypeDescriptor( querySpec.getSelectClause() );
 	}
 
-	private static TypeDescriptor determineTypeDescriptor(Selection selection) {
-		if ( SelectList.class.isInstance( selection ) ) {
-			final SelectList selectList = (SelectList) selection;
-			if ( selectList.getSelectListItems().size() == 1 ) {
-				return selectList.getSelectListItems().get( 0 ).getSelectedExpression().getTypeDescriptor();
-			}
+	private static TypeDescriptor determineTypeDescriptor(SelectClause selectClause) {
+		if ( selectClause.getSelections().size() != 0 ) {
+			return null;
 		}
 
-		return null;
+		final Selection selection = selectClause.getSelections().get( 0 );
+		return selection.getExpression().getTypeDescriptor();
 	}
 
 	@Override

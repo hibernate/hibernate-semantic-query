@@ -217,7 +217,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		final RootEntityFromElement rootEntityFromElement = fromElementBuilder.makeRootEntityFromElement(
 				currentFromElementSpace,
 				resolveEntityReference( ctx.mainEntityPersisterReference().dotIdentifierSequence() ),
-				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
+				interpretAlias( ctx.mainEntityPersisterReference().alias() )
 		);
 		fromElementMap.put( ctx.getText(), rootEntityFromElement );
 	}
@@ -233,11 +233,13 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		return entityTypeDescriptor;
 	}
 
-	private String interpretAlias(TerminalNode aliasNode) {
-		if ( aliasNode == null ) {
+	private String interpretAlias(HqlParser.AliasContext ctx) {
+		if ( ctx == null ) {
 			return parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 		}
+		final TerminalNode aliasNode = ctx.IDENTIFIER();
 		assert aliasNode.getSymbol().getType() == HqlParser.IDENTIFIER;
+		parsingContext.getAliasRegistry().registerAlias( aliasNode.getText() );
 		return aliasNode.getText();
 	}
 
@@ -257,7 +259,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		final CrossJoinedFromElement join = fromElementBuilder.makeCrossJoinedFromElement(
 				currentFromElementSpace,
 				entityTypeDescriptor,
-				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
+				interpretAlias( ctx.mainEntityPersisterReference().alias() )
 		);
 		fromElementMap.put( ctx.getText(), join );
 	}
@@ -271,7 +273,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 				currentFromElementSpace,
 				currentFromClauseStackNode,
 				JoinType.INNER,
-				interpretAlias( ctx.IDENTIFIER() ),
+				interpretAlias( ctx.alias() ),
 				false
 		);
 
@@ -304,7 +306,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 				currentFromElementSpace,
 				currentFromClauseStackNode,
 				joinType,
-				interpretAlias( ctx.qualifiedJoinRhs().IDENTIFIER() ),
+				interpretAlias( ctx.qualifiedJoinRhs().alias() ),
 				ctx.fetchKeyword() != null
 		);
 

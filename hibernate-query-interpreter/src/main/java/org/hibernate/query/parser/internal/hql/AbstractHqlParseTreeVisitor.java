@@ -243,8 +243,17 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
 		return new Selection(
 				visitSelectExpression( ctx.selectExpression() ),
-				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
+				visitAlias( ctx.alias() )
 		);
+	}
+
+	@Override
+	public String visitAlias(HqlParser.AliasContext ctx) {
+		if(ctx == null){
+			return null;
+		}
+		parsingContext.getAliasRegistry().registerAlias( ctx.IDENTIFIER().getText() );
+		return ctx.IDENTIFIER().getText();
 	}
 
 	@Override
@@ -286,7 +295,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public DynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
 		return new DynamicInstantiationArgument(
 				visitDynamicInstantiationArgExpression( ctx.dynamicInstantiationArgExpression() ),
-				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
+				visitAlias( ctx.alias() )
 		);
 	}
 
@@ -304,7 +313,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public FromElementReferenceExpression visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
-		final String alias = ctx.IDENTIFIER().getText();
+		final String alias = visitAlias( ctx.alias() );
 		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( alias );
 		if ( fromElement == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );

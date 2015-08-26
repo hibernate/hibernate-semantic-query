@@ -76,4 +76,23 @@ public class StrictJpqlComplianceTests {
 			assertEquals( StrictJpaComplianceViolation.Type.ALIASED_FETCH_JOIN , v.getType() );
 		}
 	}
+
+	@Test
+	public void testNonStandardFunctionCall() {
+		final String query = "select o from Entity o where my_func(o.basic) = 1";
+		final ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
+
+		// first test HQL superset is allowed...
+		SemanticQueryInterpreter.interpret( query, consumerContext );
+
+		// now enable strict compliance and try again, should lead to error
+		consumerContext.enableStrictJpaCompliance();
+		try {
+			SemanticQueryInterpreter.interpret( query, consumerContext );
+			fail( "expected violation" );
+		}
+		catch (StrictJpaComplianceViolation v) {
+			assertEquals( StrictJpaComplianceViolation.Type.FUNCTION_CALL , v.getType() );
+		}
+	}
 }

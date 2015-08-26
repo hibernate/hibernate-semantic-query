@@ -8,6 +8,7 @@ package org.hibernate.query.parser.internal.hql.phase2;
 
 import org.hibernate.query.parser.NotYetImplementedException;
 import org.hibernate.query.parser.ParsingException;
+import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.AbstractHqlParseTreeVisitor;
@@ -17,6 +18,7 @@ import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.query.parser.internal.hql.path.BasicAttributePathResolverImpl;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.Statement;
+import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.from.FromClause;
 
 import org.jboss.logging.Logger;
@@ -93,5 +95,17 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	@Override
 	public AttributePathPart visitIndexedPath(HqlParser.IndexedPathContext ctx) {
 		return super.visitIndexedPath( ctx );
+	}
+
+	@Override
+	public FunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+			throw new StrictJpaComplianceViolation(
+					"Encountered non-compliant non-standard function call [" +
+							ctx.nonStandardFunctionName() + "], but strict JPQL compliance was requested",
+					StrictJpaComplianceViolation.Type.FUNCTION_CALL
+			);
+		}
+		return super.visitNonStandardFunction( ctx );
 	}
 }

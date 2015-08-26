@@ -99,18 +99,6 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	}
 
 	@Override
-	public FunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
-			throw new StrictJpaComplianceViolation(
-					"Encountered non-compliant non-standard function call [" +
-							ctx.nonStandardFunctionName() + "], but strict JPQL compliance was requested",
-					StrictJpaComplianceViolation.Type.FUNCTION_CALL
-			);
-		}
-		return super.visitNonStandardFunction( ctx );
-	}
-
-	@Override
 	public OrderByClause visitOrderByClause(HqlParser.OrderByClauseContext ctx) {
 		// use the root FromClause (should be just one) to build an
 		// AttributePathResolver for the order by clause

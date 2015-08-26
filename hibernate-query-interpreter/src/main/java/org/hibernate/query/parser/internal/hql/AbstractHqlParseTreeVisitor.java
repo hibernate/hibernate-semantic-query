@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseVisitor;
 import org.hibernate.query.parser.LiteralNumberFormatException;
@@ -31,12 +32,16 @@ import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.expression.AggregateFunction;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
+import org.hibernate.sqm.query.expression.CountFunction;
+import org.hibernate.sqm.query.expression.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
@@ -53,9 +58,12 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
+import org.hibernate.sqm.query.expression.MaxFunction;
+import org.hibernate.sqm.query.expression.MinFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
+import org.hibernate.sqm.query.expression.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -873,6 +881,14 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public FunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+			throw new StrictJpaComplianceViolation(
+					"Encountered non-compliant non-standard function call [" +
+							ctx.nonStandardFunctionName() + "], but strict JPQL compliance was requested",
+					StrictJpaComplianceViolation.Type.FUNCTION_CALL
+			);
+		}
+
 		final String functionName = ctx.nonStandardFunctionName().getText();
 		final List<Expression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
 
@@ -889,6 +905,56 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 
 		return arguments;
+	}
+
+	@Override
+	public AggregateFunction visitAggregateFunction(HqlParser.AggregateFunctionContext ctx) {
+		return (AggregateFunction) super.visitAggregateFunction( ctx );
+	}
+
+	@Override
+	public AvgFunction visitAvgFunction(HqlParser.AvgFunctionContext ctx) {
+		return new AvgFunction(
+				(Expression) ctx.expression().accept( this ),
+				ctx.distinctKeyword() != null
+		);
+	}
+
+	@Override
+	public AggregateFunction visitCountFunction(HqlParser.CountFunctionContext ctx) {
+		if ( ctx.ASTERISK() != null ) {
+			return new CountStarFunction( ctx.distinctKeyword() != null );
+		}
+		else {
+			return new CountFunction(
+					(Expression) ctx.expression().accept( this ),
+					ctx.distinctKeyword() != null
+			);
+		}
+	}
+
+	@Override
+	public MaxFunction visitMaxFunction(HqlParser.MaxFunctionContext ctx) {
+		return new MaxFunction(
+				(Expression) ctx.expression().accept( this ),
+				ctx.distinctKeyword() != null
+		);
+	}
+
+	@Override
+	public MinFunction visitMinFunction(HqlParser.MinFunctionContext ctx) {
+		return new MinFunction(
+				(Expression) ctx.expression().accept( this ),
+				ctx.distinctKeyword() != null
+		);
+	}
+
+	@Override
+	public SumFunction visitSumFunction(HqlParser.SumFunctionContext ctx) {
+		return new SumFunction(
+				(Expression) ctx.expression().accept( this ),
+				ctx.distinctKeyword() != null
+		);
 	}
 
 	@Override

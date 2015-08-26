@@ -12,10 +12,13 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
+import org.hibernate.sqm.query.expression.CountFunction;
+import org.hibernate.sqm.query.expression.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
@@ -30,9 +33,12 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
+import org.hibernate.sqm.query.expression.MaxFunction;
+import org.hibernate.sqm.query.expression.MinFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
+import org.hibernate.sqm.query.expression.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
@@ -137,6 +143,18 @@ public interface SemanticQueryWalker<T> {
 	T visitFromElementReferenceExpression(FromElementReferenceExpression expression);
 
 	T visitFunctionExpression(FunctionExpression expression);
+
+	T visitAvgFunction(AvgFunction expression);
+
+	T visitCountStarFunction(CountStarFunction expression);
+
+	T visitCountFunction(CountFunction expression);
+
+	T visitMaxFunction(MaxFunction expression);
+
+	T visitMinFunction(MinFunction expression);
+
+	T visitSumFunction(SumFunction expression);
 
 	T visitLiteralStringExpression(LiteralStringExpression expression);
 

@@ -344,6 +344,7 @@ parameter
 
 function
 	: standardFunction
+	| aggregateFunction
 	| jpaNonStandardFunction
 	| nonStandardFunction
 	;
@@ -362,6 +363,34 @@ nonStandardFunctionArguments
 
 nonStandardFunction
 	: nonStandardFunctionName LEFT_PAREN nonStandardFunctionArguments? RIGHT_PAREN
+	;
+
+aggregateFunction
+	: avgFunction
+	| sumFunction
+	| minFunction
+	| maxFunction
+	| countFunction
+	;
+
+avgFunction
+	: avgKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	;
+
+sumFunction
+	: sumKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	;
+
+minFunction
+	: minKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	;
+
+maxFunction
+	: maxKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	;
+
+countFunction
+	: countKeyword LEFT_PAREN distinctKeyword? (expression | ASTERISK) RIGHT_PAREN
 	;
 
 standardFunction
@@ -567,6 +596,10 @@ asKeyword
 	: {doesUpcomingTokenMatchAny("as")}? IDENTIFIER
 	;
 
+avgKeyword
+	: {doesUpcomingTokenMatchAny("avg")}? IDENTIFIER
+	;
+
 ascendingKeyword
 	: {(doesUpcomingTokenMatchAny("ascending","asc"))}? IDENTIFIER
 	;
@@ -601,6 +634,10 @@ collateKeyword
 
 concatKeyword
 	: {doesUpcomingTokenMatchAny("concat")}? IDENTIFIER
+	;
+
+countKeyword
+	: {doesUpcomingTokenMatchAny("count")}? IDENTIFIER
 	;
 
 crossKeyword
@@ -735,8 +772,16 @@ lowerKeyword
 	: {doesUpcomingTokenMatchAny("lower")}?  IDENTIFIER
 	;
 
+maxKeyword
+	: {doesUpcomingTokenMatchAny("max")}?  IDENTIFIER
+	;
+
 memberOfKeyword
 	: {doesUpcomingTokenMatchAny(1,"member") && doesUpcomingTokenMatchAny(2,"of")}?  IDENTIFIER IDENTIFIER
+	;
+
+minKeyword
+	: {doesUpcomingTokenMatchAny("min")}?  IDENTIFIER
 	;
 
 minuteKeyword
@@ -813,6 +858,10 @@ sqrtKeyword
 
 substringKeyword
 	: {doesUpcomingTokenMatchAny("substring")}?  IDENTIFIER
+	;
+
+sumKeyword
+	: {doesUpcomingTokenMatchAny("sum")}?  IDENTIFIER
 	;
 
 timezoneHourKeyword

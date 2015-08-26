@@ -124,7 +124,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 		if ( currentFromClauseStackNode == null ) {
 			currentFromClauseStackNode = new FromClauseStackNode( new FromClause() );
-			fromClauseIndex.registerRootFromClauseNode( currentFromClauseStackNode );
+			fromClauseIndex.registerRootFromClauseStackNode( currentFromClauseStackNode );
 		}
 		else {
 			currentFromClauseStackNode = new FromClauseStackNode( new FromClause(), currentFromClauseStackNode );

@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.path;
 
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
@@ -21,13 +21,15 @@ import org.hibernate.sqm.query.from.FromElement;
  *
  * @author Steve Ebersole
  */
-public interface AttributePathPart extends Expression {
+public interface AttributePathPart {
 //	/**
 //	 * Return the path which led to this source.
 //	 *
 //	 * @return The origination path.
 //	 */
 //	String getOriginationPathText();
+
+	TypeDescriptor getTypeDescriptor();
 
 	FromElement getUnderlyingFromElement();
 }

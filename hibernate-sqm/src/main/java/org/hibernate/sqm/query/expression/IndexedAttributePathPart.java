@@ -15,7 +15,7 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class IndexedAttributePathPart implements AttributePathPart {
+public class IndexedAttributePathPart implements AttributePathPart, Expression {
 	private final AttributePathPart source;
 	private final Expression index;
 

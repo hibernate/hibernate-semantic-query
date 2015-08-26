@@ -17,7 +17,7 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class AttributeReferenceExpression implements AttributePathPart {
+public class AttributeReferenceExpression implements AttributePathPart, Expression {
 	private final FromElement source;
 	private final AttributeDescriptor attributeDescriptor;
 

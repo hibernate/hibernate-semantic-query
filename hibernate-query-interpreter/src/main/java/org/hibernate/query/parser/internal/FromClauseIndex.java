@@ -83,14 +83,14 @@ public class FromClauseIndex {
 		return found;
 	}
 
-	public void registerRootFromClauseNode(FromClauseStackNode root) {
+	public void registerRootFromClauseStackNode(FromClauseStackNode root) {
 		if ( roots == null ) {
 			roots = new ArrayList<FromClauseStackNode>();
 		}
 		roots.add( root );
 	}
 
-	public List<FromClauseStackNode> getRootFromClauseNodeList() {
+	public List<FromClauseStackNode> getFromClauseStackNodeList() {
 		if ( roots == null ) {
 			return Collections.emptyList();
 		}

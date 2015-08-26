@@ -14,7 +14,7 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class FromElementReferenceExpression implements AttributePathPart {
+public class FromElementReferenceExpression implements AttributePathPart, Expression {
 	private final FromElement fromElement;
 
 	public FromElementReferenceExpression(FromElement fromElement) {

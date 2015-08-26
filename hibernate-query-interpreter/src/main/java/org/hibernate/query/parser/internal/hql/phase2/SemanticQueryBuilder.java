@@ -20,6 +20,7 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.order.OrderByClause;
 
 import org.jboss.logging.Logger;
 
@@ -107,5 +108,33 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			);
 		}
 		return super.visitNonStandardFunction( ctx );
+	}
+
+	@Override
+	public OrderByClause visitOrderByClause(HqlParser.OrderByClauseContext ctx) {
+		// use the root FromClause (should be just one) to build an
+		// AttributePathResolver for the order by clause
+		if ( fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().isEmpty() ) {
+			throw new ParsingException( "No root FromClauseStackNodes found; cannot process order-by" );
+		}
+		if ( fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().size() > 1 ) {
+			throw new ParsingException( "Multiple root FromClauseStackNodes found; cannot process order-by" );
+		}
+		FromClauseStackNode rootFromClauseStackNode = fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().get( 0 );
+		attributePathResolverStack.push(
+				new BasicAttributePathResolverImpl(
+						fromClauseProcessor.getFromElementBuilder(),
+						fromClauseProcessor.getFromClauseIndex(),
+						getParsingContext(),
+						rootFromClauseStackNode
+				)
+		);
+		try {
+			// and then process the order by
+			return super.visitOrderByClause( ctx );
+		}
+		finally {
+			attributePathResolverStack.pop();
+		}
 	}
 }

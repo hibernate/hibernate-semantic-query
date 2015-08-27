@@ -16,6 +16,7 @@ import org.hibernate.query.parser.ConsumerContext;
 public class ParsingContext {
 	private final ConsumerContext consumerContext;
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
+	private final AliasRegistry aliasRegistry = new AliasRegistry();
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -27,5 +28,9 @@ public class ParsingContext {
 
 	public ImplicitAliasGenerator getImplicitAliasGenerator() {
 		return aliasGenerator;
+	}
+
+	public AliasRegistry getAliasRegistry(){
+		return aliasRegistry;
 	}
 }

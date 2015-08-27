@@ -243,8 +243,17 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
 		return new Selection(
 				visitSelectExpression( ctx.selectExpression() ),
-				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
+				visitAlias( ctx.alias() )
 		);
+	}
+
+	@Override
+	public String visitAlias(HqlParser.AliasContext ctx) {
+		if(ctx == null){
+			return null;
+		}
+		parsingContext.getAliasRegistry().registerAlias( ctx.IDENTIFIER().getText() );
+		return ctx.IDENTIFIER().getText();
 	}
 
 	@Override

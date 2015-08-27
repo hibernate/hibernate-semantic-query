@@ -139,7 +139,11 @@ selection
 	// I have noticed that without this predicate, Antlr will sometimes
 	// interpret `select a.b from Something ...` as `from` being the
 	// select-expression alias
-	: selectExpression (asKeyword? {!doesUpcomingTokenMatchAny("from")}? IDENTIFIER)?
+	: selectExpression (asKeyword? {!doesUpcomingTokenMatchAny("from")}? alias)?
+	;
+
+alias
+	: IDENTIFIER
 	;
 
 selectExpression
@@ -201,7 +205,7 @@ fromElementSpaceRoot
 	;
 
 mainEntityPersisterReference
-	: dotIdentifierSequence (asKeyword? {!doesUpcomingTokenMatchAny("where","join")}? IDENTIFIER)?
+	: dotIdentifierSequence (asKeyword? {!doesUpcomingTokenMatchAny("where","join")}? alias)?
 	;
 
 crossJoin
@@ -209,7 +213,7 @@ crossJoin
 	;
 
 jpaCollectionJoin
-	:	inKeyword LEFT_PAREN path RIGHT_PAREN (asKeyword? IDENTIFIER)?
+	:	inKeyword LEFT_PAREN path RIGHT_PAREN (asKeyword? alias)?
 	;
 
 qualifiedJoin
@@ -217,7 +221,7 @@ qualifiedJoin
 	;
 
 qualifiedJoinRhs
-	: path (asKeyword? IDENTIFIER)?
+	: path (asKeyword? alias)?
 	;
 
 qualifiedJoinPredicate

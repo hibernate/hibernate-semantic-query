@@ -18,7 +18,7 @@ import org.jboss.logging.Logger;
 /**
  * @author Steve Ebersole
  */
-public class DeleteStatement implements Statement, WhereClauseContainer {
+public class DeleteStatement implements NonSelectStatement, WhereClauseContainer {
 	private static final Logger log = Logger.getLogger( DeleteStatement.class );
 
 	private RootEntityFromElement entityFromElement;

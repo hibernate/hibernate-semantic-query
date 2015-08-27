@@ -18,7 +18,7 @@ import org.jboss.logging.Logger;
 /**
  * @author Steve Ebersole
  */
-public class UpdateStatement implements Statement, WhereClauseContainer {
+public class UpdateStatement implements NonSelectStatement, WhereClauseContainer {
 	private static final Logger log = Logger.getLogger( UpdateStatement.class );
 
 	private RootEntityFromElement entityFromElement;

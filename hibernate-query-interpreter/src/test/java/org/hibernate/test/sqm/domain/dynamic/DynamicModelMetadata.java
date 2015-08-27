@@ -4,31 +4,25 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.query.parser.hql;
+package org.hibernate.test.sqm.domain.dynamic;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import org.hibernate.query.parser.ConsumerContext;
 import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.domain.CollectionTypeDescriptor;
 import org.hibernate.sqm.domain.CompositeTypeDescriptor;
 import org.hibernate.sqm.domain.EntityTypeDescriptor;
+import org.hibernate.sqm.domain.ModelMetadata;
 import org.hibernate.sqm.domain.PolymorphicEntityTypeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
 import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
- * Simple implementation of ModelMetadata used for testing when there is no domain model.
- * Uses a simple naming based strategy for determining what to return.
- *
  * @author Steve Ebersole
  */
-public class ConsumerContextTestingImpl implements ConsumerContext {
-	// false (full HQL support) by default
-	private boolean strictJpaCompliance;
-
+public class DynamicModelMetadata implements ModelMetadata {
 	@Override
 	public EntityTypeDescriptor resolveEntityReference(String reference) {
 		if ( reference.startsWith( "Polymorphic" ) ) {
@@ -44,24 +38,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 		else {
 			return new EntityTypeDescriptorImpl( reference );
 		}
-	}
-
-	@Override
-	public Class classByName(String name) throws ClassNotFoundException {
-		return Class.forName( name );
-	}
-
-	@Override
-	public boolean useStrictJpaCompliance() {
-		return strictJpaCompliance;
-	}
-
-	public void enableStrictJpaCompliance() {
-		strictJpaCompliance = true;
-	}
-
-	public void disableStrictJpaCompliance() {
-		strictJpaCompliance = false;
 	}
 
 	public static abstract class AbstractTypeDescriptorImpl implements TypeDescriptor {
@@ -105,7 +81,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildBasicAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					StandardBasicTypeDescriptors.INSTANCE.LONG
 			);
@@ -113,7 +88,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildCompositeAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					new CompositeTypeDescriptorImpl("attribute: " + attributeName)
 			);
@@ -121,7 +95,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildEntityAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					new EntityTypeDescriptorImpl( "attribute: " + attributeName)
 			);
@@ -129,7 +102,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildCollectionAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					new CollectionTypeDescriptorImpl(
 							new EntityTypeDescriptorImpl( "collection-value:" + attributeName )
@@ -139,7 +111,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildBasicCollectionAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					new CollectionTypeDescriptorImpl( StandardBasicTypeDescriptors.INSTANCE.LONG )
 			);
@@ -147,7 +118,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildMapAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					new CollectionTypeDescriptorImpl(
 							StandardBasicTypeDescriptors.INSTANCE.LONG,
@@ -158,7 +128,6 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 
 		protected AttributeDescriptor buildBasicMapAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
-					this,
 					attributeName,
 					new CollectionTypeDescriptorImpl(
 							StandardBasicTypeDescriptors.INSTANCE.LONG,
@@ -177,22 +146,12 @@ public class ConsumerContextTestingImpl implements ConsumerContext {
 	}
 
 	public static class AttributeDescriptorImpl implements AttributeDescriptor {
-		private final TypeDescriptor source;
 		private final String name;
 		private final TypeDescriptor type;
 
-		public AttributeDescriptorImpl(
-				TypeDescriptor source,
-				String name,
-				TypeDescriptor type) {
-			this.source = source;
+		public AttributeDescriptorImpl(String name, TypeDescriptor type) {
 			this.name = name;
 			this.type = type;
-		}
-
-		@Override
-		public TypeDescriptor getDeclaringType() {
-			return source;
 		}
 
 		@Override

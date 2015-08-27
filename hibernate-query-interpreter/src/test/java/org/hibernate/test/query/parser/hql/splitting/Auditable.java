@@ -4,12 +4,16 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.domain;
+package org.hibernate.test.query.parser.hql.splitting;
+
+import java.time.Instant;
 
 /**
  * @author Steve Ebersole
  */
-public interface AttributeDescriptor {
-	String getName();
-	TypeDescriptor getType();
+public interface Auditable {
+	String getCreatedBy();
+	Instant getCreatedAt();
+	String getModifiedBy();
+	Instant getModifiedAt();
 }

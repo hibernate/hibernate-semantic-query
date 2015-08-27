@@ -4,7 +4,7 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.query.parser.hql;
+package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.ImplicitAliasGenerator;
@@ -16,6 +16,7 @@ import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 
+import org.hibernate.test.query.parser.ParsingContextImpl;
 import org.junit.Test;
 
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -51,7 +52,7 @@ public class HqlFromClauseProcessorPocTest {
 	}
 
 	private FromClauseProcessor processFromClause(HqlParser parser) {
-		final FromClauseProcessor explicitFromClauseIndexer = new FromClauseProcessor( new ParsingContextTestingImpl() );
+		final FromClauseProcessor explicitFromClauseIndexer = new FromClauseProcessor( new ParsingContextImpl() );
 		ParseTreeWalker.DEFAULT.walk( explicitFromClauseIndexer, parser.statement() );
 		return explicitFromClauseIndexer;
 	}

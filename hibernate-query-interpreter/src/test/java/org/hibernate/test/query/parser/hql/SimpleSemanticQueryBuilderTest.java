@@ -4,7 +4,7 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.query.parser.hql;
+package org.hibernate.test.query.parser.hql;
 
 import java.util.Collection;
 
@@ -23,6 +23,8 @@ import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 
+import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.hibernate.test.query.parser.ParsingContextImpl;
 import org.junit.Test;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -44,11 +46,11 @@ import static org.junit.Assert.fail;
 public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void simpleIntegerLiteralsTest() {
-		final ParsingContextTestingImpl parsingContext = new ParsingContextTestingImpl();
+		final ParsingContextImpl parsingContext = new ParsingContextImpl();
 
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1=2" );
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextTestingImpl() );
+		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextImpl() );
 		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
 
 		parser.reset();
@@ -79,11 +81,11 @@ public class SimpleSemanticQueryBuilderTest {
 
 	@Test
 	public void simpleLongLiteralsTest() {
-		final ParsingContextTestingImpl parsingContext = new ParsingContextTestingImpl();
+		final ParsingContextImpl parsingContext = new ParsingContextImpl();
 
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1L=2L" );
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextTestingImpl() );
+		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextImpl() );
 		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
 
 		parser.reset();
@@ -112,7 +114,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextTestingImpl()
+				new ConsumerContextImpl()
 		);
 		QuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );
@@ -123,7 +125,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 = 5 )";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextTestingImpl()
+				new ConsumerContextImpl()
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -168,7 +170,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 IN(select e from SomethingElse2 b where b.basic2 = 2 ))";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextTestingImpl()
+				new ConsumerContextImpl()
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -233,7 +235,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextTestingImpl()
+				new ConsumerContextImpl()
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -306,7 +308,7 @@ public class SimpleSemanticQueryBuilderTest {
 	public void testInvalidOnPredicateWithImplicitJoin() throws Exception {
 		final String query = "select a from Something a left outer join a.entity c on c.entity.basic1 > 5 and c.basic2 < 20";
 		try {
-			SemanticQueryInterpreter.interpret( query, new ConsumerContextTestingImpl() );
+			SemanticQueryInterpreter.interpret( query, new ConsumerContextImpl() );
 			fail();
 		}
 		catch (SemanticException expected) {
@@ -316,10 +318,10 @@ public class SimpleSemanticQueryBuilderTest {
 
 	@Test
 	public void testSimpleDynamicInstantiation() throws Exception {
-		final String query = "select new org.hibernate.query.parser.hql.SimpleSemanticQueryBuilderTest$DTO(a.basic1 as id, a.basic2 as name) from Something a";
+		final String query = "select new org.hibernate.test.query.parser.hql.SimpleSemanticQueryBuilderTest$DTO(a.basic1 as id, a.basic2 as name) from Something a";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextTestingImpl()
+				new ConsumerContextImpl()
 		);
 		QuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );

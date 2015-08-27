@@ -4,11 +4,12 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.query.parser.hql;
+package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.query.parser.StrictJpaComplianceViolation;
 
+import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +24,7 @@ public class StrictJpqlComplianceTests {
 	@Test
 	public void testImplicitSelectClause() {
 		final String query = "from Entity";
-		ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
+		ConsumerContextImpl consumerContext = new ConsumerContextImpl();
 
 		// first test HQL superset is allowed...
 		SemanticQueryInterpreter.interpret( "from Entity", consumerContext );
@@ -42,7 +43,7 @@ public class StrictJpqlComplianceTests {
 	@Test
 	public void testUnmappedPolymorphicReference() {
 		final String query = "select o from PolymorphicEntity o";
-		final ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
+		final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
 
 		// first test HQL superset is allowed...
 		SemanticQueryInterpreter.interpret( query, consumerContext );
@@ -61,7 +62,7 @@ public class StrictJpqlComplianceTests {
 	@Test
 	public void testAliasedFetchJoin() {
 		final String query = "select o from Entity o join fetch o.entity e";
-		final ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
+		final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
 
 		// first test HQL superset is allowed...
 		SemanticQueryInterpreter.interpret( query, consumerContext );
@@ -80,7 +81,7 @@ public class StrictJpqlComplianceTests {
 	@Test
 	public void testNonStandardFunctionCall() {
 		final String query = "select o from Entity o where my_func(o.basic) = 1";
-		final ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
+		final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
 
 		// first test HQL superset is allowed...
 		SemanticQueryInterpreter.interpret( query, consumerContext );

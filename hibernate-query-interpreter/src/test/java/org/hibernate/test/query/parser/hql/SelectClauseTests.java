@@ -4,7 +4,7 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.query.parser.hql;
+package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SelectStatement;
@@ -13,6 +13,7 @@ import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.Selection;
 
+import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public class SelectClauseTests {
-	private final ConsumerContextTestingImpl consumerContext = new ConsumerContextTestingImpl();
+	private final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
 
 	@Test
 	public void testSimpleAliasSelection() {
@@ -73,7 +74,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicInstantiationSelection() {
-		SelectStatement statement = interpret( "select new org.hibernate.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) from Entity o" );
+		SelectStatement statement = interpret( "select new org.hibernate.test.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -84,8 +85,8 @@ public class SelectClauseTests {
 	@Test
 	public void testMultipleDynamicInstantiationSelection() {
 		SelectStatement statement = interpret(
-				"select new org.hibernate.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), " +
-						"new org.hibernate.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) " +
+				"select new org.hibernate.test.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), " +
+						"new org.hibernate.test.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) " +
 						"from Entity o"
 		);
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
@@ -102,7 +103,7 @@ public class SelectClauseTests {
 	@Test
 	public void testMixedAttributeAndDynamicInstantiationSelection() {
 		SelectStatement statement = interpret(
-				"select new org.hibernate.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), o.basic3 from Entity o"
+				"select new org.hibernate.test.query.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), o.basic3 from Entity o"
 		);
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -118,10 +119,10 @@ public class SelectClauseTests {
 	@Test
 	public void testNestedDynamicInstantiationSelection() {
 		SelectStatement statement = interpret(
-				"select new org.hibernate.query.parser.hql.SelectClauseTests$DTO(" +
+				"select new org.hibernate.test.query.parser.hql.SelectClauseTests$DTO(" +
 						"    o.basic1, " +
 						"    o.basic2, " +
-						"    new org.hibernate.query.parser.hql.SelectClauseTests$DTO(o.basic3, o.basic4) " +
+						"    new org.hibernate.test.query.parser.hql.SelectClauseTests$DTO(o.basic3, o.basic4) " +
 						" ) " +
 						"from Entity o"
 		);

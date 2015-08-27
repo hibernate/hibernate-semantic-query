@@ -295,7 +295,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public DynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
 		return new DynamicInstantiationArgument(
 				visitDynamicInstantiationArgExpression( ctx.dynamicInstantiationArgExpression() ),
-				visitAlias( ctx.alias() )
+				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
 		);
 	}
 
@@ -313,7 +313,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public FromElementReferenceExpression visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
-		final String alias = visitAlias( ctx.alias() );
+		final String alias = ctx.IDENTIFIER().getText();
 		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( alias );
 		if ( fromElement == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );

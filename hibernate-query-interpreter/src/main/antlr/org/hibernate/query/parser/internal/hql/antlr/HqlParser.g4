@@ -176,7 +176,7 @@ dynamicInstantiationArgs
 	;
 
 dynamicInstantiationArg
-	:	dynamicInstantiationArgExpression (asKeyword? alias)?
+	:	dynamicInstantiationArgExpression (asKeyword? IDENTIFIER)?
 	;
 
 dynamicInstantiationArgExpression
@@ -185,7 +185,7 @@ dynamicInstantiationArgExpression
 	;
 
 jpaSelectObjectSyntax
-	:	objectKeyword LEFT_PAREN alias RIGHT_PAREN
+	:	objectKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
 	;
 
 

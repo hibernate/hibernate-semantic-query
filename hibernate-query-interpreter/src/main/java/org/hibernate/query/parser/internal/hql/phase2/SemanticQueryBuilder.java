@@ -16,8 +16,10 @@ import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.query.parser.internal.hql.path.BasicAttributePathResolverImpl;
+import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.Statement;
+import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.order.OrderByClause;
@@ -64,8 +66,20 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 
 	@Override
 	public Statement visitStatement(HqlParser.StatementContext ctx) {
-		// for the moment, only selectStatements are valid...
-		return visitSelectStatement( ctx.selectStatement() );
+		if ( ctx.insertStatement() != null ) {
+			throw new NotYetImplementedException( "INSERT statement parsing not yet implemented" );
+		}
+		else if ( ctx.updateStatement() != null ) {
+			return visitUpdateStatement( ctx.updateStatement() );
+		}
+		else if ( ctx.deleteStatement() != null ) {
+			return visitDeleteStatement( ctx.deleteStatement() );
+		}
+		else if ( ctx.selectStatement() != null ) {
+			return visitSelectStatement( ctx.selectStatement() );
+		}
+
+		throw new ParsingException( "Unexpected statement type [not INSERT, UPDATE, DELETE or SELECT] : " + ctx.getText() );
 	}
 
 	@Override
@@ -124,5 +138,26 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 		finally {
 			attributePathResolverStack.pop();
 		}
+	}
+
+	// todo : the structure for handling update/delete in FromClauseProcessor (and accessing them here) needs some re-thought.
+
+	@Override
+	public DeleteStatement visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
+		final DeleteStatement deleteStatement = new DeleteStatement();
+
+		return deleteStatement;
+	}
+
+	@Override
+	public UpdateStatement visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
+		final UpdateStatement updateStatement = new UpdateStatement();
+
+		return updateStatement;
+	}
+
+	@Override
+	public Object visitSetClause(HqlParser.SetClauseContext ctx) {
+		return super.visitSetClause( ctx );
 	}
 }

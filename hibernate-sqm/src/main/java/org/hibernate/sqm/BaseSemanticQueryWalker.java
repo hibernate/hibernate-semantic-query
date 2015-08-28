@@ -67,6 +67,8 @@ import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.set.Assignment;
+import org.hibernate.sqm.query.set.SetClause;
 
 /**
  * @author Steve Ebersole
@@ -87,8 +89,24 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	@Override
 	public UpdateStatement visitUpdateStatement(UpdateStatement statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
+		visitSetClause( statement.getSetClause() );
 		visitWhereClause( statement.getWhereClause() );
 		return statement;
+	}
+
+	@Override
+	public SetClause visitSetClause(SetClause setClause) {
+		for ( Assignment assignment : setClause.getAssignments() ) {
+			visitAssignment( assignment );
+		}
+		return setClause;
+	}
+
+	@Override
+	public Object visitAssignment(Assignment assignment) {
+		visitAttributeReferenceExpression( assignment.getStateField() );
+		assignment.getStateField().accept( this );
+		return assignment;
 	}
 
 	@Override

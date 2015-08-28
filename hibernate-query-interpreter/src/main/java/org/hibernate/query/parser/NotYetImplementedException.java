@@ -10,6 +10,10 @@ package org.hibernate.query.parser;
  * @author Steve Ebersole
  */
 public class NotYetImplementedException extends RuntimeException {
+	public NotYetImplementedException(String message) {
+		super( message );
+	}
+
 	public NotYetImplementedException() {
 		super( "Not yet implemented" );
 	}

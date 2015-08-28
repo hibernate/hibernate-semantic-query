@@ -65,6 +65,8 @@ import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.set.Assignment;
+import org.hibernate.sqm.query.set.SetClause;
 
 /**
  * @author Steve Ebersole
@@ -75,6 +77,10 @@ public interface SemanticQueryWalker<T> {
 	T visitSelectStatement(SelectStatement statement);
 
 	T visitUpdateStatement(UpdateStatement statement);
+
+	T visitSetClause(SetClause setClause);
+
+	T visitAssignment(Assignment assignment);
 
 	T visitDeleteStatement(DeleteStatement statement);
 

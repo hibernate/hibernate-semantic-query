@@ -75,7 +75,15 @@ selectStatement
 
 updateStatement
 // todo : add set-clause
-	: updateKeyword FROM? mainEntityPersisterReference whereClause
+	: updateKeyword FROM? mainEntityPersisterReference setClause whereClause
+	;
+
+setClause
+	: assignment+
+	;
+
+assignment
+	: dotIdentifierSequence EQUAL expression
 	;
 
 deleteStatement

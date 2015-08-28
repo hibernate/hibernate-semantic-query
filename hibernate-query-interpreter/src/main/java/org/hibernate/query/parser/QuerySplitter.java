@@ -78,6 +78,8 @@ import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
 import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.set.Assignment;
+import org.hibernate.sqm.query.set.SetClause;
 
 /**
  * Handles splitting queries containing unmapped polymorphic references.
@@ -138,6 +140,16 @@ public class QuerySplitter {
 
 		@Override
 		public UpdateStatement visitUpdateStatement(UpdateStatement statement) {
+			throw new UnsupportedOperationException( "Not valid" );
+		}
+
+		@Override
+		public SetClause visitSetClause(SetClause setClause) {
+			throw new UnsupportedOperationException( "Not valid" );
+		}
+
+		@Override
+		public Object visitAssignment(Assignment assignment) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 

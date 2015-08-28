@@ -12,6 +12,7 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.predicate.WhereClauseContainer;
+import org.hibernate.sqm.query.set.SetClause;
 
 import org.jboss.logging.Logger;
 
@@ -22,7 +23,7 @@ public class UpdateStatement implements NonSelectStatement, WhereClauseContainer
 	private static final Logger log = Logger.getLogger( UpdateStatement.class );
 
 	private RootEntityFromElement entityFromElement;
-	// todo : set-clause
+	private SetClause setClause = new SetClause();
 	private WhereClause whereClause = new WhereClause();
 
 	@Override
@@ -47,6 +48,10 @@ public class UpdateStatement implements NonSelectStatement, WhereClauseContainer
 
 		}
 		this.entityFromElement = entityFromElement;
+	}
+
+	public SetClause getSetClause() {
+		return setClause;
 	}
 
 	@Override

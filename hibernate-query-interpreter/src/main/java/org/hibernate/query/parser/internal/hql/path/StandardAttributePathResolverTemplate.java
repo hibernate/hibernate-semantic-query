@@ -6,11 +6,7 @@
  */
 package org.hibernate.query.parser.internal.hql.path;
 
-import org.hibernate.query.parser.internal.FromClauseIndex;
-import org.hibernate.query.parser.internal.FromElementBuilder;
-import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
 import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
@@ -22,34 +18,12 @@ import org.jboss.logging.Logger;
 /**
  * @author Steve Ebersole
  */
-public class BasicAttributePathResolverImpl extends StandardAttributePathResolverTemplate {
-	private static final Logger log = Logger.getLogger( BasicAttributePathResolverImpl.class );
+public abstract class StandardAttributePathResolverTemplate extends AbstractAttributePathResolverImpl {
+	private static final Logger log = Logger.getLogger( StandardAttributePathResolverTemplate.class );
 
-	private final FromElementBuilder fromElementBuilder;
-	private final FromClauseIndex fromClauseIndex;
-	private final FromClauseStackNode fromClause;
-	private final ParsingContext parsingContext;
+	protected abstract FromElement findFromElementByAlias(String alias);
 
-	public BasicAttributePathResolverImpl(
-			FromElementBuilder fromElementBuilder,
-			FromClauseIndex fromClauseIndex,
-			ParsingContext parsingContext,
-			FromClauseStackNode fromClause) {
-		this.fromElementBuilder = fromElementBuilder;
-		this.fromClauseIndex = fromClauseIndex;
-		this.fromClause = fromClause;
-		this.parsingContext = parsingContext;
-	}
-
-	@Override
-	protected FromElementBuilder fromElementBuilder() {
-		return fromElementBuilder;
-	}
-
-	@Override
-	protected ParsingContext parsingContext() {
-		return parsingContext;
-	}
+	protected abstract FromElement findFromElementWithAttribute(String attributeName);
 
 	@Override
 	public AttributePathPart resolvePath(HqlParser.DotIdentifierSequenceContext path) {
@@ -90,14 +64,6 @@ public class BasicAttributePathResolverImpl extends StandardAttributePathResolve
 	}
 
 	protected void validatePathRoot(FromElement root) {
-	}
-
-	protected FromElement findFromElementByAlias(String alias) {
-		return fromClauseIndex.findFromElementByAlias( alias );
-	}
-
-	protected FromElement findFromElementWithAttribute(String attributeName) {
-		return fromClauseIndex.findFromElementWithAttribute( fromClause, attributeName );
 	}
 
 	protected AttributePathPart resolveTerminalPathPart(FromElement lhs, String terminalName) {

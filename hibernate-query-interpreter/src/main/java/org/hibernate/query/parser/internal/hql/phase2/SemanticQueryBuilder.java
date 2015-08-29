@@ -8,10 +8,10 @@ package org.hibernate.query.parser.internal.hql.phase2;
 
 import org.hibernate.query.parser.NotYetImplementedException;
 import org.hibernate.query.parser.ParsingException;
-import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.AbstractHqlParseTreeVisitor;
+import org.hibernate.query.parser.internal.hql.path.DmlRootAttributePathResolver;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
 import org.hibernate.sqm.path.AttributePathPart;
@@ -20,9 +20,11 @@ import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-import org.hibernate.sqm.query.expression.FunctionExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.order.OrderByClause;
+import org.hibernate.sqm.query.predicate.Predicate;
 
 import org.jboss.logging.Logger;
 
@@ -44,14 +46,14 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			throw new NotYetImplementedException();
 			// set currentFromClause
 		}
-		else if ( fromClauseProcessor.getStatementType() == Statement.Type.UPDATE ) {
-			throw new NotYetImplementedException();
-			// set currentFromClause
-		}
-		else if ( fromClauseProcessor.getStatementType() == Statement.Type.DELETE ) {
-			throw new NotYetImplementedException();
-			// set currentFromClause
-		}
+//		else if ( fromClauseProcessor.getStatementType() == Statement.Type.UPDATE ) {
+//			throw new NotYetImplementedException();
+//			// set currentFromClause
+//		}
+//		else if ( fromClauseProcessor.getStatementType() == Statement.Type.DELETE ) {
+//			throw new NotYetImplementedException();
+//			// set currentFromClause
+//		}
 	}
 
 	@Override
@@ -141,10 +143,26 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	}
 
 	// todo : the structure for handling update/delete in FromClauseProcessor (and accessing them here) needs some re-thought.
+	// todo : given the current set up, need to set up the FromClauseIndex to understand the "DML root"
 
 	@Override
 	public DeleteStatement visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
 		final DeleteStatement deleteStatement = new DeleteStatement();
+		deleteStatement.setEntityFromElement( fromClauseProcessor.getDmlRoot() );
+
+		attributePathResolverStack.push(
+				new DmlRootAttributePathResolver(
+						fromClauseProcessor.getDmlRoot(),
+						fromClauseProcessor.getFromElementBuilder(),
+						getParsingContext()
+				)
+		);
+		try {
+			deleteStatement.getWhereClause().setPredicate( (Predicate) ctx.whereClause().predicate().accept( this ) );
+		}
+		finally {
+			attributePathResolverStack.pop();
+		}
 
 		return deleteStatement;
 	}
@@ -152,12 +170,30 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	@Override
 	public UpdateStatement visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
 		final UpdateStatement updateStatement = new UpdateStatement();
+		updateStatement.setEntityFromElement( fromClauseProcessor.getDmlRoot() );
+
+		attributePathResolverStack.push(
+				new DmlRootAttributePathResolver(
+						fromClauseProcessor.getDmlRoot(),
+						fromClauseProcessor.getFromElementBuilder(),
+						getParsingContext()
+				)
+		);
+		try {
+			updateStatement.getWhereClause().setPredicate( (Predicate) ctx.whereClause().predicate().accept( this ) );
+
+			for ( HqlParser.AssignmentContext assignmentContext : ctx.setClause().assignment() ) {
+				updateStatement.getSetClause().addAssignment(
+						(AttributeReferenceExpression) attributePathResolverStack.getCurrent().resolvePath( assignmentContext.dotIdentifierSequence() ),
+						(Expression) assignmentContext.expression().accept( this )
+				);
+			}
+		}
+		finally {
+			attributePathResolverStack.pop();
+		}
 
 		return updateStatement;
 	}
 
-	@Override
-	public Object visitSetClause(HqlParser.SetClauseContext ctx) {
-		return super.visitSetClause( ctx );
-	}
 }

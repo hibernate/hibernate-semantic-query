@@ -26,6 +26,7 @@ import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.domain.EntityTypeDescriptor;
 import org.hibernate.sqm.domain.PolymorphicEntityTypeDescriptor;
 import org.hibernate.sqm.path.AttributePathPart;
+import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
@@ -36,6 +37,8 @@ import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.QualifiedJoinedFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.predicate.Predicate;
+
+import org.jboss.logging.Logger;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -53,6 +56,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * @author Steve Ebersole
  */
 public class FromClauseProcessor extends HqlParserBaseListener {
+	private static final Logger log = Logger.getLogger( FromClauseProcessor.class );
+
 	private final ParsingContext parsingContext;
 	private final FromClauseIndex fromClauseIndex;
 	private final FromElementBuilder fromElementBuilder;
@@ -66,6 +71,8 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	private final Map<String, FromClauseStackNode> fromClauseMap = new HashMap<String, FromClauseStackNode>();
 	private final Map<String, FromElement> fromElementMap = new HashMap<String, FromElement>();
 
+	private RootEntityFromElement dmlRoot;
+
 	public FromClauseProcessor(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
 
@@ -75,6 +82,10 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 	public Statement.Type getStatementType() {
 		return statementType;
+	}
+
+	public RootEntityFromElement getDmlRoot() {
+		return dmlRoot;
 	}
 
 	public FromClauseIndex getFromClauseIndex() {
@@ -106,16 +117,50 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	@Override
 	public void enterInsertStatement(HqlParser.InsertStatementContext ctx) {
 		statementType = Statement.Type.INSERT;
+
+		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( ctx.insertTarget().dotIdentifierSequence() );
+		String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+		log.debugf(
+				"Generated implicit alias [%s] for INSERT target [%s]",
+				alias,
+				entityTypeDescriptor.getTypeName()
+		);
+
+		dmlRoot = new RootEntityFromElement( null, alias, entityTypeDescriptor );
+		fromClauseIndex.registerAlias( dmlRoot );
+		fromElementMap.put( ctx.getText(), dmlRoot );
 	}
 
 	@Override
 	public void enterUpdateStatement(HqlParser.UpdateStatementContext ctx) {
 		statementType = Statement.Type.UPDATE;
+
+		dmlRoot = visitDmlRootEntityReference( ctx.mainEntityPersisterReference() );
+		fromElementMap.put( ctx.getText(), dmlRoot );
 	}
 
 	@Override
 	public void enterDeleteStatement(HqlParser.DeleteStatementContext ctx) {
 		statementType = Statement.Type.DELETE;
+
+		dmlRoot = visitDmlRootEntityReference( ctx.mainEntityPersisterReference() );
+		fromElementMap.put( ctx.getText(), dmlRoot );
+	}
+
+	protected RootEntityFromElement visitDmlRootEntityReference(HqlParser.MainEntityPersisterReferenceContext rootEntityContext) {
+		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
+		String alias = interpretAlias( rootEntityContext.IDENTIFIER() );
+		if ( alias == null ) {
+			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+			log.debugf(
+					"Generated implicit alias [%s] for DML root entity reference [%s]",
+					alias,
+					entityTypeDescriptor.getTypeName()
+			);
+		}
+		final RootEntityFromElement root = new RootEntityFromElement( null, alias, entityTypeDescriptor );
+		fromClauseIndex.registerAlias( root );
+		return root;
 	}
 
 	@Override

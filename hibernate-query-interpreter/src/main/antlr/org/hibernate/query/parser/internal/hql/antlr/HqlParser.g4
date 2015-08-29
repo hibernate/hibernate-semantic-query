@@ -75,11 +75,11 @@ selectStatement
 
 updateStatement
 // todo : add set-clause
-	: updateKeyword FROM? mainEntityPersisterReference setClause whereClause
+	: updateKeyword fromKeyword? mainEntityPersisterReference setClause whereClause
 	;
 
 setClause
-	: assignment+
+	: setKeyword assignment+
 	;
 
 assignment
@@ -87,7 +87,7 @@ assignment
 	;
 
 deleteStatement
-	: deleteKeyword FROM? mainEntityPersisterReference whereClause
+	: deleteKeyword fromKeyword? mainEntityPersisterReference whereClause
 	;
 
 insertStatement
@@ -854,6 +854,10 @@ secondKeyword
 
 selectKeyword
 	: {doesUpcomingTokenMatchAny("select")}?  IDENTIFIER
+	;
+
+setKeyword
+	: {doesUpcomingTokenMatchAny("set")}?  IDENTIFIER
 	;
 
 sizeKeyword

@@ -294,6 +294,7 @@ public class QuerySplitter {
 			QualifiedAttributeJoinFromElement copy = new QualifiedAttributeJoinFromElement(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getAlias(),
+					joinedFromElement.getLhsAlias(),
 					joinedFromElement.getJoinedAttributeDescriptor(),
 					joinedFromElement.getJoinType(),
 					joinedFromElement.isFetched()

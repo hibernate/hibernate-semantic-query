@@ -115,6 +115,7 @@ public class FromElementBuilder {
 		final QualifiedAttributeJoinFromElement join = new QualifiedAttributeJoinFromElement(
 				fromElementSpace,
 				alias,
+				lhs.getAlias(),
 				attributeDescriptor,
 				joinType,
 				fetched

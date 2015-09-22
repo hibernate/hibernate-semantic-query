@@ -196,7 +196,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			selectClause = visitSelectClause( ctx.selectClause() );
 		}
 		else {
-			log.info( "Encountered implicit select clause which is a deprecated feature : " + ctx.toString() );
+			log.info( "Encountered implicit select clause which is a deprecated feature : " + ctx.getText() );
 			selectClause = buildInferredSelectClause( getCurrentFromClause() );
 		}
 
@@ -259,7 +259,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			return (Expression) ctx.expression().accept( this );
 		}
 
-		throw new ParsingException( "Unexpected selection rule type : " + ctx );
+		throw new ParsingException( "Unexpected selection rule type : " + ctx.getText() );
 	}
 
 	@Override
@@ -299,7 +299,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			return (Expression) ctx.expression().accept( this );
 		}
 
-		throw new ParsingException( "Unexpected dynamic-instantiation-argument rule type : " + ctx );
+		throw new ParsingException( "Unexpected dynamic-instantiation-argument rule type : " + ctx.getText() );
 	}
 
 	@Override
@@ -484,7 +484,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 		// todo : handle PersistentCollectionReferenceInList labeled branch
 
-		throw new ParsingException( "Unexpected IN predicate type [" + ctx.getClass().getSimpleName() + "] : " + ctx.toString() );
+		throw new ParsingException( "Unexpected IN predicate type [" + ctx.getClass().getSimpleName() + "] : " + ctx.getText() );
 	}
 
 	@Override

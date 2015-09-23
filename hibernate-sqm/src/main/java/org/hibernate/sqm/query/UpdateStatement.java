@@ -14,17 +14,17 @@ import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.predicate.WhereClauseContainer;
 import org.hibernate.sqm.query.set.SetClause;
 
-import org.jboss.logging.Logger;
-
 /**
  * @author Steve Ebersole
  */
 public class UpdateStatement implements NonSelectStatement, WhereClauseContainer {
-	private static final Logger log = Logger.getLogger( UpdateStatement.class );
+	private final RootEntityFromElement entityFromElement;
+	private final SetClause setClause = new SetClause();
+	private final WhereClause whereClause = new WhereClause();
 
-	private RootEntityFromElement entityFromElement;
-	private SetClause setClause = new SetClause();
-	private WhereClause whereClause = new WhereClause();
+	public UpdateStatement(RootEntityFromElement entityFromElement) {
+		this.entityFromElement = entityFromElement;
+	}
 
 	@Override
 	public Type getType() {
@@ -33,21 +33,6 @@ public class UpdateStatement implements NonSelectStatement, WhereClauseContainer
 
 	public RootEntityFromElement getEntityFromElement() {
 		return entityFromElement;
-	}
-
-	public void setEntityFromElement(RootEntityFromElement entityFromElement) {
-		if ( this.entityFromElement != null ) {
-			// the entity reference was already defined...
-			if ( this.entityFromElement != entityFromElement ) {
-				log.debugf(
-						"UpdateStatement#entityFromElement set more than once : %s, %s",
-						this.entityFromElement,
-						entityFromElement
-				);
-			}
-
-		}
-		this.entityFromElement = entityFromElement;
 	}
 
 	public SetClause getSetClause() {

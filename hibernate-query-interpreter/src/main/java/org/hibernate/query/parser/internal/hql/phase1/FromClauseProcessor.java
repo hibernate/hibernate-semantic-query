@@ -118,7 +118,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	public void enterInsertStatement(HqlParser.InsertStatementContext ctx) {
 		statementType = Statement.Type.INSERT;
 
-		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( ctx.insertTarget().dotIdentifierSequence() );
+		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( ctx.insertSpec().intoSpec().dotIdentifierSequence() );
 		String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 		log.debugf(
 				"Generated implicit alias [%s] for INSERT target [%s]",

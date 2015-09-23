@@ -17,6 +17,7 @@ import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.query.parser.internal.hql.path.BasicAttributePathResolverImpl;
 import org.hibernate.sqm.query.DeleteStatement;
+import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
@@ -41,19 +42,6 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	public SemanticQueryBuilder(ParsingContext parsingContext, FromClauseProcessor fromClauseProcessor) {
 		super( parsingContext, fromClauseProcessor.getFromElementBuilder(), fromClauseProcessor.getFromClauseIndex() );
 		this.fromClauseProcessor = fromClauseProcessor;
-
-		if ( fromClauseProcessor.getStatementType() == Statement.Type.INSERT ) {
-			throw new NotYetImplementedException();
-			// set currentFromClause
-		}
-//		else if ( fromClauseProcessor.getStatementType() == Statement.Type.UPDATE ) {
-//			throw new NotYetImplementedException();
-//			// set currentFromClause
-//		}
-//		else if ( fromClauseProcessor.getStatementType() == Statement.Type.DELETE ) {
-//			throw new NotYetImplementedException();
-//			// set currentFromClause
-//		}
 	}
 
 	@Override
@@ -69,7 +57,7 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	@Override
 	public Statement visitStatement(HqlParser.StatementContext ctx) {
 		if ( ctx.insertStatement() != null ) {
-			throw new NotYetImplementedException( "INSERT statement parsing not yet implemented" );
+			return visitInsertStatement( ctx.insertStatement() );
 		}
 		else if ( ctx.updateStatement() != null ) {
 			return visitUpdateStatement( ctx.updateStatement() );
@@ -147,8 +135,7 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 
 	@Override
 	public DeleteStatement visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
-		final DeleteStatement deleteStatement = new DeleteStatement();
-		deleteStatement.setEntityFromElement( fromClauseProcessor.getDmlRoot() );
+		final DeleteStatement deleteStatement = new DeleteStatement( fromClauseProcessor.getDmlRoot() );
 
 		attributePathResolverStack.push(
 				new DmlRootAttributePathResolver(
@@ -169,8 +156,7 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 
 	@Override
 	public UpdateStatement visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
-		final UpdateStatement updateStatement = new UpdateStatement();
-		updateStatement.setEntityFromElement( fromClauseProcessor.getDmlRoot() );
+		final UpdateStatement updateStatement = new UpdateStatement( fromClauseProcessor.getDmlRoot() );
 
 		attributePathResolverStack.push(
 				new DmlRootAttributePathResolver(
@@ -183,6 +169,7 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			updateStatement.getWhereClause().setPredicate( (Predicate) ctx.whereClause().predicate().accept( this ) );
 
 			for ( HqlParser.AssignmentContext assignmentContext : ctx.setClause().assignment() ) {
+				// todo : validate "state field" expression
 				updateStatement.getSetClause().addAssignment(
 						(AttributeReferenceExpression) attributePathResolverStack.getCurrent().resolvePath( assignmentContext.dotIdentifierSequence() ),
 						(Expression) assignmentContext.expression().accept( this )
@@ -196,4 +183,31 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 		return updateStatement;
 	}
 
+	@Override
+	public InsertSelectStatement visitInsertStatement(HqlParser.InsertStatementContext ctx) {
+		// for now we only support the INSERT-SELECT form
+		final InsertSelectStatement insertStatement = new InsertSelectStatement( fromClauseProcessor.getDmlRoot() );
+
+		attributePathResolverStack.push(
+				new DmlRootAttributePathResolver(
+						fromClauseProcessor.getDmlRoot(),
+						fromClauseProcessor.getFromElementBuilder(),
+						getParsingContext()
+				)
+		);
+		try {
+			insertStatement.setSelectQuery( visitQuerySpec( ctx.querySpec() ) );
+
+			for ( HqlParser.DotIdentifierSequenceContext stateFieldCtx : ctx.insertSpec().targetFieldsSpec().dotIdentifierSequence() ) {
+				final AttributeReferenceExpression stateField = (AttributeReferenceExpression) attributePathResolverStack.getCurrent().resolvePath( stateFieldCtx );
+				// todo : validate each resolved stateField...
+				insertStatement.addInsertTargetStateField( stateField );
+			}
+		}
+		finally {
+			attributePathResolverStack.pop();
+		}
+
+		return insertStatement;
+	}
 }

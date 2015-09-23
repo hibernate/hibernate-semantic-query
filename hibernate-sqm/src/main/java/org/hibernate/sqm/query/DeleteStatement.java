@@ -13,16 +13,16 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.predicate.WhereClauseContainer;
 
-import org.jboss.logging.Logger;
-
 /**
  * @author Steve Ebersole
  */
 public class DeleteStatement implements NonSelectStatement, WhereClauseContainer {
-	private static final Logger log = Logger.getLogger( DeleteStatement.class );
+	private final RootEntityFromElement entityFromElement;
+	private final WhereClause whereClause = new WhereClause();
 
-	private RootEntityFromElement entityFromElement;
-	private WhereClause whereClause = new WhereClause();
+	public DeleteStatement(RootEntityFromElement entityFromElement) {
+		this.entityFromElement = entityFromElement;
+	}
 
 	@Override
 	public Type getType() {
@@ -31,21 +31,6 @@ public class DeleteStatement implements NonSelectStatement, WhereClauseContainer
 
 	public RootEntityFromElement getEntityFromElement() {
 		return entityFromElement;
-	}
-
-	public void setEntityFromElement(RootEntityFromElement entityFromElement) {
-		if ( this.entityFromElement != null ) {
-			// the entity reference was already defined...
-			if ( this.entityFromElement != entityFromElement ) {
-				log.debugf(
-						"DeleteStatement#entityFromElement set more than once : %s, %s",
-						this.entityFromElement,
-						entityFromElement
-				);
-			}
-
-		}
-		this.entityFromElement = entityFromElement;
 	}
 
 	@Override

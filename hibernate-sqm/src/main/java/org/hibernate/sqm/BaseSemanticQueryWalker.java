@@ -7,6 +7,7 @@
 package org.hibernate.sqm;
 
 import org.hibernate.sqm.query.DeleteStatement;
+import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
@@ -111,10 +112,20 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	}
 
 	@Override
-	public Object visitAssignment(Assignment assignment) {
+	public Assignment visitAssignment(Assignment assignment) {
 		visitAttributeReferenceExpression( assignment.getStateField() );
 		assignment.getStateField().accept( this );
 		return assignment;
+	}
+
+	@Override
+	public InsertSelectStatement visitInsertSelectStatement(InsertSelectStatement statement) {
+		visitRootEntityFromElement( statement.getInsertTarget() );
+		for ( AttributeReferenceExpression stateField : statement.getStateFields() ) {
+			stateField.accept( this );
+		}
+		visitQuerySpec( statement.getSelectQuery() );
+		return statement;
 	}
 
 	@Override

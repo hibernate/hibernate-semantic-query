@@ -149,7 +149,7 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public Object visitAssignment(Assignment assignment) {
+		public Assignment visitAssignment(Assignment assignment) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 

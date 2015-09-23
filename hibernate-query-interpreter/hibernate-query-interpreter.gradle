@@ -17,3 +17,5 @@ tasks.generateGrammarSource {
 		arguments += ['-visitor']
 	}
 }
+
+task antlr(dependsOn: generateGrammarSource)

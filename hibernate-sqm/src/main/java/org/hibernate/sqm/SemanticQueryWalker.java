@@ -7,6 +7,7 @@
 package org.hibernate.sqm;
 
 import org.hibernate.sqm.query.DeleteStatement;
+import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
@@ -82,15 +83,17 @@ import org.hibernate.sqm.query.set.SetClause;
 public interface SemanticQueryWalker<T> {
 	T visitStatement(Statement statement);
 
-	T visitSelectStatement(SelectStatement statement);
-
 	T visitUpdateStatement(UpdateStatement statement);
 
 	T visitSetClause(SetClause setClause);
 
 	T visitAssignment(Assignment assignment);
 
+	T visitInsertSelectStatement(InsertSelectStatement statement);
+
 	T visitDeleteStatement(DeleteStatement statement);
+
+	T visitSelectStatement(SelectStatement statement);
 
 	T visitQuerySpec(QuerySpec querySpec);
 

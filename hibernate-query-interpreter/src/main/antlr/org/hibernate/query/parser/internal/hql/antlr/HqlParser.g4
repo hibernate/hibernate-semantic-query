@@ -74,7 +74,6 @@ selectStatement
 //	;
 
 updateStatement
-// todo : add set-clause
 	: updateKeyword fromKeyword? mainEntityPersisterReference setClause whereClause
 	;
 
@@ -91,12 +90,21 @@ deleteStatement
 	;
 
 insertStatement
-// todo : lots of things
-	: insertKeyword INTO insertTarget
+// todo : VERSIONED
+	: insertKeyword insertSpec querySpec
 	;
 
-insertTarget
-	: dotIdentifierSequence
+insertSpec
+	: intoSpec targetFieldsSpec
+	;
+
+intoSpec
+	: intoKeyword dotIdentifierSequence
+	;
+
+targetFieldsSpec
+	: LEFT_PAREN dotIdentifierSequence (COMMA dotIdentifierSequence)* RIGHT_PAREN
+
 	;
 
 
@@ -169,7 +177,6 @@ dotIdentifierSequence
 	;
 
 path
-// todo : VALUE (and ELEMENTS) and KEY handling
 	: dotIdentifierSequence																			# SimplePath
 	| treatKeyword LEFT_PAREN dotIdentifierSequence asKeyword dotIdentifierSequence RIGHT_PAREN		# TreatedPath
 	| path LEFT_BRACKET expression RIGHT_BRACKET (DOT path)?										# IndexedPath
@@ -736,6 +743,10 @@ hourKeyword
 
 inKeyword
 	: {doesUpcomingTokenMatchAny("in")}? IDENTIFIER
+	;
+
+intoKeyword
+	: {doesUpcomingTokenMatchAny("into")}? IDENTIFIER
 	;
 
 indexKeyword

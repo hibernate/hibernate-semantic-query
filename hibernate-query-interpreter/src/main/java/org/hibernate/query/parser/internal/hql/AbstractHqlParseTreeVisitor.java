@@ -36,6 +36,9 @@ import org.hibernate.sqm.query.expression.AggregateFunction;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
+import org.hibernate.sqm.query.expression.CollectionIndexFunction;
+import org.hibernate.sqm.query.expression.CollectionSizeFunction;
+import org.hibernate.sqm.query.expression.CollectionValueFunction;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantExpression;
@@ -58,8 +61,13 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
+import org.hibernate.sqm.query.expression.MapKeyFunction;
+import org.hibernate.sqm.query.expression.MaxElementFunction;
 import org.hibernate.sqm.query.expression.MaxFunction;
+import org.hibernate.sqm.query.expression.MaxIndexFunction;
+import org.hibernate.sqm.query.expression.MinElementFunction;
 import org.hibernate.sqm.query.expression.MinFunction;
+import org.hibernate.sqm.query.expression.MinIndexFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
@@ -94,6 +102,8 @@ import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
 
 import org.jboss.logging.Logger;
+
+import static org.hibernate.query.parser.StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION;
 
 /**
  * @author Steve Ebersole
@@ -955,6 +965,184 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 				(Expression) ctx.expression().accept( this ),
 				ctx.distinctKeyword() != null
 		);
+	}
+
+	@Override
+	public CollectionSizeFunction visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"size() function can only be applied to path expressions which resolve to a collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new CollectionSizeFunction( pathResolution.getUnderlyingFromElement() );
+	}
+
+	@Override
+	public CollectionValueFunction visitCollectionValueFunction(HqlParser.CollectionValueFunctionContext ctx) {
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"value() function can only be applied to path expressions which resolve to a collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new CollectionValueFunction( pathResolution.getUnderlyingFromElement() );
+
+	}
+
+	@Override
+	public CollectionIndexFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
+		final String alias = ctx.IDENTIFIER().getText();
+		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( alias );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( fromElement.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"index() function can only be applied to identification variables which resolve to a collection; specified " +
+							"identification variable [" + alias + "] resolved to " + fromElement.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) fromElement.getTypeDescriptor();
+		if ( collectionTypeDescriptor.getIndexTypeDescriptor() == null ) {
+			throw new SemanticException(
+					"index() function can only be applied to identification variables which resolve to an indexed collection; specified " +
+							"identification variable [" + alias + "] resolved to " + fromElement.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new CollectionIndexFunction( fromElement );
+	}
+
+	@Override
+	public MapKeyFunction visitMapKeyFunction(HqlParser.MapKeyFunctionContext ctx) {
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"key() function can only be applied to path expressions which resolve to a persistent Map; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) pathResolution.getTypeDescriptor();
+		if ( collectionTypeDescriptor.getIndexTypeDescriptor() == null ) {
+			throw new SemanticException(
+					"key() function can only be applied to path expressions which resolve to a persistent Map; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new MapKeyFunction( pathResolution.getUnderlyingFromElement() );
+	}
+
+	@Override
+	public MaxElementFunction visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+			throw new StrictJpaComplianceViolation( HQL_COLLECTION_FUNCTION );
+		}
+
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"maxelement() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) pathResolution.getTypeDescriptor();
+		if ( collectionTypeDescriptor.getIndexTypeDescriptor() == null ) {
+			throw new SemanticException(
+					"maxelement() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new MaxElementFunction( pathResolution.getUnderlyingFromElement() );
+	}
+
+	@Override
+	public MinElementFunction visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+			throw new StrictJpaComplianceViolation( HQL_COLLECTION_FUNCTION );
+		}
+
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"minelement() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) pathResolution.getTypeDescriptor();
+		if ( collectionTypeDescriptor.getIndexTypeDescriptor() == null ) {
+			throw new SemanticException(
+					"minelement() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new MinElementFunction( pathResolution.getUnderlyingFromElement() );
+	}
+
+	@Override
+	public MaxIndexFunction visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+			throw new StrictJpaComplianceViolation( HQL_COLLECTION_FUNCTION );
+		}
+
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"maxindex() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) pathResolution.getTypeDescriptor();
+		if ( collectionTypeDescriptor.getIndexTypeDescriptor() == null ) {
+			throw new SemanticException(
+					"maxindex() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new MaxIndexFunction( pathResolution.getUnderlyingFromElement() );
+	}
+
+	@Override
+	public MinIndexFunction visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+			throw new StrictJpaComplianceViolation( HQL_COLLECTION_FUNCTION );
+		}
+
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"minindex() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) pathResolution.getTypeDescriptor();
+		if ( collectionTypeDescriptor.getIndexTypeDescriptor() == null ) {
+			throw new SemanticException(
+					"minindex() function can only be applied to path expressions which resolve to an indexed collection; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getClass().getName()
+			);
+		}
+
+		return new MinIndexFunction( pathResolution.getUnderlyingFromElement() );
 	}
 
 	@Override

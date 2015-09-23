@@ -1,7 +1,3 @@
-* maxindex - deprecate property form on master/5.0; disallow with strict jpql compliance
-* minindex - deprecate property form on master/5.0; disallow with strict jpql compliance
-* maxelement - deprecate property form on master/5.0; disallow with strict jpql compliance
-* minelement - deprecate property form on master/5.0; disallow with strict jpql compliance
-* size - deprecate property form on master/5.0
-* index - deprecate property form on master/5.0; disallow with strict jpql compliance (key in jpql for maps)
+* type function
 * strict jpql compliance -> nested (non-embedded) join paths
+* class pseudo-property - deprecate on master/5.0 - use type() function instead

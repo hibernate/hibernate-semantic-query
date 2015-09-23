@@ -16,7 +16,8 @@ public class StrictJpaComplianceViolation extends SemanticException {
 		IMPLICIT_SELECT( "implicit select clause" ),
 		ALIASED_FETCH_JOIN( "aliased fetch join" ),
 		UNMAPPED_POLYMORPHISM( "unmapped polymorphic reference" ),
-		FUNCTION_CALL( "improper non-standard function call" )
+		FUNCTION_CALL( "improper non-standard function call" ),
+		HQL_COLLECTION_FUNCTION( "use of HQL collection functions (maxelement,minelement,maxindex,minindex)")
 		;
 
 		private final String description;

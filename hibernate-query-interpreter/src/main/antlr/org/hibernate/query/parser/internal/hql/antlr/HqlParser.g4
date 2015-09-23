@@ -355,6 +355,8 @@ function
 	| aggregateFunction
 	| jpaNonStandardFunction
 	| nonStandardFunction
+	| jpaCollectionFunction
+	| hqlCollectionFunction
 	;
 
 jpaNonStandardFunction
@@ -371,6 +373,20 @@ nonStandardFunctionArguments
 
 nonStandardFunction
 	: nonStandardFunctionName LEFT_PAREN nonStandardFunctionArguments? RIGHT_PAREN
+	;
+
+jpaCollectionFunction
+	: sizeKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionSizeFunction
+	| indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN	# CollectionIndexFunction
+	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
+	| valueKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionValueFunction
+	;
+
+hqlCollectionFunction
+	: maxindexKeyword LEFT_PAREN path RIGHT_PAREN		# MaxIndexFunction
+	| maxelementKeyword LEFT_PAREN path RIGHT_PAREN		# MaxElementFunction
+	| minindexKeyword LEFT_PAREN path RIGHT_PAREN		# MinIndexFunction
+	| minelementKeyword LEFT_PAREN path RIGHT_PAREN		# MinElementFunction
 	;
 
 aggregateFunction
@@ -413,8 +429,6 @@ standardFunction
 	|	absFunction
 	|	sqrtFunction
 	|	modFunction
-	|	sizeFunction
-	|	indexFunction
 	|	currentDateFunction
 	|	currentTimeFunction
 	|	currentTimestampFunction
@@ -510,14 +524,6 @@ modDividendArgument
 
 modDivisorArgument
 	: expression
-	;
-
-sizeFunction
-	: sizeKeyword LEFT_PAREN path RIGHT_PAREN
-	;
-
-indexFunction
-	: indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
 	;
 
 currentDateFunction
@@ -756,6 +762,10 @@ joinKeyword
 	: {doesUpcomingTokenMatchAny("join")}? IDENTIFIER
 	;
 
+keyKeyword
+	: {doesUpcomingTokenMatchAny("key")}? IDENTIFIER
+	;
+
 leadingKeyword
 	: {doesUpcomingTokenMatchAny("leading")}?  IDENTIFIER
 	;
@@ -784,12 +794,28 @@ maxKeyword
 	: {doesUpcomingTokenMatchAny("max")}?  IDENTIFIER
 	;
 
+maxelementKeyword
+	: {doesUpcomingTokenMatchAny("maxelement")}?  IDENTIFIER
+	;
+
+maxindexKeyword
+	: {doesUpcomingTokenMatchAny("maxindex")}?  IDENTIFIER
+	;
+
 memberOfKeyword
 	: {doesUpcomingTokenMatchAny(1,"member") && doesUpcomingTokenMatchAny(2,"of")}?  IDENTIFIER IDENTIFIER
 	;
 
 minKeyword
 	: {doesUpcomingTokenMatchAny("min")}?  IDENTIFIER
+	;
+
+minelementKeyword
+	: {doesUpcomingTokenMatchAny("minelement")}?  IDENTIFIER
+	;
+
+minindexKeyword
+	: {doesUpcomingTokenMatchAny("minindex")}?  IDENTIFIER
 	;
 
 minuteKeyword
@@ -906,6 +932,10 @@ updateKeyword
 
 upperKeyword
 	: {doesUpcomingTokenMatchAny("upper")}?  IDENTIFIER
+	;
+
+valueKeyword
+	: {doesUpcomingTokenMatchAny("value")}?  IDENTIFIER
 	;
 
 whereKeyword

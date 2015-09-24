@@ -72,6 +72,9 @@ public class DynamicModelMetadata implements ModelMetadata {
 			else if ( attributeName.startsWith( "collection" ) ) {
 				return buildCollectionAttribute( attributeName );
 			}
+			else if ( attributeName.startsWith( "indexedCollection" ) ) {
+				return buildIndexedCollectionAttribute( attributeName );
+			}
 			else if ( attributeName.startsWith( "map" ) ) {
 				return buildMapAttribute( attributeName );
 			}
@@ -113,6 +116,16 @@ public class DynamicModelMetadata implements ModelMetadata {
 			return new AttributeDescriptorImpl(
 					attributeName,
 					new CollectionTypeDescriptorImpl( StandardBasicTypeDescriptors.INSTANCE.LONG )
+			);
+		}
+
+		protected AttributeDescriptor buildIndexedCollectionAttribute(String attributeName) {
+			return new AttributeDescriptorImpl(
+					attributeName,
+					new CollectionTypeDescriptorImpl(
+							StandardBasicTypeDescriptors.INSTANCE.LONG,
+							new EntityTypeDescriptorImpl( "collection-value:" + attributeName )
+					)
 			);
 		}
 

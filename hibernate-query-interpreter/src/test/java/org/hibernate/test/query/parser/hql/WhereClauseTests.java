@@ -8,6 +8,7 @@ package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
 import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
 import org.hibernate.sqm.query.predicate.Predicate;
@@ -44,6 +45,23 @@ public class WhereClauseTests {
 		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionSizeFunction.class ) );
 		assertThat( ( (CollectionSizeFunction) relationalPredicate.getLeftHandExpression() ).getFromElementAlias(), is( "t" ) );
 		assertThat( ( (CollectionSizeFunction) relationalPredicate.getLeftHandExpression() ).getAttributeDescriptor().getName(), is( "basicCollection" ) );
+	}
+
+	@Test
+	public void testCollectionIndexFunction() {
+		SelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.indexedCollectionLegs l WHERE INDEX( l ) > 2" );
+
+		Predicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
+		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
+
+		assertThat( relationalPredicate.getType(), is( RelationalPredicate.Type.GT ) );
+
+		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerExpression.class ) );
+		assertThat( ( (LiteralIntegerExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
+
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexFunction.class ) );
+		assertThat( ( (CollectionIndexFunction) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
 	}
 
 	private SelectStatement interpret(String query) {

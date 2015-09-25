@@ -10,9 +10,9 @@ import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
+import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.Selection;
-
 import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.junit.Test;
 
@@ -146,6 +146,21 @@ public class SelectClauseTests {
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
 				instanceOf( DynamicInstantiation.class )
 		);
+	}
+
+	@Test
+	public void testMapKeyFunction() {
+		SelectStatement statement = interpret( "SELECT KEY( l ) FROM Trip t JOIN t.mapLegs l" );
+
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		assertThat(
+				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( MapKeyFunction.class )
+		);
+
+		MapKeyFunction mapKeyFunction = (MapKeyFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertEquals("com.acme.map-key:mapLegs", mapKeyFunction.getMapKeyType().getTypeName() );
+		assertEquals("l", mapKeyFunction.getCollectionAlias() );
 	}
 
 	private SelectStatement interpret(String query) {

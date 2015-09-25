@@ -17,7 +17,8 @@ public class StrictJpaComplianceViolation extends SemanticException {
 		ALIASED_FETCH_JOIN( "aliased fetch join" ),
 		UNMAPPED_POLYMORPHISM( "unmapped polymorphic reference" ),
 		FUNCTION_CALL( "improper non-standard function call" ),
-		HQL_COLLECTION_FUNCTION( "use of HQL collection functions (maxelement,minelement,maxindex,minindex)")
+		HQL_COLLECTION_FUNCTION( "use of HQL collection functions (maxelement,minelement,maxindex,minindex)"),
+		VALUE_FUNCTION_ON_NON_MAP( "use of value() function for non-Map type" )
 		;
 
 		private final String description;

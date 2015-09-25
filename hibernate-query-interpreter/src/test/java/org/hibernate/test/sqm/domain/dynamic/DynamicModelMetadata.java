@@ -133,8 +133,8 @@ public class DynamicModelMetadata implements ModelMetadata {
 			return new AttributeDescriptorImpl(
 					attributeName,
 					new CollectionTypeDescriptorImpl(
-							StandardBasicTypeDescriptors.INSTANCE.LONG,
-							new EntityTypeDescriptorImpl( "map-element:" + attributeName )
+							new EntityTypeDescriptorImpl( "map-key:" + attributeName),
+							new EntityTypeDescriptorImpl( "map-value:" + attributeName )
 					)
 			);
 		}

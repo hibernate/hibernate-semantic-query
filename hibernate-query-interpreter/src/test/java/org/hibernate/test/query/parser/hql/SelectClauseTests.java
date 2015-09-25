@@ -7,14 +7,19 @@
 package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
+import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.CollectionValueFunction;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.Selection;
 import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +31,16 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public class SelectClauseTests {
-	private final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
+
+	private ConsumerContextImpl consumerContext;
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
+
+	@Before
+	public void setUpContext() {
+		 consumerContext = new ConsumerContextImpl();
+	}
 
 	@Test
 	public void testSimpleAliasSelection() {
@@ -161,6 +175,46 @@ public class SelectClauseTests {
 		MapKeyFunction mapKeyFunction = (MapKeyFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertEquals("com.acme.map-key:mapLegs", mapKeyFunction.getMapKeyType().getTypeName() );
 		assertEquals("l", mapKeyFunction.getCollectionAlias() );
+	}
+
+	@Test
+	public void testMapValueFunction() {
+		SelectStatement statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.mapLegs l" );
+
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		assertThat(
+				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( CollectionValueFunction.class )
+		);
+
+		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertEquals("com.acme.map-value:mapLegs", collectionValueFunction.getValueType().getTypeName() );
+		assertEquals("l", collectionValueFunction.getCollectionAlias() );
+	}
+
+	@Test
+	public void testCollectionValueFunction() {
+		SelectStatement statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
+
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		assertThat(
+				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( CollectionValueFunction.class )
+		);
+
+		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertEquals("com.acme.collection-value:collectionLegs", collectionValueFunction.getValueType().getTypeName() );
+		assertEquals("l", collectionValueFunction.getCollectionAlias() );
+	}
+
+	@Test
+	public void testCollectionValueFunctionNotSupportedInStrictMode() {
+		consumerContext.enableStrictJpaCompliance();
+
+		expectedException.expect( StrictJpaComplianceViolation.class );
+		expectedException.expectMessage( "Encountered application of value() function to path expression which does not resolve to a persistent Map" );
+
+		interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
 	}
 
 	private SelectStatement interpret(String query) {

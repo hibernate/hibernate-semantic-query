@@ -14,6 +14,7 @@ import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.domain.CollectionTypeDescriptor;
 import org.hibernate.sqm.domain.CompositeTypeDescriptor;
 import org.hibernate.sqm.domain.EntityTypeDescriptor;
+import org.hibernate.sqm.domain.MapTypeDescriptor;
 import org.hibernate.sqm.domain.ModelMetadata;
 import org.hibernate.sqm.domain.PolymorphicEntityTypeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
@@ -132,7 +133,7 @@ public class DynamicModelMetadata implements ModelMetadata {
 		protected AttributeDescriptor buildMapAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
 					attributeName,
-					new CollectionTypeDescriptorImpl(
+					new MapTypeDescriptorImpl(
 							new EntityTypeDescriptorImpl( "map-key:" + attributeName),
 							new EntityTypeDescriptorImpl( "map-value:" + attributeName )
 					)
@@ -142,7 +143,7 @@ public class DynamicModelMetadata implements ModelMetadata {
 		protected AttributeDescriptor buildBasicMapAttribute(String attributeName) {
 			return new AttributeDescriptorImpl(
 					attributeName,
-					new CollectionTypeDescriptorImpl(
+					new MapTypeDescriptorImpl(
 							StandardBasicTypeDescriptors.INSTANCE.LONG,
 							StandardBasicTypeDescriptors.INSTANCE.LONG
 					)
@@ -249,6 +250,13 @@ public class DynamicModelMetadata implements ModelMetadata {
 		@Override
 		public TypeDescriptor getElementTypeDescriptor() {
 			return elementType;
+		}
+	}
+
+	public static class MapTypeDescriptorImpl extends CollectionTypeDescriptorImpl implements MapTypeDescriptor {
+
+		public MapTypeDescriptorImpl(TypeDescriptor indexType, TypeDescriptor elementType) {
+			super( Map.class, indexType, elementType );
 		}
 	}
 }

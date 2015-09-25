@@ -28,6 +28,7 @@ import org.hibernate.query.parser.internal.hql.path.IndexedAttributeRootPathReso
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
 import org.hibernate.sqm.domain.CollectionTypeDescriptor;
 import org.hibernate.sqm.domain.EntityTypeDescriptor;
+import org.hibernate.sqm.domain.MapTypeDescriptor;
 import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.QuerySpec;
@@ -995,6 +996,16 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public CollectionValueFunction visitCollectionValueFunction(HqlParser.CollectionValueFunctionContext ctx) {
 		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
 
+		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+
+			if ( !MapTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+				throw new StrictJpaComplianceViolation(
+						"Encountered application of value() function to path expression which does not resolve to a persistent Map, but strict JPQL compliance was requested. specified "
+								+ "path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getTypeName(),
+						StrictJpaComplianceViolation.Type.VALUE_FUNCTION_ON_NON_MAP );
+			}
+		}
+
 		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
 			throw new SemanticException(
 					"value() function can only be applied to path expressions which resolve to a collection; specified " +
@@ -1003,7 +1014,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 
 		return new CollectionValueFunction( pathResolution.getUnderlyingFromElement() );
-
 	}
 
 	@Override

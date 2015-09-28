@@ -387,6 +387,7 @@ jpaCollectionFunction
 	| indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN	# CollectionIndexFunction
 	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
 	| valueKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionValueFunction
+	| entryKeyword LEFT_PAREN path RIGHT_PAREN			# MapEntryFunction
 	;
 
 hqlCollectionFunction
@@ -947,6 +948,10 @@ upperKeyword
 
 valueKeyword
 	: {doesUpcomingTokenMatchAny("value")}?  IDENTIFIER
+	;
+
+entryKeyword
+	: {doesUpcomingTokenMatchAny("entry")}?  IDENTIFIER
 	;
 
 whereKeyword

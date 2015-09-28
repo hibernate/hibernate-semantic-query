@@ -12,6 +12,7 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
+import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.Selection;
@@ -215,6 +216,22 @@ public class SelectClauseTests {
 		expectedException.expectMessage( "Encountered application of value() function to path expression which does not resolve to a persistent Map" );
 
 		interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
+	}
+
+	@Test
+	public void testMapEntryFunction() {
+		SelectStatement statement = interpret( "SELECT ENTRY( l ) FROM Trip t JOIN t.mapLegs l" );
+
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		assertThat(
+				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( MapEntryFunction.class )
+		);
+
+		MapEntryFunction mapEntryFunction = (MapEntryFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertEquals("com.acme.map-key:mapLegs", mapEntryFunction.getMapKeyType().getTypeName() );
+		assertEquals("com.acme.map-value:mapLegs", mapEntryFunction.getMapValueType().getTypeName() );
+		assertEquals("l", mapEntryFunction.getCollectionAlias() );
 	}
 
 	private SelectStatement interpret(String query) {

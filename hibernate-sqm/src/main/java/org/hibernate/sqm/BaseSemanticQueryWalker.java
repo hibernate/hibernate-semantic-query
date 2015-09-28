@@ -38,6 +38,7 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
+import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.expression.MaxElementFunction;
 import org.hibernate.sqm.query.expression.MaxFunction;
@@ -390,6 +391,11 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 
 	@Override
 	public MapKeyFunction visitMapKeyFunction(MapKeyFunction function) {
+		return function;
+	}
+
+	@Override
+	public MapEntryFunction visitMapEntryFunction(MapEntryFunction function) {
 		return function;
 	}
 

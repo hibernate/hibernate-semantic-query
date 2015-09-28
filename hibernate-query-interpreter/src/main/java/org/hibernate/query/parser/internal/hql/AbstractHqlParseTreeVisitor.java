@@ -13,15 +13,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.query.parser.StrictJpaComplianceViolation;
-import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseVisitor;
 import org.hibernate.query.parser.LiteralNumberFormatException;
 import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.SemanticException;
+import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseVisitor;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolver;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolverStack;
 import org.hibernate.query.parser.internal.hql.path.IndexedAttributeRootPathResolver;
@@ -49,6 +49,7 @@ import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
+import org.hibernate.sqm.query.expression.IndexedAttributePathPart;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterExpression;
@@ -86,7 +87,6 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InTupleListPredicate;
-import org.hibernate.sqm.query.expression.IndexedAttributePathPart;
 import org.hibernate.sqm.query.predicate.IsEmptyPredicate;
 import org.hibernate.sqm.query.predicate.IsNullPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
@@ -96,11 +96,10 @@ import org.hibernate.sqm.query.predicate.OrPredicate;
 import org.hibernate.sqm.query.predicate.Predicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
+import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
 import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
-
 import org.jboss.logging.Logger;
 
 import static org.hibernate.query.parser.StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION;
@@ -971,6 +970,13 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public CollectionSizeFunction visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
 		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
 
+		if ( !AttributeReferenceExpression.class.isInstance( pathResolution ) ) {
+			throw new SemanticException(
+					"size() function can only be applied to path expressions which resolve to an attribute; specified " +
+							"path [" + ctx.path().getText() + "] resolved to " + pathResolution.getClass().getName()
+			);
+		}
+
 		if ( !CollectionTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
 			throw new SemanticException(
 					"size() function can only be applied to path expressions which resolve to a collection; specified " +
@@ -978,7 +984,11 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionSizeFunction( pathResolution.getUnderlyingFromElement() );
+		// TODO avoid down-cast
+		return new CollectionSizeFunction(
+				pathResolution.getUnderlyingFromElement(),
+				( (AttributeReferenceExpression) pathResolution ).getAttributeDescriptor()
+		);
 	}
 
 	@Override

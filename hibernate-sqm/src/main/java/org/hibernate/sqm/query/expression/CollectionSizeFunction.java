@@ -7,22 +7,33 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
 import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
+ * Represents the {@code SIZE()} function.
+ *
  * @author Steve Ebersole
+ * @author Gunnar Morling
  */
 public class CollectionSizeFunction implements Expression {
-	private final String collectionAlias;
 
-	public CollectionSizeFunction(FromElement collectionReference) {
-		this.collectionAlias = collectionReference.getAlias();
+	private final String fromElementAlias;
+	private final AttributeDescriptor attributeDescriptor;
+
+	public CollectionSizeFunction(FromElement fromElement, AttributeDescriptor attributeDescriptor) {
+		this.fromElementAlias = fromElement.getAlias();
+		this.attributeDescriptor = attributeDescriptor;
 	}
 
-	public String getCollectionAlias() {
-		return collectionAlias;
+	public String getFromElementAlias() {
+		return fromElementAlias;
+	}
+
+	public AttributeDescriptor getAttributeDescriptor() {
+		return attributeDescriptor;
 	}
 
 	@Override

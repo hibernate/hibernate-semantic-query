@@ -54,7 +54,13 @@ public class DynamicModelMetadata implements ModelMetadata {
 
 		@Override
 		public AttributeDescriptor getAttributeDescriptor(String attributeName) {
-			if ( attributeName.startsWith( "basic" ) ) {
+			if ( attributeName.startsWith( "basicCollection" ) ) {
+				return buildBasicCollectionAttribute( attributeName );
+			}
+			else if ( attributeName.startsWith( "basicMap" ) ) {
+				return buildBasicMapAttribute( attributeName );
+			}
+			else if ( attributeName.startsWith( "basic" ) ) {
 				return buildBasicAttribute( attributeName );
 			}
 			else if ( attributeName.startsWith( "composite" ) ) {
@@ -66,14 +72,8 @@ public class DynamicModelMetadata implements ModelMetadata {
 			else if ( attributeName.startsWith( "collection" ) ) {
 				return buildCollectionAttribute( attributeName );
 			}
-			else if ( attributeName.startsWith( "basicCollection" ) ) {
-				return buildBasicCollectionAttribute( attributeName );
-			}
 			else if ( attributeName.startsWith( "map" ) ) {
 				return buildMapAttribute( attributeName );
-			}
-			else if ( attributeName.startsWith( "basicMap" ) ) {
-				return buildBasicMapAttribute( attributeName );
 			}
 
 			return null;

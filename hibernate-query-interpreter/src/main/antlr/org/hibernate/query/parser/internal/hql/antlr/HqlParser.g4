@@ -360,10 +360,10 @@ parameter
 function
 	: standardFunction
 	| aggregateFunction
-	| jpaNonStandardFunction
-	| nonStandardFunction
 	| jpaCollectionFunction
 	| hqlCollectionFunction
+	| jpaNonStandardFunction
+	| nonStandardFunction
 	;
 
 jpaNonStandardFunction

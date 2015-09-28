@@ -21,6 +21,8 @@ import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser.GroupByClauseContext;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser.HavingClauseContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseVisitor;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolver;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolverStack;
@@ -63,6 +65,7 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
+import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.expression.MaxElementFunction;
 import org.hibernate.sqm.query.expression.MaxFunction;
@@ -114,6 +117,12 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	private final ParsingContext parsingContext;
 	private final FromElementBuilder fromElementBuilder;
 	private final FromClauseIndex fromClauseIndex;
+
+	/**
+	 * Whether the currently processed clause is WHERE or not
+	 */
+	private boolean inWhereClause;
+
 	protected final AttributePathResolverStack attributePathResolverStack = new AttributePathResolverStack();
 
 	public AbstractHqlParseTreeVisitor(
@@ -220,11 +229,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new QuerySpec( getCurrentFromClause(), selectClause, whereClause );
 	}
 
-	@Override
-	public FromClause visitFromClause(HqlParser.FromClauseContext ctx) {
-		return getCurrentFromClause();
-	}
-
 	protected SelectClause buildInferredSelectClause(FromClause fromClause) {
 		// for now, this is slightly different than the legacy behavior where
 		// the root and each non-fetched-join was selected.  For now, here, we simply
@@ -329,7 +333,24 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public WhereClause visitWhereClause(HqlParser.WhereClauseContext ctx) {
-		return new WhereClause( (Predicate) ctx.predicate().accept( this ) );
+		inWhereClause = true;
+
+		try {
+			return new WhereClause( (Predicate) ctx.predicate().accept( this ) );
+		}
+		finally {
+			inWhereClause = false;
+		}
+	}
+
+	@Override
+	public Object visitGroupByClause(GroupByClauseContext ctx) {
+		return super.visitGroupByClause( ctx );
+	}
+
+	@Override
+	public Object visitHavingClause(HavingClauseContext ctx) {
+		return super.visitHavingClause( ctx );
 	}
 
 	@Override
@@ -1059,6 +1080,26 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 
 		return new MapKeyFunction( pathResolution.getUnderlyingFromElement() );
+	}
+
+
+	@Override
+	public MapEntryFunction visitMapEntryFunction(HqlParser.MapEntryFunctionContext ctx) {
+		final AttributePathPart pathResolution = (AttributePathPart) ctx.path().accept( this );
+
+		if ( inWhereClause ) {
+			throw new SemanticException(
+					"entry() function may only be used in SELECT clauses; specified "
+							+ "path [" + ctx.path().getText() + "] is used in WHERE clause" );
+		}
+
+		if ( !MapTypeDescriptor.class.isInstance( pathResolution.getTypeDescriptor() ) ) {
+			throw new SemanticException(
+					"entry() function can only be applied to path expressions which resolve to a persistent Map; specified "
+							+ "path [" + ctx.path().getText() + "] resolved to " + pathResolution.getTypeDescriptor().getTypeName() );
+		}
+
+		return new MapEntryFunction( pathResolution.getUnderlyingFromElement() );
 	}
 
 	@Override

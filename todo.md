@@ -1,3 +1,4 @@
-* type function
+* type function - SQM-17
 * strict jpql compliance -> nested (non-embedded) join paths
-* class pseudo-property - deprecate on master/5.0 - use type() function instead
+* strict jpql compliance -> map key() function using path rather than alias
+* strict jpql compliance -> TREAT context (iirc spec allows in FROM and WHERE only)

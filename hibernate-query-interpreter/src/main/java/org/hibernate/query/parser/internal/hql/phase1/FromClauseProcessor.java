@@ -9,16 +9,16 @@ package org.hibernate.query.parser.internal.hql.phase1;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.query.parser.StrictJpaComplianceViolation;
-import org.hibernate.query.parser.internal.ImplicitAliasGenerator;
-import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseListener;
 import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.SemanticException;
+import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
+import org.hibernate.query.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.AbstractHqlParseTreeVisitor;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseListener;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolver;
 import org.hibernate.query.parser.internal.hql.path.BasicAttributePathResolverImpl;
 import org.hibernate.query.parser.internal.hql.path.JoinPredicatePathResolverImpl;
@@ -26,7 +26,6 @@ import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.domain.EntityTypeDescriptor;
 import org.hibernate.sqm.domain.PolymorphicEntityTypeDescriptor;
 import org.hibernate.sqm.path.AttributePathPart;
-import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
@@ -217,7 +216,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		final RootEntityFromElement rootEntityFromElement = fromElementBuilder.makeRootEntityFromElement(
 				currentFromElementSpace,
 				resolveEntityReference( ctx.mainEntityPersisterReference().dotIdentifierSequence() ),
-				interpretAlias( ctx.mainEntityPersisterReference().alias() )
+				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
 		);
 		fromElementMap.put( ctx.getText(), rootEntityFromElement );
 	}
@@ -233,12 +232,15 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		return entityTypeDescriptor;
 	}
 
-	private String interpretAlias(HqlParser.AliasContext ctx) {
-		if ( ctx == null ) {
+	private String interpretAlias(TerminalNode aliasNode) {
+		if ( aliasNode == null ) {
 			return parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 		}
-		final TerminalNode aliasNode = ctx.IDENTIFIER();
+
+		// todo : not sure I like asserts for this kind of thing.  They are generally disable in runtime environments.
+		// either the thing is important to check or it isn't.
 		assert aliasNode.getSymbol().getType() == HqlParser.IDENTIFIER;
+
 		parsingContext.getAliasRegistry().registerAlias( aliasNode.getText() );
 		return aliasNode.getText();
 	}
@@ -259,7 +261,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		final CrossJoinedFromElement join = fromElementBuilder.makeCrossJoinedFromElement(
 				currentFromElementSpace,
 				entityTypeDescriptor,
-				interpretAlias( ctx.mainEntityPersisterReference().alias() )
+				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
 		);
 		fromElementMap.put( ctx.getText(), join );
 	}
@@ -273,7 +275,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 				currentFromElementSpace,
 				currentFromClauseStackNode,
 				JoinType.INNER,
-				interpretAlias( ctx.alias() ),
+				interpretAlias( ctx.IDENTIFIER() ),
 				false
 		);
 
@@ -306,7 +308,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 				currentFromElementSpace,
 				currentFromClauseStackNode,
 				joinType,
-				interpretAlias( ctx.qualifiedJoinRhs().alias() ),
+				interpretAlias( ctx.qualifiedJoinRhs().IDENTIFIER() ),
 				ctx.fetchKeyword() != null
 		);
 

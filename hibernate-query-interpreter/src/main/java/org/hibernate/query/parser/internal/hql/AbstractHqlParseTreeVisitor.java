@@ -106,6 +106,8 @@ import org.hibernate.sqm.query.select.SelectClause;
 import org.hibernate.sqm.query.select.Selection;
 import org.jboss.logging.Logger;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import static org.hibernate.query.parser.StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION;
 
 /**
@@ -257,17 +259,17 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
 		return new Selection(
 				visitSelectExpression( ctx.selectExpression() ),
-				visitAlias( ctx.alias() )
+				interpretAlias( ctx.IDENTIFIER() )
 		);
 	}
 
-	@Override
-	public String visitAlias(HqlParser.AliasContext ctx) {
-		if(ctx == null){
+	private String interpretAlias(TerminalNode aliasNode) {
+		if ( aliasNode == null ) {
 			return null;
 		}
-		parsingContext.getAliasRegistry().registerAlias( ctx.IDENTIFIER().getText() );
-		return ctx.IDENTIFIER().getText();
+		final String aliasText = aliasNode.getText();
+		parsingContext.getAliasRegistry().registerAlias( aliasText );
+		return aliasText;
 	}
 
 	@Override

@@ -382,7 +382,7 @@ entityType
 	;
 
 typeFunction
-	: typeKeyword LEFT_PAREN (IDENTIFIER | parameter | mapKeyFunction| collectionValueFunction) RIGHT_PAREN
+	: typeKeyword LEFT_PAREN (IDENTIFIER | dotIdentifierSequence | parameter | mapKeyFunction| collectionValueFunction) RIGHT_PAREN
 	;
 
 entityTypeLiteral

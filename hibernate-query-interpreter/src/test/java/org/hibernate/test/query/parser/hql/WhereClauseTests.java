@@ -189,6 +189,37 @@ public class WhereClauseTests {
 	}
 
 	@Test
+	public void testTypeFunctionWithCollection() {
+		SelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.collectionLegs l WHERE TYPE( l ) = ExtendedLeg" );
+
+		Predicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
+		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
+
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( TypeFunction.class ) );
+
+		assertThat(
+				( (TypeFunction) relationalPredicate.getLeftHandExpression() ).getFromElementAlias(),
+				is( "l" )
+		);
+	}
+
+	@Test
+	public void testTypeFunctionWithSimpleProperty() {
+		SelectStatement statement = interpret( "SELECT t.basicName FROM Trip t WHERE TYPE( t.basicLength ) = Integer" );
+
+		Predicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
+		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
+
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( TypeFunction.class ) );
+		TypeFunction typeFunction = (TypeFunction) relationalPredicate.getLeftHandExpression();
+
+		assertThat( typeFunction.getFromElementAlias(), is( "t" ) );
+		assertThat( typeFunction.getAttributeDescriptor().getName(), is( "basicLength" ) );
+	}
+
+	@Test
 	public void testTypeFunctionWithMapKeyFunction() {
 		SelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.mapLegs l WHERE TYPE( KEY( l ) ) = ExtendedLeg" );
 

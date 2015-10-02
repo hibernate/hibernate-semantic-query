@@ -905,10 +905,22 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			FromElement fromElement = fromClauseIndex.findFromElementByAlias( ctx.IDENTIFIER().getText() );
 
 			if ( fromElement == null ) {
-				throw new SemanticException( "Could not element with alias[" + ctx.IDENTIFIER().getText() + "] in FROM clause" );
+				throw new SemanticException( "Could not resolve element with alias[" + ctx.IDENTIFIER().getText() + "] in FROM clause" );
 			}
 
 			return new TypeFunction( fromElement );
+		}
+		else if ( ctx.dotIdentifierSequence() != null ) {
+			AttributePathPart pathResolution = getCurrentAttributePathResolver().resolvePath( ctx.dotIdentifierSequence() );
+
+			if ( pathResolution == null ) {
+				throw new SemanticException( "Could not resolve identifier sequence [" + ctx.dotIdentifierSequence().getText() + "]" );
+			}
+
+			return new TypeFunction(
+					pathResolution.getUnderlyingFromElement(),
+					( (AttributeReferenceExpression) pathResolution ).getAttributeDescriptor()
+			);
 		}
 		// TYPE(:param) or TYPE(?1)
 		else if ( ctx.parameter() != null ){

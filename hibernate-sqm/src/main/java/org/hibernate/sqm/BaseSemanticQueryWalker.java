@@ -50,6 +50,7 @@ import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.expression.SumFunction;
+import org.hibernate.sqm.query.expression.TypeFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
@@ -315,6 +316,11 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 
 	@Override
 	public NamedParameterExpression visitNamedParameterExpression(NamedParameterExpression expression) {
+		return expression;
+	}
+
+	@Override
+	public TypeFunction visitTypeFunction(TypeFunction expression) {
 		return expression;
 	}
 

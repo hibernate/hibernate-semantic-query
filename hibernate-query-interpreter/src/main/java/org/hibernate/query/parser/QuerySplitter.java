@@ -123,7 +123,7 @@ public class QuerySplitter {
 		private final RootEntityFromElement unmappedPolymorphicFromElement;
 		private final EntityTypeDescriptor mappedDescriptor;
 
-		private Map<FromElement,FromElement> fromElementCopyMap = new HashMap<FromElement, FromElement>();
+		private final Map<FromElement,FromElement> fromElementCopyMap = new HashMap<FromElement, FromElement>();
 
 		private UnmappedPolymorphismReplacer(
 				SelectStatement selectStatement,
@@ -473,7 +473,7 @@ public class QuerySplitter {
 
 		@Override
 		public EntityTypeExpression visitEntityTypeExpression(EntityTypeExpression expression) {
-			return new EntityTypeExpression( expression.getTypeDescriptor() );
+			return new EntityTypeExpression( expression.getEntityTypeDescriptor() );
 		}
 
 		@Override

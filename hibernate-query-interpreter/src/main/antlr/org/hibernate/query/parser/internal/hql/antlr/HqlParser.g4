@@ -12,9 +12,19 @@ options {
  * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
  */
 package org.hibernate.query.parser.internal.hql.antlr;
+
+import org.hibernate.sqm.domain.ModelMetadata;
 }
 
 @members {
+
+	private ModelMetadata modelMetadata;
+
+	public HqlParser(TokenStream input, ModelMetadata modelMetadata) {
+		this( input );
+		this.modelMetadata = modelMetadata;
+	}
+
 	/**
 	 * Determine if the text of the new upcoming token LT(1), if one, matches
 	 * the passed argument.  Internally calls doesUpcomingTokenMatchAny( 1, checks )
@@ -41,6 +51,19 @@ package org.hibernate.query.parser.internal.hql.antlr;
 						}
 					}
 				}
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isUpcomingTokenEntityTypeReference() {
+		Token token = retrieveUpcomingToken( 1 );
+
+		if ( token != null ) {
+			// todo : is this really a check we want?
+			if ( token.getType() == IDENTIFIER ) {
+				return modelMetadata.resolveEntityReference( token.getText() ) != null;
 			}
 		}
 
@@ -310,6 +333,7 @@ expression
 	| MINUS expression							# UnaryMinusExpression
 	| PLUS expression							# UnaryPlusExpression
 	| literal									# LiteralExpression
+	| entityType								# EntityTypeExpression
 	| parameter									# ParameterExpression
 	| function									# FunctionExpression
 	| path										# PathExpression
@@ -350,6 +374,20 @@ timeLiteral
 
 dateTimeLiteralText
 	: STRING_LITERAL | CHARACTER_LITERAL
+	;
+
+entityType
+	: typeFunction
+	| entityTypeLiteral
+	;
+
+typeFunction
+	: typeKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
+	| typeKeyword LEFT_PAREN parameter RIGHT_PAREN
+	;
+
+entityTypeLiteral
+	: {isUpcomingTokenEntityTypeReference()}? IDENTIFIER
 	;
 
 parameter
@@ -932,6 +970,10 @@ treatKeyword
 
 trimKeyword
 	: {doesUpcomingTokenMatchAny("trim")}?  IDENTIFIER
+	;
+
+typeKeyword
+	: {doesUpcomingTokenMatchAny("type")}?  IDENTIFIER
 	;
 
 unionKeyword

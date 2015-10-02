@@ -6,12 +6,12 @@
  */
 package org.hibernate.query.parser.internal.hql;
 
-import org.hibernate.query.parser.internal.hql.antlr.HqlLexer;
-import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.hibernate.query.parser.ConsumerContext;
+import org.hibernate.query.parser.internal.hql.antlr.HqlLexer;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 
 /**
  * @author Steve Ebersole
@@ -22,14 +22,14 @@ public class HqlParseTreeBuilder {
 	 */
 	public static final HqlParseTreeBuilder INSTANCE = new HqlParseTreeBuilder();
 
-	private boolean debugEnabled = true;
+	private final boolean debugEnabled = true;
 
-	public HqlParser parseHql(String hql) {
+	public HqlParser parseHql(String hql, ConsumerContext consumerContext) {
 		// Build the lexer
 		HqlLexer hqlLexer = new HqlLexer( new ANTLRInputStream( hql ) );
 
 		// Build the parser...
-		final HqlParser parser = new HqlParser( new CommonTokenStream( hqlLexer ) );
+		final HqlParser parser = new HqlParser( new CommonTokenStream( hqlLexer ), consumerContext );
 
 		// this part would be protected by logging most likely.  Print the parse tree structure
 		if ( debugEnabled ) {

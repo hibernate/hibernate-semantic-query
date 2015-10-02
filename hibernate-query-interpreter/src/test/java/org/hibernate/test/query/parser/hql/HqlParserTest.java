@@ -8,16 +8,15 @@ package org.hibernate.test.query.parser.hql;
 
 import java.util.Collection;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.xpath.XPath;
+import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser.EqualityPredicateContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser.LiteralExpressionContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseVisitor;
-import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
-
+import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.junit.Test;
-
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.xpath.XPath;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 public class HqlParserTest {
 	@Test
 	public void justTestIt() throws Exception {
-		HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.b from Something a where a.c = '1'" );
+		HqlParser parser = parseHql( "select a.b from Something a where a.c = '1'" );
 
 		Collection<ParseTree> fromClauses = XPath.findAll( parser.statement(), "//fromClause", parser );
 		assertEquals( 1, fromClauses.size() );
@@ -40,7 +39,7 @@ public class HqlParserTest {
 	public void testIndexAccess() throws Exception {
 		final String qry = "select o from Order o where o.items[0].id = 1234";
 
-		HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( qry );
+		HqlParser parser = parseHql( qry );
 
 		Collection<ParseTree> fromClauses = XPath.findAll( parser.statement(), "//fromClause", parser );
 		assertEquals( 1, fromClauses.size() );
@@ -49,9 +48,7 @@ public class HqlParserTest {
 	@Test
 	public void testTimestampLiterals() throws Exception {
 		validateDateTimeLiteralInEqualityPredicate(
-				HqlParseTreeBuilder.INSTANCE.parseHql(
-						"select a.b from Something a where a.c = {ts '2015-01-09 20:11:11.123455'}"
-				),
+				parseHql( "select a.b from Something a where a.c = {ts '2015-01-09 20:11:11.123455'}" ),
 				DateTimeLiteralType.TIMESTAMP
 		);
 	}
@@ -59,9 +56,7 @@ public class HqlParserTest {
 	@Test
 	public void testDateLiterals() throws Exception {
 		validateDateTimeLiteralInEqualityPredicate(
-				HqlParseTreeBuilder.INSTANCE.parseHql(
-						"select a.b from Something a where a.c = {d '2015-01-09'}"
-				),
+				parseHql( "select a.b from Something a where a.c = {d '2015-01-09'}" ),
 				DateTimeLiteralType.DATE
 		);
 	}
@@ -69,9 +64,7 @@ public class HqlParserTest {
 	@Test
 	public void testTimeLiterals() throws Exception {
 		validateDateTimeLiteralInEqualityPredicate(
-				HqlParseTreeBuilder.INSTANCE.parseHql(
-						"select a.b from Something a where a.c = {t '20:11:11'}"
-				),
+				parseHql( "select a.b from Something a where a.c = {t '20:11:11'}" ),
 				DateTimeLiteralType.TIME
 		);
 	}
@@ -91,6 +84,10 @@ public class HqlParserTest {
 		DateTimeLiteralType found = lec.literal().accept( new DateTimeLiteralCategorizingVisitor() );
 
 		assertEquals( expectedType, found );
+	}
+
+	private HqlParser parseHql(String query) {
+		return HqlParseTreeBuilder.INSTANCE.parseHql( query, new ConsumerContextImpl() );
 	}
 
 	enum DateTimeLiteralType {

@@ -12,9 +12,19 @@ options {
  * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
  */
 package org.hibernate.query.parser.internal.hql.antlr;
+
+import org.hibernate.sqm.domain.ModelMetadata;
 }
 
 @members {
+
+	private ModelMetadata modelMetadata;
+
+	public HqlParser(TokenStream input, ModelMetadata modelMetadata) {
+		this( input );
+		this.modelMetadata = modelMetadata;
+	}
+
 	/**
 	 * Determine if the text of the new upcoming token LT(1), if one, matches
 	 * the passed argument.  Internally calls doesUpcomingTokenMatchAny( 1, checks )
@@ -41,6 +51,19 @@ package org.hibernate.query.parser.internal.hql.antlr;
 						}
 					}
 				}
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isUpcomingTokenEntityTypeReference() {
+		Token token = retrieveUpcomingToken( 1 );
+
+		if ( token != null ) {
+			// todo : is this really a check we want?
+			if ( token.getType() == IDENTIFIER ) {
+				return modelMetadata.resolveEntityReference( token.getText() ) != null;
 			}
 		}
 
@@ -310,6 +333,7 @@ expression
 	| MINUS expression							# UnaryMinusExpression
 	| PLUS expression							# UnaryPlusExpression
 	| literal									# LiteralExpression
+	| entityType								# EntityTypeExpression
 	| parameter									# ParameterExpression
 	| function									# FunctionExpression
 	| path										# PathExpression
@@ -352,6 +376,19 @@ dateTimeLiteralText
 	: STRING_LITERAL | CHARACTER_LITERAL
 	;
 
+entityType
+	: typeFunction
+	| entityTypeLiteral
+	;
+
+typeFunction
+	: typeKeyword LEFT_PAREN (IDENTIFIER | dotIdentifierSequence | parameter | mapKeyFunction| collectionValueFunction) RIGHT_PAREN
+	;
+
+entityTypeLiteral
+	: {isUpcomingTokenEntityTypeReference()}? IDENTIFIER
+	;
+
 parameter
 	: COLON IDENTIFIER					# NamedParameter
 	| QUESTION_MARK INTEGER_LITERAL		# PositionalParameter
@@ -383,11 +420,11 @@ nonStandardFunction
 	;
 
 jpaCollectionFunction
-	: sizeKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionSizeFunction
-	| indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN	# CollectionIndexFunction
-	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
-	| valueKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionValueFunction
-	| entryKeyword LEFT_PAREN path RIGHT_PAREN			# MapEntryFunction
+	: collectionSizeFunction
+	| collectionIndexFunction
+	| mapKeyFunction
+	| collectionValueFunction
+	| mapEntryFunction
 	;
 
 hqlCollectionFunction
@@ -395,6 +432,26 @@ hqlCollectionFunction
 	| maxelementKeyword LEFT_PAREN path RIGHT_PAREN		# MaxElementFunction
 	| minindexKeyword LEFT_PAREN path RIGHT_PAREN		# MinIndexFunction
 	| minelementKeyword LEFT_PAREN path RIGHT_PAREN		# MinElementFunction
+	;
+
+collectionSizeFunction
+	: sizeKeyword LEFT_PAREN path RIGHT_PAREN
+	;
+
+collectionIndexFunction
+	: indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
+	;
+
+mapKeyFunction
+	: keyKeyword LEFT_PAREN path RIGHT_PAREN
+	;
+
+collectionValueFunction
+	: valueKeyword LEFT_PAREN path RIGHT_PAREN
+	;
+
+mapEntryFunction
+	:entryKeyword LEFT_PAREN path RIGHT_PAREN
 	;
 
 aggregateFunction
@@ -932,6 +989,10 @@ treatKeyword
 
 trimKeyword
 	: {doesUpcomingTokenMatchAny("trim")}?  IDENTIFIER
+	;
+
+typeKeyword
+	: {doesUpcomingTokenMatchAny("type")}?  IDENTIFIER
 	;
 
 unionKeyword

@@ -6,20 +6,19 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.hibernate.query.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-
+import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.hibernate.test.query.parser.ParsingContextImpl;
 import org.junit.Test;
-
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -35,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 public class HqlFromClauseProcessorPocTest {
 	@Test
 	public void testSimpleFrom() throws Exception {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.b from Something a" );
+		final HqlParser parser = parseHql( "select a.b from Something a" );
 		final FromClauseProcessor fromClauseProcessor = processFromClause( parser );
 
 		assertEquals( 1, fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().size() );
@@ -59,7 +58,7 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testMultipleSpaces() throws Exception {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.b from Something a, SomethingElse b" );
+		final HqlParser parser = parseHql( "select a.b from Something a, SomethingElse b" );
 		final FromClauseProcessor fromClauseProcessor = processFromClause( parser );
 
 		assertEquals( 1, fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().size() );
@@ -82,7 +81,7 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testImplicitAlias() throws Exception {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select b from Something" );
+		final HqlParser parser = parseHql( "select b from Something" );
 		final FromClauseProcessor fromClauseProcessor = processFromClause( parser );
 
 		assertEquals( 1, fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().size() );
@@ -101,7 +100,7 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testCrossJoin() throws Exception {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.b from Something a cross join SomethingElse b" );
+		final HqlParser parser = parseHql( "select a.b from Something a cross join SomethingElse b" );
 		final FromClauseProcessor fromClauseProcessor = processFromClause( parser );
 
 		assertEquals( 1, fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().size() );
@@ -126,7 +125,7 @@ public class HqlFromClauseProcessorPocTest {
 	@Test
 	public void testSimpleImplicitInnerJoin() throws Exception {
 		simpleJoinAssertions(
-				HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a join a.entity c" ),
+				parseHql( "select a.basic from Something a join a.entity c" ),
 				JoinType.INNER
 		);
 	}
@@ -160,7 +159,7 @@ public class HqlFromClauseProcessorPocTest {
 	@Test
 	public void testSimpleExplicitInnerJoin() throws Exception {
 		simpleJoinAssertions(
-				HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a inner join a.entity c" ),
+				parseHql( "select a.basic from Something a inner join a.entity c" ),
 				JoinType.INNER
 		);
 	}
@@ -168,7 +167,7 @@ public class HqlFromClauseProcessorPocTest {
 	@Test
 	public void testSimpleExplicitOuterJoin() throws Exception {
 		simpleJoinAssertions(
-				HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a outer join a.entity c" ),
+				parseHql( "select a.basic from Something a outer join a.entity c" ),
 				JoinType.LEFT
 		);
 	}
@@ -176,14 +175,14 @@ public class HqlFromClauseProcessorPocTest {
 	@Test
 	public void testSimpleExplicitLeftOuterJoin() throws Exception {
 		simpleJoinAssertions(
-				HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a left outer join a.entity c" ),
+				parseHql( "select a.basic from Something a left outer join a.entity c" ),
 				JoinType.LEFT
 		);
 	}
 
 	@Test
 	public void testAttributeJoinWithOnClause() throws Exception {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20 " );
+		final HqlParser parser = parseHql( "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20 " );
 		final FromClauseProcessor fromClauseProcessor = processFromClause( parser );
 
 		assertEquals( 1, fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().size() );
@@ -198,5 +197,9 @@ public class HqlFromClauseProcessorPocTest {
 		FromElement fromElementC = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "c" );
 		assertNotNull( fromElementC );
 		assertSame( space1.getJoins().get( 0 ), fromElementC );
+	}
+
+	private HqlParser parseHql(String query) {
+		return HqlParseTreeBuilder.INSTANCE.parseHql( query, new ConsumerContextImpl() );
 	}
 }

@@ -21,8 +21,10 @@ import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser.EntityTypeLiteralContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser.GroupByClauseContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser.HavingClauseContext;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser.TypeFunctionContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseVisitor;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolver;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolverStack;
@@ -77,6 +79,7 @@ import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.expression.SumFunction;
+import org.hibernate.sqm.query.expression.TypeFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -893,6 +896,63 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 					e
 			);
 		}
+	}
+
+	@Override
+	public TypeFunction visitTypeFunction(TypeFunctionContext ctx) {
+		// TYPE(entity alias)
+		if ( ctx.IDENTIFIER() != null ) {
+			FromElement fromElement = fromClauseIndex.findFromElementByAlias( ctx.IDENTIFIER().getText() );
+
+			if ( fromElement == null ) {
+				throw new SemanticException( "Could not resolve element with alias[" + ctx.IDENTIFIER().getText() + "] in FROM clause" );
+			}
+
+			return new TypeFunction( fromElement );
+		}
+		else if ( ctx.dotIdentifierSequence() != null ) {
+			AttributePathPart pathResolution = getCurrentAttributePathResolver().resolvePath( ctx.dotIdentifierSequence() );
+
+			if ( pathResolution == null ) {
+				throw new SemanticException( "Could not resolve identifier sequence [" + ctx.dotIdentifierSequence().getText() + "]" );
+			}
+
+			return new TypeFunction(
+					pathResolution.getUnderlyingFromElement(),
+					( (AttributeReferenceExpression) pathResolution ).getAttributeDescriptor()
+			);
+		}
+		// TYPE(:param) or TYPE(?1)
+		else if ( ctx.parameter() != null ){
+			Expression parameterExpression = (Expression) ctx.parameter().accept( this );
+
+			if ( parameterExpression instanceof NamedParameterExpression ) {
+				return new TypeFunction( (NamedParameterExpression) parameterExpression );
+			}
+			else {
+				return new TypeFunction( (PositionalParameterExpression) parameterExpression );
+			}
+		}
+		// TYPE( KEY( collection alias ) )
+		else if ( ctx.mapKeyFunction() != null ) {
+			return new TypeFunction( (MapKeyFunction) ctx.mapKeyFunction().accept( this ) );
+		}
+		// TYPE( VALUE( collection alias ) )
+		else {
+			return new TypeFunction( (CollectionValueFunction) ctx.collectionValueFunction().accept( this ) );
+		}
+	}
+
+	@Override
+	public EntityTypeExpression visitEntityTypeLiteral(EntityTypeLiteralContext ctx) {
+		String typeAlias = ctx.IDENTIFIER().getText();
+		EntityTypeDescriptor typeDescriptor = parsingContext.getConsumerContext().resolveEntityReference( typeAlias );
+
+		if ( typeDescriptor == null ) {
+			throw new SemanticException( "TYPE target type [" + typeAlias + "] did not reference an entity" );
+		}
+
+		return new EntityTypeExpression( typeDescriptor );
 	}
 
 	@Override

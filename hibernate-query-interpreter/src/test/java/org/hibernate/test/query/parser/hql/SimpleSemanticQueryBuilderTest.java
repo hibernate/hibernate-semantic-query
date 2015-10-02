@@ -8,6 +8,9 @@ package org.hibernate.test.query.parser.hql;
 
 import java.util.Collection;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.xpath.XPath;
 import org.hibernate.query.parser.SemanticException;
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
@@ -22,14 +25,9 @@ import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-
 import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.hibernate.test.query.parser.ParsingContextImpl;
 import org.junit.Test;
-
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.xpath.XPath;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -44,13 +42,14 @@ import static org.junit.Assert.fail;
  * @author Steve Ebersole
  */
 public class SimpleSemanticQueryBuilderTest {
+
 	@Test
 	public void simpleIntegerLiteralsTest() {
 		final ParsingContextImpl parsingContext = new ParsingContextImpl();
 
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1=2" );
+		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1=2", parsingContext.getConsumerContext() );
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextImpl() );
+		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( parsingContext );
 		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
 
 		parser.reset();
@@ -83,9 +82,9 @@ public class SimpleSemanticQueryBuilderTest {
 	public void simpleLongLiteralsTest() {
 		final ParsingContextImpl parsingContext = new ParsingContextImpl();
 
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1L=2L" );
+		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1L=2L", parsingContext.getConsumerContext() );
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextImpl() );
+		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( parsingContext );
 		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
 
 		parser.reset();

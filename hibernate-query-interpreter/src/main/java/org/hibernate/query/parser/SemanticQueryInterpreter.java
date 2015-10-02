@@ -10,17 +10,16 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 
-import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.query.parser.internal.hql.phase2.SemanticQueryBuilder;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
+import org.hibernate.query.parser.internal.hql.phase2.SemanticQueryBuilder;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  * Main entry point into the query parser.
@@ -40,7 +39,7 @@ public class SemanticQueryInterpreter {
 		final ParsingContext parsingContext = new ParsingContext( consumerContext );
 
 		// first, ask Antlr to build the parse tree
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( query );
+		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( query, consumerContext );
 
 		// then we begin semantic analysis and building the semantic representation...
 

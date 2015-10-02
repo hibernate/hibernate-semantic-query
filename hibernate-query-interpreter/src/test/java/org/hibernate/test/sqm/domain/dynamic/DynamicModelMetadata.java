@@ -36,8 +36,12 @@ public class DynamicModelMetadata implements ModelMetadata {
 					second
 			);
 		}
-		else {
+		// Upper-case strings are considered types in this model
+		else if ( Character.isUpperCase(reference.charAt(0) ) ) {
 			return new EntityTypeDescriptorImpl( reference );
+		}
+		else {
+			return null;
 		}
 	}
 

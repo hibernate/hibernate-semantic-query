@@ -382,8 +382,7 @@ entityType
 	;
 
 typeFunction
-	: typeKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
-	| typeKeyword LEFT_PAREN parameter RIGHT_PAREN
+	: typeKeyword LEFT_PAREN (IDENTIFIER | parameter | mapKeyFunction| collectionValueFunction) RIGHT_PAREN
 	;
 
 entityTypeLiteral
@@ -421,11 +420,11 @@ nonStandardFunction
 	;
 
 jpaCollectionFunction
-	: sizeKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionSizeFunction
-	| indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN	# CollectionIndexFunction
-	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
-	| valueKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionValueFunction
-	| entryKeyword LEFT_PAREN path RIGHT_PAREN			# MapEntryFunction
+	: collectionSizeFunction
+	| collectionIndexFunction
+	| mapKeyFunction
+	| collectionValueFunction
+	| mapEntryFunction
 	;
 
 hqlCollectionFunction
@@ -433,6 +432,26 @@ hqlCollectionFunction
 	| maxelementKeyword LEFT_PAREN path RIGHT_PAREN		# MaxElementFunction
 	| minindexKeyword LEFT_PAREN path RIGHT_PAREN		# MinIndexFunction
 	| minelementKeyword LEFT_PAREN path RIGHT_PAREN		# MinElementFunction
+	;
+
+collectionSizeFunction
+	: sizeKeyword LEFT_PAREN path RIGHT_PAREN
+	;
+
+collectionIndexFunction
+	: indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
+	;
+
+mapKeyFunction
+	: keyKeyword LEFT_PAREN path RIGHT_PAREN
+	;
+
+collectionValueFunction
+	: valueKeyword LEFT_PAREN path RIGHT_PAREN
+	;
+
+mapEntryFunction
+	:entryKeyword LEFT_PAREN path RIGHT_PAREN
 	;
 
 aggregateFunction

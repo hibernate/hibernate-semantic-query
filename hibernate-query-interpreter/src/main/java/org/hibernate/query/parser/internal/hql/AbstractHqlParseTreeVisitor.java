@@ -911,7 +911,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			return new TypeFunction( fromElement );
 		}
 		// TYPE(:param) or TYPE(?1)
-		else {
+		else if ( ctx.parameter() != null ){
 			Expression parameterExpression = (Expression) ctx.parameter().accept( this );
 
 			if ( parameterExpression instanceof NamedParameterExpression ) {
@@ -920,6 +920,14 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			else {
 				return new TypeFunction( (PositionalParameterExpression) parameterExpression );
 			}
+		}
+		// TYPE( KEY( collection alias ) )
+		else if ( ctx.mapKeyFunction() != null ) {
+			return new TypeFunction( (MapKeyFunction) ctx.mapKeyFunction().accept( this ) );
+		}
+		// TYPE( VALUE( collection alias ) )
+		else {
+			return new TypeFunction( (CollectionValueFunction) ctx.collectionValueFunction().accept( this ) );
 		}
 	}
 

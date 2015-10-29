@@ -165,15 +165,20 @@ selectExpression
 	;
 
 dynamicInstantiation
-	:	newKeyword dynamicInstantiationTarget LEFT_PAREN dynamicInstantiationArgs RIGHT_PAREN
+	: newKeyword dynamicInstantiationTarget LEFT_PAREN dynamicInstantiationArgs RIGHT_PAREN
 	;
 
 dynamicInstantiationTarget
-	:	dotIdentifierSequence
+	: listKeyword
+	| mapKeyword
+	| dotIdentifierSequence
+//	: listKeyword				# ListInstantiationTarget
+//	| mapKeyword				# MapInstantiationTarget
+//	| dotIdentifierSequence		# ClassInstantiationTarget
 	;
 
 dotIdentifierSequence
-	:	IDENTIFIER (DOT IDENTIFIER)*
+	: IDENTIFIER (DOT IDENTIFIER)*
 	;
 
 path
@@ -794,12 +799,20 @@ likeKeyword
 	: {doesUpcomingTokenMatchAny("like")}?  IDENTIFIER
 	;
 
+listKeyword
+	: {doesUpcomingTokenMatchAny("list")}?  IDENTIFIER
+	;
+
 locateKeyword
 	: {doesUpcomingTokenMatchAny("locate")}?  IDENTIFIER
 	;
 
 lowerKeyword
 	: {doesUpcomingTokenMatchAny("lower")}?  IDENTIFIER
+	;
+
+mapKeyword
+	: {doesUpcomingTokenMatchAny("map")}?  IDENTIFIER
 	;
 
 maxKeyword

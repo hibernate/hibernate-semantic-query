@@ -16,7 +16,10 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Currency;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -64,6 +67,10 @@ public class StandardBasicTypeDescriptors {
 	public final BasicTypeDescriptor CURRENCY = new BasicTypeDescriptorImpl( Currency.class );
 
 	public final BasicTypeDescriptor URL = new BasicTypeDescriptorImpl( java.net.URL.class );
+
+	public final BasicTypeDescriptor MAP = new BasicTypeDescriptorImpl( Map.class );
+	public final BasicTypeDescriptor LIST = new BasicTypeDescriptorImpl( List.class );
+	public final BasicTypeDescriptor SET = new BasicTypeDescriptorImpl( Set.class );
 
 	public static class BasicTypeDescriptorImpl implements BasicTypeDescriptor {
 		private final Class javaType;

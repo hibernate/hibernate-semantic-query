@@ -8,6 +8,8 @@ package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.query.parser.StrictJpaComplianceViolation;
+import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
+import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
@@ -15,6 +17,7 @@ import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
+import org.hibernate.sqm.query.select.DynamicInstantiationTarget;
 import org.hibernate.sqm.query.select.Selection;
 import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.junit.Before;
@@ -22,7 +25,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.hamcrest.CoreMatchers;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -148,6 +155,15 @@ public class SelectClauseTests {
 		);
 
 		DynamicInstantiation dynamicInstantiation = (DynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertThat(
+				dynamicInstantiation.getInstantiationTarget().getNature(),
+				equalTo( DynamicInstantiationTarget.Nature.CLASS )
+		);
+		assertThat(
+				dynamicInstantiation.getInstantiationTarget().getTargetJavaType().getTypeName(),
+				equalTo( DTO.class.getName() )
+		);
+
 		assertEquals( 3, dynamicInstantiation.getArguments().size() );
 		assertThat(
 				dynamicInstantiation.getArguments().get( 0 ).getExpression(),
@@ -160,6 +176,74 @@ public class SelectClauseTests {
 		assertThat(
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
 				instanceOf( DynamicInstantiation.class )
+		);
+		DynamicInstantiation nestedInstantiation = (DynamicInstantiation) dynamicInstantiation.getArguments().get( 2 ).getExpression();
+		assertThat(
+				nestedInstantiation.getInstantiationTarget().getNature(),
+				equalTo( DynamicInstantiationTarget.Nature.CLASS )
+		);
+		assertThat(
+				nestedInstantiation.getInstantiationTarget().getTargetJavaType().getTypeName(),
+				equalTo( DTO.class.getName() )
+		);
+
+	}
+
+	@Test
+	public void testSimpleDynamicListInstantiation() {
+		SelectStatement statement = interpret( "select new list(o.basic1, o.basic2) from Entity o" );
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		assertThat(
+				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( DynamicInstantiation.class )
+		);
+		DynamicInstantiation instantiation = (DynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertThat(
+				instantiation.getInstantiationTarget().getNature(),
+				equalTo( DynamicInstantiationTarget.Nature.LIST )
+		);
+		assertThat(
+				instantiation.getInstantiationTarget().getTargetJavaType(),
+				CoreMatchers.<TypeDescriptor>sameInstance( StandardBasicTypeDescriptors.INSTANCE.LIST )
+		);
+
+		assertEquals( 2, instantiation.getArguments().size() );
+		assertThat(
+				instantiation.getArguments().get( 0 ).getExpression(),
+				instanceOf( AttributeReferenceExpression.class )
+		);
+		assertThat(
+				instantiation.getArguments().get( 1 ).getExpression(),
+				instanceOf( AttributeReferenceExpression.class )
+		);
+	}
+
+	@Test
+	public void testSimpleDynamicMapInstantiation() {
+		SelectStatement statement = interpret( "select new map(o.basic1 as a, o.basic2 as b) from Entity o" );
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		assertThat(
+				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( DynamicInstantiation.class )
+		);
+		DynamicInstantiation instantiation = (DynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertThat(
+				instantiation.getInstantiationTarget().getNature(),
+				equalTo( DynamicInstantiationTarget.Nature.MAP )
+		);
+		assertThat(
+				instantiation.getInstantiationTarget().getTargetJavaType(),
+				CoreMatchers.<TypeDescriptor>sameInstance( StandardBasicTypeDescriptors.INSTANCE.MAP )
+		);
+
+		assertEquals( 2, instantiation.getArguments().size() );
+		assertThat(
+				instantiation.getArguments().get( 0 ).getExpression(),
+				instanceOf( AttributeReferenceExpression.class )
+		);
+		assertThat(
+				instantiation.getArguments().get( 1 ).getExpression(),
+				instanceOf( AttributeReferenceExpression.class )
 		);
 	}
 

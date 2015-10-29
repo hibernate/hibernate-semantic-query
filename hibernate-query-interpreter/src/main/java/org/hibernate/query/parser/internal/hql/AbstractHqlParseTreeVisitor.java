@@ -289,15 +289,24 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public DynamicInstantiation visitDynamicInstantiation(HqlParser.DynamicInstantiationContext ctx) {
-		final String className = ctx.dynamicInstantiationTarget().getText();
 		final DynamicInstantiation dynamicInstantiation;
-		try {
-			dynamicInstantiation = new DynamicInstantiation(
-					parsingContext.getConsumerContext().classByName( className )
-			);
+
+		if ( ctx.dynamicInstantiationTarget().mapKeyword() != null ) {
+			dynamicInstantiation = DynamicInstantiation.forMapInstantiation();
 		}
-		catch (ClassNotFoundException e) {
-			throw new SemanticException( "Unable to resolve class named for dynamic instantiation : " + className );
+		else if ( ctx.dynamicInstantiationTarget().listKeyword() != null ) {
+			dynamicInstantiation = DynamicInstantiation.forListInstantiation();
+		}
+		else {
+			final String className = ctx.dynamicInstantiationTarget().dotIdentifierSequence().getText();
+			try {
+				dynamicInstantiation = DynamicInstantiation.forClassInstantiation(
+						parsingContext.getConsumerContext().classByName( className )
+				);
+			}
+			catch (ClassNotFoundException e) {
+				throw new SemanticException( "Unable to resolve class named for dynamic instantiation : " + className );
+			}
 		}
 
 		for ( HqlParser.DynamicInstantiationArgContext arg : ctx.dynamicInstantiationArgs().dynamicInstantiationArg() ) {

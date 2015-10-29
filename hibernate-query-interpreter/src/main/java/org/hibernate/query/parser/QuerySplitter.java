@@ -322,7 +322,7 @@ public class QuerySplitter {
 
 		@Override
 		public DynamicInstantiation visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation) {
-			DynamicInstantiation copy = new DynamicInstantiation( dynamicInstantiation.getInstantiationTarget() );
+			DynamicInstantiation copy = dynamicInstantiation.makeShallowCopy();
 			for ( DynamicInstantiationArgument aliasedArgument : dynamicInstantiation.getArguments() ) {
 				copy.addArgument(
 						new DynamicInstantiationArgument(

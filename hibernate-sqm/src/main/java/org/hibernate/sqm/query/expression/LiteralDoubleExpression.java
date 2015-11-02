@@ -7,20 +7,19 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.BasicTypeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralDoubleExpression extends AbstractLiteralExpressionImpl<Double> {
 	public LiteralDoubleExpression(Double value) {
-		super( value );
+		this( value, StandardBasicTypeDescriptors.INSTANCE.DOUBLE );
 	}
 
-	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.DOUBLE;
+	public LiteralDoubleExpression(Double value, BasicTypeDescriptor typeDescriptor) {
+		super( value, typeDescriptor );
 	}
 
 	@Override

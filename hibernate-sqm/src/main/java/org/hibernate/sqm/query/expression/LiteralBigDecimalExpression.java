@@ -9,20 +9,19 @@ package org.hibernate.sqm.query.expression;
 import java.math.BigDecimal;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.BasicTypeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralBigDecimalExpression extends AbstractLiteralExpressionImpl<BigDecimal> {
 	public LiteralBigDecimalExpression(BigDecimal value) {
-		super( value );
+		this( value, StandardBasicTypeDescriptors.INSTANCE.BIG_DECIMAL );
 	}
 
-	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.BIG_DECIMAL;
+	public LiteralBigDecimalExpression(BigDecimal value, BasicTypeDescriptor typeDescriptor) {
+		super( value, typeDescriptor );
 	}
 
 	@Override

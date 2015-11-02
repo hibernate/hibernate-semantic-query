@@ -12,16 +12,15 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class IsNullPredicate implements Predicate {
+public class NullnessPredicate implements NegatablePredicate {
 	private final Expression expression;
+	private final boolean negated;
 
-	private boolean negated;
-
-	public IsNullPredicate(Expression expression) {
+	public NullnessPredicate(Expression expression) {
 		this( expression, false );
 	}
 
-	public IsNullPredicate(Expression expression, boolean negated) {
+	public NullnessPredicate(Expression expression, boolean negated) {
 		this.expression = expression;
 		this.negated = negated;
 	}
@@ -30,6 +29,7 @@ public class IsNullPredicate implements Predicate {
 		return expression;
 	}
 
+	@Override
 	public boolean isNegated() {
 		return negated;
 	}

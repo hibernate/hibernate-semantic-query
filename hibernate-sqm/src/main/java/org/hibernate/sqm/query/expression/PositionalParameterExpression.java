@@ -20,6 +20,11 @@ public class PositionalParameterExpression implements ParameterExpression {
 		this.position = position;
 	}
 
+	public PositionalParameterExpression(int position, TypeDescriptor typeDescriptor) {
+		this.position = position;
+		this.typeDescriptor = typeDescriptor;
+	}
+
 	@Override
 	public TypeDescriptor getTypeDescriptor() {
 		return typeDescriptor;

@@ -7,20 +7,19 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.BasicTypeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralStringExpression extends AbstractLiteralExpressionImpl<String> {
 	public LiteralStringExpression(String value) {
-		super( value );
+		this( value, StandardBasicTypeDescriptors.INSTANCE.STRING );
 	}
 
-	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.STRING;
+	public LiteralStringExpression(String value, BasicTypeDescriptor typeDescriptor) {
+		super( value, typeDescriptor );
 	}
 
 	@Override

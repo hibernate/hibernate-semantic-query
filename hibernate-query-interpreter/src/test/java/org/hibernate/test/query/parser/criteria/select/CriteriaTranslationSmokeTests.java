@@ -4,13 +4,10 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.query.predicate;
-
-import org.hibernate.sqm.query.expression.Expression;
+package org.hibernate.test.query.parser.criteria.select;
 
 /**
  * @author Steve Ebersole
  */
-public interface InPredicate extends NegatablePredicate {
-	Expression getTestExpression();
+public class CriteriaTranslationSmokeTests {
 }

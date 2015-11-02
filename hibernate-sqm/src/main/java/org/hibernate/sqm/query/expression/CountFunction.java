@@ -25,6 +25,6 @@ public class CountFunction extends AbstractAggregateFunction {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return null;
+		return walker.visitCountFunction( this );
 	}
 }

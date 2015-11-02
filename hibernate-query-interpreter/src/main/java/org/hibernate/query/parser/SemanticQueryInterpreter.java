@@ -10,6 +10,8 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 
+import org.hibernate.query.parser.internal.criteria.OrderByProcessor;
+import org.hibernate.query.parser.internal.criteria.QuerySpecProcessor;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase2.SemanticQueryBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
@@ -62,7 +64,14 @@ public class SemanticQueryInterpreter {
 	 * @return The semantic representation of the incoming query.
 	 */
 	public static SelectStatement interpret(CriteriaQuery query, ConsumerContext consumerContext) {
-		throw new NotYetImplementedException();
+		final ParsingContext parsingContext = new ParsingContext( consumerContext );
+		final QuerySpecProcessor rootQuerySpecProcessor = QuerySpecProcessor.buildRootQuerySpecProcessor( parsingContext );
+
+		final SelectStatement selectStatement = new SelectStatement();
+		selectStatement.applyQuerySpec( rootQuerySpecProcessor.visitQuerySpec( query ) );
+		selectStatement.applyOrderByClause( OrderByProcessor.processOrderBy( rootQuerySpecProcessor, query ) );
+
+		return selectStatement;
 	}
 
 	/**

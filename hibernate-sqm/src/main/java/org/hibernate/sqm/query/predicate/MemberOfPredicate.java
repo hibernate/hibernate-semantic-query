@@ -12,15 +12,26 @@ import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 /**
  * @author Steve Ebersole
  */
-public class MemberOfPredicate implements Predicate {
+public class MemberOfPredicate implements NegatablePredicate {
 	private final AttributeReferenceExpression attributeReferenceExpression;
+	private final boolean negated;
 
 	public MemberOfPredicate(AttributeReferenceExpression attributeReferenceExpression) {
+		this( attributeReferenceExpression, false );
+	}
+
+	public MemberOfPredicate(AttributeReferenceExpression attributeReferenceExpression, boolean negated) {
 		this.attributeReferenceExpression = attributeReferenceExpression;
+		this.negated = negated;
 	}
 
 	public AttributeReferenceExpression getAttributeReferenceExpression() {
 		return attributeReferenceExpression;
+	}
+
+	@Override
+	public boolean isNegated() {
+		return negated;
 	}
 
 	@Override

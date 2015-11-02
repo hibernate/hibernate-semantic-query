@@ -91,8 +91,8 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InTupleListPredicate;
-import org.hibernate.sqm.query.predicate.IsEmptyPredicate;
-import org.hibernate.sqm.query.predicate.IsNullPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessPredicate;
+import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -400,13 +400,13 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public IsNullPredicate visitIsNullPredicate(HqlParser.IsNullPredicateContext ctx) {
-		return new IsNullPredicate( (Expression) ctx.expression().accept( this ) );
+	public NullnessPredicate visitIsNullPredicate(HqlParser.IsNullPredicateContext ctx) {
+		return new NullnessPredicate( (Expression) ctx.expression().accept( this ) );
 	}
 
 	@Override
-	public IsEmptyPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
-		return new IsEmptyPredicate( (Expression) ctx.expression().accept( this ) );
+	public EmptinessPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
+		return new EmptinessPredicate( (Expression) ctx.expression().accept( this ) );
 	}
 
 	@Override

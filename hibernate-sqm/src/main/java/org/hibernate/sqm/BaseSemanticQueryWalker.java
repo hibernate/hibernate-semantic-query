@@ -66,8 +66,8 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InTupleListPredicate;
-import org.hibernate.sqm.query.predicate.IsEmptyPredicate;
-import org.hibernate.sqm.query.predicate.IsNullPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessPredicate;
+import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -239,13 +239,13 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	}
 
 	@Override
-	public IsEmptyPredicate visitIsEmptyPredicate(IsEmptyPredicate predicate) {
+	public EmptinessPredicate visitIsEmptyPredicate(EmptinessPredicate predicate) {
 		predicate.getExpression().accept( this );
 		return predicate;
 	}
 
 	@Override
-	public IsNullPredicate visitIsNullPredicate(IsNullPredicate predicate) {
+	public NullnessPredicate visitIsNullPredicate(NullnessPredicate predicate) {
 		predicate.getExpression().accept( this );
 		return predicate;
 	}

@@ -6,8 +6,12 @@
  */
 package org.hibernate.query.parser;
 
+import javax.persistence.metamodel.Bindable;
+import javax.persistence.metamodel.EntityType;
+
 import org.hibernate.sqm.domain.EntityTypeDescriptor;
 import org.hibernate.sqm.domain.ModelMetadata;
+import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
  * Contextual information related to the consumer/caller of the parser - a callback API.

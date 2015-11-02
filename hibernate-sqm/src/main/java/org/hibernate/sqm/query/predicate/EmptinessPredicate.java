@@ -12,23 +12,24 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class IsEmptyPredicate implements Predicate {
+public class EmptinessPredicate implements NegatablePredicate {
 	private final Expression expression;
-	private boolean negated;
+	private final boolean negated;
 
-	public IsEmptyPredicate(Expression expression, boolean negated) {
-		this.expression = expression;
-		this.negated = negated;
+	public EmptinessPredicate(Expression expression) {
+		this( expression, false );
 	}
 
-	public IsEmptyPredicate(Expression expression) {
-		this( expression, false );
+	public EmptinessPredicate(Expression expression, boolean negated) {
+		this.expression = expression;
+		this.negated = negated;
 	}
 
 	public Expression getExpression() {
 		return expression;
 	}
 
+	@Override
 	public boolean isNegated() {
 		return negated;
 	}

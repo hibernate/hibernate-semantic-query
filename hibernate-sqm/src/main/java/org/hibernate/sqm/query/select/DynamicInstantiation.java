@@ -21,7 +21,7 @@ import org.jboss.logging.Logger;
 /**
  * @author Steve Ebersole
  */
-public class DynamicInstantiation implements Expression {
+public class DynamicInstantiation implements Expression, AliasedExpressionContainer<DynamicInstantiationArgument> {
 	private static final Logger log = Logger.getLogger( DynamicInstantiation.class );
 
 	public static DynamicInstantiation forClassInstantiation(Class type) {
@@ -100,12 +100,16 @@ public class DynamicInstantiation implements Expression {
 		arguments.add( argument );
 	}
 
-	public void addArgument(Expression argument, String alias) {
-		addArgument( new DynamicInstantiationArgument( argument, alias ) );
+	@Override
+	public DynamicInstantiationArgument add(Expression expression, String alias) {
+		DynamicInstantiationArgument argument = new DynamicInstantiationArgument( expression, alias );
+		addArgument( argument );
+		return argument;
 	}
 
-	public void addArgument(Expression argument) {
-		addArgument( argument, null );
+	@Override
+	public void add(DynamicInstantiationArgument aliasExpression) {
+		addArgument( aliasExpression );
 	}
 
 	@Override

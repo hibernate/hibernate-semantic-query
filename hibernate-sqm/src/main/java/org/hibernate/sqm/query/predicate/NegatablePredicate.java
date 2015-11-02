@@ -6,11 +6,9 @@
  */
 package org.hibernate.sqm.query.predicate;
 
-import org.hibernate.sqm.query.expression.Expression;
-
 /**
  * @author Steve Ebersole
  */
-public interface InPredicate extends NegatablePredicate {
-	Expression getTestExpression();
+public interface NegatablePredicate extends Predicate {
+	boolean isNegated();
 }

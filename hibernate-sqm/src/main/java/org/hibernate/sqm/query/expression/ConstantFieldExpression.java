@@ -7,9 +7,14 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
 import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
+ * Represents a constant that came from a static field reference.
+ * <p/>
+ * TODO : would love to store a reference to the Field the value came from
+ *
  * @author Steve Ebersole
  */
 public class ConstantFieldExpression<T> implements ConstantExpression<T> {
@@ -17,7 +22,12 @@ public class ConstantFieldExpression<T> implements ConstantExpression<T> {
 	private TypeDescriptor typeDescriptor;
 
 	public ConstantFieldExpression(T value) {
+		this( value, StandardBasicTypeDescriptors.INSTANCE.standardDescriptorForType( value.getClass() ) );
+	}
+
+	public ConstantFieldExpression(T value, TypeDescriptor typeDescriptor) {
 		this.value = value;
+		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override

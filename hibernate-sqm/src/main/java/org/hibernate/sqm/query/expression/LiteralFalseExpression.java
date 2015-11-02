@@ -7,20 +7,19 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.BasicTypeDescriptor;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralFalseExpression extends AbstractLiteralExpressionImpl<Boolean> {
 	public LiteralFalseExpression() {
-		super( Boolean.FALSE );
+		this( StandardBasicTypeDescriptors.INSTANCE.BOOLEAN );
 	}
 
-	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.BOOLEAN;
+	public LiteralFalseExpression(BasicTypeDescriptor booleanTypeDescriptor) {
+		super( Boolean.FALSE, booleanTypeDescriptor );
 	}
 
 	@Override

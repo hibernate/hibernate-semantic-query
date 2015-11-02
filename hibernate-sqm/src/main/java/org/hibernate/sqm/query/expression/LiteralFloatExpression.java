@@ -7,21 +7,19 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicTypeDescriptor;
+import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralFloatExpression extends AbstractLiteralExpressionImpl<Float> {
-	private TypeDescriptor typeDescriptor;
-
 	public LiteralFloatExpression(Float value) {
-		super( value );
+		this( value, StandardBasicTypeDescriptors.INSTANCE.FLOAT );
 	}
 
-	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+	public LiteralFloatExpression(Float value, BasicTypeDescriptor typeDescriptor) {
+		super( value, typeDescriptor );
 	}
 
 	@Override

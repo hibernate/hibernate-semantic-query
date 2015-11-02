@@ -19,6 +19,7 @@ import org.hibernate.sqm.query.expression.Expression;
 public class InTupleListPredicate implements InPredicate {
 	private final Expression testExpression;
 	private final List<Expression> tupleListExpressions;
+	private final boolean negated;
 
 	public InTupleListPredicate(Expression testExpression) {
 		this( testExpression, new ArrayList<Expression>() );
@@ -31,8 +32,16 @@ public class InTupleListPredicate implements InPredicate {
 	public InTupleListPredicate(
 			Expression testExpression,
 			List<Expression> tupleListExpressions) {
+		this( testExpression, tupleListExpressions, false );
+	}
+
+	public InTupleListPredicate(
+			Expression testExpression,
+			List<Expression> tupleListExpressions,
+			boolean negated) {
 		this.testExpression = testExpression;
 		this.tupleListExpressions = tupleListExpressions;
+		this.negated = negated;
 	}
 
 	@Override
@@ -46,6 +55,11 @@ public class InTupleListPredicate implements InPredicate {
 
 	public void addExpression(Expression expression) {
 		tupleListExpressions.add( expression );
+	}
+
+	@Override
+	public boolean isNegated() {
+		return negated;
 	}
 
 	@Override

@@ -12,18 +12,27 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class BetweenPredicate implements Predicate {
+public class BetweenPredicate implements NegatablePredicate {
 	private final Expression expression;
 	private final Expression lowerBound;
 	private final Expression upperBound;
+	private final boolean negated;
 
 	public BetweenPredicate(
 			Expression expression,
 			Expression lowerBound,
 			Expression upperBound) {
+		this( expression, lowerBound, upperBound, false );
+	}
+
+	public BetweenPredicate(
+			Expression expression,
+			Expression lowerBound,
+			Expression upperBound, boolean negated) {
 		this.expression = expression;
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
+		this.negated = negated;
 	}
 
 	public Expression getExpression() {
@@ -36,6 +45,11 @@ public class BetweenPredicate implements Predicate {
 
 	public Expression getUpperBound() {
 		return upperBound;
+	}
+
+	@Override
+	public boolean isNegated() {
+		return negated;
 	}
 
 	@Override

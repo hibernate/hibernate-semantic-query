@@ -16,6 +16,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,8 @@ import java.util.TimeZone;
  * @author Steve Ebersole
  */
 public class StandardBasicTypeDescriptors {
+	private static final Map<Class,BasicTypeDescriptor> DESCRIPTOR_MAP = new HashMap<Class, BasicTypeDescriptor>();
+
 	/**
 	 * Singleton access
 	 */
@@ -34,10 +37,12 @@ public class StandardBasicTypeDescriptors {
 	private StandardBasicTypeDescriptors() {
 	}
 
+	public final BasicTypeDescriptor NULL = new BasicTypeDescriptorImpl( Void.class );
+
 	public final BasicTypeDescriptor BOOLEAN = new BasicTypeDescriptorImpl( Boolean.class );
 
 	public final BasicTypeDescriptor CHAR = new BasicTypeDescriptorImpl( Character.class );
-	public final BasicTypeDescriptor STRING = new BasicTypeDescriptorImpl( Character.class );
+	public final BasicTypeDescriptor STRING = new BasicTypeDescriptorImpl( String.class );
 
 	public final BasicTypeDescriptor BYTE = new BasicTypeDescriptorImpl( Byte.class );
 	public final BasicTypeDescriptor SHORT = new BasicTypeDescriptorImpl( Short.class );
@@ -72,11 +77,22 @@ public class StandardBasicTypeDescriptors {
 	public final BasicTypeDescriptor LIST = new BasicTypeDescriptorImpl( List.class );
 	public final BasicTypeDescriptor SET = new BasicTypeDescriptorImpl( Set.class );
 
-	public static class BasicTypeDescriptorImpl implements BasicTypeDescriptor {
+	/**
+	 * todo : Ultimately it would be better to delegate this to the ConsumerContext
+	 * <p/>
+	 * Delegating to ConsumerContext has a huge `paradigm mismatch` though in the difference
+	 * between Class and org.hibernate.type.Type
+	 */
+	public BasicTypeDescriptor standardDescriptorForType(Class javaType) {
+		return DESCRIPTOR_MAP.get( javaType );
+	}
+
+	private static class BasicTypeDescriptorImpl implements BasicTypeDescriptor {
 		private final Class javaType;
 
-		public BasicTypeDescriptorImpl(Class javaType) {
+		private BasicTypeDescriptorImpl(Class javaType) {
 			this.javaType = javaType;
+			DESCRIPTOR_MAP.put( javaType, this );
 		}
 
 		@Override

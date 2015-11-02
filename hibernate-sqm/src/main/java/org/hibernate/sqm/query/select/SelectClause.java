@@ -11,12 +11,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.sqm.query.expression.Expression;
+
 /**
  * The semantic select clause.  Defined as a list of individual selections.
  *
  * @author Steve Ebersole
  */
-public class SelectClause {
+public class SelectClause implements AliasedExpressionContainer<Selection> {
 	private final boolean distinct;
 	private List<Selection> selections;
 
@@ -51,5 +53,17 @@ public class SelectClause {
 			selections = new ArrayList<Selection>();
 		}
 		selections.add( selection );
+	}
+
+	@Override
+	public Selection add(Expression expression, String alias) {
+		final Selection selection = new Selection( expression,alias );
+		addSelection( selection );
+		return selection;
+	}
+
+	@Override
+	public void add(Selection aliasExpression) {
+		addSelection( aliasExpression );
 	}
 }

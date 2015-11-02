@@ -20,6 +20,11 @@ public class NamedParameterExpression implements ParameterExpression {
 		this.name = name;
 	}
 
+	public NamedParameterExpression(String name, TypeDescriptor typeDescriptor) {
+		this.name = name;
+		this.typeDescriptor = typeDescriptor;
+	}
+
 	@Override
 	public TypeDescriptor getTypeDescriptor() {
 		return typeDescriptor;

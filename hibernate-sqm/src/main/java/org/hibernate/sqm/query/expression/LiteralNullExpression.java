@@ -7,14 +7,13 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
 import org.hibernate.sqm.domain.TypeDescriptor;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralNullExpression implements LiteralExpression<Void> {
-	private TypeDescriptor typeDescriptor;
-
 	@Override
 	public Void getLiteralValue() {
 		return null;
@@ -22,7 +21,7 @@ public class LiteralNullExpression implements LiteralExpression<Void> {
 
 	@Override
 	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+		return StandardBasicTypeDescriptors.INSTANCE.NULL;
 	}
 
 	@Override

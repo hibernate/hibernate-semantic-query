@@ -65,8 +65,8 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InTupleListPredicate;
-import org.hibernate.sqm.query.predicate.IsEmptyPredicate;
-import org.hibernate.sqm.query.predicate.IsNullPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessPredicate;
+import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -373,16 +373,16 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public IsEmptyPredicate visitIsEmptyPredicate(IsEmptyPredicate predicate) {
-			return new IsEmptyPredicate(
+		public EmptinessPredicate visitIsEmptyPredicate(EmptinessPredicate predicate) {
+			return new EmptinessPredicate(
 					(Expression) predicate.getExpression().accept( this ),
 					predicate.isNegated()
 			);
 		}
 
 		@Override
-		public IsNullPredicate visitIsNullPredicate(IsNullPredicate predicate) {
-			return new IsNullPredicate(
+		public NullnessPredicate visitIsNullPredicate(NullnessPredicate predicate) {
+			return new NullnessPredicate(
 					(Expression) predicate.getExpression().accept( this ),
 					predicate.isNegated()
 			);

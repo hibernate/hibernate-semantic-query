@@ -10,13 +10,19 @@ import java.util.List;
 
 import org.hibernate.query.parser.AliasCollisionException;
 import org.hibernate.query.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.domain.TypeDescriptor;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
+import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.ResultVariableReferenceExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.order.OrderByClause;
+import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
@@ -262,6 +268,94 @@ public class AliasTest {
 	public void testReDefineSameIdentificationVariableInJoin() {
 		final String query = "select a from Something a left outer join a.entity a on a.basic1 > 5";
 		interpretQuery( query );
+	}
+
+
+	// order by
+
+	@Test
+	public void testIdentificationVariableReferencedInOrderBy() {
+		final String query = "select o from Entity o order by o";
+		final SelectStatement selectStatement = interpretQuery( query );
+
+		final QuerySpec querySpec = selectStatement.getQuerySpec();
+
+		checkElementSelection( querySpec, 0, "com.acme.Entity", null );
+		checkFromClause( querySpec, 0, "com.acme.Entity", "o" );
+
+		OrderByClause orderByClause = selectStatement.getOrderByClause();
+		SortSpecification sortSpecification = orderByClause.getSortSpecifications().get( 0 );
+		Expression sortExpression = sortSpecification.getSortExpression();
+		String collation = sortSpecification.getCollation();
+		TypeDescriptor typeDescriptor = sortExpression.getTypeDescriptor();
+		assertThat( typeDescriptor.getTypeName(), is( "com.acme.Entity" ) );
+	}
+
+	@Test
+	public void testSelectAttributeReferencedInOrderBy() {
+		final String query = "select o.basic from Entity o order by o.basic";
+		final SelectStatement selectStatement = interpretQuery( query );
+
+		final QuerySpec querySpec = selectStatement.getQuerySpec();
+
+		checkAttributeReferenceExpression( querySpec, 0, "com.acme.Entity", "basic", null );
+		checkFromClause( querySpec, 0, "com.acme.Entity", "o" );
+
+		OrderByClause orderByClause = selectStatement.getOrderByClause();
+		SortSpecification sortSpecification = orderByClause.getSortSpecifications().get( 0 );
+		AttributeReferenceExpression sortExpression = (AttributeReferenceExpression) sortSpecification.getSortExpression();
+		TypeDescriptor typeDescriptor = sortExpression.getSource().getTypeDescriptor();
+		assertThat( typeDescriptor.getTypeName(), is( "com.acme.Entity" ) );
+		String attributeName = sortExpression.getAttributeDescriptor().getName();
+
+		assertThat( attributeName, is( "basic" ) );
+	}
+
+	@Test
+	public void testResultVariableReferencedInOrderBy() {
+		final String query = "select o.basic as b from Entity o order by b";
+		final SelectStatement selectStatement = interpretQuery( query );
+
+		final QuerySpec querySpec = selectStatement.getQuerySpec();
+
+		checkAttributeReferenceExpression( querySpec, 0, "com.acme.Entity", "basic", "b" );
+		checkFromClause( querySpec, 0, "com.acme.Entity", "o" );
+
+		OrderByClause orderByClause = selectStatement.getOrderByClause();
+		SortSpecification sortSpecification = orderByClause.getSortSpecifications().get( 0 );
+		ResultVariableReferenceExpression sortExpression = (ResultVariableReferenceExpression) sortSpecification.getSortExpression();
+
+		Selection underlyingSelection = sortExpression.getUnderlyingSelection();
+		assertThat( underlyingSelection.getAlias(), is( "b" ) );
+
+		AttributeReferenceExpression expression = (AttributeReferenceExpression) underlyingSelection.getExpression();
+		assertThat( expression.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( expression.getAttributeDescriptor().getName(), is( "basic" ) );
+	}
+
+	@Test
+	public void testBinaryArithmeticExpressionReferenceInOrderBy() {
+		final String query = "select o.basic + o.basic1 as b from Entity o order by b";
+		final SelectStatement selectStatement = interpretQuery( query );
+
+		final QuerySpec querySpec = selectStatement.getQuerySpec();
+
+		checkFromClause( querySpec, 0, "com.acme.Entity", "o" );
+
+		OrderByClause orderByClause = selectStatement.getOrderByClause();
+		SortSpecification sortSpecification = orderByClause.getSortSpecifications().get( 0 );
+		ResultVariableReferenceExpression sortExpression = (ResultVariableReferenceExpression) sortSpecification.getSortExpression();
+		Selection underlyingSelection = sortExpression.getUnderlyingSelection();
+		assertThat( underlyingSelection.getAlias(), is( "b" ) );
+
+		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) underlyingSelection.getExpression();
+		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
+		assertThat( leftHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
+
+		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
+		assertThat( rightHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
 	}
 
 	private void checkFromClause(QuerySpec querySpec, int fromClauseIndex, String typeName, String alias) {

@@ -47,6 +47,7 @@ import org.hibernate.sqm.query.expression.MinFunction;
 import org.hibernate.sqm.query.expression.MinIndexFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
+import org.hibernate.sqm.query.expression.ResultVariableReferenceExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.expression.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
@@ -223,4 +224,7 @@ public interface SemanticQueryWalker<T> {
 	T visitBinaryArithmeticExpression(BinaryArithmeticExpression expression);
 
 	T visitSubQueryExpression(SubQueryExpression expression);
+
+	T visitResultVariableReferenceExpression(ResultVariableReferenceExpression expression);
+
 }

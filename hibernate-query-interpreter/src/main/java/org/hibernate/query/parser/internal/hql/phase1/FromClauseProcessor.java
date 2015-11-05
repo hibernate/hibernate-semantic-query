@@ -12,6 +12,7 @@ import java.util.Map;
 import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.SemanticException;
 import org.hibernate.query.parser.StrictJpaComplianceViolation;
+import org.hibernate.query.parser.internal.AliasRegistry;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ImplicitAliasGenerator;
@@ -58,8 +59,8 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	private static final Logger log = Logger.getLogger( FromClauseProcessor.class );
 
 	private final ParsingContext parsingContext;
-	private final FromClauseIndex fromClauseIndex;
-	private final FromElementBuilder fromElementBuilder;
+	private FromClauseIndex fromClauseIndex;
+	private FromElementBuilder fromElementBuilder;
 	private FromClauseStackNode currentFromClauseStackNode;
 	private FromElementSpace currentFromElementSpace;
 
@@ -69,14 +70,14 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	// seems to build new instances.  So here use the context text as key.
 	private final Map<String, FromClauseStackNode> fromClauseMap = new HashMap<String, FromClauseStackNode>();
 	private final Map<String, FromElement> fromElementMap = new HashMap<String, FromElement>();
+	private final Map<String, FromElementBuilder> fromElementBuilderMap = new HashMap<String, FromElementBuilder>();
 
 	private RootEntityFromElement dmlRoot;
 
 	public FromClauseProcessor(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
-
 		this.fromClauseIndex = new FromClauseIndex();
-		this.fromElementBuilder = new FromElementBuilder( parsingContext, fromClauseIndex );
+		this.fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry() );
 	}
 
 	public Statement.Type getStatementType() {
@@ -91,8 +92,8 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		return fromClauseIndex;
 	}
 
-	public FromElementBuilder getFromElementBuilder() {
-		return fromElementBuilder;
+	public FromElementBuilder getFromElementBuilder(HqlParser.QuerySpecContext ctx) {
+		return fromElementBuilderMap.get( ctx.getText() );
 	}
 
 	public FromClauseStackNode findFromClauseForQuerySpec(HqlParser.QuerySpecContext ctx) {
@@ -117,7 +118,9 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	public void enterInsertStatement(HqlParser.InsertStatementContext ctx) {
 		statementType = Statement.Type.INSERT;
 
-		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( ctx.insertSpec().intoSpec().dotIdentifierSequence() );
+		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( ctx.insertSpec()
+																						  .intoSpec()
+																						  .dotIdentifierSequence() );
 		String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 		log.debugf(
 				"Generated implicit alias [%s] for INSERT target [%s]",
@@ -126,7 +129,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		);
 
 		dmlRoot = new RootEntityFromElement( null, alias, entityTypeDescriptor );
-		fromClauseIndex.registerAlias( dmlRoot );
+		fromElementBuilder.getAliasRegistry().registerAlias( dmlRoot );
 		fromElementMap.put( ctx.getText(), dmlRoot );
 	}
 
@@ -158,7 +161,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 			);
 		}
 		final RootEntityFromElement root = new RootEntityFromElement( null, alias, entityTypeDescriptor );
-		fromClauseIndex.registerAlias( root );
+		fromElementBuilder.getAliasRegistry().registerAlias( root );
 		return root;
 	}
 
@@ -168,21 +171,36 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 		if ( currentFromClauseStackNode == null ) {
 			currentFromClauseStackNode = new FromClauseStackNode( new FromClause() );
+
 			fromClauseIndex.registerRootFromClauseStackNode( currentFromClauseStackNode );
+			fromElementBuilder = new FromElementBuilder( parsingContext, fromElementBuilder.getAliasRegistry() );
 		}
 		else {
 			currentFromClauseStackNode = new FromClauseStackNode( new FromClause(), currentFromClauseStackNode );
+			fromElementBuilder = new FromElementBuilder(
+					parsingContext,
+					new AliasRegistry( fromElementBuilder.getAliasRegistry() )
+			);
 		}
 	}
 
 	@Override
 	public void exitQuerySpec(HqlParser.QuerySpecContext ctx) {
 		fromClauseMap.put( ctx.getText(), currentFromClauseStackNode );
-
+		fromElementBuilderMap.put( ctx.getText(), fromElementBuilder );
 		if ( currentFromClauseStackNode == null ) {
 			throw new ParsingException( "Mismatch currentFromClause handling" );
 		}
 		currentFromClauseStackNode = currentFromClauseStackNode.getParentNode();
+		if ( fromElementBuilder.getAliasRegistry().getParent() != null ) {
+			fromElementBuilder = new FromElementBuilder(
+					parsingContext,
+					fromElementBuilder.getAliasRegistry().getParent()
+			);
+		}
+		else {
+			fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry() );
+		}
 	}
 
 	@Override
@@ -241,7 +259,6 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		// either the thing is important to check or it isn't.
 		assert aliasNode.getSymbol().getType() == HqlParser.IDENTIFIER;
 
-		parsingContext.getAliasRegistry().registerAlias( aliasNode.getText() );
 		return aliasNode.getText();
 	}
 
@@ -359,7 +376,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 				JoinType joinType,
 				String alias,
 				boolean fetched) {
-			super( parsingContext, fromElementBuilder, fromClauseIndex );
+			super( parsingContext, fromClauseIndex );
 			this.fromElementBuilder = fromElementBuilder;
 			this.fromClauseIndex = fromClauseIndex;
 			this.parsingContext = parsingContext;
@@ -382,6 +399,11 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		@Override
 		public FromClause getCurrentFromClause() {
 			return fromElementSpace.getFromClause();
+		}
+
+		@Override
+		public FromElementBuilder getFromElementBuilder() {
+			return fromElementBuilder;
 		}
 
 		@Override

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
@@ -31,27 +30,7 @@ public class FromClauseIndex {
 
 	private List<FromClauseStackNode> roots;
 
-	private Map<String,FromElement> fromElementsByAlias = new HashMap<String, FromElement>();
 	private Map<String,FromElement> fromElementsByPath = new HashMap<String, FromElement>();
-
-	public void registerAlias(FromElement fromElement) {
-		final FromElement old = fromElementsByAlias.put( fromElement.getAlias(), fromElement );
-		if ( old != null ) {
-			throw new IllegalStateException(
-					String.format(
-							Locale.ENGLISH,
-							"Alias [%s] used for multiple from-clause-elements : %s, %s",
-							fromElement.getAlias(),
-							old,
-							fromElement
-					)
-			);
-		}
-	}
-
-	public FromElement findFromElementByAlias(String alias) {
-		return fromElementsByAlias.get( alias );
-	}
 
 	public FromElement findFromElementWithAttribute(FromClauseStackNode fromClause, String name) {
 		FromElement found = null;

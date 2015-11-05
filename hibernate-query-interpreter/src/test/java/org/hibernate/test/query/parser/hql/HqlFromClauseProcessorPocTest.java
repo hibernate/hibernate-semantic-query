@@ -15,16 +15,19 @@ import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 import org.hibernate.test.query.parser.ParsingContextImpl;
 import org.junit.Test;
 
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -46,9 +49,9 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
-		FromElement fromElement = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "a" );
-		assertNotNull( fromElement );
-		assertSame( fromElement, space1.getRoot() );
+		RootEntityFromElement root = space1.getRoot();
+		assertNotNull( root );
+		assertThat( root.getAlias(), is("a") );
 	}
 
 	private FromClauseProcessor processFromClause(HqlParser parser) {
@@ -73,11 +76,12 @@ public class HqlFromClauseProcessorPocTest {
 		assertEquals( 0, space1.getJoins().size() );
 		assertNotNull( space2.getRoot() );
 		assertEquals( 0, space2.getJoins().size() );
-		FromElement fromElementA = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "a" );
-		assertNotNull( fromElementA );
-		FromElement fromElementB = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "b" );
-		assertNotNull( fromElementB );
-		assertNotEquals( fromElementA, fromElementB );
+
+		assertNotNull( space1.getRoot() );
+		assertThat(space1.getRoot().getAlias(), is("a")  );
+
+		assertNotNull( space2.getRoot() );
+		assertThat(space2.getRoot().getAlias(), is("b")  );
 	}
 
 	@Test
@@ -95,8 +99,6 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
 		assertTrue( ImplicitAliasGenerator.isImplicitAlias( space1.getRoot().getAlias() ) );
-		FromElement fromElement = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( space1.getRoot().getAlias() );
-		assertSame( space1.getRoot(), fromElement );
 	}
 
 	@Test
@@ -113,14 +115,6 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 1, space1.getJoins().size() );
-
-		FromElement fromElementA = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "a" );
-		assertNotNull( fromElementA );
-		assertSame( space1.getRoot(), fromElementA );
-
-		FromElement fromElementB = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "b" );
-		assertNotNull( fromElementB );
-		assertSame( space1.getJoins().get( 0 ), fromElementB );
 	}
 
 	@Test
@@ -143,18 +137,6 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 1, space1.getJoins().size() );
-
-		FromElement fromElementA = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "a" );
-		assertNotNull( fromElementA );
-		assertSame( space1.getRoot(), fromElementA );
-
-		FromElement fromElementC = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "c" );
-		assertNotNull( fromElementC );
-		assertSame( space1.getJoins().get( 0 ), fromElementC );
-		QualifiedAttributeJoinFromElement join = (QualifiedAttributeJoinFromElement) fromElementC;
-		assertEquals( joinType, join.getJoinType() );
-		assertEquals( "c", join.getAlias() );
-		assertEquals( "entity", join.getJoinedAttributeDescriptor().getName() );
 	}
 
 	@Test
@@ -195,8 +177,5 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 1, space1.getJoins().size() );
-		FromElement fromElementC = fromClauseProcessor.getFromClauseIndex().findFromElementByAlias( "c" );
-		assertNotNull( fromElementC );
-		assertSame( space1.getJoins().get( 0 ), fromElementC );
 	}
 }

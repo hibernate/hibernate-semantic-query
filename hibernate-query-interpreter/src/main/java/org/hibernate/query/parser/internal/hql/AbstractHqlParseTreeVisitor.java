@@ -117,7 +117,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	private static final Logger log = Logger.getLogger( AbstractHqlParseTreeVisitor.class );
 
 	private final ParsingContext parsingContext;
-	private final FromElementBuilder fromElementBuilder;
 	private final FromClauseIndex fromClauseIndex;
 
 	/**
@@ -129,14 +128,14 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	public AbstractHqlParseTreeVisitor(
 			ParsingContext parsingContext,
-			FromElementBuilder fromElementBuilder,
 			FromClauseIndex fromClauseIndex) {
 		this.parsingContext = parsingContext;
-		this.fromElementBuilder = fromElementBuilder;
 		this.fromClauseIndex = fromClauseIndex;
 	}
 
 	public abstract FromClause getCurrentFromClause();
+
+	public abstract FromElementBuilder getFromElementBuilder();
 
 	public abstract FromClauseStackNode getCurrentFromClauseNode();
 
@@ -257,10 +256,12 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
-		return new Selection(
+		final Selection selection = new Selection(
 				visitSelectExpression( ctx.selectExpression() ),
 				interpretAlias( ctx.IDENTIFIER() )
 		);
+		getFromElementBuilder().getAliasRegistry().registerAlias( selection );
+		return selection;
 	}
 
 	private String interpretAlias(TerminalNode aliasNode) {
@@ -268,7 +269,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			return null;
 		}
 		final String aliasText = aliasNode.getText();
-		parsingContext.getAliasRegistry().registerAlias( aliasText );
 		return aliasText;
 	}
 
@@ -339,7 +339,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	@Override
 	public FromElementReferenceExpression visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
 		final String alias = ctx.IDENTIFIER().getText();
-		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( alias );
+		final FromElement fromElement = getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 		if ( fromElement == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );
 		}
@@ -665,7 +665,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		// that handles the indexed reference as the root to the path
 		attributePathResolverStack.push(
 				new IndexedAttributeRootPathResolver(
-						fromElementBuilder,
+						getFromElementBuilder(),
 						parsingContext,
 						indexedReference
 				)
@@ -1060,7 +1060,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	@Override
 	public CollectionIndexFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
 		final String alias = ctx.IDENTIFIER().getText();
-		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( alias );
+		final FromElement fromElement = getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 
 		if ( !CollectionTypeDescriptor.class.isInstance( fromElement.getTypeDescriptor() ) ) {
 			throw new SemanticException(

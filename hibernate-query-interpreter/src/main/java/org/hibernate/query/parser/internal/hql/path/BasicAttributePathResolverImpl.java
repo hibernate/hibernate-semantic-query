@@ -93,7 +93,7 @@ public class BasicAttributePathResolverImpl extends StandardAttributePathResolve
 	}
 
 	protected FromElement findFromElementByAlias(String alias) {
-		return fromClauseIndex.findFromElementByAlias( alias );
+		return fromElementBuilder.getAliasRegistry().findFromElementByAlias( alias );
 	}
 
 	protected FromElement findFromElementWithAttribute(String attributeName) {

@@ -328,33 +328,6 @@ public class SimpleSemanticQueryBuilderTest {
 		assertNotNull( querySpec );
 	}
 
-	@Test(expected = AliasCollisionException.class)
-	public void testAliasCollision(){
-		final String query = "select a.address as a from Anything as a";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
-				query,
-				new ConsumerContextImpl()
-		);
-	}
-
-	@Test(expected = AliasCollisionException.class)
-	public void testAliasCollisionInSubquery() throws Exception {
-		final String query = "Select a from Something a where a.b in ( select a from SomethingElse a where a.basic = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
-				query,
-				new ConsumerContextImpl()
-		);
-	}
-
-	@Test(expected = AliasCollisionException.class)
-	public void testAliasCollisionInJoin() throws Exception {
-		final String query = "select a from Something a left outer join a.entity a on a.basic1 > 5 and a.basic2 < 20";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
-				query,
-				new ConsumerContextImpl()
-		);
-	}
-
 	private static class DTO {
 	}
 }

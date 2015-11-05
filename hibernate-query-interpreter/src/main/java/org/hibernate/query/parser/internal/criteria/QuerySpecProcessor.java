@@ -28,6 +28,7 @@ import org.hibernate.query.parser.QueryException;
 import org.hibernate.query.parser.criteria.CriteriaVisitor;
 import org.hibernate.query.parser.criteria.ExpressionImplementor;
 import org.hibernate.query.parser.criteria.PredicateImplementor;
+import org.hibernate.query.parser.internal.AliasRegistry;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
@@ -40,9 +41,6 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeFunction;
-import org.hibernate.sqm.query.expression.CollectionValueFunction;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
@@ -64,8 +62,6 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
-import org.hibernate.sqm.query.expression.MapEntryFunction;
-import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.expression.MaxFunction;
 import org.hibernate.sqm.query.expression.MinFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
@@ -111,11 +107,10 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 	private final FromClauseIndex fromClauseIndex;
 	private final FromElementBuilder fromElementBuilder;
 
-
 	private QuerySpecProcessor(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
 		this.fromClauseIndex = new FromClauseIndex();
-		this.fromElementBuilder = new FromElementBuilder( parsingContext, fromClauseIndex );
+		this.fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry(  ) );
 	}
 
 	public FromClauseIndex getFromClauseIndex() {
@@ -390,12 +385,12 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 
 	@Override
 	public FromElementReferenceExpression visitIdentificationVariableReference(From reference) {
-		return new FromElementReferenceExpression( fromClauseIndex.findFromElementByAlias( reference.getAlias() ) );
+		return new FromElementReferenceExpression( fromElementBuilder.getAliasRegistry().findFromElementByAlias( reference.getAlias() ) );
 	}
 
 	@Override
 	public AttributeReferenceExpression visitAttributeReference(From attributeSource, String attributeName) {
-		final FromElement source = fromClauseIndex.findFromElementByAlias( attributeSource.getAlias() );
+		final FromElement source = fromElementBuilder.getAliasRegistry().findFromElementByAlias( attributeSource.getAlias() );
 		final AttributeDescriptor attributeDescriptor = source.getTypeDescriptor().getAttributeDescriptor( attributeName );
 		return new AttributeReferenceExpression( source, attributeDescriptor );
 	}
@@ -455,13 +450,13 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 
 	@Override
 	public EntityTypeExpression visitEntityType(String identificationVariable) {
-		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( identificationVariable );
+		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 		return new EntityTypeExpression( (EntityTypeDescriptor) fromElement.getTypeDescriptor() );
 	}
 
 	@Override
 	public EntityTypeExpression visitEntityType(String identificationVariable, String attributeName) {
-		final FromElement fromElement = fromClauseIndex.findFromElementByAlias( identificationVariable );
+		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 		return new EntityTypeExpression( (EntityTypeDescriptor) fromElement.getTypeDescriptor().getAttributeDescriptor(
 				attributeName
 		) );

@@ -25,11 +25,15 @@ public class FromElementBuilder {
 	private static final Logger log = Logger.getLogger( FromElementBuilder.class );
 
 	private final ParsingContext parsingContext;
-	private final FromClauseIndex fromClauseIndex;
+	private final AliasRegistry aliasRegistry;
 
-	public FromElementBuilder(ParsingContext parsingContext, FromClauseIndex fromClauseIndex) {
+	public FromElementBuilder(ParsingContext parsingContext, AliasRegistry aliasRegistry) {
 		this.parsingContext = parsingContext;
-		this.fromClauseIndex = fromClauseIndex;
+		this.aliasRegistry = aliasRegistry;
+	}
+
+	public AliasRegistry getAliasRegistry(){
+		return aliasRegistry;
 	}
 
 	/**
@@ -137,7 +141,7 @@ public class FromElementBuilder {
 			log.debug( "Alias registration for implicit FromElement alias : " + alias );
 		}
 
-		fromClauseIndex.registerAlias( fromElement );
+		aliasRegistry.registerAlias( fromElement );
 	}
 
 	private void registerPath(QualifiedAttributeJoinFromElement join) {

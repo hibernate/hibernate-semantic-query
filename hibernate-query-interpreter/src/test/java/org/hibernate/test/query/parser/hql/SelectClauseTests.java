@@ -10,8 +10,10 @@ import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.query.parser.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
 import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
@@ -30,6 +32,7 @@ import org.hamcrest.CoreMatchers;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -245,6 +248,40 @@ public class SelectClauseTests {
 				instantiation.getArguments().get( 1 ).getExpression(),
 				instanceOf( AttributeReferenceExpression.class )
 		);
+	}
+
+	@Test
+	public void testBinaryArithmeticExpression() {
+		final String query = "select o.basic + o.basic1 as b from Entity o";
+		final SelectStatement selectStatement = interpret( query );
+
+		final QuerySpec querySpec = selectStatement.getQuerySpec();
+		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
+		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
+		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
+		assertThat( leftHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
+
+		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
+		assertThat( rightHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
+	}
+
+	@Test
+	public void testBinaryArithmeticExpressionWithMultipleFromSpaces() {
+		final String query = "select o.basic + a.basic1 as b from Entity o, Entity2 a";
+		final SelectStatement selectStatement = interpret( query );
+
+		final QuerySpec querySpec = selectStatement.getQuerySpec();
+		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
+		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
+		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
+		assertThat( leftHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
+
+		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
+		assertThat( rightHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity2" ) );
+		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
 	}
 
 	@Test

@@ -685,7 +685,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 		return new ConcatExpression(
 				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 0 ).accept( this )
+				(Expression) ctx.expression( 1 ).accept( this )
 		);
 	}
 
@@ -697,7 +697,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new BinaryArithmeticExpression(
 				BinaryArithmeticExpression.Operation.ADD,
 				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 0 ).accept( this )
+				(Expression) ctx.expression( 1 ).accept( this )
 		);
 	}
 
@@ -709,7 +709,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new BinaryArithmeticExpression(
 				BinaryArithmeticExpression.Operation.SUBTRACT,
 				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 0 ).accept( this )
+				(Expression) ctx.expression( 1 ).accept( this )
 		);
 	}
 
@@ -721,7 +721,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new BinaryArithmeticExpression(
 				BinaryArithmeticExpression.Operation.MULTIPLY,
 				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 0 ).accept( this )
+				(Expression) ctx.expression( 1 ).accept( this )
 		);
 	}
 
@@ -733,7 +733,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new BinaryArithmeticExpression(
 				BinaryArithmeticExpression.Operation.DIVIDE,
 				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 0 ).accept( this )
+				(Expression) ctx.expression( 1 ).accept( this )
 		);
 	}
 
@@ -745,7 +745,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new BinaryArithmeticExpression(
 				BinaryArithmeticExpression.Operation.MODULO,
 				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 0 ).accept( this )
+				(Expression) ctx.expression( 1 ).accept( this )
 		);
 	}
 

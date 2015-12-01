@@ -6,9 +6,9 @@
  */
 package org.hibernate.sqm.query.expression;
 
+
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.CollectionTypeDescriptor;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
@@ -16,25 +16,28 @@ import org.hibernate.sqm.query.from.FromElement;
  */
 public class CollectionIndexFunction implements Expression {
 	private final String collectionAlias;
-	private final TypeDescriptor indexType;
+	private final Type indexType;
 
-	public CollectionIndexFunction(FromElement collectionReference) {
+	public CollectionIndexFunction(FromElement collectionReference, Type indexType) {
 		this.collectionAlias = collectionReference.getAlias();
-
-		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) collectionReference.getTypeDescriptor();
-		this.indexType = collectionTypeDescriptor.getIndexTypeDescriptor();
+		this.indexType = indexType;
 	}
 
 	public String getCollectionAlias() {
 		return collectionAlias;
 	}
 
-	public TypeDescriptor getIndexType() {
+	public Type getIndexType() {
 		return indexType;
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
+	public Type getExpressionType() {
+		return getIndexType();
+	}
+
+	@Override
+	public Type getInferableType() {
 		return getIndexType();
 	}
 

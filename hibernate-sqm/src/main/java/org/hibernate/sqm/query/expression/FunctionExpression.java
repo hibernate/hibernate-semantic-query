@@ -9,7 +9,8 @@ package org.hibernate.sqm.query.expression;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
@@ -17,15 +18,15 @@ import org.hibernate.sqm.domain.TypeDescriptor;
 public class FunctionExpression implements Expression {
 	private final String functionName;
 	private final List<Expression> arguments;
-	private final TypeDescriptor resultTypeDescriptor;
+	private final BasicType resultTypeDescriptor;
 
 	public FunctionExpression(
 			String functionName,
-			List<Expression> arguments,
-			TypeDescriptor resultTypeDescriptor) {
+			BasicType resultTypeDescriptor,
+			List<Expression> arguments) {
 		this.functionName = functionName;
-		this.arguments = arguments;
 		this.resultTypeDescriptor = resultTypeDescriptor;
+		this.arguments = arguments;
 	}
 
 	public String getFunctionName() {
@@ -37,8 +38,13 @@ public class FunctionExpression implements Expression {
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
+	public BasicType getExpressionType() {
 		return resultTypeDescriptor;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return null;
 	}
 
 	@Override

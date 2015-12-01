@@ -6,6 +6,15 @@
  */
 package org.hibernate.query.parser.internal.hql.path;
 
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Bindable;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
+
+import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
@@ -53,20 +62,20 @@ public class IndexedAttributeRootPathResolver extends AbstractAttributePathResol
 		final String[] parts = pathText.split( "\\." );
 
 //		final String rootPart = parts[0];
-//		final AttributeDescriptor initialAttributeReference = source.getTypeDescriptor().getAttributeDescriptor( rootPart );
+//		final AttributeDescriptor initialAttributeReference = source.getExpressionType().getAttributeDescriptor( rootPart );
 //		if ( initialAttributeReference == null ) {
 //			throw new SemanticException(
 //					String.format(
 //							Locale.ENGLISH,
 //							"Could not resolve path reference [%s] against source type [%s] from indexed collection reference [%s]",
 //							rootPart,
-//							source.getTypeDescriptor().getTypeName(),
+//							source.getExpressionType().getTypeName(),
 //							source
 //					)
 //			);
 //		}
 
 		final FromElement lhs = resolveAnyIntermediateAttributePathJoins( source.getUnderlyingFromElement(), parts, 0 );
-		return new AttributeReferenceExpression( lhs, parts[parts.length-1] );
+		return makeAttributeReferenceExpression( lhs, parts[parts.length-1] );
 	}
 }

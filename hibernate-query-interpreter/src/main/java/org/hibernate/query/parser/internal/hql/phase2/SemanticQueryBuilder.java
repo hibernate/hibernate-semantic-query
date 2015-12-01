@@ -6,17 +6,17 @@
  */
 package org.hibernate.query.parser.internal.hql.phase2;
 
-import org.hibernate.query.parser.NotYetImplementedException;
 import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.AbstractHqlParseTreeVisitor;
-import org.hibernate.query.parser.internal.hql.path.DmlRootAttributePathResolver;
-import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
-import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
-import org.hibernate.sqm.path.AttributePathPart;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.path.BasicAttributePathResolverImpl;
+import org.hibernate.query.parser.internal.hql.path.DmlRootAttributePathResolver;
+import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
+import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
+import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;

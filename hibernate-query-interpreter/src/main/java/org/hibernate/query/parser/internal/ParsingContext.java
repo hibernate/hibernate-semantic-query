@@ -30,7 +30,7 @@ public class ParsingContext {
 		return aliasGenerator;
 	}
 
-	public AliasRegistry getAliasRegistry(){
+	public AliasRegistry getAliasRegistry() {
 		return aliasRegistry;
 	}
 }

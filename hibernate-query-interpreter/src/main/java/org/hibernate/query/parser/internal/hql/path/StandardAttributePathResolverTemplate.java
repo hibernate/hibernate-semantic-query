@@ -6,8 +6,10 @@
  */
 package org.hibernate.query.parser.internal.hql.path;
 
+import javax.persistence.metamodel.Attribute;
+
+import org.hibernate.query.parser.internal.Helper;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
@@ -67,14 +69,13 @@ public abstract class StandardAttributePathResolverTemplate extends AbstractAttr
 	}
 
 	protected AttributePathPart resolveTerminalPathPart(FromElement lhs, String terminalName) {
-		final AttributeDescriptor attributeDescriptor = lhs.getTypeDescriptor().getAttributeDescriptor( terminalName );
-		final AttributeReferenceExpression expr = new AttributeReferenceExpression( lhs, attributeDescriptor );
+		final AttributeReferenceExpression expr = makeAttributeReferenceExpression( lhs, terminalName );
 		log.debugf( "Resolved terminal path-part [%s] : %s", terminalName, expr );
 		return expr;
 	}
 
 	protected AttributePathPart resolveFromElementAliasAsTerminal(FromElement aliasedFromElement) {
 		log.debugf( "Resolved from-element alias as terminal : %s", aliasedFromElement.getAlias() );
-		return new FromElementReferenceExpression( aliasedFromElement );
+		return new FromElementReferenceExpression( aliasedFromElement, aliasedFromElement.getBindableModelDescriptor().getBoundType() );
 	}
 }

@@ -6,12 +6,17 @@
  */
 package org.hibernate.query.parser.internal.hql.path;
 
+import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
+import org.hibernate.query.parser.internal.Helper;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
-import org.hibernate.sqm.domain.AttributeDescriptor;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
@@ -101,14 +106,33 @@ public class BasicAttributePathResolverImpl extends StandardAttributePathResolve
 	}
 
 	protected AttributePathPart resolveTerminalPathPart(FromElement lhs, String terminalName) {
-		final AttributeDescriptor attributeDescriptor = lhs.getTypeDescriptor().getAttributeDescriptor( terminalName );
-		final AttributeReferenceExpression expr = new AttributeReferenceExpression( lhs, attributeDescriptor );
+		final AttributeReferenceExpression expr = makeAttributeReferenceExpression( lhs, terminalName );
 		log.debugf( "Resolved terminal path-part [%s] : %s", terminalName, expr );
 		return expr;
 	}
 
+	protected AttributeReferenceExpression makeAttributeReferenceExpression(FromElement lhs, String attributeName) {
+		final Attribute attribute = lhs.resolveAttribute( attributeName );
+		final Type type;
+		if ( attribute instanceof SingularAttribute ) {
+			type = ( (SingularAttribute) attribute ).getType();
+		}
+		else if ( attribute instanceof PluralAttribute ) {
+			type = ( (PluralAttribute) attribute ).getCollectionElementType();
+		}
+		else {
+			throw new ParsingException(
+					"Resolved attribute was neither javax.persistence.metamodel.SingularAttribute " +
+							"nor javax.persistence.metamodel.PluralAttribute : " +
+							attribute
+			);
+		}
+
+		return new AttributeReferenceExpression( lhs, attribute, type );
+	}
+
 	protected AttributePathPart resolveFromElementAliasAsTerminal(FromElement aliasedFromElement) {
 		log.debugf( "Resolved from-element alias as terminal : %s", aliasedFromElement.getAlias() );
-		return new FromElementReferenceExpression( aliasedFromElement );
+		return new FromElementReferenceExpression( aliasedFromElement, aliasedFromElement.getBindableModelDescriptor().getBoundType() );
 	}
 }

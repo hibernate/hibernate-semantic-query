@@ -7,9 +7,7 @@
 package org.hibernate.sqm.domain;
 
 /**
- * Represents a map type.
- *
- * @author Gunnar Morling
+ * @author Steve Ebersole
  */
-public interface MapTypeDescriptor extends CollectionTypeDescriptor {
+public interface EmbeddableType extends ManagedType {
 }

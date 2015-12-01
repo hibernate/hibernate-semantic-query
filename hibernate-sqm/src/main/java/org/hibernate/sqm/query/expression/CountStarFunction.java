@@ -7,20 +7,25 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
  */
 public class CountStarFunction extends AbstractAggregateFunction {
-	public CountStarFunction(boolean distinct) {
-		super( STAR, distinct );
+	public CountStarFunction(boolean distinct, BasicType resultType) {
+		super( STAR, distinct, resultType );
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.LONG;
+	public BasicType getExpressionType() {
+		return (BasicType) super.getExpressionType();
+	}
+
+	@Override
+	public BasicType getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
@@ -30,7 +35,12 @@ public class CountStarFunction extends AbstractAggregateFunction {
 
 	private static Expression STAR = new Expression() {
 		@Override
-		public TypeDescriptor getTypeDescriptor() {
+		public Type getExpressionType() {
+			return null;
+		}
+
+		@Override
+		public Type getInferableType() {
 			return null;
 		}
 

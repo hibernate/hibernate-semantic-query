@@ -7,23 +7,25 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
+import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralCharacterExpression extends AbstractLiteralExpressionImpl<Character> {
-	public LiteralCharacterExpression(Character value) {
-		this( value, StandardBasicTypeDescriptors.INSTANCE.CHAR );
-	}
-
-	public LiteralCharacterExpression(Character value, BasicTypeDescriptor typeDescriptor) {
+	public LiteralCharacterExpression(Character value, BasicType<Character> typeDescriptor) {
 		super( value, typeDescriptor );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralCharacterExpression( this );
+	}
+
+	@Override
+	protected void validateInferredType(Class javaType) {
+		if ( !Character.class.equals( javaType ) ) {
+			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Character" );
+		}
 	}
 }

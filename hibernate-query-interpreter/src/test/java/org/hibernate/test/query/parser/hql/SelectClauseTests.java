@@ -8,8 +8,9 @@ package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
 import org.hibernate.query.parser.StrictJpaComplianceViolation;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
@@ -21,7 +22,13 @@ import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationTarget;
 import org.hibernate.sqm.query.select.Selection;
+
 import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.hibernate.test.query.parser.CustomAssignableFromMatcher;
+import org.hibernate.test.sqm.domain.BasicTypeImpl;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +38,6 @@ import org.hamcrest.CoreMatchers;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -42,7 +48,6 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public class SelectClauseTests {
-
 	private ConsumerContextImpl consumerContext;
 
 	@Rule
@@ -50,7 +55,61 @@ public class SelectClauseTests {
 
 	@Before
 	public void setUpContext() {
-		 consumerContext = new ConsumerContextImpl();
+		 consumerContext = new ConsumerContextImpl( buildMetamodel() );
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+
+		EntityTypeImpl entity2Type = metamodel.makeEntityType( "com.acme.Entity2" );
+		entity2Type.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+
+		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity" );
+		entityType.makeSingularAttribute(
+				"basic",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		entityType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		entityType.makeSingularAttribute(
+				"basic2",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		entityType.makeSingularAttribute(
+				"basic3",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		entityType.makeSingularAttribute(
+				"basic4",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+
+		EntityTypeImpl legType = metamodel.makeEntityType( "com.acme.Leg" );
+
+		EntityTypeImpl tripType = metamodel.makeEntityType( "com.acme.Trip" );
+		tripType.makeMapAttribute(
+				"mapLegs",
+				StandardBasicTypeDescriptors.INSTANCE.STRING,
+				legType
+		);
+		tripType.makeListAttribute(
+				"collectionLegs",
+				StandardBasicTypeDescriptors.INSTANCE.INTEGER,
+				legType
+		);
+
+		return metamodel;
 	}
 
 	@Test
@@ -163,7 +222,7 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.CLASS )
 		);
 		assertThat(
-				dynamicInstantiation.getInstantiationTarget().getTargetJavaType().getTypeName(),
+				dynamicInstantiation.getInstantiationTarget().getTargetType().getTypeName(),
 				equalTo( DTO.class.getName() )
 		);
 
@@ -186,7 +245,7 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.CLASS )
 		);
 		assertThat(
-				nestedInstantiation.getInstantiationTarget().getTargetJavaType().getTypeName(),
+				nestedInstantiation.getInstantiationTarget().getTargetType().getTypeName(),
 				equalTo( DTO.class.getName() )
 		);
 
@@ -206,8 +265,8 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.LIST )
 		);
 		assertThat(
-				instantiation.getInstantiationTarget().getTargetJavaType(),
-				CoreMatchers.<TypeDescriptor>sameInstance( StandardBasicTypeDescriptors.INSTANCE.LIST )
+				instantiation.getInstantiationTarget().getTargetType(),
+				CoreMatchers.<Type>sameInstance( StandardBasicTypeDescriptors.INSTANCE.LIST )
 		);
 
 		assertEquals( 2, instantiation.getArguments().size() );
@@ -235,8 +294,8 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.MAP )
 		);
 		assertThat(
-				instantiation.getInstantiationTarget().getTargetJavaType(),
-				CoreMatchers.<TypeDescriptor>sameInstance( StandardBasicTypeDescriptors.INSTANCE.MAP )
+				instantiation.getInstantiationTarget().getTargetType(),
+				CoreMatchers.<Type>sameInstance( StandardBasicTypeDescriptors.INSTANCE.MAP )
 		);
 
 		assertEquals( 2, instantiation.getArguments().size() );
@@ -259,11 +318,11 @@ public class SelectClauseTests {
 		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
 		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
-		assertThat( leftHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( ( (EntityTypeImpl) leftHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
 
 		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
-		assertThat( rightHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( ( (EntityTypeImpl) rightHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
 	}
 
@@ -276,11 +335,11 @@ public class SelectClauseTests {
 		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
 		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
-		assertThat( leftHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( ( (EntityTypeImpl) leftHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
 
 		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
-		assertThat( rightHandOperand.getSource().getTypeDescriptor().getTypeName(), is( "com.acme.Entity2" ) );
+		assertThat( ( (EntityTypeImpl) rightHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity2" ) );
 		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
 	}
 
@@ -295,8 +354,10 @@ public class SelectClauseTests {
 		);
 
 		MapKeyFunction mapKeyFunction = (MapKeyFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		assertEquals("com.acme.map-key:mapLegs", mapKeyFunction.getMapKeyType().getTypeName() );
-		assertEquals("l", mapKeyFunction.getCollectionAlias() );
+		assertThat( mapKeyFunction.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );
+		assertThat( mapKeyFunction.getMapKeyType().getTypeName(), is( String.class.getName() ) );
+
+		assertThat( mapKeyFunction.getCollectionAlias(), is("l") );
 	}
 
 	@Test
@@ -310,8 +371,11 @@ public class SelectClauseTests {
 		);
 
 		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		assertEquals("com.acme.map-value:mapLegs", collectionValueFunction.getValueType().getTypeName() );
-		assertEquals("l", collectionValueFunction.getCollectionAlias() );
+
+		assertThat( collectionValueFunction.getValueType(), instanceOf( EntityTypeImpl.class ) );
+		assertThat( ( (EntityTypeImpl) collectionValueFunction.getValueType() ).getTypeName(), is( "com.acme.Leg" ) );
+
+		assertThat( collectionValueFunction.getCollectionAlias(), is("l") );
 	}
 
 	@Test
@@ -325,7 +389,8 @@ public class SelectClauseTests {
 		);
 
 		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		assertEquals("com.acme.collection-value:collectionLegs", collectionValueFunction.getValueType().getTypeName() );
+		assertThat( collectionValueFunction.getElementType(), instanceOf( EntityTypeImpl.class ) );
+		assertThat( ( (EntityTypeImpl) collectionValueFunction.getElementType() ).getTypeName(), is( "com.acme.Leg" ) );
 		assertEquals("l", collectionValueFunction.getCollectionAlias() );
 	}
 
@@ -350,9 +415,16 @@ public class SelectClauseTests {
 		);
 
 		MapEntryFunction mapEntryFunction = (MapEntryFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		assertEquals("com.acme.map-key:mapLegs", mapEntryFunction.getMapKeyType().getTypeName() );
-		assertEquals("com.acme.map-value:mapLegs", mapEntryFunction.getMapValueType().getTypeName() );
-		assertEquals("l", mapEntryFunction.getCollectionAlias() );
+
+		// Key
+		assertThat( mapEntryFunction.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );
+		assertThat( mapEntryFunction.getMapKeyType().getTypeName(), is( String.class.getName() ) );
+
+		// value/element
+		assertThat( mapEntryFunction.getMapValueType(), instanceOf( EntityTypeImpl.class ) );
+		assertThat( ( (EntityTypeImpl) mapEntryFunction.getMapValueType() ).getTypeName(), is( "com.acme.Leg" ) );
+
+		assertThat( mapEntryFunction.getCollectionAlias(), is( "l" ) );
 	}
 
 	private SelectStatement interpret(String query) {

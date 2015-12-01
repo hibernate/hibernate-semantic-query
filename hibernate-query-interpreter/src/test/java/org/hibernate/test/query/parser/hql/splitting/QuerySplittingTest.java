@@ -8,12 +8,13 @@ package org.hibernate.test.query.parser.hql.splitting;
 
 import org.hibernate.query.parser.QuerySplitter;
 import org.hibernate.query.parser.SemanticQueryInterpreter;
-import org.hibernate.sqm.domain.ModelMetadata;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
-import org.hibernate.test.sqm.domain.dynamic.ExplicitModelMetadata;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.PolymorphicEntityTypeImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -52,13 +53,14 @@ public class QuerySplittingTest {
 		assertEquals( 2, split.length );
 	}
 
-	private ModelMetadata buildModelMetadata() {
-		ExplicitModelMetadata metadata = new ExplicitModelMetadata();
-		ExplicitModelMetadata.EntityTypeDescriptorImpl acct = metadata.entity( Account.class );
-		ExplicitModelMetadata.EntityTypeDescriptorImpl fund = metadata.entity( Fund.class );
-		ExplicitModelMetadata.PolymorphicEntityTypeDescriptorImpl intf = metadata.polymorphicEntity( Auditable.class );
+	private ExplicitDomainMetamodel buildModelMetadata() {
+		ExplicitDomainMetamodel metadata = new ExplicitDomainMetamodel();
+		EntityTypeImpl acct = metadata.makeEntityType( Account.class );
+		EntityTypeImpl fund = metadata.makeEntityType( Fund.class );
+		PolymorphicEntityTypeImpl intf = metadata.makePolymorphicEntity( Auditable.class );
 		intf.addImplementor( acct );
 		intf.addImplementor( fund );
+		intf.buildAttributes();
 
 		return metadata;
 	}

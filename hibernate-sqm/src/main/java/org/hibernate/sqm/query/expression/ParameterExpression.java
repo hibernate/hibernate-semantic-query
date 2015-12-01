@@ -11,5 +11,5 @@ import org.hibernate.sqm.query.Parameter;
 /**
  * @author Steve Ebersole
  */
-public interface ParameterExpression extends Parameter, Expression {
+public interface ParameterExpression extends Parameter, ImpliedTypeExpression {
 }

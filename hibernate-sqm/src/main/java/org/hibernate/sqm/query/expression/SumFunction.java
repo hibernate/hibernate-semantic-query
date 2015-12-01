@@ -7,41 +7,25 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
  */
 public class SumFunction extends AbstractAggregateFunction implements AggregateFunction {
-	private final TypeDescriptor typeDescriptor;
-
-	public SumFunction(Expression argument, boolean distinct) {
-		super( argument, distinct );
-
-		if ( argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.BIG_INTEGER ) {
-			typeDescriptor = StandardBasicTypeDescriptors.INSTANCE.BIG_INTEGER;
-		}
-		else if ( argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.BIG_DECIMAL ) {
-			typeDescriptor = StandardBasicTypeDescriptors.INSTANCE.BIG_DECIMAL;
-		}
-		else if ( argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.LONG
-				|| argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.SHORT
-				|| argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.INTEGER ) {
-			typeDescriptor = StandardBasicTypeDescriptors.INSTANCE.LONG;
-		}
-		else if ( argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.FLOAT
-				|| argument.getTypeDescriptor() == StandardBasicTypeDescriptors.INSTANCE.DOUBLE)  {
-			typeDescriptor = StandardBasicTypeDescriptors.INSTANCE.DOUBLE;
-		}
-		else {
-			typeDescriptor = argument.getTypeDescriptor();
-		}
+	public SumFunction(Expression argument, boolean distinct, BasicType resultType) {
+		super( argument, distinct, resultType );
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+	public BasicType getExpressionType() {
+		return (BasicType) super.getExpressionType();
+	}
+
+	@Override
+	public Type getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override

@@ -10,7 +10,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * Convenience base class for FromElement implementations
@@ -20,17 +22,17 @@ import org.hibernate.sqm.domain.TypeDescriptor;
 public abstract class AbstractFromElement implements FromElement {
 	private final FromElementSpace fromElementSpace;
 	private final String alias;
-	private final TypeDescriptor typeDescriptor;
+	private final Bindable bindableModelDescriptor;
 
-	private Set<TypeDescriptor> treatedAsTypeDescriptors;
+	private Set<Type> treatedAsTypeDescriptors;
 
 	protected AbstractFromElement(
 			FromElementSpace fromElementSpace,
 			String alias,
-			TypeDescriptor typeDescriptor) {
+			Bindable bindableModelDescriptor) {
 		this.fromElementSpace = fromElementSpace;
 		this.alias = alias;
-		this.typeDescriptor = typeDescriptor;
+		this.bindableModelDescriptor = bindableModelDescriptor;
 	}
 
 	@Override
@@ -44,8 +46,8 @@ public abstract class AbstractFromElement implements FromElement {
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+	public Bindable getBindableModelDescriptor() {
+		return bindableModelDescriptor;
 	}
 
 	@Override
@@ -57,14 +59,14 @@ public abstract class AbstractFromElement implements FromElement {
 	// 		since that often dictates how the TREAT AS manifests into SQL
 
 	@Override
-	public void addTreatedAs(TypeDescriptor typeDescriptor) {
+	public void addTreatedAs(EntityType typeDescriptor) {
 		if ( treatedAsTypeDescriptors == null ) {
-			treatedAsTypeDescriptors = new HashSet<TypeDescriptor>();
+			treatedAsTypeDescriptors = new HashSet<Type>();
 		}
 		treatedAsTypeDescriptors.add( typeDescriptor );
 	}
 
-	public Set<TypeDescriptor> getTreatedAsTypeDescriptors() {
+	public Set<Type> getTreatedAsTypeDescriptors() {
 		if ( treatedAsTypeDescriptors == null ) {
 			return Collections.emptySet();
 		}

@@ -40,7 +40,7 @@ public class DmlRootAttributePathResolver extends StandardAttributePathResolverT
 
 	@Override
 	protected FromElement findFromElementWithAttribute(String attributeName) {
-		if ( dmlRoot.getTypeDescriptor().getAttributeDescriptor( attributeName ) != null ) {
+		if ( dmlRoot.resolveAttribute( attributeName ) != null ) {
 			return dmlRoot;
 		}
 		else {

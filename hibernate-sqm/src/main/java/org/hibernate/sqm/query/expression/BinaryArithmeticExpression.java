@@ -7,7 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
@@ -16,14 +17,17 @@ public class BinaryArithmeticExpression implements Expression {
 	private final Operation operation;
 	private final Expression lhsOperand;
 	private final Expression rhsOperand;
+	private final BasicType resultType;
 
 	public BinaryArithmeticExpression(
 			Operation operation,
 			Expression lhsOperand,
-			Expression rhsOperand) {
+			Expression rhsOperand,
+			BasicType resultType) {
 		this.operation = operation;
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
+		this.resultType = resultType;
 	}
 
 	public enum Operation {
@@ -100,9 +104,13 @@ public class BinaryArithmeticExpression implements Expression {
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		// for now...
-		return getLeftHandOperand().getTypeDescriptor();
+	public BasicType getExpressionType() {
+		return resultType;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return null;
 	}
 
 	@Override

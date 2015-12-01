@@ -7,11 +7,14 @@
 package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.query.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.select.Selection;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -25,7 +28,7 @@ public class FromElementContainmentTests {
 	@Test
 	public void testFromElementReferenceInSelect() {
 		final String query = "select o from Entity o";
-		final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
+		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 		SelectStatement statement = (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
@@ -35,12 +38,18 @@ public class FromElementContainmentTests {
 	@Test
 	public void testFromElementReferenceInOrderBy() {
 		final String query = "select o from Entity o order by o";
-		final ConsumerContextImpl consumerContext = new ConsumerContextImpl();
+		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 		SelectStatement statement = (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
 				instanceOf( FromElementReferenceExpression.class )
 		);
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity" );
+		return metamodel;
 	}
 }

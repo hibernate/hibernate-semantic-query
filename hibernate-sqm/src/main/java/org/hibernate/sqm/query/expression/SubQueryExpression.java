@@ -7,35 +7,29 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.Selection;
 
 /**
  * @author Steve Ebersole
  */
 public class SubQueryExpression implements Expression {
 	private final QuerySpec querySpec;
-	private final TypeDescriptor typeDescriptor;
+	private final Type type;
 
-	public SubQueryExpression(QuerySpec querySpec) {
+	public SubQueryExpression(QuerySpec querySpec, Type type) {
 		this.querySpec = querySpec;
-		this.typeDescriptor = determineTypeDescriptor( querySpec.getSelectClause() );
-	}
-
-	private static TypeDescriptor determineTypeDescriptor(SelectClause selectClause) {
-		if ( selectClause.getSelections().size() != 0 ) {
-			return null;
-		}
-
-		final Selection selection = selectClause.getSelections().get( 0 );
-		return selection.getExpression().getTypeDescriptor();
+		this.type = type;
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+	public Type getExpressionType() {
+		return type;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return type;
 	}
 
 	public QuerySpec getQuerySpec() {

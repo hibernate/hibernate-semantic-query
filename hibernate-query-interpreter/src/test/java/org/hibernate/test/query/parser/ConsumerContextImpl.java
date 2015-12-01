@@ -7,31 +7,24 @@
 package org.hibernate.test.query.parser;
 
 import org.hibernate.query.parser.ConsumerContext;
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
-import org.hibernate.sqm.domain.ModelMetadata;
-
-import org.hibernate.test.sqm.domain.dynamic.DynamicModelMetadata;
+import org.hibernate.sqm.domain.DomainMetamodel;
 
 /**
  * @author Steve Ebersole
  */
 public class ConsumerContextImpl implements ConsumerContext {
-	private final ModelMetadata modelMetadata;
+	private final DomainMetamodel modelMetadata;
 
 	// false (full HQL support) by default
 	private boolean strictJpaCompliance;
 
-	public ConsumerContextImpl() {
-		this( new DynamicModelMetadata() );
-	}
-
-	public ConsumerContextImpl(ModelMetadata modelMetadata) {
+	public ConsumerContextImpl(DomainMetamodel modelMetadata) {
 		this.modelMetadata = modelMetadata;
 	}
 
 	@Override
-	public EntityTypeDescriptor resolveEntityReference(String reference) {
-		return modelMetadata.resolveEntityReference( reference );
+	public DomainMetamodel getDomainMetamodel() {
+		return modelMetadata;
 	}
 
 	@Override

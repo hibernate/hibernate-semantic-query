@@ -7,8 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
@@ -20,12 +20,34 @@ public class LiteralNullExpression implements LiteralExpression<Void> {
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.NULL;
+	public BasicType<Void> getExpressionType() {
+		return NULL_TYPE;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void impliedType(Type type) {
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralNullExpression( this );
 	}
+
+	private static BasicType<Void> NULL_TYPE = new BasicType<Void>() {
+		@Override
+		public String getTypeName() {
+			return void.class.getName();
+		}
+
+		@Override
+		public Class<Void> getJavaType() {
+			return void.class;
+		}
+	};
 }

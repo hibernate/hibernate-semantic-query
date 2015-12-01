@@ -7,11 +7,13 @@
 package org.hibernate.sqm.domain;
 
 /**
- * Information about the domain model space for the query.  This needs to come from the
- * consumer.
- *
  * @author Steve Ebersole
  */
-public interface ModelMetadata {
-	EntityTypeDescriptor resolveEntityReference(String reference);
+public interface IdentifiableType extends ManagedType {
+	@Override
+	IdentifiableType getSuperType();
+
+	IdentifierDescriptor getIdentifierDescriptor();
+
+	SingularAttribute getVersionAttribute();
 }

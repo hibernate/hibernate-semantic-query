@@ -6,27 +6,29 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.ImplicitAliasGenerator;
+import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.from.FromClause;
-import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
-import org.hibernate.test.query.parser.ParsingContextImpl;
+import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -55,9 +57,45 @@ public class HqlFromClauseProcessorPocTest {
 	}
 
 	private FromClauseProcessor processFromClause(HqlParser parser) {
-		final FromClauseProcessor explicitFromClauseIndexer = new FromClauseProcessor( new ParsingContextImpl() );
+		final FromClauseProcessor explicitFromClauseIndexer = new FromClauseProcessor( new ParsingContext( new ConsumerContextImpl( buildMetamodel() ) ) );
 		ParseTreeWalker.DEFAULT.walk( explicitFromClauseIndexer, parser.statement() );
 		return explicitFromClauseIndexer;
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+		EntityTypeImpl somethingEntityType = metamodel.makeEntityType( "com.acme.Something" );
+		EntityTypeImpl somethingElseEntityType = metamodel.makeEntityType( "com.acme.SomethingElse" );
+		EntityTypeImpl associatedEntityType = metamodel.makeEntityType( "com.acme.Related" );
+
+		somethingEntityType.makeSingularAttribute(
+				"b",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		somethingEntityType.makeSingularAttribute(
+				"basic",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingEntityType.makeSingularAttribute(
+				"entity",
+				SingularAttribute.Classification.BASIC,
+				associatedEntityType
+		);
+
+		associatedEntityType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		associatedEntityType.makeSingularAttribute(
+				"basic2",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+
+		return metamodel;
 	}
 
 	@Test
@@ -120,7 +158,7 @@ public class HqlFromClauseProcessorPocTest {
 	@Test
 	public void testSimpleImplicitInnerJoin() throws Exception {
 		simpleJoinAssertions(
-				HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a join a.entity c" ),
+				HqlParseTreeBuilder.INSTANCE.parseHql( "select a.b from Something a join a.entity c" ),
 				JoinType.INNER
 		);
 	}

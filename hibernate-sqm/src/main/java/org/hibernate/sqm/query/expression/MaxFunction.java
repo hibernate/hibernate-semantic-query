@@ -4,26 +4,28 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
  */
 public class MaxFunction extends AbstractAggregateFunction implements AggregateFunction {
-	private final TypeDescriptor typeDescriptor;
-
-	public MaxFunction(Expression argument, boolean distinct) {
-		super( argument, distinct );
-		typeDescriptor = argument.getTypeDescriptor();
+	public MaxFunction(Expression argument, boolean distinct, BasicType resultType) {
+		super( argument, distinct, resultType );
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+	public BasicType getExpressionType() {
+		return (BasicType) super.getExpressionType();
+	}
+
+	@Override
+	public Type getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override

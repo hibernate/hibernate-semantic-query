@@ -6,27 +6,20 @@
  */
 package org.hibernate.query.parser;
 
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.EntityType;
-
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
-import org.hibernate.sqm.domain.ModelMetadata;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.DomainMetamodel;
 
 /**
  * Contextual information related to the consumer/caller of the parser - a callback API.
  *
  * @author Steve Ebersole
  */
-public interface ConsumerContext extends ModelMetadata {
+public interface ConsumerContext {
 	/**
-	 * Resolve an entity reference by name,
+	 * Access to the metamodel describing the underlying domain model.
 	 *
-	 * @param reference The referenced entity name.
-	 *
-	 * @return The corresponding descriptor, or {@code null} if none.
+	 * @return The domain metamodel.
 	 */
-	EntityTypeDescriptor resolveEntityReference(String reference);
+	DomainMetamodel getDomainMetamodel();
 
 	/**
 	 * Resolve any (potential) non-entity class reference encountered in the query.

@@ -6,16 +6,17 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
  */
 public abstract class AbstractLiteralExpressionImpl<T> implements LiteralExpression<T> {
 	private final T value;
-	private final BasicTypeDescriptor typeDescriptor;
+	private BasicType<T> typeDescriptor;
 
-	public AbstractLiteralExpressionImpl(T value, BasicTypeDescriptor typeDescriptor) {
+	public AbstractLiteralExpressionImpl(T value, BasicType<T> typeDescriptor) {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
@@ -26,7 +27,26 @@ public abstract class AbstractLiteralExpressionImpl<T> implements LiteralExpress
 	}
 
 	@Override
-	public BasicTypeDescriptor getTypeDescriptor() {
+	public BasicType<T> getExpressionType() {
 		return typeDescriptor;
 	}
+
+	@Override
+	public Type getInferableType() {
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void impliedType(Type type) {
+		if ( type != null ) {
+			if ( !BasicType.class.isAssignableFrom( type.getClass() ) ) {
+				throw new TypeInferenceException( "Inferred type descriptor [" + type + "] was not castable to javax.persistence.metamodel.BasicType" );
+			}
+			validateInferredType( ( (BasicType) type ).getJavaType() );
+			this.typeDescriptor = (BasicType<T>) type;
+		}
+	}
+
+	protected abstract void validateInferredType(Class javaType);
 }

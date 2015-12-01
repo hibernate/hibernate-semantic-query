@@ -9,8 +9,9 @@ package org.hibernate.sqm.query.expression;
 import java.util.Locale;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.AttributeDescriptor;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.from.FromElement;
 
@@ -19,30 +20,39 @@ import org.hibernate.sqm.query.from.FromElement;
  */
 public class AttributeReferenceExpression implements AttributePathPart, Expression {
 	private final FromElement source;
-	private final AttributeDescriptor attributeDescriptor;
-
-	public AttributeReferenceExpression(FromElement source, String attributeName) {
-		this( source, source.getTypeDescriptor().getAttributeDescriptor( attributeName ) );
-	}
+	private final Attribute attributeDescriptor;
+	private final Type type;
 
 	public AttributeReferenceExpression(
 			FromElement source,
-			AttributeDescriptor attributeDescriptor) {
+			Attribute attributeDescriptor,
+			Type type) {
 		this.source = source;
 		this.attributeDescriptor = attributeDescriptor;
+		this.type = type;
 	}
 
 	public FromElement getSource() {
 		return source;
 	}
 
-	public AttributeDescriptor getAttributeDescriptor() {
+	public Attribute getAttributeDescriptor() {
 		return attributeDescriptor;
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return getAttributeDescriptor().getType();
+	public Bindable getBindableModelDescriptor() {
+		return (Bindable) getAttributeDescriptor();
+	}
+
+	@Override
+	public Type getExpressionType() {
+		return type;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return type;
 	}
 
 	@Override
@@ -56,7 +66,7 @@ public class AttributeReferenceExpression implements AttributePathPart, Expressi
 						'}',
 				getSource().getAlias(),
 				getAttributeDescriptor().getName(),
-				getAttributeDescriptor().getType().getTypeName()
+				type
 		);
 	}
 

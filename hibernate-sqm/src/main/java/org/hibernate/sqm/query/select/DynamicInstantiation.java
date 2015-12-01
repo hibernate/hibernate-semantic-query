@@ -8,12 +8,12 @@ package org.hibernate.sqm.query.select;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.hibernate.sqm.domain.BasicType;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.AttributeDescriptor;
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.expression.Expression;
 
 import org.jboss.logging.Logger;
@@ -24,29 +24,29 @@ import org.jboss.logging.Logger;
 public class DynamicInstantiation implements Expression, AliasedExpressionContainer<DynamicInstantiationArgument> {
 	private static final Logger log = Logger.getLogger( DynamicInstantiation.class );
 
-	public static DynamicInstantiation forClassInstantiation(Class type) {
+	public static DynamicInstantiation forClassInstantiation(Type type) {
 		return new DynamicInstantiation(
 				new DynamicInstantiationTargetImpl(
 						DynamicInstantiationTarget.Nature.CLASS,
-						new ClassInstantiationTypeDescriptor( type )
+						type
 				)
 		);
 	}
 
-	public static DynamicInstantiation forMapInstantiation() {
+	public static DynamicInstantiation forMapInstantiation(BasicType<Map> mapType) {
 		return new DynamicInstantiation(
 				new DynamicInstantiationTargetImpl(
 						DynamicInstantiationTarget.Nature.MAP,
-						StandardBasicTypeDescriptors.INSTANCE.MAP
+						mapType
 				)
 		);
 	}
 
-	public static DynamicInstantiation forListInstantiation() {
+	public static DynamicInstantiation forListInstantiation(BasicType<List> listType) {
 		return new DynamicInstantiation(
 				new DynamicInstantiationTargetImpl(
 						DynamicInstantiationTarget.Nature.LIST,
-						StandardBasicTypeDescriptors.INSTANCE.LIST
+						listType
 				)
 		);
 	}
@@ -59,8 +59,13 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return instantiationTarget.getTargetJavaType();
+	public Type getExpressionType() {
+		return instantiationTarget.getTargetType();
+	}
+
+	@Override
+	public Type getInferableType() {
+		return null;
 	}
 
 	public DynamicInstantiationTarget getInstantiationTarget() {
@@ -123,9 +128,10 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 
 	private static class DynamicInstantiationTargetImpl implements DynamicInstantiationTarget {
 		private final Nature nature;
-		private final TypeDescriptor typeDescriptor;
+		private final Type typeDescriptor;
 
-		public DynamicInstantiationTargetImpl(Nature nature, TypeDescriptor typeDescriptor) {
+
+		public DynamicInstantiationTargetImpl(Nature nature, Type typeDescriptor) {
 			this.nature = nature;
 			this.typeDescriptor = typeDescriptor;
 		}
@@ -136,32 +142,8 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 		}
 
 		@Override
-		public TypeDescriptor getTargetJavaType() {
+		public Type getTargetType() {
 			return typeDescriptor;
-		}
-	}
-
-	private static class ClassInstantiationTypeDescriptor implements BasicTypeDescriptor {
-		private final Class instantiationTarget;
-
-		public ClassInstantiationTypeDescriptor(Class instantiationTarget) {
-			this.instantiationTarget = instantiationTarget;
-		}
-
-		@Override
-		public Class getCorrespondingJavaType() {
-			return instantiationTarget;
-		}
-
-		@Override
-		public String getTypeName() {
-			return instantiationTarget.getName();
-		}
-
-		@Override
-		public AttributeDescriptor getAttributeDescriptor(String attributeName) {
-			// todo : we may want to do this for "property-injection"
-			return null;
 		}
 	}
 }

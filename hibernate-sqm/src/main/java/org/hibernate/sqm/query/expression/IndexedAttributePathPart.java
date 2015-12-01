@@ -7,8 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.CollectionTypeDescriptor;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.from.FromElement;
 
@@ -19,14 +19,12 @@ public class IndexedAttributePathPart implements AttributePathPart, Expression {
 	private final AttributePathPart source;
 	private final Expression index;
 
-	private final TypeDescriptor typeDescriptor;
+	private final Type type;
 
-	public IndexedAttributePathPart(AttributePathPart source, Expression index) {
+	public IndexedAttributePathPart(AttributePathPart source, Expression index, Type type) {
 		this.source = source;
 		this.index = index;
-
-		// Ultimately the TypeDescriptor for this part is the same as the elements of the collection...
-		this.typeDescriptor = ( (CollectionTypeDescriptor) source.getTypeDescriptor() ).getElementTypeDescriptor();
+		this.type = type;
 	}
 
 	public AttributePathPart getSource() {
@@ -38,8 +36,18 @@ public class IndexedAttributePathPart implements AttributePathPart, Expression {
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return typeDescriptor;
+	public Type getExpressionType() {
+		return type;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return getExpressionType();
+	}
+
+	@Override
+	public Bindable getBindableModelDescriptor() {
+		return source.getBindableModelDescriptor();
 	}
 
 	@Override

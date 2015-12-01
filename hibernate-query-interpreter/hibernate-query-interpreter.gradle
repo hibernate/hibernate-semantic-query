@@ -2,8 +2,9 @@ apply plugin: 'antlr'
 
 dependencies {
 	compile project( ':hibernate-sqm' )
-	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+
 	antlr 'org.antlr:antlr4:4.5'
+
 	runtime 'org.antlr:antlr4-runtime:4.5'
 }
 

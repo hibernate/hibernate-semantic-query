@@ -10,9 +10,12 @@ import java.util.List;
 
 import org.hibernate.query.parser.AliasCollisionException;
 import org.hibernate.query.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
@@ -23,9 +26,11 @@ import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.Selection;
 
-import org.junit.Test;
-
 import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
+import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -286,7 +291,7 @@ public class AliasTest {
 		List<Selection> selections = querySpect.getSelectClause().getSelections();
 		Selection selection = selections.get( attributeIndex );
 		AttributeReferenceExpression expression = (AttributeReferenceExpression) selection.getExpression();
-		assertThat( expression.getSource().getTypeDescriptor().getTypeName(), is( typeName ) );
+		assertThat( ( (EntityTypeImpl) expression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
 		assertThat( expression.getAttributeDescriptor().getName(), is( attributeName ) );
 		if ( alias == null ) {
 			assertThat( selection.getAlias(), is( nullValue() ) );
@@ -299,7 +304,9 @@ public class AliasTest {
 	private void checkElementSelection(QuerySpec querySpec, int selectionIndex, String typeName, String alias) {
 		List<Selection> selections = querySpec.getSelectClause().getSelections();
 		Selection selection = selections.get( selectionIndex );
-		assertThat( selection.getExpression().getTypeDescriptor().getTypeName(), is( typeName ) );
+		FromElementReferenceExpression expression = (FromElementReferenceExpression) selection.getExpression();
+		EntityTypeImpl entityType = (EntityTypeImpl) expression.getBindableModelDescriptor();
+		assertThat( entityType.getTypeName(), is( typeName ) );
 		if ( alias == null ) {
 			assertThat( selection.getAlias(), is( nullValue() ) );
 		}
@@ -317,7 +324,7 @@ public class AliasTest {
 		WhereClause whereClause = querySpec.getWhereClause();
 		InSubQueryPredicate predicate = (InSubQueryPredicate) whereClause.getPredicate();
 		AttributeReferenceExpression testExpression = (AttributeReferenceExpression) predicate.getTestExpression();
-		assertThat( testExpression.getSource().getTypeDescriptor().getTypeName(), is( typeName ) );
+		assertThat( ( (EntityTypeImpl) testExpression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
 		assertThat( testExpression.getAttributeDescriptor().getName(), is( attributeName ) );
 		assertThat( testExpression.getSource().getAlias(), is( alias ) );
 	}
@@ -330,7 +337,7 @@ public class AliasTest {
 		WhereClause whereClause = querySpec.getWhereClause();
 		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
 		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
-		assertThat( leftHandExpression.getSource().getTypeDescriptor().getTypeName(), is( typeName ) );
+		assertThat( ( (EntityTypeImpl) leftHandExpression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
 		assertThat( leftHandExpression.getAttributeDescriptor().getName(), is( attributeName ) );
 		assertThat( leftHandExpression.getSource().getAlias(), is( alias ) );
 	}
@@ -345,7 +352,7 @@ public class AliasTest {
 		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getRightHandExpression();
 		assertThat( leftHandExpression.getAttributeDescriptor().getName(), is( attributeName ) );
 		assertThat( leftHandExpression.getSource().getAlias(), is( alias ) );
-		assertThat( leftHandExpression.getSource().getTypeDescriptor().getTypeName(), is( typeName ) );
+		assertThat( ( (EntityTypeImpl) leftHandExpression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
 	}
 
 	private SubQueryExpression getInSubQueryExpression(SelectStatement selectStatement) {
@@ -382,8 +389,102 @@ public class AliasTest {
 	private SelectStatement interpretQuery(String query) {
 		return (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl()
+				new ConsumerContextImpl( buildMetamodel() )
 		);
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+
+		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity" );
+		entityType.makeSingularAttribute(
+				"basic",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		entityType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+
+		EntityTypeImpl anythingType = metamodel.makeEntityType( "com.acme.Anything" );
+		anythingType.makeSingularAttribute(
+				"address",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		anythingType.makeSingularAttribute(
+				"name",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		anythingType.makeSingularAttribute(
+				"basic",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		anythingType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		anythingType.makeSingularAttribute(
+				"basic2",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		anythingType.makeSingularAttribute(
+				"b",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+
+		EntityTypeImpl somethingType = metamodel.makeEntityType( "com.acme.Something" );
+		somethingType.makeSingularAttribute(
+				"basic",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingType.makeSingularAttribute(
+				"basic3",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingType.makeSingularAttribute(
+				"entity",
+				SingularAttribute.Classification.BASIC,
+				entityType
+		);
+
+		EntityTypeImpl somethingElseType = metamodel.makeEntityType( "com.acme.SomethingElse" );
+		somethingElseType.makeSingularAttribute(
+				"basic",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingElseType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingElseType.makeSingularAttribute(
+				"basic2",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingElseType.makeSingularAttribute(
+				"basic3",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+
+		return metamodel;
 	}
 }
 

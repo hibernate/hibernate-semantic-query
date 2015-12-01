@@ -21,14 +21,8 @@ public class BetweenPredicate implements NegatablePredicate {
 	public BetweenPredicate(
 			Expression expression,
 			Expression lowerBound,
-			Expression upperBound) {
-		this( expression, lowerBound, upperBound, false );
-	}
-
-	public BetweenPredicate(
-			Expression expression,
-			Expression lowerBound,
-			Expression upperBound, boolean negated) {
+			Expression upperBound,
+			boolean negated) {
 		this.expression = expression;
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;

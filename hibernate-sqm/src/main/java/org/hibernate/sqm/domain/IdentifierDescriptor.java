@@ -6,11 +6,10 @@
  */
 package org.hibernate.sqm.domain;
 
-import java.util.Collection;
-
 /**
  * @author Steve Ebersole
  */
-public interface PolymorphicEntityTypeDescriptor extends EntityTypeDescriptor {
-	Collection<EntityTypeDescriptor> getImplementors();
+public interface IdentifierDescriptor {
+	Type getIdType();
+	boolean hasSingleIdAttribute();
 }

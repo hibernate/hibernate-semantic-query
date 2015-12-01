@@ -7,8 +7,12 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.ManagedType;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.query.predicate.Predicate;
 
 import org.jboss.logging.Logger;
@@ -24,7 +28,7 @@ public class QualifiedAttributeJoinFromElement
 	private static final Logger log = Logger.getLogger( QualifiedAttributeJoinFromElement.class );
 
 	private final String lhsAlias;
-	private final AttributeDescriptor joinedAttributeDescriptor;
+	private final Attribute joinedAttributeDescriptor;
 	private final boolean fetched;
 
 	private Predicate onClausePredicate;
@@ -33,10 +37,11 @@ public class QualifiedAttributeJoinFromElement
 			FromElementSpace fromElementSpace,
 			String alias,
 			String lhsAlias,
-			AttributeDescriptor joinedAttributeDescriptor,
+			Attribute joinedAttributeDescriptor,
 			JoinType joinType,
 			boolean fetched) {
-		super( fromElementSpace, alias, joinedAttributeDescriptor.getType(), joinType );
+		// todo : need to rework the type binding in FromElement
+		super( fromElementSpace, alias, (Bindable) joinedAttributeDescriptor, joinType );
 		this.lhsAlias = lhsAlias;
 		this.joinedAttributeDescriptor = joinedAttributeDescriptor;
 		this.fetched = fetched;
@@ -56,12 +61,40 @@ public class QualifiedAttributeJoinFromElement
 	 *
 	 * @return The attribute descriptor
 	 */
-	public AttributeDescriptor getJoinedAttributeDescriptor() {
+	public Attribute getJoinedAttributeDescriptor() {
 		return joinedAttributeDescriptor;
 	}
 
 	public boolean isFetched() {
 		return fetched;
+	}
+
+	@Override
+	public Attribute resolveAttribute(String attributeName) {
+		if ( getJoinedAttributeDescriptor() instanceof SingularAttribute ) {
+			final SingularAttribute singularAttribute = (SingularAttribute) getJoinedAttributeDescriptor();
+			if ( !ManagedType.class.isInstance( singularAttribute.getBoundType() ) ) {
+				throw new AttributeResolutionException(
+						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + singularAttribute.getBoundType() + "]"
+				);
+			}
+			return ( (ManagedType) singularAttribute.getBoundType() ).getAttribute( attributeName );
+		}
+		else if ( getJoinedAttributeDescriptor() instanceof PluralAttribute ) {
+			// Use the element type...
+			final PluralAttribute pluralAttribute = (PluralAttribute) getJoinedAttributeDescriptor();
+			if ( !ManagedType.class.isInstance( pluralAttribute.getCollectionElementType() ) ) {
+				throw new AttributeResolutionException(
+						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + pluralAttribute.getCollectionElementType() + "]"
+				);
+			}
+			return ( (ManagedType) pluralAttribute.getCollectionElementType() ).getAttribute( attributeName );
+		}
+
+		throw new AttributeResolutionException(
+				"Unexpected Attribute Type [" + getJoinedAttributeDescriptor() + "] as left-hand side for attribute reference [" +
+						attributeName + "]"
+		);
 	}
 
 	@Override

@@ -6,10 +6,17 @@
  */
 package org.hibernate.sqm.domain;
 
+import java.util.Set;
+
 /**
  * @author Steve Ebersole
  */
-public interface CollectionTypeDescriptor extends TypeDescriptor {
-	TypeDescriptor getIndexTypeDescriptor();
-	TypeDescriptor getElementTypeDescriptor();
+public interface IdentifierDescriptorMultipleAttribute {
+	interface IdClassDescriptor {
+		Type getType();
+		Set<SingularAttribute> getAttributes();
+	}
+
+	Set<SingularAttribute> getIdentifierAttributes();
+	IdClassDescriptor getIdClassDescriptor();
 }

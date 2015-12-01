@@ -7,23 +7,25 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
+import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralTrueExpression extends AbstractLiteralExpressionImpl<Boolean> {
-	public LiteralTrueExpression() {
-		this( StandardBasicTypeDescriptors.INSTANCE.BOOLEAN );
-	}
-
-	public LiteralTrueExpression(BasicTypeDescriptor booleanTypeDescriptor) {
+	public LiteralTrueExpression(BasicType<Boolean> booleanTypeDescriptor) {
 		super( Boolean.TRUE, booleanTypeDescriptor );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralTrueExpression( this );
+	}
+
+	@Override
+	protected void validateInferredType(Class javaType) {
+		if ( !Boolean.class.equals( javaType ) ) {
+			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Boolean" );
+		}
 	}
 }

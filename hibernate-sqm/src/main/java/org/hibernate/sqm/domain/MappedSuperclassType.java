@@ -9,5 +9,6 @@ package org.hibernate.sqm.domain;
 /**
  * @author Steve Ebersole
  */
-public interface CompositeTypeDescriptor extends TypeDescriptor {
+public interface MappedSuperclassType extends IdentifiableType {
+
 }

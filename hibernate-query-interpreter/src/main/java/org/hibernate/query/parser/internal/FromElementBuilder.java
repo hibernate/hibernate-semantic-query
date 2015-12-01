@@ -7,8 +7,8 @@
 package org.hibernate.query.parser.internal;
 
 import org.hibernate.query.parser.ParsingException;
-import org.hibernate.sqm.domain.AttributeDescriptor;
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromElement;
@@ -40,24 +40,24 @@ public class FromElementBuilder {
 	 * Make the root entity reference for the FromElementSpace
 	 *
 	 * @param fromElementSpace
-	 * @param entityTypeDescriptor
+	 * @param entityType
 	 * @param alias
 	 *
 	 * @return
 	 */
 	public RootEntityFromElement makeRootEntityFromElement(
 			FromElementSpace fromElementSpace,
-			EntityTypeDescriptor entityTypeDescriptor,
+			EntityType entityType,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for root entity reference [%s]",
 					alias,
-					entityTypeDescriptor.getTypeName()
+					entityType.getName()
 			);
 		}
-		final RootEntityFromElement root = new RootEntityFromElement( fromElementSpace, alias, entityTypeDescriptor );
+		final RootEntityFromElement root = new RootEntityFromElement( fromElementSpace, alias, entityType );
 		fromElementSpace.setRoot( root );
 		registerAlias( root );
 		return root;
@@ -68,25 +68,25 @@ public class FromElementBuilder {
 	 * Make the root entity reference for the FromElementSpace
 	 *
 	 * @param fromElementSpace
-	 * @param entityTypeDescriptor
+	 * @param entityType
 	 * @param alias
 	 *
 	 * @return
 	 */
 	public CrossJoinedFromElement makeCrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
-			EntityTypeDescriptor entityTypeDescriptor,
+			EntityType entityType,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for cross joined entity reference [%s]",
 					alias,
-					entityTypeDescriptor.getTypeName()
+					entityType.getName()
 			);
 		}
 
-		final CrossJoinedFromElement join = new CrossJoinedFromElement( fromElementSpace, alias, entityTypeDescriptor );
+		final CrossJoinedFromElement join = new CrossJoinedFromElement( fromElementSpace, alias, entityType );
 		fromElementSpace.addJoin( join );
 		registerAlias( join );
 		return join;
@@ -95,14 +95,14 @@ public class FromElementBuilder {
 	public QualifiedAttributeJoinFromElement buildAttributeJoin(
 			FromElementSpace fromElementSpace,
 			FromElement lhs,
-			AttributeDescriptor attributeDescriptor,
+			Attribute attributeDescriptor,
 			String alias,
 			JoinType joinType,
 			boolean fetched) {
 		if ( attributeDescriptor == null ) {
 			throw new ParsingException(
 					"AttributeDescriptor was null [name unknown]; cannot build attribute join in relation to from-element [" +
-							lhs.getTypeDescriptor().getTypeName() + "]"
+							lhs.getBindableModelDescriptor() + "(" + lhs.getAlias() + ")]"
 			);
 		}
 

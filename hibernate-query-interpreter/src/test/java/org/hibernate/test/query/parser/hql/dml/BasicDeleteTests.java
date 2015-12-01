@@ -6,7 +6,11 @@
  */
 package org.hibernate.test.query.parser.hql.dml;
 
+import javax.persistence.metamodel.Attribute;
+
 import org.hibernate.query.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
@@ -14,11 +18,13 @@ import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertSame;
 
@@ -28,19 +34,19 @@ import static org.junit.Assert.assertSame;
 public class BasicDeleteTests {
 	@Test
 	public void basicDeleteTest() {
-		basicDeleteAssertions( "delete Entity1 where basic1 = :something" );
-		basicDeleteAssertions( "delete from Entity1 where basic1 = :something" );
+		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
-		basicDeleteAssertions( "delete Entity1 e where e.basic1 = :something" );
-		basicDeleteAssertions( "delete from Entity1 e where e.basic1 = :something" );
+		basicDeleteAssertions( "delete Entity1 where basic1 = :something", consumerContext );
+		basicDeleteAssertions( "delete from Entity1 where basic1 = :something", consumerContext );
 
-		basicDeleteAssertions( "delete Entity1 e where basic1 = :something" );
-		basicDeleteAssertions( "delete from Entity1 e where basic1 = :something" );
+		basicDeleteAssertions( "delete Entity1 e where e.basic1 = :something", consumerContext );
+		basicDeleteAssertions( "delete from Entity1 e where e.basic1 = :something", consumerContext );
+
+		basicDeleteAssertions( "delete Entity1 e where basic1 = :something", consumerContext );
+		basicDeleteAssertions( "delete from Entity1 e where basic1 = :something", consumerContext );
 	}
 
-	private void basicDeleteAssertions(String query) {
-		ConsumerContextImpl consumerContext = new ConsumerContextImpl();
-
+	private void basicDeleteAssertions(String query, ConsumerContextImpl consumerContext) {
 		final Statement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
 
 		assertThat( statement, instanceOf( DeleteStatement.class ) );
@@ -56,5 +62,16 @@ public class BasicDeleteTests {
 		assertSame( attributeReferenceExpression.getUnderlyingFromElement(), deleteStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterExpression.class ) );
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity1" );
+		entityType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		return metamodel;
 	}
 }

@@ -6,9 +6,14 @@
  */
 package org.hibernate.sqm.query.expression;
 
+import org.hibernate.sqm.domain.BasicType;
+
 /**
  * @author Steve Ebersole
  */
-public interface ConstantExpression<T> extends Expression {
+public interface ConstantExpression<T> extends ImpliedTypeExpression {
 	T getValue();
+
+	@Override
+	BasicType<T> getExpressionType();
 }

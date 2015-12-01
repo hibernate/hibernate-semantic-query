@@ -8,18 +8,14 @@ package org.hibernate.query.parser.criteria;
 
 import java.util.List;
 import javax.persistence.criteria.AbstractQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Subquery;
 
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeFunction;
-import org.hibernate.sqm.query.expression.CollectionValueFunction;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
@@ -29,8 +25,6 @@ import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralExpression;
-import org.hibernate.sqm.query.expression.MapEntryFunction;
-import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.expression.MaxFunction;
 import org.hibernate.sqm.query.expression.MinFunction;
 import org.hibernate.sqm.query.expression.ParameterExpression;
@@ -57,38 +51,66 @@ public interface CriteriaVisitor {
 	SelectClause visitSelectClause(AbstractQuery jpaCriteria);
 
 	<T> LiteralExpression<T> visitLiteral(T value);
-	<T> LiteralExpression<T> visitLiteral(T value, BasicTypeDescriptor typeDescriptor);
+	<T> LiteralExpression<T> visitLiteral(T value, BasicType<T> typeDescriptor);
 
 	<T extends Enum> ConstantEnumExpression<T> visitEnumConstant(T value);
 	<T> ConstantFieldExpression<T> visitConstant(T value);
-	<T> ConstantFieldExpression<T> visitConstant(T value, TypeDescriptor typeDescriptor);
+	<T> ConstantFieldExpression<T> visitConstant(T value, BasicType<T> typeDescriptor);
 
 	ParameterExpression visitParameter(javax.persistence.criteria.ParameterExpression param);
-	ParameterExpression visitParameter(javax.persistence.criteria.ParameterExpression param, TypeDescriptor typeDescriptor);
+	ParameterExpression visitParameter(javax.persistence.criteria.ParameterExpression param, Type typeDescriptor);
 
 	UnaryOperationExpression visitUnaryOperation(
+			UnaryOperationExpression.Operation operation,
+			javax.persistence.criteria.Expression expression);
+
+	UnaryOperationExpression visitUnaryOperation(
+			UnaryOperationExpression.Operation operation,
 			javax.persistence.criteria.Expression expression,
-			UnaryOperationExpression.Operation operation);
+			BasicType resultType);
 
 	BinaryArithmeticExpression visitArithmetic(
-			javax.persistence.criteria.Expression expression1,
 			BinaryArithmeticExpression.Operation operation,
+			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2);
+
+	BinaryArithmeticExpression visitArithmetic(
+			BinaryArithmeticExpression.Operation operation,
+			javax.persistence.criteria.Expression expression1,
+			javax.persistence.criteria.Expression expression2,
+			BasicType resultType);
 
 	FromElementReferenceExpression visitIdentificationVariableReference(From reference);
 	AttributeReferenceExpression visitAttributeReference(From attributeSource, String attributeName);
 
-	FunctionExpression visitFunction(String name, TypeDescriptor resultTypeDescriptor, List<javax.persistence.criteria.Expression> expressions);
+	FunctionExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression> expressions);
+
 	AvgFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	AvgFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+
 	CountFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	CountFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+
 	CountStarFunction visitCountStarFunction(boolean distinct);
+	CountStarFunction visitCountStarFunction(boolean distinct, BasicType resultType);
+
 	MaxFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	MaxFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+
 	MinFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	MinFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+
 	SumFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	SumFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
 	ConcatExpression visitConcat(
 			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2);
+
+	ConcatExpression visitConcat(
+			javax.persistence.criteria.Expression expression1,
+			javax.persistence.criteria.Expression expression2,
+			BasicType resultType);
 
 	EntityTypeExpression visitEntityType(String identificationVariable);
 	EntityTypeExpression visitEntityType(String identificationVariable, String attributeName);

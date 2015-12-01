@@ -8,13 +8,14 @@ package org.hibernate.test.query.parser.hql;
 
 import java.util.Collection;
 
-import org.hibernate.query.parser.AliasCollisionException;
 import org.hibernate.query.parser.SemanticException;
 import org.hibernate.query.parser.SemanticQueryInterpreter;
+import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.HqlParseTreeBuilder;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseProcessor;
 import org.hibernate.query.parser.internal.hql.phase2.SemanticQueryBuilder;
+import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
@@ -25,7 +26,9 @@ import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
-import org.hibernate.test.query.parser.ParsingContextImpl;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -45,13 +48,13 @@ import static org.junit.Assert.fail;
  * @author Steve Ebersole
  */
 public class SimpleSemanticQueryBuilderTest {
+	private ParsingContext parsingContext = new ParsingContext( new ConsumerContextImpl( buildMetamodel() ) );
+
 	@Test
 	public void simpleIntegerLiteralsTest() {
-		final ParsingContextImpl parsingContext = new ParsingContextImpl();
-
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1=2" );
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextImpl() );
+		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( parsingContext );
 		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
 
 		parser.reset();
@@ -82,11 +85,9 @@ public class SimpleSemanticQueryBuilderTest {
 
 	@Test
 	public void simpleLongLiteralsTest() {
-		final ParsingContextImpl parsingContext = new ParsingContextImpl();
-
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1L=2L" );
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( new ParsingContextImpl() );
+		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( parsingContext );
 		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
 
 		parser.reset();
@@ -115,7 +116,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl()
+				parsingContext.getConsumerContext()
 		);
 		QuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );
@@ -126,7 +127,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 = 5 )";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl()
+				parsingContext.getConsumerContext()
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -137,7 +138,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
-		assertThat( fromElementSpace.getRoot().getTypeDescriptor().getTypeName(), is( "com.acme.Something" ) );
+		assertThat( fromElementSpace.getRoot().getEntityName(), is( "com.acme.Something" ) );
 		assertThat( fromElementSpace.getRoot().getAlias(), is( "a" ) );
 
 		// assertions against the root query predicate that defines the sub-query
@@ -160,7 +161,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( subqueryFromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat(
-				subqueryFromElementSpace.getRoot().getTypeDescriptor().getTypeName(),
+				subqueryFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse" )
 		);
 		assertThat( subqueryFromElementSpace.getRoot().getAlias(), is( "e" ) );
@@ -171,7 +172,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 IN(select e from SomethingElse2 b where b.basic2 = 2 ))";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl()
+				parsingContext.getConsumerContext()
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -182,7 +183,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
-		assertThat( fromElementSpace.getRoot().getTypeDescriptor().getTypeName(), is( "com.acme.Something" ) );
+		assertThat( fromElementSpace.getRoot().getEntityName(), is( "com.acme.Something" ) );
 		assertThat( fromElementSpace.getRoot().getAlias(), is( "a" ) );
 
 		// assertions against the root query predicate that defines the sub-query
@@ -205,7 +206,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( subqueryFromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat(
-				subqueryFromElementSpace.getRoot().getTypeDescriptor().getTypeName(),
+				subqueryFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse" )
 		);
 		assertThat( subqueryFromElementSpace.getRoot().getAlias(), is( "e" ) );
@@ -225,7 +226,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( subSubqueryFromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat(
-				subSubqueryFromElementSpace.getRoot().getTypeDescriptor().getTypeName(),
+				subSubqueryFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse2" )
 		);
 		assertThat( subSubqueryFromElementSpace.getRoot().getAlias(), is( "b" ) );
@@ -236,7 +237,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl()
+				parsingContext.getConsumerContext()
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -247,7 +248,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
-		assertThat( fromElementSpace.getRoot().getTypeDescriptor().getTypeName(), is( "com.acme.Something" ) );
+		assertThat( fromElementSpace.getRoot().getEntityName(), is( "com.acme.Something" ) );
 		assertThat( fromElementSpace.getRoot().getAlias(), is( "a" ) );
 
 		// assertions against the root query predicate that defines the sub-query
@@ -279,7 +280,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( leftHandPredicateFromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat(
-				leftHandPredicateFromElementSpace.getRoot().getTypeDescriptor().getTypeName(),
+				leftHandPredicateFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse" )
 		);
 		assertThat( leftHandPredicateFromElementSpace.getRoot().getAlias(), is( "b" ) );
@@ -298,7 +299,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( rightHandPredicateFromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat(
-				rightHandPredicateFromElementSpace.getRoot().getTypeDescriptor().getTypeName(),
+				rightHandPredicateFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse2" )
 		);
 		assertThat( rightHandPredicateFromElementSpace.getRoot().getAlias(), is( "c" ) );
@@ -309,7 +310,7 @@ public class SimpleSemanticQueryBuilderTest {
 	public void testInvalidOnPredicateWithImplicitJoin() throws Exception {
 		final String query = "select a from Something a left outer join a.entity c on c.entity.basic1 > 5 and c.basic2 < 20";
 		try {
-			SemanticQueryInterpreter.interpret( query, new ConsumerContextImpl() );
+			SemanticQueryInterpreter.interpret( query, parsingContext.getConsumerContext() );
 			fail();
 		}
 		catch (SemanticException expected) {
@@ -322,12 +323,78 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select new org.hibernate.test.query.parser.hql.SimpleSemanticQueryBuilderTest$DTO(a.basic1 as id, a.basic2 as name) from Something a";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl()
+				parsingContext.getConsumerContext()
 		);
 		QuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );
 	}
 
 	private static class DTO {
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+
+		EntityTypeImpl relatedType = metamodel.makeEntityType( "com.acme.Related" );
+		relatedType.makeSingularAttribute(
+				"basic1",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		relatedType.makeSingularAttribute(
+				"basic2",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		relatedType.makeSingularAttribute(
+				"entity",
+				relatedType
+		);
+
+		EntityTypeImpl somethingType = metamodel.makeEntityType( "com.acme.Something" );
+		somethingType.makeSingularAttribute(
+				"b",
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		somethingType.makeSingularAttribute(
+				"c",
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		somethingType.makeSingularAttribute(
+				"basic",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingType.makeSingularAttribute(
+				"basic1",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingType.makeSingularAttribute(
+				"basic2",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingType.makeSingularAttribute(
+				"entity",
+				relatedType
+		);
+
+		EntityTypeImpl somethingElseType = metamodel.makeEntityType( "com.acme.SomethingElse" );
+		somethingElseType.makeSingularAttribute(
+				"basic",
+				relatedType
+		);
+		somethingElseType.makeSingularAttribute(
+				"basic1",
+				relatedType
+		);
+
+		EntityTypeImpl somethingElse2Type = metamodel.makeEntityType( "com.acme.SomethingElse2" );
+		somethingElse2Type.makeSingularAttribute(
+				"basic1",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingElse2Type.makeSingularAttribute(
+				"basic2",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+
+		return metamodel;
 	}
 }

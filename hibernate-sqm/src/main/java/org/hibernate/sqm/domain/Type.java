@@ -7,8 +7,15 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * A type-safe representation of a domain model type.
+ *
  * @author Steve Ebersole
  */
-public interface BasicTypeDescriptor extends TypeDescriptor {
-	Class getCorrespondingJavaType();
+public interface Type {
+	/**
+	 * The name of the type.  For a Java type this would be the same as the type's Class name
+	 *
+	 * @return The type name
+	 */
+	String getTypeName();
 }

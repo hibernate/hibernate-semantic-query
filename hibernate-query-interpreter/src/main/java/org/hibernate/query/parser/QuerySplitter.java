@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.sqm.BaseSemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
-import org.hibernate.sqm.domain.PolymorphicEntityTypeDescriptor;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
@@ -93,7 +93,7 @@ public class QuerySplitter {
 		// root.  Use that restriction to locate the unmapped polymorphic reference
 		RootEntityFromElement unmappedPolymorphicReference = null;
 		for ( FromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
-			if ( PolymorphicEntityTypeDescriptor.class.isInstance( fromElementSpace.getRoot().getTypeDescriptor() ) ) {
+			if ( PolymorphicEntityType.class.isInstance( fromElementSpace.getRoot().getBindableModelDescriptor() ) ) {
 				unmappedPolymorphicReference = fromElementSpace.getRoot();
 			}
 		}
@@ -102,11 +102,11 @@ public class QuerySplitter {
 			return new SelectStatement[] { statement };
 		}
 
-		final PolymorphicEntityTypeDescriptor unmappedPolymorphicDescriptor = (PolymorphicEntityTypeDescriptor) unmappedPolymorphicReference.getTypeDescriptor();
+		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBindableModelDescriptor();
 		final SelectStatement[] expanded = new SelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
-		for ( EntityTypeDescriptor mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
+		for ( EntityType mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
 			i++;
 			final UnmappedPolymorphismReplacer replacer = new UnmappedPolymorphismReplacer(
 					statement,
@@ -121,14 +121,14 @@ public class QuerySplitter {
 
 	private static class UnmappedPolymorphismReplacer extends BaseSemanticQueryWalker {
 		private final RootEntityFromElement unmappedPolymorphicFromElement;
-		private final EntityTypeDescriptor mappedDescriptor;
+		private final EntityType mappedDescriptor;
 
 		private Map<FromElement,FromElement> fromElementCopyMap = new HashMap<FromElement, FromElement>();
 
 		private UnmappedPolymorphismReplacer(
 				SelectStatement selectStatement,
 				RootEntityFromElement unmappedPolymorphicFromElement,
-				EntityTypeDescriptor mappedDescriptor) {
+				EntityType mappedDescriptor) {
 			this.unmappedPolymorphicFromElement = unmappedPolymorphicFromElement;
 			this.mappedDescriptor = mappedDescriptor;
 		}
@@ -239,7 +239,7 @@ public class QuerySplitter {
 				copy = new RootEntityFromElement(
 						currentFromElementSpaceCopy,
 						rootEntityFromElement.getAlias(),
-						rootEntityFromElement.getTypeDescriptor()
+						rootEntityFromElement.getBindableModelDescriptor()
 				);
 			}
 			fromElementCopyMap.put( rootEntityFromElement, copy );
@@ -251,7 +251,7 @@ public class QuerySplitter {
 			CrossJoinedFromElement copy = new CrossJoinedFromElement(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getAlias(),
-					joinedFromElement.getTypeDescriptor()
+					joinedFromElement.getBindableModelDescriptor()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
 			return copy;
@@ -263,7 +263,8 @@ public class QuerySplitter {
 
 			TreatedJoinedFromElement copy = new TreatedJoinedFromElement(
 					wrappedCopy,
-					joinedFromElement.getTypeDescriptor()
+					// todo : for now...
+					(EntityType) joinedFromElement.getBindableModelDescriptor()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
 			return copy;
@@ -278,7 +279,7 @@ public class QuerySplitter {
 			QualifiedEntityJoinFromElement copy = new QualifiedEntityJoinFromElement(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getAlias(),
-					joinedFromElement.getTypeDescriptor(),
+					joinedFromElement.getBindableModelDescriptor(),
 					joinedFromElement.getJoinType()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
@@ -393,7 +394,8 @@ public class QuerySplitter {
 			return new BetweenPredicate(
 					(Expression) predicate.getExpression().accept( this ),
 					(Expression) predicate.getLowerBound().accept( this ),
-					(Expression) predicate.getUpperBound().accept( this )
+					(Expression) predicate.getUpperBound().accept( this ),
+					predicate.isNegated()
 			);
 		}
 
@@ -473,7 +475,7 @@ public class QuerySplitter {
 
 		@Override
 		public EntityTypeExpression visitEntityTypeExpression(EntityTypeExpression expression) {
-			return new EntityTypeExpression( expression.getTypeDescriptor() );
+			return new EntityTypeExpression( expression.getExpressionType() );
 		}
 
 		@Override
@@ -491,7 +493,11 @@ public class QuerySplitter {
 			if ( sourceCopy == null ) {
 				throw new AssertionError( "FromElement not found in copy map" );
 			}
-			return new AttributeReferenceExpression( sourceCopy, expression.getAttributeDescriptor() );
+			return new AttributeReferenceExpression(
+					sourceCopy,
+					expression.getAttributeDescriptor(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
@@ -501,7 +507,7 @@ public class QuerySplitter {
 			if ( fromElementCopy == null ) {
 				throw new AssertionError( "FromElement not found in copy map" );
 			}
-			return new FromElementReferenceExpression( fromElementCopy );
+			return new FromElementReferenceExpression( fromElementCopy, expression.getExpressionType() );
 		}
 
 		@Override
@@ -512,8 +518,8 @@ public class QuerySplitter {
 			}
 			return new FunctionExpression(
 					expression.getFunctionName(),
-					argumentsCopy,
-					expression.getTypeDescriptor()
+					expression.getExpressionType(),
+					argumentsCopy
 			);
 		}
 
@@ -521,20 +527,22 @@ public class QuerySplitter {
 		public AvgFunction visitAvgFunction(AvgFunction expression) {
 			return new AvgFunction(
 					(Expression) expression.getArgument().accept( this ),
-					expression.isDistinct()
+					expression.isDistinct(),
+					expression.getExpressionType()
 			);
 		}
 
 		@Override
 		public CountStarFunction visitCountStarFunction(CountStarFunction expression) {
-			return new CountStarFunction( expression.isDistinct() );
+			return new CountStarFunction( expression.isDistinct(), expression.getExpressionType() );
 		}
 
 		@Override
 		public CountFunction visitCountFunction(CountFunction expression) {
 			return new CountFunction(
 					(Expression) expression.getArgument().accept( this ),
-					expression.isDistinct()
+					expression.isDistinct(),
+					expression.getExpressionType()
 			);
 		}
 
@@ -542,7 +550,8 @@ public class QuerySplitter {
 		public MaxFunction visitMaxFunction(MaxFunction expression) {
 			return new MaxFunction(
 					(Expression) expression.getArgument().accept( this ),
-					expression.isDistinct()
+					expression.isDistinct(),
+					expression.getExpressionType()
 			);
 		}
 
@@ -550,7 +559,8 @@ public class QuerySplitter {
 		public MinFunction visitMinFunction(MinFunction expression) {
 			return new MinFunction(
 					(Expression) expression.getArgument().accept( this ),
-					expression.isDistinct()
+					expression.isDistinct(),
+					expression.getExpressionType()
 			);
 		}
 
@@ -558,58 +568,83 @@ public class QuerySplitter {
 		public SumFunction visitSumFunction(SumFunction expression) {
 			return new SumFunction(
 					(Expression) expression.getArgument().accept( this ),
-					expression.isDistinct()
+					expression.isDistinct(),
+					expression.getExpressionType()
 			);
 		}
 
 		@Override
 		public LiteralStringExpression visitLiteralStringExpression(LiteralStringExpression expression) {
-			return new LiteralStringExpression( expression.getLiteralValue() );
+			return new LiteralStringExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralCharacterExpression visitLiteralCharacterExpression(LiteralCharacterExpression expression) {
-			return new LiteralCharacterExpression( expression.getLiteralValue() );
+			return new LiteralCharacterExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralDoubleExpression visitLiteralDoubleExpression(LiteralDoubleExpression expression) {
-			return new LiteralDoubleExpression( expression.getLiteralValue() );
+			return new LiteralDoubleExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralIntegerExpression visitLiteralIntegerExpression(LiteralIntegerExpression expression) {
-			return new LiteralIntegerExpression( expression.getLiteralValue() );
+			return new LiteralIntegerExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralBigIntegerExpression visitLiteralBigIntegerExpression(LiteralBigIntegerExpression expression) {
-			return new LiteralBigIntegerExpression( expression.getLiteralValue() );
+			return new LiteralBigIntegerExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralBigDecimalExpression visitLiteralBigDecimalExpression(LiteralBigDecimalExpression expression) {
-			return new LiteralBigDecimalExpression( expression.getLiteralValue() );
+			return new LiteralBigDecimalExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralFloatExpression visitLiteralFloatExpression(LiteralFloatExpression expression) {
-			return new LiteralFloatExpression( expression.getLiteralValue() );
+			return new LiteralFloatExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralLongExpression visitLiteralLongExpression(LiteralLongExpression expression) {
-			return new LiteralLongExpression( expression.getLiteralValue() );
+			return new LiteralLongExpression(
+					expression.getLiteralValue(),
+					expression.getExpressionType()
+			);
 		}
 
 		@Override
 		public LiteralTrueExpression visitLiteralTrueExpression(LiteralTrueExpression expression) {
-			return new LiteralTrueExpression();
+			return new LiteralTrueExpression( expression.getExpressionType() );
 		}
 
 		@Override
 		public LiteralFalseExpression visitLiteralFalseExpression(LiteralFalseExpression expression) {
-			return new LiteralFalseExpression();
+			return new LiteralFalseExpression( expression.getExpressionType() );
 		}
 
 		@Override
@@ -628,13 +663,13 @@ public class QuerySplitter {
 		@Override
 		@SuppressWarnings("unchecked")
 		public ConstantEnumExpression visitConstantEnumExpression(ConstantEnumExpression expression) {
-			return new ConstantEnumExpression( expression.getValue() );
+			return new ConstantEnumExpression( expression.getValue(), expression.getExpressionType() );
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
 		public ConstantFieldExpression visitConstantFieldExpression(ConstantFieldExpression expression) {
-			return new ConstantFieldExpression( expression.getValue() );
+			return new ConstantFieldExpression( expression.getValue(), expression.getExpressionType() );
 		}
 
 		@Override
@@ -642,13 +677,18 @@ public class QuerySplitter {
 			return new BinaryArithmeticExpression(
 					expression.getOperation(),
 					(Expression) expression.getLeftHandOperand().accept( this ),
-					(Expression) expression.getRightHandOperand().accept( this )
+					(Expression) expression.getRightHandOperand().accept( this ),
+					expression.getExpressionType()
 			);
 		}
 
 		@Override
 		public SubQueryExpression visitSubQueryExpression(SubQueryExpression expression) {
-			return new SubQueryExpression( visitQuerySpec( expression.getQuerySpec() ) );
+			return new SubQueryExpression(
+					visitQuerySpec( expression.getQuerySpec() ),
+					// assume already validated
+					expression.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression().getExpressionType()
+			);
 		}
 	}
 

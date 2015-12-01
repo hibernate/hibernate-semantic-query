@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.select;
 
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
@@ -32,5 +32,5 @@ public interface DynamicInstantiationTarget<T> {
 	 *
 	 * @return The type to be instantiated.
 	 */
-	TypeDescriptor getTargetJavaType();
+	Type getTargetType();
 }

@@ -6,8 +6,11 @@
  */
 package org.hibernate.test.query.parser.hql.dml;
 
+import javax.persistence.metamodel.Attribute;
+
 import org.hibernate.query.parser.SemanticQueryInterpreter;
-import org.hibernate.sqm.query.DeleteStatement;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
@@ -17,7 +20,9 @@ import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.set.Assignment;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
-import org.junit.Assert;
+import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
+import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -43,7 +48,7 @@ public class BasicUpdateTests {
 	}
 
 	private void basicUpdateAssertions(String query) {
-		ConsumerContextImpl consumerContext = new ConsumerContextImpl();
+		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 		final Statement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
 
@@ -67,5 +72,21 @@ public class BasicUpdateTests {
 		assertSame( assignment.getStateField().getUnderlyingFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( assignment.getValue(), instanceOf( LiteralCharacterExpression.class ) );
+	}
+
+	private DomainMetamodel buildMetamodel() {
+		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
+		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity1" );
+		entityType.makeSingularAttribute(
+				"basic1",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		entityType.makeSingularAttribute(
+				"basic2",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
+		return metamodel;
 	}
 }

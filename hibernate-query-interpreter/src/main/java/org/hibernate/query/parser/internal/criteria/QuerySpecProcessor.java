@@ -29,14 +29,16 @@ import org.hibernate.query.parser.criteria.CriteriaVisitor;
 import org.hibernate.query.parser.criteria.ExpressionImplementor;
 import org.hibernate.query.parser.criteria.PredicateImplementor;
 import org.hibernate.query.parser.internal.AliasRegistry;
+import org.hibernate.query.parser.internal.ExpressionTypeHelper;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
 import org.hibernate.query.parser.internal.ParsingContext;
-import org.hibernate.sqm.domain.AttributeDescriptor;
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
@@ -131,7 +133,9 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 			final FromElementSpace space = fromClause.makeFromElementSpace();
 			final RootEntityFromElement sqmRoot = fromElementBuilder.makeRootEntityFromElement(
 					space,
-					parsingContext.getConsumerContext().resolveEntityReference( root.getModel().getJavaType().getName() ),
+					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityType(
+							root.getModel().getJavaType().getName()
+					),
 					root.getAlias()
 			);
 			space.setRoot( sqmRoot );
@@ -147,7 +151,7 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 			final QualifiedAttributeJoinFromElement sqmJoin = fromElementBuilder.buildAttributeJoin(
 					space,
 					sqmLhs,
-					sqmLhs.getTypeDescriptor().getAttributeDescriptor( join.getAttribute().getName() ),
+					sqmLhs.resolveAttribute( join.getAttribute().getName() ),
 					join.getAlias(),
 					convert( join.getJoinType() ),
 					false
@@ -162,7 +166,7 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 			final QualifiedAttributeJoinFromElement sqmFetch = fromElementBuilder.buildAttributeJoin(
 					space,
 					sqmLhs,
-					sqmLhs.getTypeDescriptor().getAttributeDescriptor( fetch.getAttribute().getName() ),
+					sqmLhs.resolveAttribute( fetch.getAttribute().getName() ),
 					parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias(),
 					convert( fetch.getJoinType() ),
 					true
@@ -207,13 +211,16 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 				containerForSelections = container;
 			}
 			else if ( List.class.equals( selectionResultType ) ) {
-				containerForSelections = DynamicInstantiation.forListInstantiation();
+				final BasicType<List> listType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( List.class );
+				containerForSelections = DynamicInstantiation.forListInstantiation( listType );
 			}
 			else if ( Map.class.equals( selectionResultType ) ) {
-				containerForSelections = DynamicInstantiation.forMapInstantiation();
+				final BasicType<Map> mapType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Map.class );
+				containerForSelections = DynamicInstantiation.forMapInstantiation( mapType );
 			}
 			else {
-				containerForSelections = DynamicInstantiation.forClassInstantiation( selectionResultType );
+				final BasicType instantiationType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( selectionResultType );
+				containerForSelections = DynamicInstantiation.forClassInstantiation( instantiationType );
 			}
 
 			for ( Selection<?> nestedSelection : selection.getCompoundSelectionItems() ) {
@@ -272,88 +279,123 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 
 		return visitLiteral(
 				value,
-				StandardBasicTypeDescriptors.INSTANCE.standardDescriptorForType( value.getClass() )
+				(BasicType<T>) parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( value.getClass() )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> LiteralExpression<T> visitLiteral(T value, BasicTypeDescriptor typeDescriptor) {
+	public <T> LiteralExpression<T> visitLiteral(T value, BasicType<T> typeDescriptor) {
 		assert typeDescriptor != null : "BasicTypeDescriptor passed cannot be null";
 
 		if ( value == null ) {
 			return (LiteralExpression<T>) new LiteralNullExpression();
 		}
 
-		if ( Boolean.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
+		if ( Boolean.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
 			if ( (Boolean) value ) {
-				return (LiteralExpression<T>) new LiteralTrueExpression( typeDescriptor );
+				return (LiteralExpression<T>) new LiteralTrueExpression( (BasicType<Boolean>) typeDescriptor );
 			}
 			else {
-				return (LiteralExpression<T>) new LiteralFalseExpression( typeDescriptor );
+				return (LiteralExpression<T>) new LiteralFalseExpression( (BasicType<Boolean>) typeDescriptor );
 			}
 		}
-		else if ( Integer.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralIntegerExpression( (Integer) value, typeDescriptor );
+		else if ( Integer.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralIntegerExpression(
+					(Integer) value,
+					(BasicType<Integer>) typeDescriptor
+			);
 		}
-		else if ( Long.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralLongExpression( (Long) value, typeDescriptor );
+		else if ( Long.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralLongExpression(
+					(Long) value,
+					(BasicType<Long>) typeDescriptor
+			);
 		}
-		else if ( Float.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralFloatExpression( (Float) value, typeDescriptor );
+		else if ( Float.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralFloatExpression(
+					(Float) value,
+					(BasicType<Float>) typeDescriptor
+			);
 		}
-		else if ( Double.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralDoubleExpression( (Double) value, typeDescriptor );
+		else if ( Double.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralDoubleExpression(
+					(Double) value,
+					(BasicType<Double>) typeDescriptor
+			);
 		}
-		else if ( BigInteger.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralBigIntegerExpression( (BigInteger) value, typeDescriptor );
+		else if ( BigInteger.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralBigIntegerExpression(
+					(BigInteger) value,
+					(BasicType<BigInteger>) typeDescriptor
+			);
 		}
-		else if ( BigDecimal.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralBigDecimalExpression( (BigDecimal) value, typeDescriptor );
+		else if ( BigDecimal.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralBigDecimalExpression(
+					(BigDecimal) value,
+					(BasicType<BigDecimal>) typeDescriptor
+			);
 		}
-		else if ( Character.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralCharacterExpression( (Character) value, typeDescriptor );
+		else if ( Character.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralCharacterExpression(
+					(Character) value,
+					(BasicType<Character>) typeDescriptor
+			);
 		}
-		else if ( String.class.isAssignableFrom( typeDescriptor.getCorrespondingJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralStringExpression( (String) value, typeDescriptor );
+		else if ( String.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
+			return (LiteralExpression<T>) new LiteralStringExpression(
+					(String) value,
+					(BasicType<String>) typeDescriptor
+			);
 		}
 
 		throw new QueryException(
 				"Unexpected literal expression [value=" + value +
-						", javaType=" + typeDescriptor.getCorrespondingJavaType().getName() +
+						", javaType=" + typeDescriptor.getJavaType().getName() +
 						"]; expecting boolean, int, long, float, double, BigInteger, BigDecimal, char, or String"
 		);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends Enum> ConstantEnumExpression<T> visitEnumConstant(T value) {
-		return new ConstantEnumExpression<T>( value );
+		return new ConstantEnumExpression<T>(
+				value,
+				(BasicType<T>) parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( value.getClass() )
+		);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> ConstantFieldExpression<T> visitConstant(T value) {
-		return new ConstantFieldExpression<T>( value );
+		if ( value == null ) {
+			throw new NullPointerException( "Value passed as `constant value` cannot be null" );
+		}
+
+		return visitConstant(
+				value,
+				(BasicType<T>) parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( value.getClass() )
+		);
 	}
 
 	@Override
-	public <T> ConstantFieldExpression<T> visitConstant(T value, TypeDescriptor typeDescriptor) {
+	public <T> ConstantFieldExpression<T> visitConstant(T value, BasicType<T> typeDescriptor) {
 		return new ConstantFieldExpression<T>( value, typeDescriptor );
 	}
 
 	@Override
 	public ParameterExpression visitParameter(javax.persistence.criteria.ParameterExpression param) {
-		TypeDescriptor typeDescriptor = null;
-		if ( param.getJavaType() != null ) {
-			typeDescriptor = StandardBasicTypeDescriptors.INSTANCE.standardDescriptorForType( param.getJavaType() );
-		}
-
-		return visitParameter( param, typeDescriptor );
+		return visitParameter(
+				param,
+				// we assume basic types here.  I *think* JPA only allows basic types, but double check
+				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( param.getParameterType() )
+		);
 	}
 
 	@Override
 	public ParameterExpression visitParameter(
 			javax.persistence.criteria.ParameterExpression param,
-			TypeDescriptor typeDescriptor) {
+			Type typeDescriptor) {
 		if ( isNotEmpty( param.getName() ) ) {
 			return new NamedParameterExpression( param.getName(), typeDescriptor );
 		}
@@ -366,76 +408,170 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 
 	@Override
 	public UnaryOperationExpression visitUnaryOperation(
-			javax.persistence.criteria.Expression expression,
-			UnaryOperationExpression.Operation operation) {
+			UnaryOperationExpression.Operation operation,
+			javax.persistence.criteria.Expression expression) {
 		return new UnaryOperationExpression( operation, visitExpression( expression ) );
 	}
 
 	@Override
+	public UnaryOperationExpression visitUnaryOperation(
+			UnaryOperationExpression.Operation operation,
+			javax.persistence.criteria.Expression expression,
+			BasicType resultType) {
+		return new UnaryOperationExpression( operation, visitExpression( expression ), resultType );
+	}
+
+	@Override
 	public BinaryArithmeticExpression visitArithmetic(
-			javax.persistence.criteria.Expression expression1,
 			BinaryArithmeticExpression.Operation operation,
+			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2) {
+		final Expression firstOperand = visitExpression( expression1 );
+		final Expression secondOperand = visitExpression( expression2 );
+		return new BinaryArithmeticExpression(
+				operation,
+				firstOperand,
+				secondOperand,
+				ExpressionTypeHelper.resolveArithmeticType(
+						(BasicType) firstOperand.getExpressionType(),
+						(BasicType) secondOperand.getExpressionType(),
+						parsingContext.getConsumerContext(),
+						operation == BinaryArithmeticExpression.Operation.DIVIDE
+				)
+		);
+	}
+
+	@Override
+	public BinaryArithmeticExpression visitArithmetic(
+			BinaryArithmeticExpression.Operation operation,
+			javax.persistence.criteria.Expression expression1,
+			javax.persistence.criteria.Expression expression2,
+			BasicType resultType) {
 		return new BinaryArithmeticExpression(
 				operation,
 				visitExpression( expression1 ),
-				visitExpression( expression2 )
+				visitExpression( expression2 ),
+				resultType
 		);
 	}
 
 	@Override
 	public FromElementReferenceExpression visitIdentificationVariableReference(From reference) {
-		return new FromElementReferenceExpression( fromElementBuilder.getAliasRegistry().findFromElementByAlias( reference.getAlias() ) );
+		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( reference.getAlias() );
+		return new FromElementReferenceExpression( fromElement, fromElement.getBindableModelDescriptor().getBoundType() );
 	}
 
 	@Override
 	public AttributeReferenceExpression visitAttributeReference(From attributeSource, String attributeName) {
 		final FromElement source = fromElementBuilder.getAliasRegistry().findFromElementByAlias( attributeSource.getAlias() );
-		final AttributeDescriptor attributeDescriptor = source.getTypeDescriptor().getAttributeDescriptor( attributeName );
-		return new AttributeReferenceExpression( source, attributeDescriptor );
+		final Attribute attributeDescriptor = source.resolveAttribute( attributeName );
+		final Type type;
+		if ( attributeDescriptor instanceof SingularAttribute ) {
+			type = ( (SingularAttribute) attributeDescriptor ).getType();
+		}
+		else if ( attributeDescriptor instanceof PluralAttribute ) {
+			type = ( (PluralAttribute) attributeDescriptor ).getCollectionElementType();
+		}
+		else {
+			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );
+		}
+		return new AttributeReferenceExpression( source, attributeDescriptor, type );
 	}
 
 	@Override
 	public FunctionExpression visitFunction(
 			String name,
-			TypeDescriptor resultTypeDescriptor,
+			BasicType resultTypeDescriptor,
 			List<javax.persistence.criteria.Expression> expressions) {
 		final List<Expression> sqmExpressions = new ArrayList<Expression>();
 		for ( javax.persistence.criteria.Expression expression : expressions ) {
 			sqmExpressions.add( visitExpression( expression ) );
 		}
 
-		return new FunctionExpression( name, sqmExpressions, resultTypeDescriptor );
+		return new FunctionExpression( name, resultTypeDescriptor, sqmExpressions );
 	}
 
 	@Override
 	public AvgFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		return new AvgFunction( visitExpression( expression ), distinct );
+		final Expression sqmExpression = visitExpression( expression );
+		return new AvgFunction(
+				sqmExpression,
+				distinct,
+				(BasicType) sqmExpression.getExpressionType()
+		);
+	}
+
+	@Override
+	public AvgFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new AvgFunction( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
 	public CountFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		return new CountFunction( visitExpression( expression ), distinct );
+		final Expression sqmExpression = visitExpression( expression );
+		return new CountFunction(
+				sqmExpression,
+				distinct,
+				(BasicType) sqmExpression.getExpressionType()
+		);
+	}
+
+	@Override
+	public CountFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new CountFunction( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
 	public CountStarFunction visitCountStarFunction(boolean distinct) {
-		return new CountStarFunction( distinct );
+		return new CountStarFunction(
+				distinct,
+				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class )
+		);
+	}
+
+	@Override
+	public CountStarFunction visitCountStarFunction(boolean distinct, BasicType resultType) {
+		return new CountStarFunction( distinct, resultType );
 	}
 
 	@Override
 	public MaxFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		return new MaxFunction( visitExpression( expression ), distinct );
+		final Expression sqmExpression = visitExpression( expression );
+		return new MaxFunction( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
+	}
+
+	@Override
+	public MaxFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new MaxFunction( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
 	public MinFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		return new MinFunction( visitExpression( expression ), distinct );
+		final Expression sqmExpression = visitExpression( expression );
+		return new MinFunction( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
+	}
+
+	@Override
+	public MinFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new MinFunction( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
 	public SumFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		return new SumFunction( visitExpression( expression ), distinct );
+		final Expression sqmExpression = visitExpression( expression );
+		return new SumFunction(
+				sqmExpression,
+				distinct,
+				ExpressionTypeHelper.resolveSingleNumericType(
+						(BasicType) sqmExpression.getExpressionType(),
+						parsingContext.getConsumerContext()
+				)
+		);
+	}
+
+	@Override
+	public SumFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new SumFunction( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
@@ -449,22 +585,33 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 	}
 
 	@Override
+	public ConcatExpression visitConcat(
+			javax.persistence.criteria.Expression expression1,
+			javax.persistence.criteria.Expression expression2,
+			BasicType resultType) {
+		return new ConcatExpression(
+				visitExpression( expression1 ),
+				visitExpression( expression2 ),
+				resultType
+		);
+	}
+
+	@Override
 	public EntityTypeExpression visitEntityType(String identificationVariable) {
 		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
-		return new EntityTypeExpression( (EntityTypeDescriptor) fromElement.getTypeDescriptor() );
+		return new EntityTypeExpression( (EntityType) fromElement.getBindableModelDescriptor() );
 	}
 
 	@Override
 	public EntityTypeExpression visitEntityType(String identificationVariable, String attributeName) {
 		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
-		return new EntityTypeExpression( (EntityTypeDescriptor) fromElement.getTypeDescriptor().getAttributeDescriptor(
-				attributeName
-		) );
+		return new EntityTypeExpression( (EntityType) fromElement.resolveAttribute( attributeName ) );
 	}
 
 	@Override
 	public SubQueryExpression visitSubQuery(Subquery subquery) {
-		return new SubQueryExpression( visitQuerySpec( subquery ) );
+		// todo : need to work out the "proper" Type here...
+		return new SubQueryExpression( visitQuerySpec( subquery ), null );
 	}
 
 	private WhereClause visitWhereClause(AbstractQuery<?> jpaCriteria) {

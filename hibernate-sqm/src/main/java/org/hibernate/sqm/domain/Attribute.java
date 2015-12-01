@@ -7,9 +7,22 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * Represents an attribute in the domain model.
+ *
  * @author Steve Ebersole
  */
-public interface AttributeDescriptor {
+public interface Attribute {
+	/**
+	 * Obtain the type that declares the attribute.
+	 *
+	 * @return The attribute's declaring type.
+	 */
+	ManagedType getDeclaringType();
+
+	/**
+	 * Obtain the attribute's name
+	 *
+	 * @return The name
+	 */
 	String getName();
-	TypeDescriptor getType();
 }

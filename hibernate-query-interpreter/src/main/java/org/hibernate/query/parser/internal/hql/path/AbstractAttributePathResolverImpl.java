@@ -6,11 +6,16 @@
  */
 package org.hibernate.query.parser.internal.hql.path;
 
+import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.internal.FromElementBuilder;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.SemanticException;
-import org.hibernate.sqm.domain.AttributeDescriptor;
+import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
@@ -36,7 +41,7 @@ public abstract class AbstractAttributePathResolverImpl implements AttributePath
 	}
 
 	protected FromElement buildIntermediateAttributeJoin(FromElement lhs, String pathPart) {
-		final AttributeDescriptor joinedAttributeDescriptor = resolveAttributeDescriptor( lhs, pathPart );
+		final Attribute joinedAttributeDescriptor = resolveAttributeDescriptor( lhs, pathPart );
 		validateIntermediateAttributeJoin( lhs, joinedAttributeDescriptor );
 		return fromElementBuilder().buildAttributeJoin(
 				lhs.getContainingSpace(),
@@ -48,7 +53,7 @@ public abstract class AbstractAttributePathResolverImpl implements AttributePath
 		);
 	}
 
-	protected void validateIntermediateAttributeJoin(FromElement lhs, AttributeDescriptor joinedAttributeDescriptor) {
+	protected void validateIntermediateAttributeJoin(FromElement lhs, Attribute joinedAttributeDescriptor) {
 	}
 
 	protected JoinType getIntermediateJoinType() {
@@ -59,15 +64,31 @@ public abstract class AbstractAttributePathResolverImpl implements AttributePath
 		return false;
 	}
 
-	protected AttributeDescriptor resolveAttributeDescriptor(FromElement lhs, String attributeName) {
-		final AttributeDescriptor attributeDescriptor = lhs.getTypeDescriptor().getAttributeDescriptor( attributeName );
+	protected Attribute resolveAttributeDescriptor(FromElement lhs, String attributeName) {
+		final Attribute attributeDescriptor = lhs.resolveAttribute( attributeName );
 		if ( attributeDescriptor == null ) {
 			throw new SemanticException(
 					"Name [" + attributeName + "] is not a valid attribute on from-element [" +
-							lhs.getTypeDescriptor().getTypeName() + "]"
+							lhs.getBindableModelDescriptor() + "(" + lhs.getAlias() + ")]"
 			);
 		}
 
 		return attributeDescriptor;
+	}
+
+	protected AttributeReferenceExpression makeAttributeReferenceExpression(FromElement lhs, String attributeName) {
+		final Attribute attribute = resolveAttributeDescriptor( lhs, attributeName );
+		final Type type;
+		if ( attribute instanceof SingularAttribute ) {
+			type = ( (SingularAttribute) attribute ).getType();
+		}
+		else if ( attribute instanceof PluralAttribute ) {
+			type = ( (PluralAttribute) attribute ).getCollectionElementType();
+		}
+		else {
+			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );
+		}
+
+		return new AttributeReferenceExpression( lhs, attribute, type );
 	}
 }

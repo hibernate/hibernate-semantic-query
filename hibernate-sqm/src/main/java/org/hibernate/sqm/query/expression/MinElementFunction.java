@@ -7,8 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.CollectionTypeDescriptor;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
@@ -16,26 +15,29 @@ import org.hibernate.sqm.query.from.FromElement;
  */
 public class MinElementFunction implements Expression {
 	private final String collectionAlias;
-	private final TypeDescriptor valueType;
+	private final Type elementType;
 
-	public MinElementFunction(FromElement collectionReference) {
+	public MinElementFunction(FromElement collectionReference, Type elementType) {
 		this.collectionAlias = collectionReference.getAlias();
-
-		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) collectionReference.getTypeDescriptor();
-		this.valueType = collectionTypeDescriptor.getElementTypeDescriptor();
+		this.elementType = elementType;
 	}
 
 	public String getCollectionAlias() {
 		return collectionAlias;
 	}
 
-	public TypeDescriptor getValueType() {
-		return valueType;
+	public Type getElementType() {
+		return elementType;
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return getValueType();
+	public Type getExpressionType() {
+		return getElementType();
+	}
+
+	@Override
+	public Type getInferableType() {
+		return getElementType();
 	}
 
 	@Override

@@ -7,9 +7,16 @@
 package org.hibernate.sqm.domain;
 
 /**
- * Descriptor for a Hibernate ANY mapping
+ * A basic domain model type.  Even though the type system here is tye safe, basic
+ * types are defined in terms of a Java type.
  *
  * @author Steve Ebersole
  */
-public interface AnyTypeDescriptor extends TypeDescriptor {
+public interface BasicType<X> extends Type {
+	/**
+	 * Return the represented Java type.
+	 *
+	 * @return Java type
+	 */
+	Class<X> getJavaType();
 }

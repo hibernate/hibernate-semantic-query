@@ -23,9 +23,8 @@ import org.hibernate.query.parser.internal.hql.antlr.HqlParserBaseListener;
 import org.hibernate.query.parser.internal.hql.path.AttributePathResolver;
 import org.hibernate.query.parser.internal.hql.path.BasicAttributePathResolverImpl;
 import org.hibernate.query.parser.internal.hql.path.JoinPredicatePathResolverImpl;
-import org.hibernate.sqm.domain.AttributeDescriptor;
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
-import org.hibernate.sqm.domain.PolymorphicEntityTypeDescriptor;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.Statement;
@@ -118,17 +117,15 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	public void enterInsertStatement(HqlParser.InsertStatementContext ctx) {
 		statementType = Statement.Type.INSERT;
 
-		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( ctx.insertSpec()
-																						  .intoSpec()
-																						  .dotIdentifierSequence() );
+		final EntityType entityType = resolveEntityReference( ctx.insertSpec().intoSpec().dotIdentifierSequence() );
 		String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 		log.debugf(
 				"Generated implicit alias [%s] for INSERT target [%s]",
 				alias,
-				entityTypeDescriptor.getTypeName()
+				entityType.getName()
 		);
 
-		dmlRoot = new RootEntityFromElement( null, alias, entityTypeDescriptor );
+		dmlRoot = new RootEntityFromElement( null, alias, entityType );
 		fromElementBuilder.getAliasRegistry().registerAlias( dmlRoot );
 		fromElementMap.put( ctx.getText(), dmlRoot );
 	}
@@ -150,17 +147,17 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 	}
 
 	protected RootEntityFromElement visitDmlRootEntityReference(HqlParser.MainEntityPersisterReferenceContext rootEntityContext) {
-		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
+		final EntityType entityType = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
 		String alias = interpretAlias( rootEntityContext.IDENTIFIER() );
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for DML root entity reference [%s]",
 					alias,
-					entityTypeDescriptor.getTypeName()
+					entityType.getName()
 			);
 		}
-		final RootEntityFromElement root = new RootEntityFromElement( null, alias, entityTypeDescriptor );
+		final RootEntityFromElement root = new RootEntityFromElement( null, alias, entityType );
 		fromElementBuilder.getAliasRegistry().registerAlias( root );
 		return root;
 	}
@@ -215,14 +212,14 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 	@Override
 	public void enterFromElementSpaceRoot(HqlParser.FromElementSpaceRootContext ctx) {
-		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference(
+		final EntityType entityType = resolveEntityReference(
 				ctx.mainEntityPersisterReference().dotIdentifierSequence()
 		);
 
-		if ( PolymorphicEntityTypeDescriptor.class.isInstance( entityTypeDescriptor ) ) {
+		if ( PolymorphicEntityType.class.isInstance( entityType ) ) {
 			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 				throw new StrictJpaComplianceViolation(
-						"Encountered unmapped polymorphic reference [" + entityTypeDescriptor.getTypeName()
+						"Encountered unmapped polymorphic reference [" + entityType.getName()
 								+ "], but strict JPQL compliance was requested",
 						StrictJpaComplianceViolation.Type.UNMAPPED_POLYMORPHISM
 				);
@@ -233,17 +230,17 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 		final RootEntityFromElement rootEntityFromElement = fromElementBuilder.makeRootEntityFromElement(
 				currentFromElementSpace,
-				resolveEntityReference( ctx.mainEntityPersisterReference().dotIdentifierSequence() ),
+				entityType,
 				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
 		);
 		fromElementMap.put( ctx.getText(), rootEntityFromElement );
 	}
 
-	private EntityTypeDescriptor resolveEntityReference(HqlParser.DotIdentifierSequenceContext dotIdentifierSequenceContext) {
+	private EntityType resolveEntityReference(HqlParser.DotIdentifierSequenceContext dotIdentifierSequenceContext) {
 		final String entityName = dotIdentifierSequenceContext.getText();
-		final EntityTypeDescriptor entityTypeDescriptor = parsingContext.getConsumerContext().resolveEntityReference(
-				entityName
-		);
+		final EntityType entityTypeDescriptor = parsingContext.getConsumerContext()
+				.getDomainMetamodel()
+				.resolveEntityType( entityName );
 		if ( entityTypeDescriptor == null ) {
 			throw new SemanticException( "Unresolved entity name : " + entityName );
 		}
@@ -264,20 +261,20 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 	@Override
 	public void enterCrossJoin(HqlParser.CrossJoinContext ctx) {
-		final EntityTypeDescriptor entityTypeDescriptor = resolveEntityReference(
+		final EntityType entityType = resolveEntityReference(
 				ctx.mainEntityPersisterReference().dotIdentifierSequence()
 		);
 
-		if ( PolymorphicEntityTypeDescriptor.class.isInstance( entityTypeDescriptor ) ) {
+		if ( PolymorphicEntityType.class.isInstance( entityType ) ) {
 			throw new SemanticException(
 					"Unmapped polymorphic references are only valid as query root, not in cross join : " +
-							entityTypeDescriptor.getTypeName()
+							entityType.getName()
 			);
 		}
 
 		final CrossJoinedFromElement join = fromElementBuilder.makeCrossJoinedFromElement(
 				currentFromElementSpace,
-				entityTypeDescriptor,
+				entityType,
 				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
 		);
 		fromElementMap.put( ctx.getText(), join );
@@ -487,20 +484,6 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 					joinType,
 					fetched
 			);
-		}
-
-		protected AttributeDescriptor resolveAttributeDescriptor(FromElement lhs, String attributeName) {
-			final AttributeDescriptor attributeDescriptor = lhs.getTypeDescriptor().getAttributeDescriptor(
-					attributeName
-			);
-			if ( attributeDescriptor == null ) {
-				throw new SemanticException(
-						"Name [" + attributeName + "] is not a valid attribute on from-element [" +
-								lhs.getTypeDescriptor().getTypeName() + "]"
-				);
-			}
-
-			return attributeDescriptor;
 		}
 
 		@Override

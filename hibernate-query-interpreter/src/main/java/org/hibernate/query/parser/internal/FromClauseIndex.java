@@ -35,7 +35,7 @@ public class FromClauseIndex {
 	public FromElement findFromElementWithAttribute(FromClauseStackNode fromClause, String name) {
 		FromElement found = null;
 		for ( FromElementSpace space : fromClause.getFromClause().getFromElementSpaces() ) {
-			if ( space.getRoot().getTypeDescriptor().getAttributeDescriptor( name ) != null ) {
+			if ( space.getRoot().resolveAttribute( name ) != null ) {
 				if ( found != null ) {
 					throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );
 				}
@@ -43,7 +43,7 @@ public class FromClauseIndex {
 			}
 
 			for ( JoinedFromElement join : space.getJoins() ) {
-				if ( join.getTypeDescriptor().getAttributeDescriptor( name ) != null ) {
+				if ( join.resolveAttribute( name ) != null ) {
 					if ( found != null ) {
 						throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );
 					}

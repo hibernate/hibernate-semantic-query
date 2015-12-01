@@ -7,23 +7,25 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
+import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralFloatExpression extends AbstractLiteralExpressionImpl<Float> {
-	public LiteralFloatExpression(Float value) {
-		this( value, StandardBasicTypeDescriptors.INSTANCE.FLOAT );
-	}
-
-	public LiteralFloatExpression(Float value, BasicTypeDescriptor typeDescriptor) {
+	public LiteralFloatExpression(Float value, BasicType<Float> typeDescriptor) {
 		super( value, typeDescriptor );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralFloatExpression( this );
+	}
+
+	@Override
+	protected void validateInferredType(Class javaType) {
+		if ( !Float.class.equals( javaType ) ) {
+			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Float" );
+		}
 	}
 }

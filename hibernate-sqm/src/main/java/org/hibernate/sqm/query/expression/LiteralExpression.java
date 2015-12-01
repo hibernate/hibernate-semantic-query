@@ -16,6 +16,6 @@ package org.hibernate.sqm.query.expression;
  * </ul>
  * @author Steve Ebersole
  */
-public interface LiteralExpression<T> extends Expression {
+public interface LiteralExpression<T> extends ImpliedTypeExpression {
 	T getLiteralValue();
 }

@@ -74,25 +74,25 @@ public class AliasRegistry {
 	private void checkResultVariable(Selection selection) {
 		final String alias = selection.getAlias();
 		if ( selectionsByAlias.containsKey( alias ) ) {
-			throw new AliasCollisionException( String.format(
-					Locale.ENGLISH,
-					"Alias [%s] is already used in same select clause",
-					alias
-			) );
+			throw new AliasCollisionException(
+					String.format(
+							Locale.ENGLISH,
+							"Alias [%s] is already used in same select clause",
+							alias
+					)
+			);
 		}
 		final FromElement fromElement = fromElementsByAlias.get( alias );
 		if ( fromElement != null ) {
-			if ( !selection.getExpression().getTypeDescriptor().equals(
-					fromElement.getTypeDescriptor()
-			) ) {
+			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBindableModelDescriptor() ) ) {
 				throw new AliasCollisionException(
 						String.format(
 								Locale.ENGLISH,
 								"Alias [%s] used in select-clause for %s is also used in from element: %s for %s",
 								alias,
-								selection.getExpression().getTypeDescriptor(),
+								selection.getExpression().getExpressionType(),
 								fromElement,
-								fromElement.getTypeDescriptor()
+								fromElement.getBindableModelDescriptor()
 						)
 				);
 			}

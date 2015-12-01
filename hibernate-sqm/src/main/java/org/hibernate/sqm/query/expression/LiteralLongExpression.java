@@ -7,23 +7,25 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicTypeDescriptor;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
+import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralLongExpression extends AbstractLiteralExpressionImpl<Long> {
-	public LiteralLongExpression(Long value) {
-		this( value, StandardBasicTypeDescriptors.INSTANCE.LONG );
-	}
-
-	public LiteralLongExpression(Long value, BasicTypeDescriptor typeDescriptor) {
+	public LiteralLongExpression(Long value, BasicType<Long> typeDescriptor) {
 		super( value, typeDescriptor );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralLongExpression( this );
+	}
+
+	@Override
+	protected void validateInferredType(Class javaType) {
+		if ( !Long.class.equals( javaType ) ) {
+			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Long" );
+		}
 	}
 }

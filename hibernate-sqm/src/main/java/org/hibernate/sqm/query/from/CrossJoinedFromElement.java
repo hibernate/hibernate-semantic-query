@@ -7,7 +7,8 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityTypeDescriptor;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.query.JoinType;
 
 /**
@@ -18,22 +19,27 @@ public class CrossJoinedFromElement extends AbstractFromElement implements Joine
 	public CrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
 			String alias,
-			EntityTypeDescriptor entityTypeDescriptor) {
+			EntityType entityTypeDescriptor) {
 		super( fromElementSpace, alias, entityTypeDescriptor );
 	}
 
 	public String getEntityName() {
-		return getTypeDescriptor().getTypeName();
+		return getBindableModelDescriptor().getName();
 	}
 
 	@Override
-	public EntityTypeDescriptor getTypeDescriptor() {
-		return (EntityTypeDescriptor) super.getTypeDescriptor();
+	public EntityType getBindableModelDescriptor() {
+		return (EntityType) super.getBindableModelDescriptor();
 	}
 
 	@Override
 	public JoinType getJoinType() {
 		return JoinType.CROSS;
+	}
+
+	@Override
+	public Attribute resolveAttribute(String attributeName) {
+		return getBindableModelDescriptor().getAttribute( attributeName );
 	}
 
 	@Override

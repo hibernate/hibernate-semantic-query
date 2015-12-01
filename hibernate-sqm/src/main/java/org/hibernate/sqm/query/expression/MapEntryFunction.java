@@ -6,48 +6,66 @@
  */
 package org.hibernate.sqm.query.expression;
 
+import java.util.Map;
+
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.CollectionTypeDescriptor;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
  * Represents the ENTRY() function for obtaining the map entries from a {@code Map}-typed association.
  *
  * @author Gunnar Morling
+ * @author Steve Ebersole
  */
 public class MapEntryFunction implements Expression {
 	private final String collectionAlias;
-	private final TypeDescriptor indexType;
-	private final TypeDescriptor valueType;
+	private final Type indexType;
+	private final Type elementType;
 
-	public MapEntryFunction(FromElement collectionReference) {
+	public MapEntryFunction(FromElement collectionReference, Type indexType, Type elementType) {
 		this.collectionAlias = collectionReference.getAlias();
-
-		CollectionTypeDescriptor collectionTypeDescriptor = (CollectionTypeDescriptor) collectionReference.getTypeDescriptor();
-		this.indexType = collectionTypeDescriptor.getIndexTypeDescriptor();
-		this.valueType = collectionTypeDescriptor.getElementTypeDescriptor();
+		this.indexType = indexType;
+		this.elementType = elementType;
 	}
 
 	public String getCollectionAlias() {
 		return collectionAlias;
 	}
 
-	public TypeDescriptor getMapKeyType() {
+	public Type getMapKeyType() {
 		return indexType;
 	}
 
-	public TypeDescriptor getMapValueType() {
-		return valueType;
+	public Type getMapValueType() {
+		return elementType;
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return getMapKeyType();
+	public Type getExpressionType() {
+		return MAP_ENTRY_TYPE;
+	}
+
+	@Override
+	public Type getInferableType() {
+		return null;
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitMapEntryFunction( this );
 	}
+
+	static final BasicType MAP_ENTRY_TYPE = new BasicType() {
+		@Override
+		public String getTypeName() {
+			return Map.Entry.class.getName();
+		}
+
+		@Override
+		public Class getJavaType() {
+			return Map.Entry.class;
+		}
+	};
 }

@@ -7,20 +7,24 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.StandardBasicTypeDescriptors;
-import org.hibernate.sqm.domain.TypeDescriptor;
+import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class AvgFunction extends AbstractAggregateFunction implements AggregateFunction {
-	public AvgFunction(Expression argument, boolean distinct) {
-		super( argument, distinct );
+	public AvgFunction(Expression argument, boolean distinct, BasicType resultType) {
+		super( argument, distinct, resultType );
 	}
 
 	@Override
-	public TypeDescriptor getTypeDescriptor() {
-		return StandardBasicTypeDescriptors.INSTANCE.DOUBLE;
+	public BasicType getInferableType() {
+		return getExpressionType();
+	}
+
+	@Override
+	public BasicType getExpressionType() {
+		return (BasicType) super.getExpressionType();
 	}
 
 	@Override

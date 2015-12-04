@@ -9,8 +9,7 @@ package org.hibernate.sqm.domain;
 import javax.persistence.TemporalType;
 
 /**
- * Extends the JPA Metamodel contract to expose access to BasicTypes
- * as well as access to EntityTypes by name
+ * Expose access to BasicTypes as well as access to EntityTypes by name
  *
  * @author Steve Ebersole
  */

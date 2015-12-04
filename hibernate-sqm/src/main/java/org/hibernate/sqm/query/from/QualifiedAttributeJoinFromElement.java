@@ -78,17 +78,17 @@ public class QualifiedAttributeJoinFromElement
 						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + singularAttribute.getBoundType() + "]"
 				);
 			}
-			return ( (ManagedType) singularAttribute.getBoundType() ).getAttribute( attributeName );
+			return ( (ManagedType) singularAttribute.getBoundType() ).findAttribute( attributeName );
 		}
 		else if ( getJoinedAttributeDescriptor() instanceof PluralAttribute ) {
 			// Use the element type...
 			final PluralAttribute pluralAttribute = (PluralAttribute) getJoinedAttributeDescriptor();
-			if ( !ManagedType.class.isInstance( pluralAttribute.getCollectionElementType() ) ) {
+			if ( !ManagedType.class.isInstance( pluralAttribute.getElementType() ) ) {
 				throw new AttributeResolutionException(
-						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + pluralAttribute.getCollectionElementType() + "]"
+						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + pluralAttribute.getElementType() + "]"
 				);
 			}
-			return ( (ManagedType) pluralAttribute.getCollectionElementType() ).getAttribute( attributeName );
+			return ( (ManagedType) pluralAttribute.getElementType() ).findAttribute( attributeName );
 		}
 
 		throw new AttributeResolutionException(

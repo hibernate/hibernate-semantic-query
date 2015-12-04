@@ -7,6 +7,8 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * Models information about a mapped superclass.
+ *
  * @author Steve Ebersole
  */
 public interface MappedSuperclassType extends IdentifiableType {

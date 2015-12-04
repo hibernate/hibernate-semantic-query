@@ -470,7 +470,7 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 			type = ( (SingularAttribute) attributeDescriptor ).getType();
 		}
 		else if ( attributeDescriptor instanceof PluralAttribute ) {
-			type = ( (PluralAttribute) attributeDescriptor ).getCollectionElementType();
+			type = ( (PluralAttribute) attributeDescriptor ).getElementType();
 		}
 		else {
 			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );

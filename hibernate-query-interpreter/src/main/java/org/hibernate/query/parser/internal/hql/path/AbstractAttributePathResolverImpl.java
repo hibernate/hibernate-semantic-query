@@ -83,7 +83,7 @@ public abstract class AbstractAttributePathResolverImpl implements AttributePath
 			type = ( (SingularAttribute) attribute ).getType();
 		}
 		else if ( attribute instanceof PluralAttribute ) {
-			type = ( (PluralAttribute) attribute ).getCollectionElementType();
+			type = ( (PluralAttribute) attribute ).getElementType();
 		}
 		else {
 			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );

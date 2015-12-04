@@ -20,6 +20,9 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.domain.Type;
 
 /**
+ * Base support for all ManagedType implementations.managed types, which is the JPA term for commonality between entity, embeddable and
+ * "mapped superclass" types.
+ *
  * @author Steve Ebersole
  */
 public abstract class AbstractManagedType extends AbstractTypeImpl implements ManagedType {
@@ -176,15 +179,15 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 	}
 
 	@Override
-	public Attribute getAttribute(String name) {
+	public Attribute findAttribute(String name) {
 		return attributesByName == null
 				? null
 				: attributesByName.get( name );
 	}
 
 	@Override
-	public Attribute getDeclaredAttribute(String name) {
-		return getAttribute( name );
+	public Attribute findDeclaredAttribute(String name) {
+		return findAttribute( name );
 	}
 
 	Map<String, Attribute> getAttributesByName() {

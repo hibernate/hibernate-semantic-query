@@ -55,12 +55,12 @@ public class PluralAttributeImpl implements PluralAttribute {
 	}
 
 	@Override
-	public Type getCollectionIndexType() {
+	public Type getIndexType() {
 		return collectionIndexType;
 	}
 
 	@Override
-	public Type getCollectionElementType() {
+	public Type getElementType() {
 		return collectionElementType;
 	}
 

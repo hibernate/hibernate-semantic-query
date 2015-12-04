@@ -9,7 +9,6 @@ package org.hibernate.query.parser.internal.hql.path;
 import org.hibernate.query.parser.ParsingException;
 import org.hibernate.query.parser.internal.FromClauseIndex;
 import org.hibernate.query.parser.internal.FromElementBuilder;
-import org.hibernate.query.parser.internal.Helper;
 import org.hibernate.query.parser.internal.ParsingContext;
 import org.hibernate.query.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.query.parser.internal.hql.phase1.FromClauseStackNode;
@@ -118,7 +117,7 @@ public class BasicAttributePathResolverImpl extends StandardAttributePathResolve
 			type = ( (SingularAttribute) attribute ).getType();
 		}
 		else if ( attribute instanceof PluralAttribute ) {
-			type = ( (PluralAttribute) attribute ).getCollectionElementType();
+			type = ( (PluralAttribute) attribute ).getElementType();
 		}
 		else {
 			throw new ParsingException(

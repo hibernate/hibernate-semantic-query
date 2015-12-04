@@ -32,7 +32,7 @@ public class RootEntityFromElement extends AbstractFromElement {
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBindableModelDescriptor().getAttribute( attributeName );
+		return getBindableModelDescriptor().findAttribute( attributeName );
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class CrossJoinedFromElement extends AbstractFromElement implements Joine
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBindableModelDescriptor().getAttribute( attributeName );
+		return getBindableModelDescriptor().findAttribute( attributeName );
 	}
 
 	@Override

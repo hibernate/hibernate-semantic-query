@@ -9,6 +9,8 @@ package org.hibernate.sqm.domain;
 import java.util.Set;
 
 /**
+ * Base information describing an identifier which can not be referenced through a single attribute
+ *
  * @author Steve Ebersole
  */
 public interface IdentifierDescriptorMultipleAttribute {

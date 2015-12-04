@@ -7,6 +7,8 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * Models information about an entity
+ *
  * @author Steve Ebersole
  */
 public interface EntityType extends IdentifiableType, Bindable {

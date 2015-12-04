@@ -7,6 +7,8 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * Base information describing an identifier which can be referenced through a single attribute
+ *
  * @author Steve Ebersole
  */
 public interface IdentifierDescriptorSingleAttribute extends IdentifierDescriptor {

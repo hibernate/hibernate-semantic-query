@@ -704,7 +704,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 				indexSource,
 				indexExpression,
 				// Ultimately the Type for this part is the same as the elements of the collection...
-				pluralAttribute.getCollectionElementType()
+				pluralAttribute.getElementType()
 		);
 
 		if ( ctx.path( 1 ) == null ) {
@@ -1206,7 +1206,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new CollectionValueFunction( pathResolution.getUnderlyingFromElement(), collectionReference.getCollectionElementType() );
+		return new CollectionValueFunction( pathResolution.getUnderlyingFromElement(), collectionReference.getElementType() );
 	}
 
 	@Override
@@ -1231,7 +1231,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionIndexFunction( fromElement, collectionDescriptor.getCollectionIndexType() );
+		return new CollectionIndexFunction( fromElement, collectionDescriptor.getIndexType() );
 	}
 
 	@Override
@@ -1246,7 +1246,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new MapKeyFunction( pathResolution.getUnderlyingFromElement(), pluralAttribute.getCollectionIndexType() );
+		return new MapKeyFunction( pathResolution.getUnderlyingFromElement(), pluralAttribute.getIndexType() );
 	}
 
 
@@ -1265,8 +1265,8 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
 				return new MapEntryFunction(
 						pathResolution.getUnderlyingFromElement(),
-						pluralAttribute.getCollectionIndexType(),
-						pluralAttribute.getCollectionElementType()
+						pluralAttribute.getIndexType(),
+						pluralAttribute.getElementType()
 				);
 			}
 		}
@@ -1294,7 +1294,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBindableModelDescriptor();
-		return new MaxElementFunction( pathResolution.getUnderlyingFromElement(), pluralAttribute.getCollectionElementType() );
+		return new MaxElementFunction( pathResolution.getUnderlyingFromElement(), pluralAttribute.getElementType() );
 	}
 
 	@Override
@@ -1313,7 +1313,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBindableModelDescriptor();
-		return new MinElementFunction( pathResolution.getUnderlyingFromElement(), pluralAttribute.getCollectionElementType() );
+		return new MinElementFunction( pathResolution.getUnderlyingFromElement(), pluralAttribute.getElementType() );
 	}
 
 	@Override
@@ -1335,7 +1335,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			else if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
 				return new MaxIndexFunction(
 						pathResolution.getUnderlyingFromElement(),
-						pluralAttribute.getCollectionIndexType()
+						pluralAttribute.getIndexType()
 				);
 			}
 		}
@@ -1366,7 +1366,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			else if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
 				return new MinIndexFunction(
 						pathResolution.getUnderlyingFromElement(),
-						pluralAttribute.getCollectionIndexType()
+						pluralAttribute.getIndexType()
 				);
 			}
 		}

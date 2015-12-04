@@ -47,7 +47,7 @@ public class PolymorphicEntityTypeImpl extends EntityTypeImpl implements Polymor
 			for ( EntityType implementor : implementors ) {
 				// NOTE : according to JPA the lookup here should throw an exception rather than return null
 				// so we either need to adjust this expectation (in main code too) or go back to our own model
-				if ( implementor.getAttribute( attribute.getName() ) == null ) {
+				if ( implementor.findAttribute( attribute.getName() ) == null ) {
 					break attr_loop;
 				}
 			}

@@ -7,6 +7,8 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * Base information describing an identifier
+ *
  * @author Steve Ebersole
  */
 public interface IdentifierDescriptor {

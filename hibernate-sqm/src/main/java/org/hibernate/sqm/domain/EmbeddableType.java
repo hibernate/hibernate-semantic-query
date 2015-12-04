@@ -7,6 +7,8 @@
 package org.hibernate.sqm.domain;
 
 /**
+ * Models information about an embeddable
+ *
  * @author Steve Ebersole
  */
 public interface EmbeddableType extends ManagedType {

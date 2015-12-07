@@ -1,3 +1,6 @@
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Build script section
+
 buildscript {
 	repositories {
 		mavenCentral()
@@ -17,114 +20,127 @@ buildscript {
 	}
 }
 
+apply plugin: 'java'
+apply plugin: 'antlr'
+
+apply plugin: 'org.hibernate.build.gradle.animalSniffer'
+
+apply plugin: 'maven-publish'
+apply plugin: 'maven-publish-auth'
+
 apply plugin: 'idea'
+apply plugin: 'eclipse'
 
-idea {
-	project {
-		jdkName = '1.6'
-		languageLevel = '1.6'
 
-		vcs = 'Git'
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Project section
+
+repositories {
+	mavenCentral()
+	jcenter()
+}
+
+sourceCompatibility = 1.6
+
+group = 'org.hibernate'
+version = '1.0.0-SNAPSHOT'
+
+configurations {
+	provided {
+		description = 'Non-exported compile-time dependencies.'
 	}
 }
 
-apply plugin: 'eclipse'
+dependencies {
+	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+	compile 'org.jboss.logging:jboss-logging:3.3.0.Final'
 
-subprojects { subproject ->
+	provided 'org.jboss.logging:jboss-logging-annotations:2.0.0.Final'
+
+	antlr 'org.antlr:antlr4:4.5'
+
+	runtime 'org.antlr:antlr4-runtime:4.5'
+
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+
+	testRuntime 'log4j:log4j:1.2.17'
+
+	animalSnifferSignature 'org.codehaus.mojo.signature:java16:1.0@signature'
+}
+
+task compile
+tasks.withType( JavaCompile ).each {
+	tasks.compile.dependsOn it
+	it.options.compilerArgs += [
+			"-nowarn",
+			"-encoding", "UTF-8"
+	]
+}
+
+tasks.generateGrammarSource {
+	outputDirectory = file( "${outputDirectory}/org/hibernate/sqm/parser/internal/hql/antlr" )
+	// ugh!  https://discuss.gradle.org/t/antlr-v4-visitor-generation/10017/1
+	if ( arguments == null ) {
+		arguments = ['-visitor']
+	}
+	else {
+		arguments += ['-visitor']
+	}
+}
+
+task antlr(dependsOn: generateGrammarSource)
+
+idea {
+	project {
+		jdkName = "${sourceCompatibility}"
+		languageLevel = "${sourceCompatibility}"
+		vcs = 'Git'
+	}
+	module {
+		excludeDirs = [file( ".gradle" )]
+		excludeDirs += file( "$buildDir/classes" )
+		excludeDirs += file( "$buildDir/packages" )
+		excludeDirs += file( "$buildDir/dependency-cache" )
+		excludeDirs += file( "$buildDir/libs" )
+		excludeDirs += file( "$buildDir/reports" )
+		excludeDirs += file( "$buildDir/resources" )
+		excludeDirs += file( "$buildDir/test-results" )
+		excludeDirs += file( "$buildDir/tmp" )
+
+		downloadSources = true
+	}
+}
+
+publishing {
+	publications {
+		mavenJava( MavenPublication ) {
+			from components.java
+
+			artifact( sourcesJar ) {
+				classifier 'sources'
+			}
+		}
+	}
 	repositories {
-		mavenCentral()
-		jcenter()
-	}
-
-	apply plugin: 'java'
-
-	apply plugin: 'maven-publish'
-	apply plugin: 'maven-publish-auth'
-
-	apply plugin: 'org.hibernate.build.gradle.animalSniffer'
-	apply plugin: 'idea'
-	apply plugin: 'eclipse'
-
-	sourceCompatibility = 1.6
-
-	group = 'org.hibernate'
-	version = '1.0.0-SNAPSHOT'
-
-	configurations {
-		provided {
-			// todo : need to make sure these are non-exported
-			description = 'Non-exported compile-time dependencies.'
-		}
-	}
-
-	dependencies {
-		compile 'org.jboss.logging:jboss-logging:3.3.0.Final'
-		provided 'org.jboss.logging:jboss-logging-annotations:2.0.0.Final'
-
-		animalSnifferSignature 'org.codehaus.mojo.signature:java16:1.0@signature'
-
-		testCompile group: 'junit', name: 'junit', version: '4.11'
-
-		testRuntime 'log4j:log4j:1.2.17'
-	}
-
-	task compile
-	tasks.withType( JavaCompile ).each {
-		tasks.compile.dependsOn it
-		it.options.compilerArgs += [
-				"-nowarn",
-				"-encoding", "UTF-8"
-		]
-	}
-
-	idea {
-		module {
-			jdkName = sourceCompatibility
-
-			excludeDirs = [file( ".gradle" )]
-			excludeDirs += file( "$buildDir/classes" )
-			excludeDirs += file( "$buildDir/packages" )
-			excludeDirs += file( "$buildDir/dependency-cache" )
-			excludeDirs += file( "$buildDir/libs" )
-			excludeDirs += file( "$buildDir/reports" )
-			excludeDirs += file( "$buildDir/resources" )
-			excludeDirs += file( "$buildDir/test-results" )
-			excludeDirs += file( "$buildDir/tmp" )
-
-			downloadSources = true
-		}
-	}
-
-	publishing {
-		publications {
-			mavenJava( MavenPublication ) {
-				from components.java
-
-				artifact( sourcesJar ) {
-					classifier 'sources'
-				}
+		if ( (project.version as String).endsWith( '-SNAPSHOT' ) ) {
+			maven {
+				name 'jboss-snapshots-repository'
+				url 'https://repository.jboss.org/nexus/content/repositories/snapshots'
 			}
 		}
-		repositories {
-			if ( (project.version as String).endsWith( '-SNAPSHOT' ) ) {
-				maven {
-					name 'jboss-snapshots-repository'
-					url 'https://repository.jboss.org/nexus/content/repositories/snapshots'
-				}
-			}
-			else {
-				maven {
-					name 'jboss-releases-repository'
-					url 'https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/'
-				}
+		else {
+			maven {
+				name 'jboss-releases-repository'
+				url 'https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/'
 			}
 		}
 	}
+}
 
-	task sourcesJar(type: Jar, dependsOn: compileJava) {
-		from sourceSets.main.allSource
-		classifier = 'sources'
-	}
+task sourcesJar(type: Jar, dependsOn: compileJava) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
 }
 
 task wrapper(type: Wrapper) {

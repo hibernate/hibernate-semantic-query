@@ -1,9 +1,5 @@
-include 'hibernate-sqm'
-include 'hibernate-query-interpreter'
-
-rootProject.children.each { project ->
-	project.buildFileName = "${project.name}.gradle"
-	assert project.projectDir.isDirectory()
-	assert project.buildFile.exists()
-	assert project.buildFile.isFile()
-}
+// Rename the root project in Gradle terms.  This allows the
+// "nicer" `hibernate-semantic-query` name to be used in as
+// the git repo name, but the more concise `hibernate-sqm`
+// name to be used for the artifact(s)
+rootProject.name = 'hibernate-sqm'

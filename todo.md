@@ -21,7 +21,7 @@ from orm-sqm poc
 * Make sure that FromElements are NEVER used directly in other parts of the query.  All references to a FromElement in
 	another part of the query should always be "wrapped" in another type (FromElementReferenceExpression, e.g.).  Part
 	of this is that I do not think its a good idea for all FromElement types (via org.hibernate.sqm.path.AttributePathPart) 
-	to be Expressions; that change has some bearing on the org.hibernate.query.parser.internal.hql.path.AttributePathResolver
+	to be Expressions; that change has some bearing on the AttributePathResolver
 	code.
 
 Downcasting (TREAT)

@@ -8,14 +8,14 @@ package org.hibernate.test.query.parser.hql;
 
 import java.util.List;
 
-import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.parser.AliasCollisionException;
+import org.hibernate.sqm.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
+import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
@@ -275,10 +275,10 @@ public class AliasTest {
 		RootEntityFromElement root = fromElementSpace.getRoot();
 		assertThat( root.getEntityName(), is( typeName ) );
 		if ( alias == null ) {
-			assertThat( root.getAlias(), is( nullValue() ) );
+			assertThat( root.getIdentificationVariable(), is( nullValue() ) );
 		}
 		else {
-			assertThat( root.getAlias(), is( alias ) );
+			assertThat( root.getIdentificationVariable(), is( alias ) );
 		}
 	}
 
@@ -291,8 +291,8 @@ public class AliasTest {
 		List<Selection> selections = querySpect.getSelectClause().getSelections();
 		Selection selection = selections.get( attributeIndex );
 		AttributeReferenceExpression expression = (AttributeReferenceExpression) selection.getExpression();
-		assertThat( ( (EntityTypeImpl) expression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
-		assertThat( expression.getAttributeDescriptor().getName(), is( attributeName ) );
+		assertThat( expression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
+		assertThat( expression.getBoundAttribute().getName(), is( attributeName ) );
 		if ( alias == null ) {
 			assertThat( selection.getAlias(), is( nullValue() ) );
 		}
@@ -304,8 +304,8 @@ public class AliasTest {
 	private void checkElementSelection(QuerySpec querySpec, int selectionIndex, String typeName, String alias) {
 		List<Selection> selections = querySpec.getSelectClause().getSelections();
 		Selection selection = selections.get( selectionIndex );
-		FromElementReferenceExpression expression = (FromElementReferenceExpression) selection.getExpression();
-		EntityTypeImpl entityType = (EntityTypeImpl) expression.getBindableModelDescriptor();
+		Expression expression = selection.getExpression();
+		EntityTypeImpl entityType = (EntityTypeImpl) expression.getExpressionType();
 		assertThat( entityType.getTypeName(), is( typeName ) );
 		if ( alias == null ) {
 			assertThat( selection.getAlias(), is( nullValue() ) );
@@ -324,9 +324,9 @@ public class AliasTest {
 		WhereClause whereClause = querySpec.getWhereClause();
 		InSubQueryPredicate predicate = (InSubQueryPredicate) whereClause.getPredicate();
 		AttributeReferenceExpression testExpression = (AttributeReferenceExpression) predicate.getTestExpression();
-		assertThat( ( (EntityTypeImpl) testExpression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
-		assertThat( testExpression.getAttributeDescriptor().getName(), is( attributeName ) );
-		assertThat( testExpression.getSource().getAlias(), is( alias ) );
+		assertThat( testExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
+		assertThat( testExpression.getBoundAttribute().getName(), is( attributeName ) );
+		assertThat( testExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(), is( alias ) );
 	}
 
 	private void checkRelationalPredicateLeftHandWhereExpression(
@@ -337,9 +337,9 @@ public class AliasTest {
 		WhereClause whereClause = querySpec.getWhereClause();
 		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
 		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
-		assertThat( ( (EntityTypeImpl) leftHandExpression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
-		assertThat( leftHandExpression.getAttributeDescriptor().getName(), is( attributeName ) );
-		assertThat( leftHandExpression.getSource().getAlias(), is( alias ) );
+		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
+		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
+		assertThat( leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(), is( alias ) );
 	}
 
 	private void checkRelationalPredicateRightHandWhereExpression(
@@ -350,9 +350,9 @@ public class AliasTest {
 		WhereClause whereClause = querySpec.getWhereClause();
 		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
 		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getRightHandExpression();
-		assertThat( leftHandExpression.getAttributeDescriptor().getName(), is( attributeName ) );
-		assertThat( leftHandExpression.getSource().getAlias(), is( alias ) );
-		assertThat( ( (EntityTypeImpl) leftHandExpression.getSource().getBindableModelDescriptor() ).getTypeName(), is( typeName ) );
+		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
+		assertThat( leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(), is( alias ) );
+		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 	}
 
 	private SubQueryExpression getInSubQueryExpression(SelectStatement selectStatement) {

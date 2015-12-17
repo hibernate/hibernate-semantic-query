@@ -47,9 +47,19 @@ public class WhereClauseTests {
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerExpression.class ) );
 		assertThat( ( (LiteralIntegerExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 311 ) );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionSizeFunction.class ) );
-		assertThat( ( (CollectionSizeFunction) relationalPredicate.getLeftHandExpression() ).getFromElementAlias(), is( "t" ) );
-		assertThat( ( (CollectionSizeFunction) relationalPredicate.getLeftHandExpression() ).getAttributeDescriptor().getName(), is( "basicCollection" ) );
+		assertThat(
+				relationalPredicate.getLeftHandExpression(),
+				instanceOf( CollectionSizeFunction.class )
+		);
+		final CollectionSizeFunction func = (CollectionSizeFunction) relationalPredicate.getLeftHandExpression();
+		assertThat(
+				func.getPluralAttributeBinding().getAttributeBindingSource().getFromElement().getIdentificationVariable(),
+				is( "t" )
+		);
+		assertThat(
+				func.getPluralAttributeBinding().getBoundAttribute().getName(),
+				is( "basicCollection" )
+		);
 	}
 
 	@Test

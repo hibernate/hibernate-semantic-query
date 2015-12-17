@@ -139,7 +139,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat( fromElementSpace.getRoot().getEntityName(), is( "com.acme.Something" ) );
-		assertThat( fromElementSpace.getRoot().getAlias(), is( "a" ) );
+		assertThat( fromElementSpace.getRoot().getIdentificationVariable(), is( "a" ) );
 
 		// assertions against the root query predicate that defines the sub-query
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), notNullValue() );
@@ -164,7 +164,7 @@ public class SimpleSemanticQueryBuilderTest {
 				subqueryFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse" )
 		);
-		assertThat( subqueryFromElementSpace.getRoot().getAlias(), is( "e" ) );
+		assertThat( subqueryFromElementSpace.getRoot().getIdentificationVariable(), is( "e" ) );
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat( fromElementSpace.getRoot().getEntityName(), is( "com.acme.Something" ) );
-		assertThat( fromElementSpace.getRoot().getAlias(), is( "a" ) );
+		assertThat( fromElementSpace.getRoot().getIdentificationVariable(), is( "a" ) );
 
 		// assertions against the root query predicate that defines the sub-query
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), notNullValue() );
@@ -209,7 +209,7 @@ public class SimpleSemanticQueryBuilderTest {
 				subqueryFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse" )
 		);
-		assertThat( subqueryFromElementSpace.getRoot().getAlias(), is( "e" ) );
+		assertThat( subqueryFromElementSpace.getRoot().getIdentificationVariable(), is( "e" ) );
 
 		// assertions against the root query predicate that defines the su-query of sub-query
 		InSubQueryPredicate subSubqueryPredicate = (InSubQueryPredicate) subQueryPredicate.getSubQueryExpression()
@@ -229,7 +229,7 @@ public class SimpleSemanticQueryBuilderTest {
 				subSubqueryFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse2" )
 		);
-		assertThat( subSubqueryFromElementSpace.getRoot().getAlias(), is( "b" ) );
+		assertThat( subSubqueryFromElementSpace.getRoot().getIdentificationVariable(), is( "b" ) );
 	}
 
 	@Test
@@ -249,7 +249,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
 		assertThat( fromElementSpace.getRoot().getEntityName(), is( "com.acme.Something" ) );
-		assertThat( fromElementSpace.getRoot().getAlias(), is( "a" ) );
+		assertThat( fromElementSpace.getRoot().getIdentificationVariable(), is( "a" ) );
 
 		// assertions against the root query predicate that defines the sub-query
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), notNullValue() );
@@ -283,7 +283,7 @@ public class SimpleSemanticQueryBuilderTest {
 				leftHandPredicateFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse" )
 		);
-		assertThat( leftHandPredicateFromElementSpace.getRoot().getAlias(), is( "b" ) );
+		assertThat( leftHandPredicateFromElementSpace.getRoot().getIdentificationVariable(), is( "b" ) );
 
 		InSubQueryPredicate rightHandPredicate = (InSubQueryPredicate) andPredicate.getRightHandPredicate();
 
@@ -302,7 +302,7 @@ public class SimpleSemanticQueryBuilderTest {
 				rightHandPredicateFromElementSpace.getRoot().getEntityName(),
 				is( "com.acme.SomethingElse2" )
 		);
-		assertThat( rightHandPredicateFromElementSpace.getRoot().getAlias(), is( "c" ) );
+		assertThat( rightHandPredicateFromElementSpace.getRoot().getIdentificationVariable(), is( "c" ) );
 	}
 
 

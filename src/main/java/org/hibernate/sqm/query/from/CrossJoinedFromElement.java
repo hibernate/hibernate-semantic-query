@@ -18,18 +18,19 @@ public class CrossJoinedFromElement extends AbstractFromElement implements Joine
 
 	public CrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
+			String uid,
 			String alias,
 			EntityType entityTypeDescriptor) {
-		super( fromElementSpace, alias, entityTypeDescriptor );
+		super( fromElementSpace, uid, alias, entityTypeDescriptor, entityTypeDescriptor, alias );
 	}
 
 	public String getEntityName() {
-		return getBindableModelDescriptor().getName();
+		return getBoundModelType().getName();
 	}
 
 	@Override
-	public EntityType getBindableModelDescriptor() {
-		return (EntityType) super.getBindableModelDescriptor();
+	public EntityType getBoundModelType() {
+		return (EntityType) super.getBoundModelType();
 	}
 
 	@Override
@@ -39,7 +40,7 @@ public class CrossJoinedFromElement extends AbstractFromElement implements Joine
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBindableModelDescriptor().findAttribute( attributeName );
+		return getBoundModelType().findAttribute( attributeName );
 	}
 
 	@Override

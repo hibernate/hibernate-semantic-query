@@ -13,6 +13,7 @@ import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
@@ -22,7 +23,6 @@ import org.hibernate.sqm.query.expression.ConstantFieldExpression;
 import org.hibernate.sqm.query.expression.CountFunction;
 import org.hibernate.sqm.query.expression.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralExpression;
 import org.hibernate.sqm.query.expression.MaxFunction;
@@ -80,7 +80,7 @@ public interface CriteriaVisitor {
 			javax.persistence.criteria.Expression expression2,
 			BasicType resultType);
 
-	FromElementReferenceExpression visitIdentificationVariableReference(From reference);
+	FromElementBinding visitIdentificationVariableReference(From reference);
 	AttributeReferenceExpression visitAttributeReference(From attributeSource, String attributeName);
 
 	FunctionExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression> expressions);

@@ -16,32 +16,39 @@ import org.hibernate.sqm.domain.EntityType;
 public class RootEntityFromElement extends AbstractFromElement {
 	public RootEntityFromElement(
 			FromElementSpace fromElementSpace,
+			String uid,
 			String alias,
 			EntityType entityTypeDescriptor) {
-		super( fromElementSpace, alias, entityTypeDescriptor );
+		super( fromElementSpace, uid, alias, entityTypeDescriptor, entityTypeDescriptor, alias );
 	}
 
 	public String getEntityName() {
-		return getBindableModelDescriptor().getName();
+		return getBoundModelType().getName();
 	}
 
 	@Override
-	public EntityType getBindableModelDescriptor() {
-		return (EntityType) super.getBindableModelDescriptor();
+	public EntityType getBoundModelType() {
+		return (EntityType) super.getBoundModelType();
+	}
+
+	@Override
+	public EntityType getIntrinsicSubclassIndicator() {
+		// a root FromElement cannot indicate a subclass intrinsically (as part of its declaration)
+		return null;
 	}
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBindableModelDescriptor().findAttribute( attributeName );
+		return getBoundModelType().findAttribute( attributeName );
 	}
 
 	@Override
 	public String toString() {
-		return getEntityName() + " as " + getAlias();
+		return getEntityName() + " as " + getIdentificationVariable();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		throw new UnsupportedOperationException( "see todo.md comment" );
+		return walker.visitRootEntityFromElement( this );
 	}
 }

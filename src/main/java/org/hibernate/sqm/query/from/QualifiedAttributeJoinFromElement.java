@@ -9,9 +9,12 @@ package org.hibernate.sqm.query.from;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.predicate.Predicate;
 
@@ -24,26 +27,38 @@ import org.jboss.logging.Logger;
  */
 public class QualifiedAttributeJoinFromElement
 		extends AbstractJoinedFromElement
-		implements QualifiedJoinedFromElement {
+		implements QualifiedJoinedFromElement, AttributeBinding {
 	private static final Logger log = Logger.getLogger( QualifiedAttributeJoinFromElement.class );
 
-	private final String lhsAlias;
+	private final AttributeBindingSource lhs;
 	private final Attribute joinedAttributeDescriptor;
+	private final EntityType intrinsicSubclassIndicator;
 	private final boolean fetched;
 
 	private Predicate onClausePredicate;
 
 	public QualifiedAttributeJoinFromElement(
 			FromElementSpace fromElementSpace,
+			String uid,
 			String alias,
-			String lhsAlias,
 			Attribute joinedAttributeDescriptor,
+			EntityType intrinsicSubclassIndicator,
+			String sourcePath,
 			JoinType joinType,
+			AttributeBindingSource lhs,
 			boolean fetched) {
-		// todo : need to rework the type binding in FromElement
-		super( fromElementSpace, alias, (Bindable) joinedAttributeDescriptor, joinType );
-		this.lhsAlias = lhsAlias;
+		super(
+				fromElementSpace,
+				uid,
+				alias,
+				(Bindable) joinedAttributeDescriptor,
+				intrinsicSubclassIndicator,
+				sourcePath,
+				joinType
+		);
+		this.lhs = lhs;
 		this.joinedAttributeDescriptor = joinedAttributeDescriptor;
+		this.intrinsicSubclassIndicator = intrinsicSubclassIndicator;
 		this.fetched = fetched;
 	}
 
@@ -53,7 +68,17 @@ public class QualifiedAttributeJoinFromElement
 	 * @return The LHS FromElement alias.
 	 */
 	public String getLhsAlias() {
-		return lhsAlias;
+		return lhs.getFromElement().getIdentificationVariable();
+	}
+
+	@Override
+	public Attribute getBoundAttribute() {
+		return getJoinedAttributeDescriptor();
+	}
+
+	@Override
+	public AttributeBindingSource getAttributeBindingSource() {
+		return lhs;
 	}
 
 	/**
@@ -63,6 +88,11 @@ public class QualifiedAttributeJoinFromElement
 	 */
 	public Attribute getJoinedAttributeDescriptor() {
 		return joinedAttributeDescriptor;
+	}
+
+	@Override
+	public EntityType getIntrinsicSubclassIndicator() {
+		return intrinsicSubclassIndicator;
 	}
 
 	public boolean isFetched() {

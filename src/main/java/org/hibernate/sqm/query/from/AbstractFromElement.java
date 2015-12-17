@@ -6,13 +6,17 @@
  */
 package org.hibernate.sqm.query.from;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.path.FromElementBinding;
+import org.hibernate.sqm.query.Helper;
 
 /**
  * Convenience base class for FromElement implementations
@@ -21,18 +25,31 @@ import org.hibernate.sqm.domain.Type;
  */
 public abstract class AbstractFromElement implements FromElement {
 	private final FromElementSpace fromElementSpace;
+	private final String uid;
 	private final String alias;
 	private final Bindable bindableModelDescriptor;
+	private final EntityType subclassIndicator;
+	private final String sourcePath;
 
-	private Set<Type> treatedAsTypeDescriptors;
+	private final ManagedType attributeContributingType;
+
+	private Map<EntityType,Downcast> downcastMap;
 
 	protected AbstractFromElement(
 			FromElementSpace fromElementSpace,
+			String uid,
 			String alias,
-			Bindable bindableModelDescriptor) {
+			Bindable bindableModelDescriptor,
+			EntityType subclassIndicator,
+			String sourcePath) {
 		this.fromElementSpace = fromElementSpace;
+		this.uid = uid;
 		this.alias = alias;
 		this.bindableModelDescriptor = bindableModelDescriptor;
+		this.subclassIndicator = subclassIndicator;
+		this.sourcePath = sourcePath;
+
+		this.attributeContributingType = Helper.determineManagedType( bindableModelDescriptor );
 	}
 
 	@Override
@@ -41,37 +58,90 @@ public abstract class AbstractFromElement implements FromElement {
 	}
 
 	@Override
-	public String getAlias() {
+	public String getUniqueIdentifier() {
+		return uid;
+	}
+
+	@Override
+	public String getIdentificationVariable() {
 		return alias;
 	}
 
 	@Override
-	public Bindable getBindableModelDescriptor() {
+	public Bindable getBoundModelType() {
 		return bindableModelDescriptor;
 	}
 
 	@Override
-	public FromElement getUnderlyingFromElement() {
+	public EntityType getIntrinsicSubclassIndicator() {
+		return subclassIndicator;
+	}
+
+	@Override
+	public FromElement getFromElement() {
 		return this;
 	}
 
-	// todo : we likely need to capture information about where the TREAT AS was defined as well
-	// 		since that often dictates how the TREAT AS manifests into SQL
-
 	@Override
-	public void addTreatedAs(EntityType typeDescriptor) {
-		if ( treatedAsTypeDescriptors == null ) {
-			treatedAsTypeDescriptors = new HashSet<Type>();
-		}
-		treatedAsTypeDescriptors.add( typeDescriptor );
+	public ManagedType getAttributeContributingType() {
+		return attributeContributingType;
 	}
 
-	public Set<Type> getTreatedAsTypeDescriptors() {
-		if ( treatedAsTypeDescriptors == null ) {
+	@Override
+	public String asLoggableText() {
+		return sourcePath;
+	}
+
+	@Override
+	public EntityType getSubclassIndicator() {
+		return subclassIndicator;
+	}
+
+	@Override
+	public Type getExpressionType() {
+		return getAttributeContributingType();
+	}
+
+	@Override
+	public Type getInferableType() {
+		return getExpressionType();
+	}
+
+	@Override
+	public FromElementBinding getBoundFromElementBinding() {
+		return this;
+	}
+
+	@Override
+	public void addDowncast(Downcast downcast) {
+		Downcast existing = null;
+		if ( downcastMap == null ) {
+			downcastMap = new HashMap<EntityType, Downcast>();
+		}
+		else {
+			existing = downcastMap.get( downcast.getTargetType() );
+		}
+
+		final Downcast toPut;
+		if ( existing == null ) {
+			toPut = downcast;
+		}
+		else {
+			// todo : depending on how we ultimately define TreatedAsInformation defines what exactly needs to happen here..
+			//		for now, just keep the existing...
+			toPut = existing;
+		}
+
+		downcastMap.put( downcast.getTargetType(), toPut );
+	}
+
+	@Override
+	public Collection<Downcast> getDowncasts() {
+		if ( downcastMap == null ) {
 			return Collections.emptySet();
 		}
 		else {
-			return Collections.unmodifiableSet( treatedAsTypeDescriptors );
+			return downcastMap.values();
 		}
 	}
 }

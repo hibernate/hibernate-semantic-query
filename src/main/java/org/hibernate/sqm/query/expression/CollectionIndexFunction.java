@@ -19,7 +19,7 @@ public class CollectionIndexFunction implements Expression {
 	private final Type indexType;
 
 	public CollectionIndexFunction(FromElement collectionReference, Type indexType) {
-		this.collectionAlias = collectionReference.getAlias();
+		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 	}
 

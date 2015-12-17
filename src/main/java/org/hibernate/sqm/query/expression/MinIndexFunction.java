@@ -18,7 +18,7 @@ public class MinIndexFunction implements Expression {
 	private final Type indexType;
 
 	public MinIndexFunction(FromElement collectionReference, Type indexType) {
-		this.collectionAlias = collectionReference.getAlias();
+		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 	}
 

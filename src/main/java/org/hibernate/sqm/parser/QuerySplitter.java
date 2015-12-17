@@ -14,6 +14,8 @@ import java.util.Map;
 import org.hibernate.sqm.BaseSemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PolymorphicEntityType;
+import org.hibernate.sqm.parser.internal.path.resolution.TreatedFromElement;
+import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
@@ -29,7 +31,6 @@ import org.hibernate.sqm.query.expression.CountFunction;
 import org.hibernate.sqm.query.expression.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
@@ -53,23 +54,21 @@ import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.JoinedFromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
-import org.hibernate.sqm.query.from.TreatedJoinedFromElement;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InTupleListPredicate;
-import org.hibernate.sqm.query.predicate.EmptinessPredicate;
-import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
+import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.OrPredicate;
 import org.hibernate.sqm.query.predicate.Predicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
@@ -93,7 +92,7 @@ public class QuerySplitter {
 		// root.  Use that restriction to locate the unmapped polymorphic reference
 		RootEntityFromElement unmappedPolymorphicReference = null;
 		for ( FromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
-			if ( PolymorphicEntityType.class.isInstance( fromElementSpace.getRoot().getBindableModelDescriptor() ) ) {
+			if ( PolymorphicEntityType.class.isInstance( fromElementSpace.getRoot().getBoundModelType() ) ) {
 				unmappedPolymorphicReference = fromElementSpace.getRoot();
 			}
 		}
@@ -102,7 +101,7 @@ public class QuerySplitter {
 			return new SelectStatement[] { statement };
 		}
 
-		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBindableModelDescriptor();
+		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBoundModelType();
 		final SelectStatement[] expanded = new SelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
@@ -203,7 +202,7 @@ public class QuerySplitter {
 		@Override
 		public FromElementSpace visitFromElementSpace(FromElementSpace fromElementSpace) {
 			if ( currentFromClauseCopy == null ) {
-				throw new AssertionError( "Current FromClause copy was null" );
+				throw new ParsingException( "Current FromClause copy was null" );
 			}
 
 			final FromElementSpace previousCurrent = currentFromElementSpaceCopy;
@@ -220,26 +219,33 @@ public class QuerySplitter {
 
 		@Override
 		public RootEntityFromElement visitRootEntityFromElement(RootEntityFromElement rootEntityFromElement) {
+			final RootEntityFromElement existingCopy = (RootEntityFromElement) fromElementCopyMap.get( rootEntityFromElement );
+			if ( existingCopy != null ) {
+				return existingCopy;
+			}
+
 			if ( currentFromElementSpaceCopy == null ) {
-				throw new AssertionError( "Current FromElementSpace copy was null" );
+				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 			if ( currentFromElementSpaceCopy.getRoot() != null ) {
-				throw new AssertionError( "FromElementSpace copy already contains root." );
+				throw new ParsingException( "FromElementSpace copy already contains root." );
 			}
 
 			final RootEntityFromElement copy;
 			if ( rootEntityFromElement == unmappedPolymorphicFromElement ) {
 				copy = new RootEntityFromElement(
 						currentFromElementSpaceCopy,
-						rootEntityFromElement.getAlias(),
+						rootEntityFromElement.getUniqueIdentifier(),
+						rootEntityFromElement.getIdentificationVariable(),
 						mappedDescriptor
 				);
 			}
 			else {
 				copy = new RootEntityFromElement(
 						currentFromElementSpaceCopy,
-						rootEntityFromElement.getAlias(),
-						rootEntityFromElement.getBindableModelDescriptor()
+						rootEntityFromElement.getUniqueIdentifier(),
+						rootEntityFromElement.getIdentificationVariable(),
+						rootEntityFromElement.getBoundModelType()
 				);
 			}
 			fromElementCopyMap.put( rootEntityFromElement, copy );
@@ -248,23 +254,20 @@ public class QuerySplitter {
 
 		@Override
 		public Object visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement) {
+			final CrossJoinedFromElement existingCopy = (CrossJoinedFromElement) fromElementCopyMap.get( joinedFromElement );
+			if ( existingCopy != null ) {
+				return existingCopy;
+			}
+
+			if ( currentFromElementSpaceCopy == null ) {
+				throw new ParsingException( "Current FromElementSpace copy was null" );
+			}
+
 			CrossJoinedFromElement copy = new CrossJoinedFromElement(
 					currentFromElementSpaceCopy,
-					joinedFromElement.getAlias(),
-					joinedFromElement.getBindableModelDescriptor()
-			);
-			fromElementCopyMap.put( joinedFromElement, copy );
-			return copy;
-		}
-
-		@Override
-		public Object visitTreatedJoinFromElement(TreatedJoinedFromElement joinedFromElement) {
-			JoinedFromElement wrappedCopy = (JoinedFromElement) joinedFromElement.getWrapped().accept( this );
-
-			TreatedJoinedFromElement copy = new TreatedJoinedFromElement(
-					wrappedCopy,
-					// todo : for now...
-					(EntityType) joinedFromElement.getBindableModelDescriptor()
+					joinedFromElement.getUniqueIdentifier(),
+					joinedFromElement.getIdentificationVariable(),
+					joinedFromElement.getBoundModelType()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
 			return copy;
@@ -272,14 +275,20 @@ public class QuerySplitter {
 
 		@Override
 		public Object visitQualifiedEntityJoinFromElement(QualifiedEntityJoinFromElement joinedFromElement) {
+			final QualifiedEntityJoinFromElement existingCopy = (QualifiedEntityJoinFromElement) fromElementCopyMap.get( joinedFromElement );
+			if ( existingCopy != null ) {
+				return existingCopy;
+			}
+
 			if ( currentFromElementSpaceCopy == null ) {
-				throw new AssertionError( "Current FromElementSpace copy was null" );
+				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
 			QualifiedEntityJoinFromElement copy = new QualifiedEntityJoinFromElement(
 					currentFromElementSpaceCopy,
-					joinedFromElement.getAlias(),
-					joinedFromElement.getBindableModelDescriptor(),
+					joinedFromElement.getUniqueIdentifier(),
+					joinedFromElement.getIdentificationVariable(),
+					joinedFromElement.getBoundModelType(),
 					joinedFromElement.getJoinType()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
@@ -288,16 +297,24 @@ public class QuerySplitter {
 
 		@Override
 		public Object visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement) {
+			final QualifiedAttributeJoinFromElement existingCopy = (QualifiedAttributeJoinFromElement) fromElementCopyMap.get( joinedFromElement );
+			if ( existingCopy != null ) {
+				return existingCopy;
+			}
+
 			if ( currentFromElementSpaceCopy == null ) {
-				throw new AssertionError( "Current FromElementSpace copy was null" );
+				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
 			QualifiedAttributeJoinFromElement copy = new QualifiedAttributeJoinFromElement(
 					currentFromElementSpaceCopy,
-					joinedFromElement.getAlias(),
-					joinedFromElement.getLhsAlias(),
+					joinedFromElement.getUniqueIdentifier(),
+					joinedFromElement.getIdentificationVariable(),
 					joinedFromElement.getJoinedAttributeDescriptor(),
+					joinedFromElement.getIntrinsicSubclassIndicator(),
+					joinedFromElement.asLoggableText(),
 					joinedFromElement.getJoinType(),
+					joinedFromElement,
 					joinedFromElement.isFetched()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
@@ -488,26 +505,27 @@ public class QuerySplitter {
 
 		@Override
 		public AttributeReferenceExpression visitAttributeReferenceExpression(AttributeReferenceExpression expression) {
-			// find the FromElement copy
-			final FromElement sourceCopy = fromElementCopyMap.get( expression.getSource() );
-			if ( sourceCopy == null ) {
-				throw new AssertionError( "FromElement not found in copy map" );
+			AttributeBindingSource attributeBindingSource = expression.getAttributeBindingSource();
+			if ( attributeBindingSource instanceof FromElement ) {
+				// find the FromElement copy
+				final FromElement sourceCopy = fromElementCopyMap.get( attributeBindingSource );
+				if ( sourceCopy == null ) {
+					throw new AssertionError( "FromElement not found in copy map" );
+				}
+				attributeBindingSource = sourceCopy;
 			}
 			return new AttributeReferenceExpression(
-					sourceCopy,
-					expression.getAttributeDescriptor(),
-					expression.getExpressionType()
+					attributeBindingSource,
+					expression.getBoundAttribute()
 			);
 		}
 
 		@Override
-		public FromElementReferenceExpression visitFromElementReferenceExpression(FromElementReferenceExpression expression) {
-			// find the FromElement copy
-			final FromElement fromElementCopy = fromElementCopyMap.get( expression.getFromElement() );
-			if ( fromElementCopy == null ) {
-				throw new AssertionError( "FromElement not found in copy map" );
-			}
-			return new FromElementReferenceExpression( fromElementCopy, expression.getExpressionType() );
+		public TreatedFromElement visitTreatedFromElement(TreatedFromElement treatedFromElement) {
+			return new TreatedFromElement(
+					treatedFromElement.getFromElement(),
+					treatedFromElement.getSubclassIndicator()
+			);
 		}
 
 		@Override

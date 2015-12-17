@@ -6,17 +6,18 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
-import org.hibernate.sqm.parser.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.parser.StrictJpaComplianceViolation;
+import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyFunction;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
@@ -116,7 +117,7 @@ public class SelectClauseTests {
 		SelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( FromElementReferenceExpression.class ) );
+		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
 	}
 
 	@Test
@@ -147,11 +148,11 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( FromElementReferenceExpression.class )
+				instanceOf( FromElementBinding.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeBinding.class )
 		);
 	}
 
@@ -317,12 +318,12 @@ public class SelectClauseTests {
 		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
 		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
-		assertThat( ( (EntityTypeImpl) leftHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity" ) );
-		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
+		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getBoundAttribute().getName(), is( "basic" ) );
 
 		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
-		assertThat( ( (EntityTypeImpl) rightHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity" ) );
-		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
+		assertThat( rightHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( rightHandOperand.getBoundAttribute().getName(), is( "basic1" ) );
 	}
 
 	@Test
@@ -334,12 +335,12 @@ public class SelectClauseTests {
 		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
 		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
-		assertThat( ( (EntityTypeImpl) leftHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity" ) );
-		assertThat( leftHandOperand.getAttributeDescriptor().getName(), is( "basic" ) );
+		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getBoundAttribute().getName(), is( "basic" ) );
 
 		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
-		assertThat( ( (EntityTypeImpl) rightHandOperand.getSource().getBindableModelDescriptor() ).getTypeName(), is( "com.acme.Entity2" ) );
-		assertThat( rightHandOperand.getAttributeDescriptor().getName(), is( "basic1" ) );
+		assertThat( rightHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity2" ) );
+		assertThat( rightHandOperand.getBoundAttribute().getName(), is( "basic1" ) );
 	}
 
 	@Test
@@ -372,9 +373,8 @@ public class SelectClauseTests {
 		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 
 		assertThat( collectionValueFunction.getValueType(), instanceOf( EntityTypeImpl.class ) );
-		assertThat( ( (EntityTypeImpl) collectionValueFunction.getValueType() ).getTypeName(), is( "com.acme.Leg" ) );
-
-		assertThat( collectionValueFunction.getCollectionAlias(), is("l") );
+		assertThat( collectionValueFunction.getValueType().getTypeName(), is( "com.acme.Leg" ) );
+		assertThat( collectionValueFunction.getPluralAttributeBinding().getIdentificationVariable(), is("l") );
 	}
 
 	@Test
@@ -389,8 +389,8 @@ public class SelectClauseTests {
 
 		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( collectionValueFunction.getElementType(), instanceOf( EntityTypeImpl.class ) );
-		assertThat( ( (EntityTypeImpl) collectionValueFunction.getElementType() ).getTypeName(), is( "com.acme.Leg" ) );
-		assertEquals("l", collectionValueFunction.getCollectionAlias() );
+		assertThat( collectionValueFunction.getElementType().getTypeName(), is( "com.acme.Leg" ) );
+		assertThat( collectionValueFunction.getPluralAttributeBinding().getIdentificationVariable(), is("l") );
 	}
 
 	@Test

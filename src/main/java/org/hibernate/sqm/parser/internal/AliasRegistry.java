@@ -43,13 +43,13 @@ public class AliasRegistry {
 	}
 
 	public void registerAlias(FromElement fromElement) {
-		final FromElement old = fromElementsByAlias.put( fromElement.getAlias(), fromElement );
+		final FromElement old = fromElementsByAlias.put( fromElement.getIdentificationVariable(), fromElement );
 		if ( old != null ) {
 			throw new AliasCollisionException(
 					String.format(
 							Locale.ENGLISH,
 							"Alias [%s] used for multiple from-clause-elements : %s, %s",
-							fromElement.getAlias(),
+							fromElement.getIdentificationVariable(),
 							old,
 							fromElement
 					)
@@ -84,7 +84,7 @@ public class AliasRegistry {
 		}
 		final FromElement fromElement = fromElementsByAlias.get( alias );
 		if ( fromElement != null ) {
-			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBindableModelDescriptor() ) ) {
+			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBoundModelType() ) ) {
 				throw new AliasCollisionException(
 						String.format(
 								Locale.ENGLISH,
@@ -92,7 +92,7 @@ public class AliasRegistry {
 								alias,
 								selection.getExpression().getExpressionType(),
 								fromElement,
-								fromElement.getBindableModelDescriptor()
+								fromElement.getBoundModelType()
 						)
 				);
 			}

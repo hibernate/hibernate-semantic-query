@@ -38,12 +38,6 @@ public class FromElementBuilder {
 
 	/**
 	 * Make the root entity reference for the FromElementSpace
-	 *
-	 * @param fromElementSpace
-	 * @param entityType
-	 * @param alias
-	 *
-	 * @return
 	 */
 	public RootEntityFromElement makeRootEntityFromElement(
 			FromElementSpace fromElementSpace,
@@ -57,8 +51,14 @@ public class FromElementBuilder {
 					entityType.getName()
 			);
 		}
-		final RootEntityFromElement root = new RootEntityFromElement( fromElementSpace, alias, entityType );
+		final RootEntityFromElement root = new RootEntityFromElement(
+				fromElementSpace,
+				parsingContext.makeUniqueIdentifier(),
+				alias,
+				entityType
+		);
 		fromElementSpace.setRoot( root );
+		parsingContext.registerFromElementByUniqueId( root );
 		registerAlias( root );
 		return root;
 	}
@@ -66,15 +66,10 @@ public class FromElementBuilder {
 
 	/**
 	 * Make the root entity reference for the FromElementSpace
-	 *
-	 * @param fromElementSpace
-	 * @param entityType
-	 * @param alias
-	 *
-	 * @return
 	 */
 	public CrossJoinedFromElement makeCrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
+			String uid,
 			EntityType entityType,
 			String alias) {
 		if ( alias == null ) {
@@ -86,23 +81,31 @@ public class FromElementBuilder {
 			);
 		}
 
-		final CrossJoinedFromElement join = new CrossJoinedFromElement( fromElementSpace, alias, entityType );
+		final CrossJoinedFromElement join = new CrossJoinedFromElement(
+				fromElementSpace,
+				uid,
+				alias,
+				entityType
+		);
 		fromElementSpace.addJoin( join );
+		parsingContext.registerFromElementByUniqueId( join );
 		registerAlias( join );
 		return join;
 	}
 
 	public QualifiedAttributeJoinFromElement buildAttributeJoin(
 			FromElementSpace fromElementSpace,
-			FromElement lhs,
-			Attribute attributeDescriptor,
 			String alias,
+			Attribute attributeDescriptor,
+			EntityType subclassIndicator,
+			String path,
 			JoinType joinType,
+			FromElement lhs,
 			boolean fetched) {
 		if ( attributeDescriptor == null ) {
 			throw new ParsingException(
 					"AttributeDescriptor was null [name unknown]; cannot build attribute join in relation to from-element [" +
-							lhs.getBindableModelDescriptor() + "(" + lhs.getAlias() + ")]"
+							lhs.getBoundModelType() + "(" + lhs.getIdentificationVariable() + ")]"
 			);
 		}
 
@@ -111,27 +114,31 @@ public class FromElementBuilder {
 			log.debugf(
 					"Generated implicit alias [%s] for attribute join [%s.%s]",
 					alias,
-					lhs.getAlias(),
+					lhs.getIdentificationVariable(),
 					attributeDescriptor.getName()
 			);
 		}
 
 		final QualifiedAttributeJoinFromElement join = new QualifiedAttributeJoinFromElement(
 				fromElementSpace,
+				parsingContext.makeUniqueIdentifier(),
 				alias,
-				lhs.getAlias(),
 				attributeDescriptor,
+				subclassIndicator,
+				path,
 				joinType,
+				lhs,
 				fetched
 		);
 		fromElementSpace.addJoin( join );
+		parsingContext.registerFromElementByUniqueId( join );
 		registerAlias( join );
 		registerPath( join );
 		return join;
 	}
 
 	private void registerAlias(FromElement fromElement) {
-		final String alias = fromElement.getAlias();
+		final String alias = fromElement.getIdentificationVariable();
 
 		if ( alias == null ) {
 			throw new ParsingException( "FromElement alias was null" );

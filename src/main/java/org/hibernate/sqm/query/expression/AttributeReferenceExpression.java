@@ -12,47 +12,52 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.AttributePathPart;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.path.AttributeBindingSource;
+import org.hibernate.sqm.path.FromElementBinding;
 
 /**
  * @author Steve Ebersole
  */
-public class AttributeReferenceExpression implements AttributePathPart, Expression {
-	private final FromElement source;
-	private final Attribute attributeDescriptor;
-	private final Type type;
+public class AttributeReferenceExpression implements AttributeBinding, Expression {
+	private final AttributeBindingSource attributeBindingSource;
+	private final Attribute boundAttribute;
 
 	public AttributeReferenceExpression(
-			FromElement source,
-			Attribute attributeDescriptor,
-			Type type) {
-		this.source = source;
-		this.attributeDescriptor = attributeDescriptor;
-		this.type = type;
-	}
-
-	public FromElement getSource() {
-		return source;
-	}
-
-	public Attribute getAttributeDescriptor() {
-		return attributeDescriptor;
+			AttributeBindingSource attributeBindingSource,
+			Attribute boundAttribute) {
+		this.attributeBindingSource = attributeBindingSource;
+		this.boundAttribute = boundAttribute;
 	}
 
 	@Override
-	public Bindable getBindableModelDescriptor() {
-		return (Bindable) getAttributeDescriptor();
+	public Attribute getBoundAttribute() {
+		return boundAttribute;
+	}
+
+	@Override
+	public AttributeBindingSource getAttributeBindingSource() {
+		return attributeBindingSource;
+	}
+
+	@Override
+	public Bindable getBoundModelType() {
+		return (Bindable) boundAttribute;
+	}
+
+	@Override
+	public String asLoggableText() {
+		return getAttributeBindingSource().asLoggableText() + '.' + getBoundAttribute().getName();
 	}
 
 	@Override
 	public Type getExpressionType() {
-		return type;
+		return getBoundModelType().getBoundType();
 	}
 
 	@Override
 	public Type getInferableType() {
-		return type;
+		return getExpressionType();
 	}
 
 	@Override
@@ -60,24 +65,25 @@ public class AttributeReferenceExpression implements AttributePathPart, Expressi
 		return String.format(
 				Locale.ENGLISH,
 				"AttributeReferenceExpression{" +
-						"source=%s" +
+						"path=%s" +
+						", lhs-alias=%s" +
 						", attribute-name=%s" +
 						", attribute-type=%s" +
 						'}',
-				getSource().getAlias(),
-				getAttributeDescriptor().getName(),
-				type
+				asLoggableText(),
+				getAttributeBindingSource().getFromElement().getIdentificationVariable(),
+				getBoundAttribute().getName(),
+				getExpressionType()
 		);
-	}
-
-	@Override
-	public FromElement getUnderlyingFromElement() {
-		// todo : not sure this is correct in all cases..
-		return source;
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitAttributeReferenceExpression( this );
+	}
+
+	@Override
+	public FromElementBinding getBoundFromElementBinding() {
+		return getAttributeBindingSource().getFromElement();
 	}
 }

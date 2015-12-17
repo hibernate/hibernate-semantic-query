@@ -6,7 +6,12 @@
  */
 package org.hibernate.sqm.parser.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hibernate.sqm.parser.ConsumerContext;
+import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 /**
  * Represents contextual information for each parse
@@ -16,7 +21,7 @@ import org.hibernate.sqm.parser.ConsumerContext;
 public class ParsingContext {
 	private final ConsumerContext consumerContext;
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
-	private final AliasRegistry aliasRegistry = new AliasRegistry();
+	private final Map<String,FromElement> globalFromElementMap = new HashMap<String, FromElement>();
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -30,7 +35,18 @@ public class ParsingContext {
 		return aliasGenerator;
 	}
 
-	public AliasRegistry getAliasRegistry() {
-		return aliasRegistry;
+	private long uidSequence = 0;
+
+	public String makeUniqueIdentifier() {
+		return "<uid:" + ++uidSequence + ">";
+	}
+
+	public void registerFromElementByUniqueId(FromElement fromElement) {
+		final FromElement old = globalFromElementMap.put( fromElement.getUniqueIdentifier(), fromElement );
+		assert old == null;
+	}
+
+	public void findElementByUniqueId(String uid) {
+		globalFromElementMap.get( uid );
 	}
 }

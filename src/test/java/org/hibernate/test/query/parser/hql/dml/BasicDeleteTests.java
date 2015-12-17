@@ -57,7 +57,7 @@ public class BasicDeleteTests {
 
 		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceExpression.class ) );
 		AttributeReferenceExpression attributeReferenceExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
-		assertSame( attributeReferenceExpression.getUnderlyingFromElement(), deleteStatement.getEntityFromElement() );
+		assertSame( attributeReferenceExpression.getBoundFromElementBinding().getFromElement(), deleteStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterExpression.class ) );
 	}

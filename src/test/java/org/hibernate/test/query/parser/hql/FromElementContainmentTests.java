@@ -6,10 +6,10 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.select.Selection;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
@@ -32,7 +32,7 @@ public class FromElementContainmentTests {
 		SelectStatement statement = (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( FromElementReferenceExpression.class ) );
+		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
 	}
 
 	@Test
@@ -43,7 +43,7 @@ public class FromElementContainmentTests {
 		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
-				instanceOf( FromElementReferenceExpression.class )
+				instanceOf( FromElementBinding.class )
 		);
 	}
 

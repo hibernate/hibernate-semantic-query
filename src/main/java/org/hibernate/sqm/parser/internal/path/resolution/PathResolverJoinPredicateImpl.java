@@ -4,27 +4,30 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.internal.hql.path;
+package org.hibernate.sqm.parser.internal.path.resolution;
 
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.internal.FromClauseIndex;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.hql.phase1.FromClauseStackNode;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.QualifiedJoinedFromElement;
 
 /**
+ * PathResolver implementation for paths found in a join predicate.
+ *
  * @author Steve Ebersole
  */
-public class JoinPredicatePathResolverImpl extends BasicAttributePathResolverImpl {
+public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 	private final QualifiedJoinedFromElement joinRhs;
 	private FromElement joinLhs;
 
-	public JoinPredicatePathResolverImpl(
+	public PathResolverJoinPredicateImpl(
 			FromElementBuilder fromElementBuilder,
 			FromClauseIndex fromClauseIndex,
 			ParsingContext parsingContext,
@@ -52,7 +55,9 @@ public class JoinPredicatePathResolverImpl extends BasicAttributePathResolverImp
 	}
 
 	@Override
-	protected void validateIntermediateAttributeJoin(FromElement lhs, Attribute joinedAttribute) {
+	protected void validateIntermediateAttributeJoin(
+			AttributeBindingSource lhs,
+			Attribute joinedAttribute) {
 		if ( joinedAttribute instanceof SingularAttribute ) {
 			final SingularAttribute singularAttribute = (SingularAttribute) joinedAttribute;
 			if ( singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.ANY

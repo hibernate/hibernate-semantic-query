@@ -9,6 +9,8 @@ package org.hibernate.sqm.parser.internal.hql.phase1;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.StrictJpaComplianceViolation;
@@ -17,15 +19,8 @@ import org.hibernate.sqm.parser.internal.FromClauseIndex;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.sqm.parser.internal.ParsingContext;
-import org.hibernate.sqm.parser.internal.hql.AbstractHqlParseTreeVisitor;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParserBaseListener;
-import org.hibernate.sqm.parser.internal.hql.path.AttributePathResolver;
-import org.hibernate.sqm.parser.internal.hql.path.BasicAttributePathResolverImpl;
-import org.hibernate.sqm.parser.internal.hql.path.JoinPredicatePathResolverImpl;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.PolymorphicEntityType;
-import org.hibernate.sqm.path.AttributePathPart;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
@@ -125,7 +120,8 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 				entityType.getName()
 		);
 
-		dmlRoot = new RootEntityFromElement( null, alias, entityType );
+		dmlRoot = new RootEntityFromElement( null, parsingContext.makeUniqueIdentifier(), alias, entityType );
+		parsingContext.registerFromElementByUniqueId( dmlRoot );
 		fromElementBuilder.getAliasRegistry().registerAlias( dmlRoot );
 		fromElementMap.put( ctx.getText(), dmlRoot );
 	}
@@ -157,7 +153,8 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 					entityType.getName()
 			);
 		}
-		final RootEntityFromElement root = new RootEntityFromElement( null, alias, entityType );
+		final RootEntityFromElement root = new RootEntityFromElement( null, parsingContext.makeUniqueIdentifier(), alias, entityType );
+		parsingContext.registerFromElementByUniqueId( root );
 		fromElementBuilder.getAliasRegistry().registerAlias( root );
 		return root;
 	}
@@ -274,6 +271,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 		final CrossJoinedFromElement join = fromElementBuilder.makeCrossJoinedFromElement(
 				currentFromElementSpace,
+				parsingContext.makeUniqueIdentifier(),
 				entityType,
 				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
 		);
@@ -282,7 +280,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 
 	@Override
 	public void enterJpaCollectionJoin(HqlParser.JpaCollectionJoinContext ctx) {
-		final QualifiedJoinTreeVisitor visitor = new QualifiedJoinTreeVisitor(
+		final ParseTreeVisitorQualifiedJoinImpl visitor = new ParseTreeVisitorQualifiedJoinImpl(
 				fromElementBuilder,
 				fromClauseIndex,
 				parsingContext,
@@ -315,7 +313,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 			joinType = JoinType.INNER;
 		}
 
-		final QualifiedJoinTreeVisitor visitor = new QualifiedJoinTreeVisitor(
+		final ParseTreeVisitorQualifiedJoinImpl visitor = new ParseTreeVisitorQualifiedJoinImpl(
 				fromElementBuilder,
 				fromClauseIndex,
 				parsingContext,
@@ -335,7 +333,7 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		}
 
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
-			if ( !ImplicitAliasGenerator.isImplicitAlias( joinedPath.getAlias() ) ) {
+			if ( !ImplicitAliasGenerator.isImplicitAlias( joinedPath.getIdentificationVariable() ) ) {
 				if ( QualifiedAttributeJoinFromElement.class.isInstance( joinedPath ) ) {
 					if ( QualifiedAttributeJoinFromElement.class.cast( joinedPath ).isFetched() ) {
 						throw new StrictJpaComplianceViolation(
@@ -355,140 +353,4 @@ public class FromClauseProcessor extends HqlParserBaseListener {
 		fromElementMap.put( ctx.getText(), joinedPath );
 	}
 
-	private static class QualifiedJoinTreeVisitor extends AbstractHqlParseTreeVisitor {
-		private final FromElementBuilder fromElementBuilder;
-		private final FromClauseIndex fromClauseIndex;
-		private final ParsingContext parsingContext;
-		private final FromElementSpace fromElementSpace;
-		private final FromClauseStackNode currentFromClauseNode;
-
-		private QualifiedJoinedFromElement currentJoinRhs;
-
-		public QualifiedJoinTreeVisitor(
-				FromElementBuilder fromElementBuilder,
-				FromClauseIndex fromClauseIndex,
-				ParsingContext parsingContext,
-				FromElementSpace fromElementSpace,
-				FromClauseStackNode fromClauseNode,
-				JoinType joinType,
-				String alias,
-				boolean fetched) {
-			super( parsingContext, fromClauseIndex );
-			this.fromElementBuilder = fromElementBuilder;
-			this.fromClauseIndex = fromClauseIndex;
-			this.parsingContext = parsingContext;
-			this.fromElementSpace = fromElementSpace;
-			this.currentFromClauseNode = fromClauseNode;
-			this.attributePathResolverStack.push(
-					new JoinAttributePathResolver(
-							fromElementBuilder,
-							fromClauseIndex,
-							currentFromClauseNode,
-							parsingContext,
-							fromElementSpace,
-							joinType,
-							alias,
-							fetched
-					)
-			);
-		}
-
-		@Override
-		public FromClause getCurrentFromClause() {
-			return fromElementSpace.getFromClause();
-		}
-
-		@Override
-		public FromElementBuilder getFromElementBuilder() {
-			return fromElementBuilder;
-		}
-
-		@Override
-		public FromClauseStackNode getCurrentFromClauseNode() {
-			return currentFromClauseNode;
-		}
-
-		@Override
-		public AttributePathResolver getCurrentAttributePathResolver() {
-			return attributePathResolverStack.getCurrent();
-		}
-
-		public void setCurrentJoinRhs(QualifiedJoinedFromElement currentJoinRhs) {
-			this.currentJoinRhs = currentJoinRhs;
-		}
-
-		@Override
-		public Predicate visitQualifiedJoinPredicate(HqlParser.QualifiedJoinPredicateContext ctx) {
-			if ( currentJoinRhs == null ) {
-				throw new ParsingException( "Expecting join RHS to be set" );
-			}
-
-			attributePathResolverStack.push(
-					new JoinPredicatePathResolverImpl(
-							fromElementBuilder,
-							fromClauseIndex,
-							parsingContext,
-							getCurrentFromClauseNode(),
-							currentJoinRhs
-					)
-			);
-			try {
-				return super.visitQualifiedJoinPredicate( ctx );
-			}
-			finally {
-				attributePathResolverStack.pop();
-			}
-		}
-	}
-
-	private static class JoinAttributePathResolver extends BasicAttributePathResolverImpl {
-		private final FromElementBuilder fromElementBuilder;
-		private final FromElementSpace fromElementSpace;
-		private final JoinType joinType;
-		private final String alias;
-		private final boolean fetched;
-
-		public JoinAttributePathResolver(
-				FromElementBuilder fromElementBuilder,
-				FromClauseIndex fromClauseIndex,
-				FromClauseStackNode currentFromClauseNode,
-				ParsingContext parsingContext,
-				FromElementSpace fromElementSpace,
-				JoinType joinType,
-				String alias,
-				boolean fetched) {
-			super( fromElementBuilder, fromClauseIndex, parsingContext, currentFromClauseNode );
-			this.fromElementBuilder = fromElementBuilder;
-			this.fromElementSpace = fromElementSpace;
-			this.joinType = joinType;
-			this.alias = alias;
-			this.fetched = fetched;
-		}
-
-		@Override
-		protected JoinType getIntermediateJoinType() {
-			return joinType;
-		}
-
-		protected boolean areIntermediateJoinsFetched() {
-			return fetched;
-		}
-
-		@Override
-		protected AttributePathPart resolveTerminalPathPart(FromElement lhs, String terminalName) {
-			return fromElementBuilder.buildAttributeJoin(
-					fromElementSpace,
-					lhs,
-					resolveAttributeDescriptor( lhs, terminalName ),
-					alias,
-					joinType,
-					fetched
-			);
-		}
-
-		@Override
-		protected AttributePathPart resolveFromElementAliasAsTerminal(FromElement aliasedFromElement) {
-			return aliasedFromElement;
-		}
-	}
 }

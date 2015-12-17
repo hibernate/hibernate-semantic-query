@@ -9,7 +9,7 @@ package org.hibernate.sqm.domain;
 /**
  * Represents something that can be bound into a query.  Typically this will be one of:<ul>
  *     <li>
- *         {@link EntityType} - The entity type itself is the {@link #getBoundType()} and
+ *         {@link ManagedType} - The entity/embeddable type itself is the {@link #getBoundType()} and
  *         the {@link #asManagedType()}
  *     </li>
  *     <li>

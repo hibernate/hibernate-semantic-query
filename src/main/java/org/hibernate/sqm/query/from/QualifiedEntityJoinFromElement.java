@@ -24,10 +24,11 @@ public class QualifiedEntityJoinFromElement
 
 	public QualifiedEntityJoinFromElement(
 			FromElementSpace fromElementSpace,
+			String uid,
 			String alias,
 			EntityType joinedEntityDescriptor,
 			JoinType joinType) {
-		super( fromElementSpace, alias, joinedEntityDescriptor, joinType );
+		super( fromElementSpace, uid, alias, joinedEntityDescriptor, joinedEntityDescriptor, alias, joinType );
 		this.entityName = joinedEntityDescriptor.getName();
 	}
 
@@ -36,13 +37,13 @@ public class QualifiedEntityJoinFromElement
 	}
 
 	@Override
-	public EntityType getBindableModelDescriptor() {
-		return (EntityType) super.getBindableModelDescriptor();
+	public EntityType getBoundModelType() {
+		return (EntityType) super.getBoundModelType();
 	}
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBindableModelDescriptor().findAttribute( attributeName );
+		return getBoundModelType().findAttribute( attributeName );
 	}
 
 	@Override

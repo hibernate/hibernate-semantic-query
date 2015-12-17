@@ -25,7 +25,7 @@ public class MapEntryFunction implements Expression {
 	private final Type elementType;
 
 	public MapEntryFunction(FromElement collectionReference, Type indexType, Type elementType) {
-		this.collectionAlias = collectionReference.getAlias();
+		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 		this.elementType = elementType;
 	}

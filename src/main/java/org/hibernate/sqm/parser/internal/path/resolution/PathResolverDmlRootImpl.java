@@ -4,7 +4,7 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.internal.hql.path;
+package org.hibernate.sqm.parser.internal.path.resolution;
 
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ParsingContext;
@@ -14,12 +14,12 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
 /**
  * @author Steve Ebersole
  */
-public class DmlRootAttributePathResolver extends StandardAttributePathResolverTemplate {
+public class PathResolverDmlRootImpl extends PathResolverStandardTemplate {
 	private final RootEntityFromElement dmlRoot;
 	private final FromElementBuilder fromElementBuilder;
 	private final ParsingContext parsingContext;
 
-	public DmlRootAttributePathResolver(
+	public PathResolverDmlRootImpl(
 			RootEntityFromElement dmlRoot,
 			FromElementBuilder fromElementBuilder,
 			ParsingContext parsingContext) {
@@ -30,7 +30,7 @@ public class DmlRootAttributePathResolver extends StandardAttributePathResolverT
 
 	@Override
 	protected FromElement findFromElementByAlias(String alias) {
-		if ( alias.equals( dmlRoot.getAlias() ) ) {
+		if ( alias.equals( dmlRoot.getIdentificationVariable() ) ) {
 			return dmlRoot;
 		}
 		else {

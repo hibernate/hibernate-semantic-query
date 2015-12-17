@@ -18,7 +18,7 @@ public class MinElementFunction implements Expression {
 	private final Type elementType;
 
 	public MinElementFunction(FromElement collectionReference, Type elementType) {
-		this.collectionAlias = collectionReference.getAlias();
+		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.elementType = elementType;
 	}
 

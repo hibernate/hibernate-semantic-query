@@ -44,7 +44,7 @@ public class BasicInsertTests {
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
 		for ( AttributeReferenceExpression stateField : insertStatement.getStateFields() ) {
-			assertSame( insertStatement.getInsertTarget(), stateField.getUnderlyingFromElement() );
+			assertSame( insertStatement.getInsertTarget(), stateField.getBoundFromElementBinding().getFromElement() );
 		}
 	}
 

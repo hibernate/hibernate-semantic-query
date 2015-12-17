@@ -11,11 +11,11 @@ import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.hql.AbstractHqlParseTreeVisitor;
-import org.hibernate.sqm.parser.internal.hql.path.BasicAttributePathResolverImpl;
-import org.hibernate.sqm.parser.internal.hql.path.DmlRootAttributePathResolver;
+import org.hibernate.sqm.parser.internal.path.resolution.PathResolverBasicImpl;
+import org.hibernate.sqm.parser.internal.path.resolution.PathResolverDmlRootImpl;
 import org.hibernate.sqm.parser.internal.hql.phase1.FromClauseProcessor;
 import org.hibernate.sqm.parser.internal.hql.phase1.FromClauseStackNode;
-import org.hibernate.sqm.path.AttributePathPart;
+import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
@@ -87,8 +87,8 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 		}
 		FromClauseStackNode originalCurrentFromClauseNode = currentFromClauseNode;
 		currentFromClauseNode = fromClauseNode;
-		attributePathResolverStack.push(
-				new BasicAttributePathResolverImpl(
+		pathResolverStack.push(
+				new PathResolverBasicImpl(
 						currentFromElementBuilder,
 						fromClauseProcessor.getFromClauseIndex(),
 						getParsingContext(),
@@ -99,13 +99,13 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			return super.visitQuerySpec( ctx );
 		}
 		finally {
-			attributePathResolverStack.pop();
+			pathResolverStack.pop();
 			currentFromClauseNode = originalCurrentFromClauseNode;
 		}
 	}
 
 	@Override
-	public AttributePathPart visitIndexedPath(HqlParser.IndexedPathContext ctx) {
+	public Binding visitIndexedPath(HqlParser.IndexedPathContext ctx) {
 		return super.visitIndexedPath( ctx );
 	}
 
@@ -120,8 +120,8 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			throw new ParsingException( "Multiple root FromClauseStackNodes found; cannot process order-by" );
 		}
 		FromClauseStackNode rootFromClauseStackNode = fromClauseProcessor.getFromClauseIndex().getFromClauseStackNodeList().get( 0 );
-		attributePathResolverStack.push(
-				new BasicAttributePathResolverImpl(
+		pathResolverStack.push(
+				new PathResolverBasicImpl(
 						currentFromElementBuilder,
 						fromClauseProcessor.getFromClauseIndex(),
 						getParsingContext(),
@@ -133,7 +133,7 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			return super.visitOrderByClause( ctx );
 		}
 		finally {
-			attributePathResolverStack.pop();
+			pathResolverStack.pop();
 		}
 	}
 
@@ -144,8 +144,8 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	public DeleteStatement visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
 		final DeleteStatement deleteStatement = new DeleteStatement( fromClauseProcessor.getDmlRoot() );
 
-		attributePathResolverStack.push(
-				new DmlRootAttributePathResolver(
+		pathResolverStack.push(
+				new PathResolverDmlRootImpl(
 						fromClauseProcessor.getDmlRoot(),
 						currentFromElementBuilder,
 						getParsingContext()
@@ -155,7 +155,7 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			deleteStatement.getWhereClause().setPredicate( (Predicate) ctx.whereClause().predicate().accept( this ) );
 		}
 		finally {
-			attributePathResolverStack.pop();
+			pathResolverStack.pop();
 		}
 
 		return deleteStatement;
@@ -165,8 +165,8 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 	public UpdateStatement visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
 		final UpdateStatement updateStatement = new UpdateStatement( fromClauseProcessor.getDmlRoot() );
 
-		attributePathResolverStack.push(
-				new DmlRootAttributePathResolver(
+		pathResolverStack.push(
+				new PathResolverDmlRootImpl(
 						fromClauseProcessor.getDmlRoot(),
 						currentFromElementBuilder,
 						getParsingContext()
@@ -178,13 +178,13 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			for ( HqlParser.AssignmentContext assignmentContext : ctx.setClause().assignment() ) {
 				// todo : validate "state field" expression
 				updateStatement.getSetClause().addAssignment(
-						(AttributeReferenceExpression) attributePathResolverStack.getCurrent().resolvePath( assignmentContext.dotIdentifierSequence() ),
+						(AttributeReferenceExpression) pathResolverStack.getCurrent().resolvePath( assignmentContext.dotIdentifierSequence() ),
 						(Expression) assignmentContext.expression().accept( this )
 				);
 			}
 		}
 		finally {
-			attributePathResolverStack.pop();
+			pathResolverStack.pop();
 		}
 
 		return updateStatement;
@@ -195,8 +195,8 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 		// for now we only support the INSERT-SELECT form
 		final InsertSelectStatement insertStatement = new InsertSelectStatement( fromClauseProcessor.getDmlRoot() );
 
-		attributePathResolverStack.push(
-				new DmlRootAttributePathResolver(
+		pathResolverStack.push(
+				new PathResolverDmlRootImpl(
 						fromClauseProcessor.getDmlRoot(),
 						currentFromElementBuilder,
 						getParsingContext()
@@ -206,13 +206,13 @@ public class SemanticQueryBuilder extends AbstractHqlParseTreeVisitor {
 			insertStatement.setSelectQuery( visitQuerySpec( ctx.querySpec() ) );
 
 			for ( HqlParser.DotIdentifierSequenceContext stateFieldCtx : ctx.insertSpec().targetFieldsSpec().dotIdentifierSequence() ) {
-				final AttributeReferenceExpression stateField = (AttributeReferenceExpression) attributePathResolverStack.getCurrent().resolvePath( stateFieldCtx );
+				final AttributeReferenceExpression stateField = (AttributeReferenceExpression) pathResolverStack.getCurrent().resolvePath( stateFieldCtx );
 				// todo : validate each resolved stateField...
 				insertStatement.addInsertTargetStateField( stateField );
 			}
 		}
 		finally {
-			attributePathResolverStack.pop();
+			pathResolverStack.pop();
 		}
 
 		return insertStatement;

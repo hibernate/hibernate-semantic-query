@@ -53,7 +53,7 @@ public class HqlFromClauseProcessorPocTest {
 		assertEquals( 0, space1.getJoins().size() );
 		RootEntityFromElement root = space1.getRoot();
 		assertNotNull( root );
-		assertThat( root.getAlias(), is("a") );
+		assertThat( root.getIdentificationVariable(), is( "a") );
 	}
 
 	private FromClauseProcessor processFromClause(HqlParser parser) {
@@ -116,10 +116,10 @@ public class HqlFromClauseProcessorPocTest {
 		assertEquals( 0, space2.getJoins().size() );
 
 		assertNotNull( space1.getRoot() );
-		assertThat(space1.getRoot().getAlias(), is("a")  );
+		assertThat( space1.getRoot().getIdentificationVariable(), is( "a")  );
 
 		assertNotNull( space2.getRoot() );
-		assertThat(space2.getRoot().getAlias(), is("b")  );
+		assertThat( space2.getRoot().getIdentificationVariable(), is( "b")  );
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
-		assertTrue( ImplicitAliasGenerator.isImplicitAlias( space1.getRoot().getAlias() ) );
+		assertTrue( ImplicitAliasGenerator.isImplicitAlias( space1.getRoot().getIdentificationVariable() ) );
 	}
 
 	@Test

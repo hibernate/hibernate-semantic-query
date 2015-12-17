@@ -6,6 +6,7 @@
  */
 package org.hibernate.sqm;
 
+import org.hibernate.sqm.parser.internal.path.resolution.TreatedFromElement;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
@@ -25,7 +26,6 @@ import org.hibernate.sqm.query.expression.CountFunction;
 import org.hibernate.sqm.query.expression.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
@@ -58,19 +58,18 @@ import org.hibernate.sqm.query.from.JoinedFromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
-import org.hibernate.sqm.query.from.TreatedJoinedFromElement;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InTupleListPredicate;
-import org.hibernate.sqm.query.predicate.EmptinessPredicate;
-import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
+import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.OrPredicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
@@ -163,11 +162,6 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 
 	@Override
 	public Object visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement) {
-		return joinedFromElement;
-	}
-
-	@Override
-	public Object visitTreatedJoinFromElement(TreatedJoinedFromElement joinedFromElement) {
 		return joinedFromElement;
 	}
 
@@ -335,8 +329,8 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	}
 
 	@Override
-	public FromElementReferenceExpression visitFromElementReferenceExpression(FromElementReferenceExpression expression) {
-		return expression;
+	public Object visitTreatedFromElement(TreatedFromElement treatedFromElement) {
+		return treatedFromElement;
 	}
 
 	@Override

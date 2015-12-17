@@ -60,14 +60,14 @@ public class BasicUpdateTests {
 
 		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceExpression.class ) );
 		AttributeReferenceExpression attributeReferenceExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
-		assertSame( attributeReferenceExpression.getUnderlyingFromElement(), updateStatement.getEntityFromElement() );
+		assertSame( attributeReferenceExpression.getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterExpression.class ) );
 
 		assertEquals( 1, updateStatement.getSetClause().getAssignments().size() );
 
 		Assignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
-		assertSame( assignment.getStateField().getUnderlyingFromElement(), updateStatement.getEntityFromElement() );
+		assertSame( assignment.getStateField().getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( assignment.getValue(), instanceOf( LiteralCharacterExpression.class ) );
 	}

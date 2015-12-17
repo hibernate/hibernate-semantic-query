@@ -8,22 +8,22 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 
 /**
  * @author Steve Ebersole
  */
 public class CollectionValueFunction implements Expression {
-	private final String collectionAlias;
+	private final QualifiedAttributeJoinFromElement pluralAttributeBinding;
 	private final Type elementType;
 
-	public CollectionValueFunction(FromElement collectionReference, Type elementType) {
-		this.collectionAlias = collectionReference.getAlias();
+	public CollectionValueFunction(QualifiedAttributeJoinFromElement pluralAttributeBinding, Type elementType) {
+		this.pluralAttributeBinding = pluralAttributeBinding;
 		this.elementType = elementType;
 	}
 
-	public String getCollectionAlias() {
-		return collectionAlias;
+	public QualifiedAttributeJoinFromElement getPluralAttributeBinding() {
+		return pluralAttributeBinding;
 	}
 
 	public Type getElementType() {

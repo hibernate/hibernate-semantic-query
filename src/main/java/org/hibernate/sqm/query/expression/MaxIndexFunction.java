@@ -18,7 +18,7 @@ public class MaxIndexFunction implements Expression {
 	private final Type indexType;
 
 	public MaxIndexFunction(FromElement collectionReference, Type indexType) {
-		this.collectionAlias = collectionReference.getAlias();
+		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 	}
 

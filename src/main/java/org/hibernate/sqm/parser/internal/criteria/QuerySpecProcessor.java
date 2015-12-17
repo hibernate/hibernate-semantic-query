@@ -23,6 +23,12 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.internal.AliasRegistry;
@@ -30,12 +36,7 @@ import org.hibernate.sqm.parser.internal.ExpressionTypeHelper;
 import org.hibernate.sqm.parser.internal.FromClauseIndex;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ParsingContext;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
@@ -47,7 +48,6 @@ import org.hibernate.sqm.query.expression.CountFunction;
 import org.hibernate.sqm.query.expression.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.FromElementReferenceExpression;
 import org.hibernate.sqm.query.expression.FunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
@@ -145,12 +145,18 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 
 	private void bindJoins(From<?,?> lhs, FromElement sqmLhs, FromElementSpace space) {
 		for ( Join<?, ?> join : lhs.getJoins() ) {
+			final String alias = join.getAlias();
+			// todo : we could theoretically reconstruct the "fetch path" via parent refs if we deem it useful..
+			@SuppressWarnings("UnnecessaryLocalVariable") final String path  = alias;
+
 			final QualifiedAttributeJoinFromElement sqmJoin = fromElementBuilder.buildAttributeJoin(
 					space,
-					sqmLhs,
+					alias,
 					sqmLhs.resolveAttribute( join.getAttribute().getName() ),
-					join.getAlias(),
+					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityType( join.getJavaType() ),
+					path,
 					convert( join.getJoinType() ),
+					sqmLhs,
 					false
 			);
 			space.addJoin( sqmJoin );
@@ -160,12 +166,18 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 
 	private void bindFetches(FetchParent<?, ?> lhs, FromElement sqmLhs, FromElementSpace space) {
 		for ( Fetch<?, ?> fetch : lhs.getFetches() ) {
+			final String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+			// todo : we could theoretically reconstruct the "fetch path" via parent refs if we deem it useful..
+			@SuppressWarnings("UnnecessaryLocalVariable") final String path  = alias;
+
 			final QualifiedAttributeJoinFromElement sqmFetch = fromElementBuilder.buildAttributeJoin(
 					space,
-					sqmLhs,
+					alias,
 					sqmLhs.resolveAttribute( fetch.getAttribute().getName() ),
-					parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias(),
+					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityType( fetch.getAttribute().getJavaType() ),
+					path,
 					convert( fetch.getJoinType() ),
+					sqmLhs,
 					true
 			);
 			space.addJoin( sqmFetch );
@@ -453,9 +465,9 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 	}
 
 	@Override
-	public FromElementReferenceExpression visitIdentificationVariableReference(From reference) {
+	public FromElementBinding visitIdentificationVariableReference(From reference) {
 		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( reference.getAlias() );
-		return new FromElementReferenceExpression( fromElement, fromElement.getBindableModelDescriptor().getBoundType() );
+		return fromElement;
 	}
 
 	@Override
@@ -472,7 +484,7 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 		else {
 			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );
 		}
-		return new AttributeReferenceExpression( source, attributeDescriptor, type );
+		return new AttributeReferenceExpression( source, attributeDescriptor );
 	}
 
 	@Override
@@ -596,7 +608,7 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 	@Override
 	public EntityTypeExpression visitEntityType(String identificationVariable) {
 		final FromElement fromElement = fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
-		return new EntityTypeExpression( (EntityType) fromElement.getBindableModelDescriptor() );
+		return new EntityTypeExpression( (EntityType) fromElement.getBoundModelType() );
 	}
 
 	@Override

@@ -33,7 +33,6 @@ import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.internal.AliasRegistry;
 import org.hibernate.sqm.parser.internal.ExpressionTypeHelper;
-import org.hibernate.sqm.parser.internal.FromClauseIndex;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.path.FromElementBinding;
@@ -103,17 +102,11 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 	}
 
 	private final ParsingContext parsingContext;
-	private final FromClauseIndex fromClauseIndex;
 	private final FromElementBuilder fromElementBuilder;
 
 	private QuerySpecProcessor(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
-		this.fromClauseIndex = new FromClauseIndex();
 		this.fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry(  ) );
-	}
-
-	public FromClauseIndex getFromClauseIndex() {
-		return fromClauseIndex;
 	}
 
 	public QuerySpec visitQuerySpec(AbstractQuery jpaCriteria) {

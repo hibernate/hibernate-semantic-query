@@ -39,7 +39,7 @@ import static org.junit.Assert.fail;
  * @author Steve Ebersole
  */
 public class SimpleSemanticQueryBuilderTest {
-	private ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
+	private final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 	@Test
 	public void simpleIntegerLiteralsTest() {

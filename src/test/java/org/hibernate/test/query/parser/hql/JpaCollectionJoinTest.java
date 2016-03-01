@@ -27,7 +27,7 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public class JpaCollectionJoinTest {
-	private ConsumerContextImpl consumerContext;
+	private final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 	@Test
 	public void basicTest() {
@@ -41,11 +41,6 @@ public class JpaCollectionJoinTest {
 
 	private SelectStatement interpret(String query) {
 		return (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
-	}
-
-	@Before
-	public void setUpContext() {
-		consumerContext = new ConsumerContextImpl( buildMetamodel() );
 	}
 
 	private DomainMetamodel buildMetamodel() {

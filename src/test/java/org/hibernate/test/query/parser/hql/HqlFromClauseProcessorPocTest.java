@@ -34,6 +34,8 @@ import static org.junit.Assert.assertTrue;
  * @author Steve Ebersole
  */
 public class HqlFromClauseProcessorPocTest {
+
+	final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 	@Test
 	public void testSimpleFrom() throws Exception {
 		final SelectStatement selectStatement = interpret( "select a.b from Something a" );
@@ -51,11 +53,7 @@ public class HqlFromClauseProcessorPocTest {
 	}
 
 	private SelectStatement interpret(String query) {
-		return (SelectStatement) SemanticQueryInterpreter.interpret( query, buildConsumerContext() );
-	}
-
-	private ConsumerContextImpl buildConsumerContext() {
-		return new ConsumerContextImpl( buildMetamodel() );
+		return (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	private DomainMetamodel buildMetamodel() {

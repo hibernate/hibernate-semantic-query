@@ -31,6 +31,7 @@ import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
+
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
@@ -42,6 +43,8 @@ import static org.junit.Assert.assertTrue;
  * @author Andrea Boriero
  */
 public class AliasTest {
+
+	final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 	@Test(expected = AliasCollisionException.class)
 	public void testRedefiningAResultVariableInSelectionsHavingDifferentSelectionExpressions() {
@@ -328,7 +331,10 @@ public class AliasTest {
 		AttributeReferenceExpression testExpression = (AttributeReferenceExpression) predicate.getTestExpression();
 		assertThat( testExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( testExpression.getBoundAttribute().getName(), is( attributeName ) );
-		assertThat( testExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(), is( alias ) );
+		assertThat(
+				testExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(),
+				is( alias )
+		);
 	}
 
 	private void checkRelationalPredicateLeftHandWhereExpression(
@@ -341,7 +347,10 @@ public class AliasTest {
 		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
 		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
-		assertThat( leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(), is( alias ) );
+		assertThat(
+				leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(),
+				is( alias )
+		);
 	}
 
 	private void checkRelationalPredicateRightHandWhereExpression(
@@ -353,7 +362,10 @@ public class AliasTest {
 		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
 		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getRightHandExpression();
 		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
-		assertThat( leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(), is( alias ) );
+		assertThat(
+				leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(),
+				is( alias )
+		);
 		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 	}
 
@@ -391,7 +403,7 @@ public class AliasTest {
 	private SelectStatement interpretQuery(String query) {
 		return (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				new ConsumerContextImpl( buildMetamodel() )
+				consumerContext
 		);
 	}
 

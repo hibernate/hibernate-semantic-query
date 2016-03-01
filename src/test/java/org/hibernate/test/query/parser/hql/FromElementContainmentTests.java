@@ -25,10 +25,11 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public class FromElementContainmentTests {
+	final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
+
 	@Test
 	public void testFromElementReferenceInSelect() {
 		final String query = "select o from Entity o";
-		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 		SelectStatement statement = (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
@@ -38,7 +39,6 @@ public class FromElementContainmentTests {
 	@Test
 	public void testFromElementReferenceInOrderBy() {
 		final String query = "select o from Entity o order by o";
-		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 		SelectStatement statement = (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
 		assertThat(

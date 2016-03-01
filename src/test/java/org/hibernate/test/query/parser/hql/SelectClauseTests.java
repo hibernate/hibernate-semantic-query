@@ -48,15 +48,10 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public class SelectClauseTests {
-	private ConsumerContextImpl consumerContext;
+	private final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
-
-	@Before
-	public void setUpContext() {
-		 consumerContext = new ConsumerContextImpl( buildMetamodel() );
-	}
 
 	private DomainMetamodel buildMetamodel() {
 		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();

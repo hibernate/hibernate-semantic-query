@@ -229,7 +229,7 @@ crossJoin
 	;
 
 jpaCollectionJoin
-	:	inKeyword LEFT_PAREN path RIGHT_PAREN (asKeyword? IDENTIFIER)?
+	:	COMMA inKeyword LEFT_PAREN path RIGHT_PAREN (asKeyword? IDENTIFIER)?
 	;
 
 qualifiedJoin

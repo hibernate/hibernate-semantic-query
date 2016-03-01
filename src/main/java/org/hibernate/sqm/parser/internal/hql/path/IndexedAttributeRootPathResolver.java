@@ -4,7 +4,7 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.internal.path.resolution;
+package org.hibernate.sqm.parser.internal.hql.path;
 
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.NotYetImplementedException;
@@ -12,7 +12,6 @@ import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.path.Binding;
-import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
 
 import org.jboss.logging.Logger;
@@ -23,28 +22,21 @@ import org.jboss.logging.Logger;
 public class IndexedAttributeRootPathResolver extends AbstractPathResolverImpl {
 	private static final Logger log = Logger.getLogger( IndexedAttributeRootPathResolver.class );
 
-	private final FromElementBuilder fromElementBuilder;
-	private final ParsingContext parsingContext;
+	private final ResolutionContext resolutionContext;
 	private final PluralAttributeIndexedReference source;
 
 	public IndexedAttributeRootPathResolver(
-			FromElementBuilder fromElementBuilder,
-			ParsingContext parsingContext,
+			ResolutionContext resolutionContext,
 			PluralAttributeIndexedReference source) {
-		this.fromElementBuilder = fromElementBuilder;
-		this.parsingContext = parsingContext;
+		this.resolutionContext = resolutionContext;
 		this.source = source;
 	}
 
 	@Override
-	protected FromElementBuilder fromElementBuilder() {
-		return fromElementBuilder;
+	protected ResolutionContext resolutionContext() {
+		return resolutionContext;
 	}
 
-	@Override
-	protected ParsingContext parsingContext() {
-		return parsingContext;
-	}
 	@Override
 	public Binding resolvePath(HqlParser.DotIdentifierSequenceContext path) {
 		return resolvePath( path, null );

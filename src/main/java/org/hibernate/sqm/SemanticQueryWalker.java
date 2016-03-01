@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.parser.internal.path.resolution.TreatedFromElement;
+import org.hibernate.sqm.parser.internal.hql.path.TreatedFromElement;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;

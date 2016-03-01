@@ -4,7 +4,7 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.internal.path.resolution;
+package org.hibernate.sqm.parser.internal.hql.path;
 
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
@@ -14,8 +14,6 @@ import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.parser.internal.FromElementBuilder;
-import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.from.FromElement;
@@ -27,8 +25,7 @@ import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
  * @author Steve Ebersole
  */
 public abstract class AbstractPathResolverImpl implements PathResolver {
-	protected abstract FromElementBuilder fromElementBuilder();
-	protected abstract ParsingContext parsingContext();
+	protected abstract ResolutionContext resolutionContext();
 
 	protected AttributeBindingSource resolveAnyIntermediateAttributePathJoins(
 			AttributeBindingSource lhs,
@@ -49,16 +46,14 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		final Attribute joinedAttributeDescriptor = resolveAttributeDescriptor( lhs, pathPart );
 		validateIntermediateAttributeJoin( lhs, joinedAttributeDescriptor );
 
-		final QualifiedAttributeJoinFromElement join = buildAttributeJoin( lhs.getFromElement(), joinedAttributeDescriptor, null );
-
-		return join;
+		return buildAttributeJoin( lhs.getFromElement(), joinedAttributeDescriptor, null );
 	}
 
 	protected QualifiedAttributeJoinFromElement buildAttributeJoin(
 			FromElement lhsFromElement,
 			Attribute joinedAttributeDescriptor,
 			EntityType subclassIndicator) {
-		return fromElementBuilder().buildAttributeJoin(
+		return resolutionContext().getFromElementBuilder().buildAttributeJoin(
 				lhsFromElement.getContainingSpace(),
 				null,
 				joinedAttributeDescriptor,

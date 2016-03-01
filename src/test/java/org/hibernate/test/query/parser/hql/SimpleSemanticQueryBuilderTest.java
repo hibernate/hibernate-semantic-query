@@ -6,34 +6,25 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import java.util.Collection;
-
+import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.SemanticQueryInterpreter;
-import org.hibernate.sqm.parser.internal.ParsingContext;
-import org.hibernate.sqm.parser.internal.hql.HqlParseTreeBuilder;
-import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.sqm.parser.internal.hql.phase1.FromClauseProcessor;
-import org.hibernate.sqm.parser.internal.hql.phase2.SemanticQueryBuilder;
-import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
 import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
+import org.hibernate.sqm.query.predicate.RelationalPredicate;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
-
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.xpath.XPath;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -48,63 +39,41 @@ import static org.junit.Assert.fail;
  * @author Steve Ebersole
  */
 public class SimpleSemanticQueryBuilderTest {
-	private ParsingContext parsingContext = new ParsingContext( new ConsumerContextImpl( buildMetamodel() ) );
+	private ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 	@Test
 	public void simpleIntegerLiteralsTest() {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1=2" );
+		SelectStatement selectStatement = interpret( "select a.basic from Something a where 1=2" );
+		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalPredicate.class ) );
+		final RelationalPredicate predicate = (RelationalPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( parsingContext );
-		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
-
-		parser.reset();
-
-		Collection<ParseTree> logicalExpressions = XPath.findAll( parser.statement(), "//predicate", parser );
-		assertEquals( 1, logicalExpressions.size() );
-		ParseTree logicalExpression = logicalExpressions.iterator().next();
-		// 3 -> the 2 expressions, plus the operand (=)
-		assertEquals( 3, logicalExpression.getChildCount() );
-
-		SemanticQueryBuilder semanticQueryBuilder = new SemanticQueryBuilder( parsingContext, fromClauseProcessor );
-		Object lhs = logicalExpression.getChild( 0 ).accept( semanticQueryBuilder );
+		Expression lhs = predicate.getLeftHandExpression();
 		assertNotNull( lhs );
 		assertTrue( lhs instanceof LiteralIntegerExpression );
 		assertEquals( 1, ((LiteralIntegerExpression) lhs).getLiteralValue().intValue() );
 
-		Object rhs = logicalExpression.getChild( 2 ).accept( semanticQueryBuilder );
+		Object rhs = predicate.getRightHandExpression();
 		assertNotNull( rhs );
 		assertTrue( rhs instanceof LiteralIntegerExpression );
 		assertEquals( 2, ((LiteralIntegerExpression) rhs).getLiteralValue().intValue() );
+	}
 
-		parser.reset();
-
-		semanticQueryBuilder = new SemanticQueryBuilder( parsingContext, fromClauseProcessor );
-		SelectStatement selectStatement = semanticQueryBuilder.visitSelectStatement( parser.selectStatement() );
-		selectStatement.getQuerySpec();
+	private SelectStatement interpret(String query) {
+		return (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	@Test
 	public void simpleLongLiteralsTest() {
-		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( "select a.basic from Something a where 1L=2L" );
+		SelectStatement selectStatement = interpret( "select a.basic from Something a where 1L=2L" );
+		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalPredicate.class ) );
+		final RelationalPredicate predicate = (RelationalPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
-		final FromClauseProcessor fromClauseProcessor = new FromClauseProcessor( parsingContext );
-		ParseTreeWalker.DEFAULT.walk( fromClauseProcessor, parser.statement() );
-
-		parser.reset();
-
-		Collection<ParseTree> logicalExpressions = XPath.findAll( parser.statement(), "//predicate", parser );
-		assertEquals( 1, logicalExpressions.size() );
-		ParseTree logicalExpression = logicalExpressions.iterator().next();
-		// 3 -> the 2 expressions, plus the operand (=)
-		assertEquals( 3, logicalExpression.getChildCount() );
-
-		SemanticQueryBuilder semanticQueryBuilder = new SemanticQueryBuilder( parsingContext, fromClauseProcessor );
-		Object lhs = logicalExpression.getChild( 0 ).accept( semanticQueryBuilder );
+		Expression lhs = predicate.getLeftHandExpression();
 		assertNotNull( lhs );
 		assertTrue( lhs instanceof LiteralLongExpression );
 		assertEquals( 1L, ((LiteralLongExpression) lhs).getLiteralValue().longValue() );
 
-		Object rhs = logicalExpression.getChild( 2 ).accept( semanticQueryBuilder );
+		Object rhs = predicate.getRightHandExpression();
 		assertNotNull( rhs );
 		assertTrue( rhs instanceof LiteralLongExpression );
 		assertEquals( 2L, ( (LiteralLongExpression) rhs ).getLiteralValue().longValue() );
@@ -116,7 +85,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				parsingContext.getConsumerContext()
+				consumerContext
 		);
 		QuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );
@@ -127,7 +96,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 = 5 )";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				parsingContext.getConsumerContext()
+				consumerContext
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -172,7 +141,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 IN(select e from SomethingElse2 b where b.basic2 = 2 ))";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				parsingContext.getConsumerContext()
+				consumerContext
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -237,7 +206,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				parsingContext.getConsumerContext()
+				consumerContext
 		);
 
 		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
@@ -310,7 +279,7 @@ public class SimpleSemanticQueryBuilderTest {
 	public void testInvalidOnPredicateWithImplicitJoin() throws Exception {
 		final String query = "select a from Something a left outer join a.entity c on c.entity.basic1 > 5 and c.basic2 < 20";
 		try {
-			SemanticQueryInterpreter.interpret( query, parsingContext.getConsumerContext() );
+			SemanticQueryInterpreter.interpret( query, consumerContext );
 			fail();
 		}
 		catch (SemanticException expected) {
@@ -323,7 +292,7 @@ public class SimpleSemanticQueryBuilderTest {
 		final String query = "select new org.hibernate.test.query.parser.hql.SimpleSemanticQueryBuilderTest$DTO(a.basic1 as id, a.basic2 as name) from Something a";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
-				parsingContext.getConsumerContext()
+				consumerContext
 		);
 		QuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );

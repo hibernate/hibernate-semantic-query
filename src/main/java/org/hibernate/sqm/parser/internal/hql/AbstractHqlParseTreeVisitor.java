@@ -23,21 +23,19 @@ import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.StrictJpaComplianceViolation;
 import org.hibernate.sqm.parser.internal.ExpressionTypeHelper;
-import org.hibernate.sqm.parser.internal.FromClauseIndex;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser.GroupByClauseContext;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser.HavingClauseContext;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParserBaseVisitor;
-import org.hibernate.sqm.parser.internal.hql.phase1.FromClauseStackNode;
-import org.hibernate.sqm.parser.internal.path.resolution.IndexedAttributeRootPathResolver;
-import org.hibernate.sqm.parser.internal.path.resolution.PathResolver;
-import org.hibernate.sqm.parser.internal.path.resolution.PathResolverStack;
+import org.hibernate.sqm.parser.internal.hql.path.IndexedAttributeRootPathResolver;
+import org.hibernate.sqm.parser.internal.hql.path.PathResolver;
+import org.hibernate.sqm.parser.internal.hql.path.PathResolverStack;
+import org.hibernate.sqm.parser.internal.hql.path.ResolutionContext;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AggregateFunction;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
@@ -84,9 +82,6 @@ import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.order.OrderByClause;
-import org.hibernate.sqm.query.order.SortOrder;
-import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
@@ -117,7 +112,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	private static final Logger log = Logger.getLogger( AbstractHqlParseTreeVisitor.class );
 
 	private final ParsingContext parsingContext;
-	private final FromClauseIndex fromClauseIndex;
 
 	/**
 	 * Whether the currently processed clause is WHERE or not
@@ -126,18 +120,13 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	protected final PathResolverStack pathResolverStack = new PathResolverStack();
 
-	public AbstractHqlParseTreeVisitor(
-			ParsingContext parsingContext,
-			FromClauseIndex fromClauseIndex) {
+	public AbstractHqlParseTreeVisitor(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
-		this.fromClauseIndex = fromClauseIndex;
 	}
 
 	public abstract FromClause getCurrentFromClause();
 
 	public abstract FromElementBuilder getFromElementBuilder();
-
-	public abstract FromClauseStackNode getCurrentFromClauseNode();
 
 	public ParsingContext getParsingContext() {
 		return parsingContext;
@@ -145,68 +134,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	public PathResolver getCurrentPathResolver() {
 		return pathResolverStack.getCurrent();
-	}
-
-	@Override
-	public SelectStatement visitSelectStatement(HqlParser.SelectStatementContext ctx) {
-		final SelectStatement selectStatement = new SelectStatement();
-		selectStatement.applyQuerySpec( visitQuerySpec( ctx.querySpec() ) );
-		if ( ctx.orderByClause() != null ) {
-			selectStatement.applyOrderByClause( visitOrderByClause( ctx.orderByClause() ) );
-		}
-
-		return selectStatement;
-	}
-
-	@Override
-	public OrderByClause visitOrderByClause(HqlParser.OrderByClauseContext ctx) {
-		final OrderByClause orderByClause = new OrderByClause();
-		for ( HqlParser.SortSpecificationContext sortSpecificationContext : ctx.sortSpecification() ) {
-			orderByClause.addSortSpecification( visitSortSpecification( sortSpecificationContext ) );
-		}
-		return orderByClause;
-	}
-
-	@Override
-	public SortSpecification visitSortSpecification(HqlParser.SortSpecificationContext ctx) {
-		final Expression sortExpression = (Expression) ctx.expression().accept( this );
-		final String collation;
-		if ( ctx.collationSpecification() != null && ctx.collationSpecification().collateName() != null ) {
-			collation = ctx.collationSpecification().collateName().dotIdentifierSequence().getText();
-		}
-		else {
-			collation = null;
-		}
-		final SortOrder sortOrder;
-		if ( ctx.orderingSpecification() != null ) {
-			final String ordering = ctx.orderingSpecification().getText();
-			try {
-				sortOrder = interpretSortOrder( ordering );
-			}
-			catch (IllegalArgumentException e) {
-				throw new SemanticException( "Unrecognized sort ordering: " + ordering, e );
-			}
-		}
-		else {
-			sortOrder = null;
-		}
-		return new SortSpecification( sortExpression, collation, sortOrder );
-	}
-
-	private SortOrder interpretSortOrder(String value) {
-		if ( value == null ) {
-			return null;
-		}
-
-		if ( value.equalsIgnoreCase( "ascending" ) || value.equalsIgnoreCase( "asc" ) ) {
-			return SortOrder.ASCENDING;
-		}
-
-		if ( value.equalsIgnoreCase( "descending" ) || value.equalsIgnoreCase( "desc" ) ) {
-			return SortOrder.DESCENDING;
-		}
-
-		throw new SemanticException( "Unknown sort order : " + value );
 	}
 
 	@Override
@@ -693,8 +620,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		// that handles the indexed reference as the root to the path
 		pathResolverStack.push(
 				new IndexedAttributeRootPathResolver(
-						getFromElementBuilder(),
-						parsingContext,
+						buildPathResolutionContext(),
 						indexedReference
 				)
 		);
@@ -705,6 +631,8 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			pathResolverStack.pop();
 		}
 	}
+
+	protected abstract ResolutionContext buildPathResolutionContext();
 
 	@Override
 	public ConcatExpression visitConcatenationExpression(HqlParser.ConcatenationExpressionContext ctx) {

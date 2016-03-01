@@ -4,17 +4,13 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.internal.hql.phase1;
+package org.hibernate.sqm.parser.internal.hql.path;
 
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.parser.internal.FromClauseIndex;
-import org.hibernate.sqm.parser.internal.FromElementBuilder;
-import org.hibernate.sqm.parser.internal.ParsingContext;
-import org.hibernate.sqm.parser.internal.path.resolution.PathResolverBasicImpl;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.path.FromElementBinding;
@@ -29,24 +25,19 @@ import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
  *
  * @author Steve Ebersole
  */
-class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
-	private final FromElementBuilder fromElementBuilder;
+public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	private final FromElementSpace fromElementSpace;
 	private final JoinType joinType;
 	private final String alias;
 	private final boolean fetched;
 
-	PathResolverJoinAttributeImpl(
-			FromElementBuilder fromElementBuilder,
-			FromClauseIndex fromClauseIndex,
-			FromClauseStackNode currentFromClauseNode,
-			ParsingContext parsingContext,
+	public PathResolverJoinAttributeImpl(
+			ResolutionContext resolutionContext,
 			FromElementSpace fromElementSpace,
 			JoinType joinType,
 			String alias,
 			boolean fetched) {
-		super( fromElementBuilder, fromClauseIndex, parsingContext, currentFromClauseNode );
-		this.fromElementBuilder = fromElementBuilder;
+		super( resolutionContext );
 		this.fromElementSpace = fromElementSpace;
 		this.joinType = joinType;
 		this.alias = alias;
@@ -93,7 +84,7 @@ class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 			String terminalName,
 			Attribute attribute,
 			EntityType subclassType) {
-		return fromElementBuilder.buildAttributeJoin(
+		return resolutionContext().getFromElementBuilder().buildAttributeJoin(
 				fromElementSpace,
 				alias,
 				attribute,

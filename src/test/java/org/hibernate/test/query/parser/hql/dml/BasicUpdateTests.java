@@ -6,7 +6,7 @@
  */
 package org.hibernate.test.query.parser.hql.dml;
 
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.Statement;

@@ -10,6 +10,7 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.sqm.parser.internal.hql.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SelectStatement;

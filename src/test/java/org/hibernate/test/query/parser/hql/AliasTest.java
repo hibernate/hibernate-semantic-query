@@ -11,7 +11,8 @@ import java.util.List;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.SemanticQueryInterpreter;
+import org.hibernate.sqm.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
@@ -35,6 +36,7 @@ import org.junit.Test;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Andrea Boriero
@@ -294,7 +296,7 @@ public class AliasTest {
 		assertThat( expression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( expression.getBoundAttribute().getName(), is( attributeName ) );
 		if ( alias == null ) {
-			assertThat( selection.getAlias(), is( nullValue() ) );
+			assertTrue( ImplicitAliasGenerator.isImplicitAlias( selection.getAlias() ) );
 		}
 		else {
 			assertThat( selection.getAlias(), is( alias ) );
@@ -308,7 +310,7 @@ public class AliasTest {
 		EntityTypeImpl entityType = (EntityTypeImpl) expression.getExpressionType();
 		assertThat( entityType.getTypeName(), is( typeName ) );
 		if ( alias == null ) {
-			assertThat( selection.getAlias(), is( nullValue() ) );
+			assertTrue( ImplicitAliasGenerator.isImplicitAlias( selection.getAlias() ) );
 		}
 		else {
 			assertThat( selection.getAlias(), is( alias ) );

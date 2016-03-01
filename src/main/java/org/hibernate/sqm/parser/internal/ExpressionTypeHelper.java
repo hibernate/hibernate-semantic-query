@@ -9,7 +9,7 @@ package org.hibernate.sqm.parser.internal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.hibernate.sqm.parser.ConsumerContext;
+import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.domain.BasicType;
 
 /**

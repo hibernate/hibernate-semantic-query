@@ -6,7 +6,7 @@
  */
 package org.hibernate.test.query.parser;
 
-import org.hibernate.sqm.parser.ConsumerContext;
+import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.domain.DomainMetamodel;
 
 /**

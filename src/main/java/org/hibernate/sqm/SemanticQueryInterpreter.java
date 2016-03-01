@@ -4,25 +4,26 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser;
+package org.hibernate.sqm;
 
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 
+import org.hibernate.sqm.parser.NotYetImplementedException;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.criteria.OrderByProcessor;
 import org.hibernate.sqm.parser.internal.criteria.QuerySpecProcessor;
 import org.hibernate.sqm.parser.internal.hql.HqlParseTreeBuilder;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.sqm.parser.internal.hql.single.SemanticQueryBuilder;
+import org.hibernate.sqm.parser.internal.hql.SemanticQueryBuilder;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
 
 /**
- * Main entry point into the query parser.
+ * Main entry point into building semantic queries.
  *
  * @author Steve Ebersole
  */

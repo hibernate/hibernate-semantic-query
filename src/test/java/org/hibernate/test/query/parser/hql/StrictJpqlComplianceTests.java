@@ -6,8 +6,8 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
-import org.hibernate.sqm.parser.StrictJpaComplianceViolation;
+import org.hibernate.sqm.SemanticQueryInterpreter;
+import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;

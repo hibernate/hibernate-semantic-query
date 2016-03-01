@@ -7,7 +7,7 @@
 package org.hibernate.test.query.parser.hql.splitting;
 
 import org.hibernate.sqm.parser.QuerySplitter;
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 

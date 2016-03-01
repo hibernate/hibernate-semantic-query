@@ -8,7 +8,7 @@ package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 
@@ -17,9 +17,7 @@ import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;

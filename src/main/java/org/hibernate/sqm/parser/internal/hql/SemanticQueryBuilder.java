@@ -17,25 +17,34 @@ import java.util.Map;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.LiteralNumberFormatException;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.parser.StrictJpaComplianceViolation;
+import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.parser.internal.ExpressionTypeHelper;
 import org.hibernate.sqm.parser.internal.FromElementBuilder;
+import org.hibernate.sqm.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser.GroupByClauseContext;
-import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser.HavingClauseContext;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParserBaseVisitor;
+import org.hibernate.sqm.parser.internal.hql.path.FromElementLocator;
 import org.hibernate.sqm.parser.internal.hql.path.IndexedAttributeRootPathResolver;
-import org.hibernate.sqm.parser.internal.hql.path.PathResolver;
+import org.hibernate.sqm.parser.internal.hql.path.PathResolverBasicImpl;
+import org.hibernate.sqm.parser.internal.hql.path.PathResolverJoinAttributeImpl;
+import org.hibernate.sqm.parser.internal.hql.path.PathResolverJoinPredicateImpl;
 import org.hibernate.sqm.parser.internal.hql.path.PathResolverStack;
 import org.hibernate.sqm.parser.internal.hql.path.ResolutionContext;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.DeleteStatement;
+import org.hibernate.sqm.query.InsertSelectStatement;
+import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.QuerySpec;
+import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.Statement;
+import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AggregateFunction;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
@@ -79,9 +88,17 @@ import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.expression.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
+import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.JoinedFromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.QualifiedJoinedFromElement;
+import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.order.OrderByClause;
+import org.hibernate.sqm.query.order.SortOrder;
+import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
@@ -108,53 +125,102 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 /**
  * @author Steve Ebersole
  */
-public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
-	private static final Logger log = Logger.getLogger( AbstractHqlParseTreeVisitor.class );
+public class SemanticQueryBuilder extends HqlParserBaseVisitor {
+	private static final Logger log = Logger.getLogger( SemanticQueryBuilder.class );
 
 	private final ParsingContext parsingContext;
 
-	/**
-	 * Whether the currently processed clause is WHERE or not
-	 */
+	private Statement statement;
+
 	private boolean inWhereClause;
+	private final PathResolverStack pathResolverStack = new PathResolverStack();
+	private QuerySpecProcessingState currentQuerySpecProcessingState;
 
-	protected final PathResolverStack pathResolverStack = new PathResolverStack();
 
-	public AbstractHqlParseTreeVisitor(ParsingContext parsingContext) {
+	public SemanticQueryBuilder(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
 	}
 
-	public abstract FromClause getCurrentFromClause();
 
-	public abstract FromElementBuilder getFromElementBuilder();
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Grammar rules
 
-	public ParsingContext getParsingContext() {
-		return parsingContext;
+	@Override
+	public Statement visitStatement(HqlParser.StatementContext ctx) {
+		if ( ctx.insertStatement() != null ) {
+			return visitInsertStatement( ctx.insertStatement() );
+		}
+		else if ( ctx.updateStatement() != null ) {
+			return visitUpdateStatement( ctx.updateStatement() );
+		}
+		else if ( ctx.deleteStatement() != null ) {
+			return visitDeleteStatement( ctx.deleteStatement() );
+		}
+		else if ( ctx.selectStatement() != null ) {
+			return visitSelectStatement( ctx.selectStatement() );
+		}
+
+		throw new ParsingException( "Unexpected statement type [not INSERT, UPDATE, DELETE or SELECT] : " + ctx.getText() );
 	}
 
-	public PathResolver getCurrentPathResolver() {
-		return pathResolverStack.getCurrent();
+	@Override
+	public SelectStatement visitSelectStatement(HqlParser.SelectStatementContext ctx) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+			if ( ctx.querySpec().selectClause() == null ) {
+				throw new StrictJpaComplianceViolation(
+						"Encountered implicit select-clause, but strict JPQL compliance was requested",
+						StrictJpaComplianceViolation.Type.IMPLICIT_SELECT
+				);
+			}
+		}
+
+		final SelectStatement selectStatement = new SelectStatement();
+		selectStatement.applyQuerySpec( visitQuerySpec( ctx.querySpec() ) );
+		if ( ctx.orderByClause() != null ) {
+			pathResolverStack.push(
+					new PathResolverBasicImpl( new OrderByResolutionContext( parsingContext, selectStatement ) )
+			);
+			try {
+				selectStatement.applyOrderByClause( visitOrderByClause( ctx.orderByClause() ) );
+			}
+			finally {
+				pathResolverStack.pop();
+			}
+		}
+
+		return selectStatement;
 	}
 
 	@Override
 	public QuerySpec visitQuerySpec(HqlParser.QuerySpecContext ctx) {
-		final SelectClause selectClause;
-		if ( ctx.selectClause() != null ) {
-			selectClause = visitSelectClause( ctx.selectClause() );
-		}
-		else {
-			log.info( "Encountered implicit select clause which is a deprecated feature : " + ctx.getText() );
-			selectClause = buildInferredSelectClause( getCurrentFromClause() );
-		}
+		currentQuerySpecProcessingState = new QuerySpecProcessingStateStandardImpl( parsingContext, currentQuerySpecProcessingState );
+		pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
+		try {
+			// visit from-clause first!!!
+			visitFromClause( ctx.fromClause() );
 
-		final WhereClause whereClause;
-		if ( ctx.whereClause() != null ) {
-			whereClause = visitWhereClause( ctx.whereClause() );
+			final SelectClause selectClause;
+			if ( ctx.selectClause() != null ) {
+				selectClause = visitSelectClause( ctx.selectClause() );
+			}
+			else {
+				log.info( "Encountered implicit select clause which is a deprecated feature : " + ctx.getText() );
+				selectClause = buildInferredSelectClause( currentQuerySpecProcessingState.getFromClause() );
+			}
+
+			final WhereClause whereClause;
+			if ( ctx.whereClause() != null ) {
+				whereClause = visitWhereClause( ctx.whereClause() );
+			}
+			else {
+				whereClause = null;
+			}
+			return new QuerySpec( currentQuerySpecProcessingState.getFromClause(), selectClause, whereClause );
 		}
-		else {
-			whereClause = null;
+		finally {
+			pathResolverStack.pop();
+			currentQuerySpecProcessingState = currentQuerySpecProcessingState.getParent();
 		}
-		return new QuerySpec( getCurrentFromClause(), selectClause, whereClause );
 	}
 
 	protected SelectClause buildInferredSelectClause(FromClause fromClause) {
@@ -182,14 +248,19 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 				visitSelectExpression( ctx.selectExpression() ),
 				interpretAlias( ctx.IDENTIFIER() )
 		);
-		getFromElementBuilder().getAliasRegistry().registerAlias( selection );
+		currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( selection );
 		return selection;
 	}
 
 	private String interpretAlias(TerminalNode aliasNode) {
 		if ( aliasNode == null ) {
-			return null;
+			return parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 		}
+
+		// todo : not sure I like asserts for this kind of thing.  They are generally disable in runtime environments.
+		// either the thing is important to check or it isn't.
+		assert aliasNode.getSymbol().getType() == HqlParser.IDENTIFIER;
+
 		return aliasNode.getText();
 	}
 
@@ -264,16 +335,11 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	@Override
 	public FromElement visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
 		final String alias = ctx.IDENTIFIER().getText();
-		final FromElement fromElement = getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
+		final FromElement fromElement = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 		if ( fromElement == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );
 		}
 		return fromElement;
-	}
-
-	@Override
-	public Predicate visitQualifiedJoinPredicate(HqlParser.QualifiedJoinPredicateContext ctx) {
-		return (Predicate) ctx.predicate().accept( this );
 	}
 
 	@Override
@@ -289,12 +355,12 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Object visitGroupByClause(GroupByClauseContext ctx) {
+	public Object visitGroupByClause(HqlParser.GroupByClauseContext ctx) {
 		return super.visitGroupByClause( ctx );
 	}
 
 	@Override
-	public Object visitHavingClause(HavingClauseContext ctx) {
+	public Object visitHavingClause(HqlParser.HavingClauseContext ctx) {
 		return super.visitHavingClause( ctx );
 	}
 
@@ -303,6 +369,419 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		return new GroupedPredicate( (Predicate) ctx.predicate().accept( this ) );
 	}
 
+	private static class OrderByResolutionContext implements ResolutionContext, FromElementLocator {
+		private final ParsingContext parsingContext;
+		private final SelectStatement selectStatement;
+
+		public OrderByResolutionContext(ParsingContext parsingContext, SelectStatement selectStatement) {
+			this.parsingContext = parsingContext;
+			this.selectStatement = selectStatement;
+		}
+
+		@Override
+		public FromElement findFromElementByIdentificationVariable(String identificationVariable) {
+			for ( FromElementSpace fromElementSpace : selectStatement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
+				if ( fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable ) ) {
+					return fromElementSpace.getRoot();
+				}
+
+				for ( JoinedFromElement joinedFromElement : fromElementSpace.getJoins() ) {
+					if ( joinedFromElement.getIdentificationVariable().equals( identificationVariable ) ) {
+						return joinedFromElement;
+					}
+				}
+			}
+
+			// otherwise there is none
+			return null;
+		}
+
+		@Override
+		public FromElement findFromElementExposingAttribute(String attributeName) {
+			for ( FromElementSpace fromElementSpace : selectStatement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
+				if ( fromElementSpace.getRoot().resolveAttribute( attributeName ) != null ) {
+					return fromElementSpace.getRoot();
+				}
+
+				for ( JoinedFromElement joinedFromElement : fromElementSpace.getJoins() ) {
+					if ( joinedFromElement.resolveAttribute( attributeName ) != null ) {
+						return joinedFromElement;
+					}
+				}
+			}
+
+			// otherwise there is none
+			return null;
+		}
+
+		@Override
+		public FromElementLocator getFromElementLocator() {
+			return this;
+		}
+
+		@Override
+		public FromElementBuilder getFromElementBuilder() {
+			throw new SemanticException( "order-by clause cannot define implicit joins" );
+		}
+
+		@Override
+		public ParsingContext getParsingContext() {
+			return parsingContext;
+		}
+	}
+
+	@Override
+	public OrderByClause visitOrderByClause(HqlParser.OrderByClauseContext ctx) {
+		final OrderByClause orderByClause = new OrderByClause();
+		for ( HqlParser.SortSpecificationContext sortSpecificationContext : ctx.sortSpecification() ) {
+			orderByClause.addSortSpecification( visitSortSpecification( sortSpecificationContext ) );
+		}
+		return orderByClause;
+	}
+
+	@Override
+	public SortSpecification visitSortSpecification(HqlParser.SortSpecificationContext ctx) {
+		final Expression sortExpression = (Expression) ctx.expression().accept( this );
+		final String collation;
+		if ( ctx.collationSpecification() != null && ctx.collationSpecification().collateName() != null ) {
+			collation = ctx.collationSpecification().collateName().dotIdentifierSequence().getText();
+		}
+		else {
+			collation = null;
+		}
+		final SortOrder sortOrder;
+		if ( ctx.orderingSpecification() != null ) {
+			final String ordering = ctx.orderingSpecification().getText();
+			try {
+				sortOrder = interpretSortOrder( ordering );
+			}
+			catch (IllegalArgumentException e) {
+				throw new SemanticException( "Unrecognized sort ordering: " + ordering, e );
+			}
+		}
+		else {
+			sortOrder = null;
+		}
+		return new SortSpecification( sortExpression, collation, sortOrder );
+	}
+
+	private SortOrder interpretSortOrder(String value) {
+		if ( value == null ) {
+			return null;
+		}
+
+		if ( value.equalsIgnoreCase( "ascending" ) || value.equalsIgnoreCase( "asc" ) ) {
+			return SortOrder.ASCENDING;
+		}
+
+		if ( value.equalsIgnoreCase( "descending" ) || value.equalsIgnoreCase( "desc" ) ) {
+			return SortOrder.DESCENDING;
+		}
+
+		throw new SemanticException( "Unknown sort order : " + value );
+	}
+
+	@Override
+	public DeleteStatement visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
+		currentQuerySpecProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
+		try {
+			final RootEntityFromElement root = resolveDmlRootEntityReference( ctx.mainEntityPersisterReference() );
+			final DeleteStatement deleteStatement = new DeleteStatement( root );
+
+			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
+			try {
+				deleteStatement.getWhereClause().setPredicate( (Predicate) ctx.whereClause()
+						.predicate()
+						.accept( this ) );
+			}
+			finally {
+				pathResolverStack.pop();
+			}
+
+			return deleteStatement;
+		}
+		finally {
+			currentQuerySpecProcessingState = null;
+		}
+	}
+
+	protected RootEntityFromElement resolveDmlRootEntityReference(HqlParser.MainEntityPersisterReferenceContext rootEntityContext) {
+		final EntityType entityType = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
+		String alias = interpretAlias( rootEntityContext.IDENTIFIER() );
+		if ( alias == null ) {
+			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+			log.debugf(
+					"Generated implicit alias [%s] for DML root entity reference [%s]",
+					alias,
+					entityType.getName()
+			);
+		}
+		final RootEntityFromElement root = new RootEntityFromElement( null, parsingContext.makeUniqueIdentifier(), alias, entityType );
+		parsingContext.registerFromElementByUniqueId( root );
+		currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( root );
+		currentQuerySpecProcessingState.getFromClause().getFromElementSpaces().get( 0 ).setRoot( root );
+		return root;
+	}
+
+	@Override
+	public UpdateStatement visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
+		currentQuerySpecProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
+		try {
+			final RootEntityFromElement root = resolveDmlRootEntityReference( ctx.mainEntityPersisterReference() );
+			final UpdateStatement updateStatement = new UpdateStatement( root );
+
+			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
+			try {
+				updateStatement.getWhereClause().setPredicate(
+						(Predicate) ctx.whereClause().predicate().accept( this )
+				);
+
+				for ( HqlParser.AssignmentContext assignmentContext : ctx.setClause().assignment() ) {
+					// todo : validate "state field" expression
+					updateStatement.getSetClause().addAssignment(
+							(AttributeReferenceExpression) pathResolverStack.getCurrent().resolvePath( assignmentContext.dotIdentifierSequence() ),
+							(Expression) assignmentContext.expression().accept( this )
+					);
+				}
+			}
+			finally {
+				pathResolverStack.pop();
+			}
+
+			return updateStatement;
+		}
+		finally {
+			currentQuerySpecProcessingState = null;
+		}
+	}
+
+	@Override
+	public InsertSelectStatement visitInsertStatement(HqlParser.InsertStatementContext ctx) {
+		currentQuerySpecProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
+		try {
+			final EntityType entityType = resolveEntityReference( ctx.insertSpec().intoSpec().dotIdentifierSequence() );
+			String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+			log.debugf(
+					"Generated implicit alias [%s] for INSERT target [%s]",
+					alias,
+					entityType.getName()
+			);
+
+			RootEntityFromElement root = new RootEntityFromElement( null, parsingContext.makeUniqueIdentifier(), alias, entityType );
+			parsingContext.registerFromElementByUniqueId( root );
+			currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( root );
+			currentQuerySpecProcessingState.getFromClause().getFromElementSpaces().get( 0 ).setRoot( root );
+
+			// for now we only support the INSERT-SELECT form
+			final InsertSelectStatement insertStatement = new InsertSelectStatement( root );
+
+			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
+			try {
+				insertStatement.setSelectQuery( visitQuerySpec( ctx.querySpec() ) );
+
+				for ( HqlParser.DotIdentifierSequenceContext stateFieldCtx : ctx.insertSpec().targetFieldsSpec().dotIdentifierSequence() ) {
+					final AttributeReferenceExpression stateField = (AttributeReferenceExpression) pathResolverStack.getCurrent().resolvePath( stateFieldCtx );
+					// todo : validate each resolved stateField...
+					insertStatement.addInsertTargetStateField( stateField );
+				}
+			}
+			finally {
+				pathResolverStack.pop();
+			}
+
+			return insertStatement;
+		}
+		finally {
+			currentQuerySpecProcessingState = null;
+		}
+	}
+
+	private FromElementSpace currentFromElementSpace;
+
+	@Override
+	public Object visitFromElementSpace(HqlParser.FromElementSpaceContext ctx) {
+		currentFromElementSpace = currentQuerySpecProcessingState.getFromClause().makeFromElementSpace();
+
+		// adding root and joins to the FromElementSpace is currently handled in FromElementBuilder
+		// it is very questionable whether this should be done there, but for now keep it
+		// todo : revisit ^^
+
+		visitFromElementSpaceRoot( ctx.fromElementSpaceRoot() );
+
+		for ( HqlParser.CrossJoinContext crossJoinContext : ctx.crossJoin() ) {
+			visitCrossJoin( crossJoinContext );
+		}
+
+		for ( HqlParser.QualifiedJoinContext qualifiedJoinContext : ctx.qualifiedJoin() ) {
+			visitQualifiedJoin( qualifiedJoinContext );
+		}
+
+		for ( HqlParser.JpaCollectionJoinContext jpaCollectionJoinContext : ctx.jpaCollectionJoin() ) {
+			visitJpaCollectionJoin( jpaCollectionJoinContext );
+		}
+
+
+		FromElementSpace rtn = currentFromElementSpace;
+		currentFromElementSpace = null;
+		return rtn;
+	}
+
+	@Override
+	public RootEntityFromElement visitFromElementSpaceRoot(HqlParser.FromElementSpaceRootContext ctx) {
+		final EntityType entityType = resolveEntityReference(
+				ctx.mainEntityPersisterReference().dotIdentifierSequence()
+		);
+
+		if ( PolymorphicEntityType.class.isInstance( entityType ) ) {
+			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+				throw new StrictJpaComplianceViolation(
+						"Encountered unmapped polymorphic reference [" + entityType.getName()
+								+ "], but strict JPQL compliance was requested",
+						StrictJpaComplianceViolation.Type.UNMAPPED_POLYMORPHISM
+				);
+			}
+
+			// todo : disallow in subqueries as well
+		}
+
+		return currentQuerySpecProcessingState.getFromElementBuilder().makeRootEntityFromElement(
+				currentFromElementSpace,
+				entityType,
+				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
+		);
+	}
+
+	private EntityType resolveEntityReference(HqlParser.DotIdentifierSequenceContext dotIdentifierSequenceContext) {
+		final String entityName = dotIdentifierSequenceContext.getText();
+		final EntityType entityTypeDescriptor = parsingContext.getConsumerContext()
+				.getDomainMetamodel()
+				.resolveEntityType( entityName );
+		if ( entityTypeDescriptor == null ) {
+			throw new SemanticException( "Unresolved entity name : " + entityName );
+		}
+		return entityTypeDescriptor;
+	}
+
+	@Override
+	public CrossJoinedFromElement visitCrossJoin(HqlParser.CrossJoinContext ctx) {
+		final EntityType entityType = resolveEntityReference(
+				ctx.mainEntityPersisterReference().dotIdentifierSequence()
+		);
+
+		if ( PolymorphicEntityType.class.isInstance( entityType ) ) {
+			throw new SemanticException(
+					"Unmapped polymorphic references are only valid as query root, not in cross join : " +
+							entityType.getName()
+			);
+		}
+
+		return currentQuerySpecProcessingState.getFromElementBuilder().makeCrossJoinedFromElement(
+				currentFromElementSpace,
+				parsingContext.makeUniqueIdentifier(),
+				entityType,
+				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
+		);
+	}
+
+	@Override
+	public QualifiedJoinedFromElement visitJpaCollectionJoin(HqlParser.JpaCollectionJoinContext ctx) {
+		pathResolverStack.push(
+				new PathResolverJoinAttributeImpl(
+						currentQuerySpecProcessingState,
+						currentFromElementSpace,
+						JoinType.INNER,
+						interpretAlias( ctx.IDENTIFIER() ),
+						false
+				)
+		);
+
+		try {
+			QualifiedJoinedFromElement joinedPath = (QualifiedJoinedFromElement) ctx.path().accept( this );
+
+			if ( joinedPath == null ) {
+				throw new ParsingException( "Could not resolve JPA collection join path : " + ctx.getText() );
+			}
+
+			return joinedPath;
+		}
+		finally {
+			pathResolverStack.pop();
+		}
+	}
+
+	@Override
+	public QualifiedJoinedFromElement visitQualifiedJoin(HqlParser.QualifiedJoinContext ctx) {
+		final JoinType joinType;
+		if ( ctx.outerKeyword() != null ) {
+			// for outer joins, only left outer joins are currently supported
+			joinType = JoinType.LEFT;
+		}
+		else {
+			joinType = JoinType.INNER;
+		}
+
+		pathResolverStack.push(
+				new PathResolverJoinAttributeImpl(
+						currentQuerySpecProcessingState,
+						currentFromElementSpace,
+						joinType,
+						interpretAlias( ctx.qualifiedJoinRhs().IDENTIFIER() ),
+						ctx.fetchKeyword() != null
+				)
+		);
+
+		try {
+			QualifiedJoinedFromElement joinedPath = (QualifiedJoinedFromElement) ctx.qualifiedJoinRhs().path().accept( this );
+			currentJoinRhs = joinedPath;
+
+			if ( joinedPath == null ) {
+				throw new ParsingException( "Could not resolve join path : " + ctx.qualifiedJoinRhs().getText() );
+			}
+
+			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+				if ( !ImplicitAliasGenerator.isImplicitAlias( joinedPath.getIdentificationVariable() ) ) {
+					if ( QualifiedAttributeJoinFromElement.class.isInstance( joinedPath ) ) {
+						if ( QualifiedAttributeJoinFromElement.class.cast( joinedPath ).isFetched() ) {
+							throw new StrictJpaComplianceViolation(
+									"Encountered aliased fetch join, but strict JPQL compliance was requested",
+									StrictJpaComplianceViolation.Type.ALIASED_FETCH_JOIN
+							);
+						}
+					}
+				}
+			}
+
+			if ( ctx.qualifiedJoinPredicate() != null ) {
+				joinedPath.setOnClausePredicate( visitQualifiedJoinPredicate( ctx.qualifiedJoinPredicate() ) );
+			}
+
+			return joinedPath;
+		}
+		finally {
+			currentJoinRhs = null;
+			pathResolverStack.pop();
+		}
+	}
+
+	private QualifiedJoinedFromElement currentJoinRhs;
+
+	@Override
+	public Predicate visitQualifiedJoinPredicate(HqlParser.QualifiedJoinPredicateContext ctx) {
+		if ( currentJoinRhs == null ) {
+			throw new ParsingException( "Expecting join RHS to be set" );
+		}
+
+		pathResolverStack.push(
+				new PathResolverJoinPredicateImpl( currentQuerySpecProcessingState, currentJoinRhs )
+		);
+		try {
+			return (Predicate) ctx.predicate().accept( this );
+		}
+		finally {
+
+			pathResolverStack.pop();
+		}
+	}
 	@Override
 	public AndPredicate visitAndPredicate(HqlParser.AndPredicateContext ctx) {
 		return new AndPredicate(
@@ -491,11 +970,9 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		// todo : handle PersistentCollectionReferenceInList labeled branch
 
 		throw new ParsingException( "Unexpected IN predicate type [" + ctx.getClass().getSimpleName() + "] : " + ctx.getText() );
-	}
-
-	@Override
+	}	@Override
 	public Object visitSimplePath(HqlParser.SimplePathContext ctx) {
-		final Binding binding = getCurrentPathResolver().resolvePath( ctx.dotIdentifierSequence() );
+		final Binding binding = pathResolverStack.getCurrent().resolvePath( ctx.dotIdentifierSequence() );
 		if ( binding != null ) {
 			return binding;
 		}
@@ -581,7 +1058,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			throw new SemanticException( "TREAT-AS target type [" + treatAsName + "] did not reference an entity" );
 		}
 
-		return getCurrentPathResolver().resolvePath( ctx.dotIdentifierSequence().get( 0 ), treatAsTypeDescriptor );
+		return pathResolverStack.getCurrent().resolvePath( ctx.dotIdentifierSequence().get( 0 ), treatAsTypeDescriptor );
 	}
 
 	@Override
@@ -619,10 +1096,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		// we have a de-reference of the indexed reference.  push a new path resolver
 		// that handles the indexed reference as the root to the path
 		pathResolverStack.push(
-				new IndexedAttributeRootPathResolver(
-						buildPathResolutionContext(),
-						indexedReference
-				)
+				new IndexedAttributeRootPathResolver( currentQuerySpecProcessingState, indexedReference )
 		);
 		try {
 			return (AttributeBinding) ctx.path( 1 ).accept( this );
@@ -631,8 +1105,6 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 			pathResolverStack.pop();
 		}
 	}
-
-	protected abstract ResolutionContext buildPathResolutionContext();
 
 	@Override
 	public ConcatExpression visitConcatenationExpression(HqlParser.ConcatenationExpressionContext ctx) {
@@ -972,7 +1444,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public FunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation(
 					"Encountered non-compliant non-standard function call [" +
 							ctx.nonStandardFunctionName() + "], but strict JPQL compliance was requested",
@@ -1105,7 +1577,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute collectionReference = (PluralAttribute) attributeBinding.getBoundAttribute();
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			if ( collectionReference.getCollectionClassification() != PluralAttribute.CollectionClassification.MAP ) {
 				throw new StrictJpaComplianceViolation(
 						"Encountered application of value() function to path expression which does not " +
@@ -1125,7 +1597,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 	@Override
 	public CollectionIndexFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
 		final String alias = ctx.IDENTIFIER().getText();
-		final FromElement fromElement = getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
+		final FromElement fromElement = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 
 		if ( !PluralAttribute.class.isInstance( fromElement.getBoundModelType() ) ) {
 			throw new SemanticException(
@@ -1192,7 +1664,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public MaxElementFunction visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
@@ -1212,7 +1684,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public MinElementFunction visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
@@ -1231,7 +1703,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public MaxIndexFunction visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
@@ -1261,7 +1733,7 @@ public abstract class AbstractHqlParseTreeVisitor extends HqlParserBaseVisitor {
 
 	@Override
 	public MinIndexFunction visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
-		if ( getParsingContext().getConsumerContext().useStrictJpaCompliance() ) {
+		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 

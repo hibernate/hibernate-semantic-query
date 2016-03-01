@@ -8,7 +8,7 @@ package org.hibernate.test.query.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.parser.SemanticQueryInterpreter;
+import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.SelectStatement;

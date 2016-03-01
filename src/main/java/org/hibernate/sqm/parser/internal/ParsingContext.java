@@ -9,9 +9,8 @@ package org.hibernate.sqm.parser.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.parser.ConsumerContext;
+import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.query.from.FromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 /**
  * Represents contextual information for each parse

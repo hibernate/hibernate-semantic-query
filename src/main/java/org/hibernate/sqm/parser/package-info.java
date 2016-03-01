@@ -7,9 +7,9 @@
 
 /**
  * API for parsing HQL/JPQL queries and JPA Criteria queries into Semantic Query Model (SQM) representation.  The
- * main entry point into the parsing is {@link org.hibernate.sqm.parser.SemanticQueryInterpreter}.
+ * main entry point into the parsing is {@link org.hibernate.sqm.SemanticQueryInterpreter}.
  * <p/>
- * For HQL/JPQL parsing, pass in the query string and a {@link org.hibernate.sqm.parser.ConsumerContext} and get
+ * For HQL/JPQL parsing, pass in the query string and a {@link org.hibernate.sqm.ConsumerContext} and get
  * back the semantic query tree as a {@link org.hibernate.sqm.query.Statement}.
  * <p/>
  * For Criteria queries ...

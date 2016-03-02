@@ -11,8 +11,8 @@ import java.util.Collection;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser.EqualityPredicateContext;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser.LiteralExpressionContext;
-import org.hibernate.sqm.parser.internal.hql.antlr.HqlParserBaseVisitor;
 import org.hibernate.sqm.parser.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.sqm.parser.internal.hql.antlr.HqlParserBaseVisitor;
 
 import org.junit.Test;
 

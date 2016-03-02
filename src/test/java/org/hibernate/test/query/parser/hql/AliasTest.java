@@ -8,10 +8,10 @@ package org.hibernate.test.query.parser.hql;
 
 import java.util.List;
 
+import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.parser.internal.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
@@ -31,7 +31,6 @@ import org.hibernate.test.query.parser.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
-
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;

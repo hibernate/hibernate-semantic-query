@@ -246,10 +246,17 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
 		final Selection selection = new Selection(
 				visitSelectExpression( ctx.selectExpression() ),
-				interpretAlias( ctx.IDENTIFIER() )
+				interpretAlias( ctx.identifier() )
 		);
 		currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( selection );
 		return selection;
+	}
+
+	private String interpretAlias(HqlParser.IdentifierContext identifier) {
+		if ( identifier == null || identifier.getText() == null ) {
+			return parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+		}
+		return identifier.getText();
 	}
 
 	private String interpretAlias(TerminalNode aliasNode) {
@@ -316,7 +323,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public DynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
 		return new DynamicInstantiationArgument(
 				visitDynamicInstantiationArgExpression( ctx.dynamicInstantiationArgExpression() ),
-				ctx.IDENTIFIER() == null ? null : ctx.IDENTIFIER().getText()
+				ctx.identifier() == null ? null : ctx.identifier().getText()
 		);
 	}
 
@@ -334,7 +341,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public FromElement visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
-		final String alias = ctx.IDENTIFIER().getText();
+		final String alias = ctx.identifier().getText();
 		final FromElement fromElement = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 		if ( fromElement == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );
@@ -507,7 +514,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	protected RootEntityFromElement resolveDmlRootEntityReference(HqlParser.MainEntityPersisterReferenceContext rootEntityContext) {
 		final EntityType entityType = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
-		String alias = interpretAlias( rootEntityContext.IDENTIFIER() );
+		String alias = interpretAlias( rootEntityContext.identifier() );
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
@@ -647,7 +654,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return currentQuerySpecProcessingState.getFromElementBuilder().makeRootEntityFromElement(
 				currentFromElementSpace,
 				entityType,
-				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
+				interpretAlias( ctx.mainEntityPersisterReference().identifier() )
 		);
 	}
 
@@ -679,7 +686,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				currentFromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
 				entityType,
-				interpretAlias( ctx.mainEntityPersisterReference().IDENTIFIER() )
+				interpretAlias( ctx.mainEntityPersisterReference().identifier() )
 		);
 	}
 
@@ -690,7 +697,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						currentQuerySpecProcessingState,
 						currentFromElementSpace,
 						JoinType.INNER,
-						interpretAlias( ctx.IDENTIFIER() ),
+						interpretAlias( ctx.identifier() ),
 						false
 				)
 		);
@@ -712,8 +719,15 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public QualifiedJoinedFromElement visitQualifiedJoin(HqlParser.QualifiedJoinContext ctx) {
 		final JoinType joinType;
-		if ( ctx.outerKeyword() != null ) {
+		if ( ctx.OUTER() != null ) {
 			// for outer joins, only left outer joins are currently supported
+			if ( ctx.FULL() != null ) {
+				throw new SemanticException( "FULL OUTER joins are not yet supported : " + ctx.getText() );
+			}
+			if ( ctx.RIGHT() != null ) {
+				throw new SemanticException( "FULL OUTER joins are not yet supported : " + ctx.getText() );
+			}
+
 			joinType = JoinType.LEFT;
 		}
 		else {
@@ -725,7 +739,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						currentQuerySpecProcessingState,
 						currentFromElementSpace,
 						joinType,
-						interpretAlias( ctx.qualifiedJoinRhs().IDENTIFIER() ),
+						interpretAlias( ctx.qualifiedJoinRhs().identifier() ),
 						ctx.fetchKeyword() != null
 				)
 		);
@@ -1434,7 +1448,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public NamedParameterExpression visitNamedParameter(HqlParser.NamedParameterContext ctx) {
-		return new NamedParameterExpression( ctx.IDENTIFIER().getText() );
+		return new NamedParameterExpression( ctx.identifier().getText() );
 	}
 
 	@Override
@@ -1596,7 +1610,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public CollectionIndexFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
-		final String alias = ctx.IDENTIFIER().getText();
+		final String alias = ctx.identifier().getText();
 		final FromElement fromElement = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 
 		if ( !PluralAttribute.class.isInstance( fromElement.getBoundModelType() ) ) {

@@ -12,24 +12,7 @@ package org.hibernate.sqm.parser.internal.hql.antlr;
 }
 
 tokens {
-//GENERIC SQL TOKENS
-//	TABLE,
-//	COLUMN,
-//	COLUMN_LIST,
-
-//VIRTUAL TOKENS
-//	ALIAS_NAME,
-//	ALIAS_REFERENCE,
-//	ATTRIBUTE_REFERENCE,
-	BETWEEN_LIST,
 	COLLATE,
-//	COLLECTION_EXPRESSION,
-	DISCRIMINATOR,
-	DYNAMIC_INSTANTIATION_ARG,
-	DYNAMIC_INSTANTIATION,
-	ENTITY_NAME,
-	ENTITY_PERSISTER_REF,
-	FILTER,
 	FUNCTION,
 //	GENERAL_FUNCTION_CALL,
 //	GENERAL_FUNCTION_ARGUMENTS,
@@ -56,7 +39,6 @@ tokens {
 	QUERY_SPEC,
 	QUERY,
 	SEARCHED_CASE,
-	SELECT_FROM,
 	SELECT_ITEM,
 	SELECT_LIST,
 	SIMPLE_CASE,
@@ -71,9 +53,7 @@ tokens {
 //SOFT KEYWORDS
 	ABS,
 	ALL,
-	AND,
 	ANY,
-	AS,
 	AVG,
 	BETWEEN,
 	BIT_LENGTH,
@@ -89,7 +69,6 @@ tokens {
 	CURRENT_TIME,
 	CURRENT_TIMESTAMP,
 	DAY,
-	DELETE,
 	DISTINCT,
 	ELEMENTS,
 	ELSE,
@@ -100,16 +79,13 @@ tokens {
 	EXISTS,
 	EXTRACT,
 	FETCH,
-	FROM,
 	FULL,
 	GROUP_BY,
 	HAVING,
 	HOUR,
-	IN,
 	INDEX,
 	INDICES,
 	INNER,
-	INSERT,
 	INTERSECT,
 	INTO,
 	IS_EMPTY,
@@ -135,15 +111,11 @@ tokens {
 	NOT,
 	NULLIF,
 	OCTET_LENGTH,
-	ON,
-	OR,
-	ORDER_BY,
 	OUTER,
 	POSITION,
 	PROPERTIES,
 	RIGHT,
 	SECOND,
-	SELECT,
 	SET,
 	SIZE,
 	SOME,
@@ -156,12 +128,9 @@ tokens {
 	TRAILING,
 	TRIM,
 	UNION,
-	UPDATE,
 	UPPER,
 	VERSIONED,
 	WHEN,
-	WHERE,
-	WITH,
 	YEAR
 }
 
@@ -268,6 +237,29 @@ DOUBLE_PIPE : '||';
 QUESTION_MARK :	'?';
 ARROW :	'->';
 
+SELECT 		: [sS] [eE] [lL] [eE] [cC] [tT];
+UPDATE 		: [uU] [pP] [dD] [aA] [tT] [eE];
+DELETE 		: [dD] [eE] [lL] [eE] [tT] [eE];
+INSERT 		: [iI] [nN] [sS] [eE] [rR] [tT];
+FROM 		: [fF] [rR] [oO] [mM];
+WHERE 		: [wW] [hH] [eE] [rR] [eE];
+ORDER 		: [oO] [rR] [dD] [eE] [rR];
+BY 			: [bB] [yY];
+IN 			: [iI] [nN];
+JOIN 		: [jJ] [oO] [iI] [nN];
+CROSS 		: [cC] [rR] [oO] [sS] [sS];
+INNER 		: [iI] [nN] [nN] [eE] [rR];
+LEFT 		: [lL] [eE] [fF] [tT];
+RIGHT 		: [rR] [iI] [gG] [hH] [tT];
+FULL 		: [fF] [uU] [lL] [lL];
+OUTER 		: [oO] [uU] [tT] [eE] [rR];
+ON			: [oO] [nN];
+WITH		: [wW] [iI] [tT] [hH];
+NEW			: [nN] [eE] [wW];
+AND 		: [aA] [nN] [dD];
+OR			: [oO] [rR];
+AS			: [aA] [sS];
+
 IDENTIFIER
 	:	('a'..'z'|'A'..'Z'|'_'|'$'|'\u0080'..'\ufffe')('a'..'z'|'A'..'Z'|'_'|'$'|'0'..'9'|'\u0080'..'\ufffe')*
 	;
@@ -275,4 +267,3 @@ IDENTIFIER
 QUOTED_IDENTIFIER
 	: '`' ( ESCAPE_SEQUENCE | ~('\\'|'`') )* '`'
 	;
-

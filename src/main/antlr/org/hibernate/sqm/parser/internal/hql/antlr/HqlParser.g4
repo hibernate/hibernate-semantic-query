@@ -66,15 +66,10 @@ statement
 
 selectStatement
 	: querySpec orderByClause?
-//	: queryExpression orderByClause?
 	;
 
-//queryExpression
-//	:	querySpec ( ( unionKeyword | intersectKeyword | exceptKeyword ) allKeyword? querySpec )*
-//	;
-
 updateStatement
-	: updateKeyword fromKeyword? mainEntityPersisterReference setClause whereClause
+	: UPDATE FROM? mainEntityPersisterReference setClause whereClause
 	;
 
 setClause
@@ -86,12 +81,12 @@ assignment
 	;
 
 deleteStatement
-	: deleteKeyword fromKeyword? mainEntityPersisterReference whereClause
+	: DELETE FROM? mainEntityPersisterReference whereClause
 	;
 
 insertStatement
 // todo : VERSIONED
-	: insertKeyword insertSpec querySpec
+	: INSERT insertSpec querySpec
 	;
 
 insertSpec
@@ -112,7 +107,7 @@ targetFieldsSpec
 // ORDER BY clause
 
 orderByClause
-	: orderByKeyword sortSpecification (COMMA sortSpecification)*
+	: ORDER BY sortSpecification (COMMA sortSpecification)*
 	;
 
 sortSpecification
@@ -144,7 +139,7 @@ querySpec
 // SELECT clause
 
 selectClause
-	:	selectKeyword distinctKeyword? selectionList
+	:	SELECT distinctKeyword? selectionList
 	;
 
 selectionList
@@ -155,7 +150,7 @@ selection
 	// I have noticed that without this predicate, Antlr will sometimes
 	// interpret `select a.b from Something ...` as `from` being the
 	// select-expression alias
-	: selectExpression (asKeyword? {!doesUpcomingTokenMatchAny("from")}? IDENTIFIER)?
+	: selectExpression (AS? identifier)?
 	;
 
 selectExpression
@@ -165,25 +160,22 @@ selectExpression
 	;
 
 dynamicInstantiation
-	: newKeyword dynamicInstantiationTarget LEFT_PAREN dynamicInstantiationArgs RIGHT_PAREN
+	: NEW dynamicInstantiationTarget LEFT_PAREN dynamicInstantiationArgs RIGHT_PAREN
 	;
 
 dynamicInstantiationTarget
 	: listKeyword
 	| mapKeyword
 	| dotIdentifierSequence
-//	: listKeyword				# ListInstantiationTarget
-//	| mapKeyword				# MapInstantiationTarget
-//	| dotIdentifierSequence		# ClassInstantiationTarget
 	;
 
 dotIdentifierSequence
-	: IDENTIFIER (DOT IDENTIFIER)*
+	: identifier (DOT identifier)*
 	;
 
 path
 	: dotIdentifierSequence																			# SimplePath
-	| treatKeyword LEFT_PAREN dotIdentifierSequence asKeyword dotIdentifierSequence RIGHT_PAREN		# TreatedPath
+	| treatKeyword LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN			# TreatedPath
 	| path LEFT_BRACKET expression RIGHT_BRACKET (DOT path)?										# IndexedPath
 	;
 
@@ -192,7 +184,7 @@ dynamicInstantiationArgs
 	;
 
 dynamicInstantiationArg
-	:	dynamicInstantiationArgExpression (asKeyword? IDENTIFIER)?
+	:	dynamicInstantiationArgExpression (AS? identifier)?
 	;
 
 dynamicInstantiationArgExpression
@@ -201,7 +193,7 @@ dynamicInstantiationArgExpression
 	;
 
 jpaSelectObjectSyntax
-	:	objectKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN
+	:	objectKeyword LEFT_PAREN identifier RIGHT_PAREN
 	;
 
 
@@ -209,7 +201,7 @@ jpaSelectObjectSyntax
 // FROM clause
 
 fromClause
-	: fromKeyword fromElementSpace (COMMA fromElementSpace)*
+	: FROM fromElementSpace (COMMA fromElementSpace)*
 	;
 
 fromElementSpace
@@ -221,27 +213,27 @@ fromElementSpaceRoot
 	;
 
 mainEntityPersisterReference
-	: dotIdentifierSequence (asKeyword? {!doesUpcomingTokenMatchAny("where","join")}? IDENTIFIER)?
+	: dotIdentifierSequence (AS? {!doesUpcomingTokenMatchAny("where","join")}? identifier)?
 	;
 
 crossJoin
-	: crossKeyword joinKeyword mainEntityPersisterReference
+	: CROSS JOIN mainEntityPersisterReference
 	;
 
 jpaCollectionJoin
-	:	COMMA inKeyword LEFT_PAREN path RIGHT_PAREN (asKeyword? IDENTIFIER)?
+	:	COMMA IN LEFT_PAREN path RIGHT_PAREN (AS? identifier)?
 	;
 
 qualifiedJoin
-	: ( innerKeyword | ((leftKeyword|rightKeyword|fullKeyword)? outerKeyword) )? joinKeyword fetchKeyword? qualifiedJoinRhs (qualifiedJoinPredicate)?
+	: ( INNER | ((LEFT|RIGHT|FULL)? OUTER) )? JOIN fetchKeyword? qualifiedJoinRhs (qualifiedJoinPredicate)?
 	;
 
 qualifiedJoinRhs
-	: path (asKeyword? IDENTIFIER)?
+	: path (AS? identifier)?
 	;
 
 qualifiedJoinPredicate
-	: (onKeyword | withKeyword) predicate
+	: (ON | WITH) predicate
 	;
 
 
@@ -273,13 +265,13 @@ havingClause
 // WHERE clause
 
 whereClause
-	:	whereKeyword predicate
+	:	WHERE predicate
 	;
 
 predicate
 	: LEFT_PAREN predicate RIGHT_PAREN								# GroupedPredicate
-	| predicate orKeyword predicate									# OrPredicate
-	| predicate andKeyword predicate								# AndPredicate
+	| predicate OR predicate										# OrPredicate
+	| predicate AND predicate										# AndPredicate
 	| notKeyword predicate											# NegatedPredicate
 	| expression isKeyword (notKeyword)? NULL						# IsNullPredicate
 	| expression isKeyword (notKeyword)? emptyKeyword				# IsEmptyPredicate
@@ -289,8 +281,8 @@ predicate
 	| expression GREATER_EQUAL expression							# GreaterThanOrEqualPredicate
 	| expression LESS expression									# LessThanPredicate
 	| expression LESS_EQUAL expression								# LessThanOrEqualPredicate
-	| expression inKeyword inList									# InPredicate
-	| expression betweenKeyword expression andKeyword expression	# BetweenPredicate
+	| expression IN inList											# InPredicate
+	| expression betweenKeyword expression AND expression			# BetweenPredicate
 	| expression likeKeyword expression likeEscape					# LikePredicate
 	| memberOfKeyword path											# MemberOfPredicate
 	;
@@ -358,7 +350,7 @@ dateTimeLiteralText
 	;
 
 parameter
-	: COLON IDENTIFIER					# NamedParameter
+	: COLON identifier					# NamedParameter
 	| QUESTION_MARK INTEGER_LITERAL		# PositionalParameter
 	;
 
@@ -389,7 +381,7 @@ nonStandardFunction
 
 jpaCollectionFunction
 	: sizeKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionSizeFunction
-	| indexKeyword LEFT_PAREN IDENTIFIER RIGHT_PAREN	# CollectionIndexFunction
+	| indexKeyword LEFT_PAREN identifier RIGHT_PAREN	# CollectionIndexFunction
 	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
 	| valueKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionValueFunction
 	| entryKeyword LEFT_PAREN path RIGHT_PAREN			# MapEntryFunction
@@ -454,7 +446,7 @@ standardFunction
 
 
 castFunction
-	: castkeyword LEFT_PAREN expression asKeyword dataType RIGHT_PAREN
+	: castkeyword LEFT_PAREN expression AS dataType RIGHT_PAREN
 	;
 
 dataType
@@ -478,7 +470,7 @@ substringFunctionLengthArgument
 	;
 
 trimFunction
-	: trimKeyword LEFT_PAREN trimSpecification? trimCharacter? fromKeyword? expression RIGHT_PAREN
+	: trimKeyword LEFT_PAREN trimSpecification? trimCharacter? FROM? expression RIGHT_PAREN
 	;
 
 trimSpecification
@@ -552,7 +544,7 @@ currentTimestampFunction
 	;
 
 extractFunction
-	: extractKeyword LEFT_PAREN extractField fromKeyword expression RIGHT_PAREN
+	: extractKeyword LEFT_PAREN extractField FROM expression RIGHT_PAREN
 	;
 
 extractField
@@ -579,7 +571,7 @@ timeZoneField
 	;
 
 positionFunction
-	: positionKeyword LEFT_PAREN positionSubstrArgument inKeyword positionStringArgument RIGHT_PAREN
+	: positionKeyword LEFT_PAREN positionSubstrArgument IN positionStringArgument RIGHT_PAREN
 	;
 
 positionSubstrArgument
@@ -602,6 +594,42 @@ bitLengthFunction
 	: bitLengthKeyword LEFT_PAREN expression RIGHT_PAREN
 	;
 
+/**
+ * The `identifier` is used to provide "keyword as identifier" handling.
+ *
+ * The lexer hands us recognized keywords using their specific tokens.  This is important
+ * for the recognition of query structure, especially in terms of performance!
+ *
+ * However we want to continue to allow users to use mopst keywords as identifiers (e.g., attribute names).
+ * This parser rule helps with that.  Here we expect that the caller already understands their
+ * context enough to know that keywords-as-identifiers are allowed.
+ *
+ */
+identifier
+	: IDENTIFIER
+	| FROM
+	| SELECT
+	| WHERE
+	| UPDATE
+	| DELETE
+	| INSERT
+	| ORDER
+	| BY
+	| IN
+	| JOIN
+	| CROSS
+	| INNER
+	| LEFT
+	| RIGHT
+	| FULL
+	| OUTER
+	| ON
+	| WITH
+	| AND
+	| OR
+	| AS
+	;
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Key word rules
@@ -613,14 +641,6 @@ absKeyword
 
 allKeyword
 	: {doesUpcomingTokenMatchAny("all")}? IDENTIFIER
-	;
-
-andKeyword
-	: {doesUpcomingTokenMatchAny("and")}? IDENTIFIER
-	;
-
-asKeyword
-	: {doesUpcomingTokenMatchAny("as")}? IDENTIFIER
 	;
 
 avgKeyword
@@ -667,10 +687,6 @@ countKeyword
 	: {doesUpcomingTokenMatchAny("count")}? IDENTIFIER
 	;
 
-crossKeyword
-	: {doesUpcomingTokenMatchAny("cross")}? IDENTIFIER
-	;
-
 currentDateKeyword
 	: {doesUpcomingTokenMatchAny("current_date")}? IDENTIFIER
 	;
@@ -685,10 +701,6 @@ currentTimestampKeyword
 
 dayKeyword
 	: {doesUpcomingTokenMatchAny("day")}? IDENTIFIER
-	;
-
-deleteKeyword
-	: {doesUpcomingTokenMatchAny("delete")}? IDENTIFIER
 	;
 
 descendingKeyword
@@ -723,14 +735,6 @@ fetchKeyword
 	: {doesUpcomingTokenMatchAny("fetch")}? IDENTIFIER
 	;
 
-fromKeyword
-	: {doesUpcomingTokenMatchAny("from")}? IDENTIFIER
-	;
-
-fullKeyword
-	: {doesUpcomingTokenMatchAny("full")}? IDENTIFIER
-	;
-
 functionKeyword
 	: {doesUpcomingTokenMatchAny("function")}? IDENTIFIER
 	;
@@ -747,24 +751,12 @@ hourKeyword
 	: {doesUpcomingTokenMatchAny("hour")}? IDENTIFIER
 	;
 
-inKeyword
-	: {doesUpcomingTokenMatchAny("in")}? IDENTIFIER
-	;
-
 intoKeyword
 	: {doesUpcomingTokenMatchAny("into")}? IDENTIFIER
 	;
 
 indexKeyword
 	: {doesUpcomingTokenMatchAny("index")}? IDENTIFIER
-	;
-
-innerKeyword
-	: {doesUpcomingTokenMatchAny("inner")}? IDENTIFIER
-	;
-
-insertKeyword
-	: {doesUpcomingTokenMatchAny("insert")}? IDENTIFIER
 	;
 
 isKeyword
@@ -775,20 +767,12 @@ intersectKeyword
 	: {doesUpcomingTokenMatchAny("intersect")}? IDENTIFIER
 	;
 
-joinKeyword
-	: {doesUpcomingTokenMatchAny("join")}? IDENTIFIER
-	;
-
 keyKeyword
 	: {doesUpcomingTokenMatchAny("key")}? IDENTIFIER
 	;
 
 leadingKeyword
 	: {doesUpcomingTokenMatchAny("leading")}?  IDENTIFIER
-	;
-
-leftKeyword
-	: {doesUpcomingTokenMatchAny("left")}?  IDENTIFIER
 	;
 
 lengthKeyword
@@ -855,10 +839,6 @@ monthKeyword
 	: {doesUpcomingTokenMatchAny("month")}?  IDENTIFIER
 	;
 
-newKeyword
-	: {doesUpcomingTokenMatchAny("new")}?  IDENTIFIER
-	;
-
 notKeyword
 	: {doesUpcomingTokenMatchAny("not")}?  IDENTIFIER
 	;
@@ -871,22 +851,6 @@ octetLengthKeyword
 	: {doesUpcomingTokenMatchAny("octet_length")}?  IDENTIFIER
 	;
 
-onKeyword
-	: {doesUpcomingTokenMatchAny("on")}?  IDENTIFIER
-	;
-
-orKeyword
-	: {doesUpcomingTokenMatchAny("or")}?  IDENTIFIER
-	;
-
-orderByKeyword
-	: {(doesUpcomingTokenMatchAny("order") && doesUpcomingTokenMatchAny(2, "by"))}?  IDENTIFIER IDENTIFIER
-	;
-
-outerKeyword
-	: {doesUpcomingTokenMatchAny("outer")}?  IDENTIFIER
-	;
-
 positionKeyword
 	: {doesUpcomingTokenMatchAny("position")}?  IDENTIFIER
 	;
@@ -895,16 +859,8 @@ propertiesKeyword
 	: {doesUpcomingTokenMatchAny("properties")}?  IDENTIFIER
 	;
 
-rightKeyword
-	: {doesUpcomingTokenMatchAny("right")}?  IDENTIFIER
-	;
-
 secondKeyword
 	: {doesUpcomingTokenMatchAny("second")}?  IDENTIFIER
-	;
-
-selectKeyword
-	: {doesUpcomingTokenMatchAny("select")}?  IDENTIFIER
 	;
 
 setKeyword
@@ -951,10 +907,6 @@ unionKeyword
 	: {doesUpcomingTokenMatchAny("union")}?  IDENTIFIER
 	;
 
-updateKeyword
-	: {doesUpcomingTokenMatchAny("update")}?  IDENTIFIER
-	;
-
 upperKeyword
 	: {doesUpcomingTokenMatchAny("upper")}?  IDENTIFIER
 	;
@@ -965,14 +917,6 @@ valueKeyword
 
 entryKeyword
 	: {doesUpcomingTokenMatchAny("entry")}?  IDENTIFIER
-	;
-
-whereKeyword
-	: {doesUpcomingTokenMatchAny("where")}?  IDENTIFIER
-	;
-
-withKeyword
-	: {doesUpcomingTokenMatchAny("with")}?  IDENTIFIER
 	;
 
 yearKeyword

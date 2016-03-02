@@ -89,6 +89,11 @@ public class SelectClauseTests {
 				SingularAttribute.Classification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
+		entityType.makeSingularAttribute(
+				"from",
+				SingularAttribute.Classification.BASIC,
+				StandardBasicTypeDescriptors.INSTANCE.STRING
+		);
 
 		EntityTypeImpl legType = metamodel.makeEntityType( "com.acme.Leg" );
 
@@ -118,6 +123,15 @@ public class SelectClauseTests {
 	@Test
 	public void testSimpleAttributeSelection() {
 		SelectStatement statement = interpret( "select o.basic from Entity o" );
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		assertThat( selection.getExpression(), instanceOf( AttributeReferenceExpression.class ) );
+	}
+
+	@Test
+	public void testSelectionOfAttributeNamedFrom() {
+		SelectStatement statement = interpret( "select o.from from Entity o where o.from = ?1" );
+//		SelectStatement statement = interpret( "select o.basic from Entity o where o.from = ?1" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( AttributeReferenceExpression.class ) );

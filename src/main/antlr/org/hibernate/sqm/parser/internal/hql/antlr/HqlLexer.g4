@@ -51,14 +51,7 @@ tokens {
 	CONST_STRING_VALUE,
 
 //SOFT KEYWORDS
-	ABS,
-	ALL,
 	ANY,
-	AVG,
-	BETWEEN,
-	BIT_LENGTH,
-	BOTH,
-	CAST,
 	CHARACTER_LENGTH,
 	CLASS,
 	COALESCE,
@@ -259,6 +252,17 @@ NEW			: [nN] [eE] [wW];
 AND 		: [aA] [nN] [dD];
 OR			: [oO] [rR];
 AS			: [aA] [sS];
+VALUE       : [vV] [aA] [lL] [uU] [eE];
+ENTRY       : [eE] [nN] [tT] [rR] [yY];
+ABS         : [aA] [bB] [sS];
+ALL         : [aA] [lL] [lL];
+AVG         : [aA] [vV] [gG];
+ASC         : [aA] [sS] [cC];
+DESC        : [dD] [eE] [sS] [cC];
+BETWEEN     : [bB] [eE] [tT] [wW] [eE] [eE] [nN];
+BIT_LENGTH  : [bB] [iI] [tT] [_] [lL] [eE] [nN] [gG] [tT] [hH];
+BOTH        : [bB] [oO] [tT] [hH];
+CAST        : [cC] [aA] [sS] [tT];
 
 IDENTIFIER
 	:	('a'..'z'|'A'..'Z'|'_'|'$'|'\u0080'..'\ufffe')('a'..'z'|'A'..'Z'|'_'|'$'|'0'..'9'|'\u0080'..'\ufffe')*

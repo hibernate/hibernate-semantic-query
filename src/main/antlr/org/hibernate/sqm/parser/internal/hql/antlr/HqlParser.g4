@@ -123,8 +123,8 @@ collateName
 	;
 
 orderingSpecification
-	:	ascendingKeyword
-	|	descendingKeyword
+	:	ASC
+	|	DESC
 	;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -282,7 +282,7 @@ predicate
 	| expression LESS expression									# LessThanPredicate
 	| expression LESS_EQUAL expression								# LessThanOrEqualPredicate
 	| expression IN inList											# InPredicate
-	| expression betweenKeyword expression AND expression			# BetweenPredicate
+	| expression BETWEEN expression AND expression			        # BetweenPredicate
 	| expression likeKeyword expression likeEscape					# LikePredicate
 	| memberOfKeyword path											# MemberOfPredicate
 	;
@@ -383,8 +383,8 @@ jpaCollectionFunction
 	: sizeKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionSizeFunction
 	| indexKeyword LEFT_PAREN identifier RIGHT_PAREN	# CollectionIndexFunction
 	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
-	| valueKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionValueFunction
-	| entryKeyword LEFT_PAREN path RIGHT_PAREN			# MapEntryFunction
+	| VALUE LEFT_PAREN path RIGHT_PAREN			        # CollectionValueFunction
+	| ENTRY LEFT_PAREN path RIGHT_PAREN			        # MapEntryFunction
 	;
 
 hqlCollectionFunction
@@ -403,7 +403,7 @@ aggregateFunction
 	;
 
 avgFunction
-	: avgKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	: AVG LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
 	;
 
 sumFunction
@@ -446,7 +446,7 @@ standardFunction
 
 
 castFunction
-	: castkeyword LEFT_PAREN expression AS dataType RIGHT_PAREN
+	: CAST LEFT_PAREN expression AS dataType RIGHT_PAREN
 	;
 
 dataType
@@ -476,7 +476,7 @@ trimFunction
 trimSpecification
 	: leadingKeyword
 	| trailingKeyword
-	| bothKeyword
+	| BOTH
 	;
 
 trimCharacter
@@ -512,7 +512,7 @@ locateFunctionStartArgument
 	;
 
 absFunction
-	:	absKeyword LEFT_PAREN expression RIGHT_PAREN
+	:	ABS LEFT_PAREN expression RIGHT_PAREN
 	;
 
 sqrtFunction
@@ -583,7 +583,7 @@ positionStringArgument
 	;
 
 charLengthFunction
-	: charLengthKeyword LEFT_PAREN expression RIGHT_PAREN
+	: CAST LEFT_PAREN expression RIGHT_PAREN
 	;
 
 octetLengthFunction
@@ -591,7 +591,7 @@ octetLengthFunction
 	;
 
 bitLengthFunction
-	: bitLengthKeyword LEFT_PAREN expression RIGHT_PAREN
+	: BIT_LENGTH LEFT_PAREN expression RIGHT_PAREN
 	;
 
 /**
@@ -628,48 +628,22 @@ identifier
 	| AND
 	| OR
 	| AS
+	| VALUE
+	| ENTRY
+	| ABS
+	| ALL
+	| AVG
+	| ASC
+	| DESC
+	| BETWEEN
+	| BIT_LENGTH
+	| BOTH
+	| CAST
 	;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Key word rules
-
-
-absKeyword
-	: {doesUpcomingTokenMatchAny("abs")}? IDENTIFIER
-	;
-
-allKeyword
-	: {doesUpcomingTokenMatchAny("all")}? IDENTIFIER
-	;
-
-avgKeyword
-	: {doesUpcomingTokenMatchAny("avg")}? IDENTIFIER
-	;
-
-ascendingKeyword
-	: {(doesUpcomingTokenMatchAny("ascending","asc"))}? IDENTIFIER
-	;
-
-betweenKeyword
-	: {doesUpcomingTokenMatchAny("between")}? IDENTIFIER
-	;
-
-bitLengthKeyword
-	: {doesUpcomingTokenMatchAny("bit_length")}? IDENTIFIER
-	;
-
-bothKeyword
-	: {doesUpcomingTokenMatchAny("both")}? IDENTIFIER
-	;
-
-castkeyword
-	: {doesUpcomingTokenMatchAny("cast")}? IDENTIFIER
-	;
-
-charLengthKeyword
-	: {doesUpcomingTokenMatchAny("character_length","char_length")}? IDENTIFIER
-	;
 
 classKeyword
 	: {doesUpcomingTokenMatchAny("class")}? IDENTIFIER
@@ -701,10 +675,6 @@ currentTimestampKeyword
 
 dayKeyword
 	: {doesUpcomingTokenMatchAny("day")}? IDENTIFIER
-	;
-
-descendingKeyword
-	: {(doesUpcomingTokenMatchAny("descending","desc"))}? IDENTIFIER
 	;
 
 distinctKeyword
@@ -909,14 +879,6 @@ unionKeyword
 
 upperKeyword
 	: {doesUpcomingTokenMatchAny("upper")}?  IDENTIFIER
-	;
-
-valueKeyword
-	: {doesUpcomingTokenMatchAny("value")}?  IDENTIFIER
-	;
-
-entryKeyword
-	: {doesUpcomingTokenMatchAny("entry")}?  IDENTIFIER
 	;
 
 yearKeyword

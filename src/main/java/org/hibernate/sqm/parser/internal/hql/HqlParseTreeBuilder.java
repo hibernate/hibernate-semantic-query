@@ -9,34 +9,37 @@ package org.hibernate.sqm.parser.internal.hql;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlLexer;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 
+import org.jboss.logging.Logger;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  * @author Steve Ebersole
  */
 public class HqlParseTreeBuilder {
+	private static final Logger log = Logger.getLogger( HqlParseTreeBuilder.class );
+
 	/**
 	 * Singleton access
 	 */
 	public static final HqlParseTreeBuilder INSTANCE = new HqlParseTreeBuilder();
-
-	private boolean debugEnabled = true;
 
 	public HqlParser parseHql(String hql) {
 		// Build the lexer
 		HqlLexer hqlLexer = new HqlLexer( new ANTLRInputStream( hql ) );
 
 		// Build the parser...
-		final HqlParser parser = new HqlParser( new CommonTokenStream( hqlLexer ) );
+		final HqlParser parser = new HqlParser( new CommonTokenStream( hqlLexer ) ) {
+			@Override
+			protected void logUseOfReservedWordAsIdentifier(Token token) {
+				log.debugf( "Encountered use of reserved word as identifier : " + token.getText() );
+			}
+		};
 
-		// this part would be protected by logging most likely.  Print the parse tree structure
-		if ( debugEnabled ) {
-			ParseTreeWalker.DEFAULT.walk( new HqlParseTreePrinter( parser ), parser.statement() );
-			hqlLexer.reset();
-			parser.reset();
-		}
+		HqlParseTreePrinter.logParseTree( parser );
 
 		return parser;
 	}

@@ -16,6 +16,8 @@ import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
+import org.hibernate.sqm.query.expression.CaseSearchedExpression;
+import org.hibernate.sqm.query.expression.CaseSimpleExpression;
 import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
@@ -492,6 +494,16 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 
 	@Override
 	public SubQueryExpression visitSubQueryExpression(SubQueryExpression expression) {
+		return expression;
+	}
+
+	@Override
+	public Object visitSimpleCaseExpression(CaseSimpleExpression expression) {
+		return expression;
+	}
+
+	@Override
+	public Object visitSearchedCaseExpression(CaseSearchedExpression expression) {
 		return expression;
 	}
 }

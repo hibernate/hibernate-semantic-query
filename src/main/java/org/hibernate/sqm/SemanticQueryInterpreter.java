@@ -10,7 +10,9 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 
+import org.hibernate.sqm.parser.InterpretationException;
 import org.hibernate.sqm.parser.NotYetImplementedException;
+import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.internal.ParsingContext;
 import org.hibernate.sqm.parser.internal.criteria.OrderByProcessor;
 import org.hibernate.sqm.parser.internal.criteria.QuerySpecProcessor;
@@ -43,7 +45,15 @@ public class SemanticQueryInterpreter {
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( query );
 
 		// then we perform semantic analysis and building the semantic representation...
-		return new SemanticQueryBuilder( parsingContext ).visitStatement( parser.statement() );
+		try {
+			return new SemanticQueryBuilder( parsingContext ).visitStatement( parser.statement() );
+		}
+		catch (QueryException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new InterpretationException( query, e );
+		}
 	}
 
 	/**

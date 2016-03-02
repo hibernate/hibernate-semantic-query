@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.sqm.domain.BasicType;
@@ -49,6 +50,7 @@ import org.hibernate.sqm.query.expression.AggregateFunction;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
+import org.hibernate.sqm.query.expression.CaseSearchedExpression;
 import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
@@ -85,6 +87,7 @@ import org.hibernate.sqm.query.expression.MinIndexFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
+import org.hibernate.sqm.query.expression.CaseSimpleExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
 import org.hibernate.sqm.query.expression.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
@@ -120,6 +123,7 @@ import org.hibernate.sqm.query.select.Selection;
 
 import org.jboss.logging.Logger;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
@@ -235,7 +239,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public SelectClause visitSelectClause(HqlParser.SelectClauseContext ctx) {
-		final SelectClause selectClause = new SelectClause( ctx.distinctKeyword() != null );
+		final SelectClause selectClause = new SelectClause( ctx.DISTINCT() != null );
 		for ( HqlParser.SelectionContext selectionContext : ctx.selectionList().selection() ) {
 			selectClause.addSelection( visitSelection( selectionContext ) );
 		}
@@ -246,10 +250,41 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public Selection visitSelection(HqlParser.SelectionContext ctx) {
 		final Selection selection = new Selection(
 				visitSelectExpression( ctx.selectExpression() ),
-				interpretAlias( ctx.identifier() )
+				interpretResultIdentifier( ctx.resultIdentifier() )
 		);
 		currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( selection );
 		return selection;
+	}
+
+	private String interpretResultIdentifier(HqlParser.ResultIdentifierContext resultIdentifierContext) {
+		if ( resultIdentifierContext != null ) {
+			final String explicitAlias;
+			if ( resultIdentifierContext.AS() != null ) {
+				final Token aliasToken = resultIdentifierContext.identifier().getStart();
+				explicitAlias = aliasToken.getText();
+
+				if ( aliasToken.getType() != HqlParser.IDENTIFIER ) {
+					// we have a reserved word used as an identification variable.
+					if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+						throw new StrictJpaComplianceViolation(
+								String.format(
+										Locale.ROOT,
+										"Strict JPQL compliance was violated : %s [%s]",
+										StrictJpaComplianceViolation.Type.RESERVED_WORD_USED_AS_ALIAS.description(),
+										explicitAlias
+								),
+								StrictJpaComplianceViolation.Type.RESERVED_WORD_USED_AS_ALIAS
+						);
+					}
+				}
+			}
+			else {
+				explicitAlias = resultIdentifierContext.getText();
+			}
+			return explicitAlias;
+		}
+
+		return parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 	}
 
 	private String interpretAlias(HqlParser.IdentifierContext identifier) {
@@ -514,7 +549,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	protected RootEntityFromElement resolveDmlRootEntityReference(HqlParser.MainEntityPersisterReferenceContext rootEntityContext) {
 		final EntityType entityType = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
-		String alias = interpretAlias( rootEntityContext.identifier() );
+		String alias = interpretIdentificationVariable( rootEntityContext.identificationVariableDef() );
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
@@ -528,6 +563,36 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( root );
 		currentQuerySpecProcessingState.getFromClause().getFromElementSpaces().get( 0 ).setRoot( root );
 		return root;
+	}
+
+	private String interpretIdentificationVariable(HqlParser.IdentificationVariableDefContext identificationVariableDef) {
+		if ( identificationVariableDef != null ) {
+			final String explicitAlias;
+			if ( identificationVariableDef.AS() != null ) {
+				final Token identificationVariableToken = identificationVariableDef.identificationVariable().identifier().getStart();
+				if ( identificationVariableToken.getType() != HqlParser.IDENTIFIER ) {
+					// we have a reserved word used as an identification variable.
+					if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+						throw new StrictJpaComplianceViolation(
+								String.format(
+										Locale.ROOT,
+										"Strict JPQL compliance was violated : %s [%s]",
+										StrictJpaComplianceViolation.Type.RESERVED_WORD_USED_AS_ALIAS.description(),
+										identificationVariableToken.getText()
+								),
+								StrictJpaComplianceViolation.Type.RESERVED_WORD_USED_AS_ALIAS
+						);
+					}
+				}
+				explicitAlias = identificationVariableToken.getText();
+			}
+			else {
+				explicitAlias = identificationVariableDef.IDENTIFIER().getText();
+			}
+			return explicitAlias;
+		}
+
+		return parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 	}
 
 	@Override
@@ -654,7 +719,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return currentQuerySpecProcessingState.getFromElementBuilder().makeRootEntityFromElement(
 				currentFromElementSpace,
 				entityType,
-				interpretAlias( ctx.mainEntityPersisterReference().identifier() )
+				interpretIdentificationVariable( ctx.mainEntityPersisterReference().identificationVariableDef() )
 		);
 	}
 
@@ -686,7 +751,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				currentFromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
 				entityType,
-				interpretAlias( ctx.mainEntityPersisterReference().identifier() )
+				interpretIdentificationVariable( ctx.mainEntityPersisterReference().identificationVariableDef() )
 		);
 	}
 
@@ -697,7 +762,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						currentQuerySpecProcessingState,
 						currentFromElementSpace,
 						JoinType.INNER,
-						interpretAlias( ctx.identifier() ),
+						interpretIdentificationVariable( ctx.identificationVariableDef() ),
 						false
 				)
 		);
@@ -739,7 +804,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						currentQuerySpecProcessingState,
 						currentFromElementSpace,
 						joinType,
-						interpretAlias( ctx.qualifiedJoinRhs().identifier() ),
+						interpretIdentificationVariable( ctx.qualifiedJoinRhs().identificationVariableDef() ),
 						ctx.fetchKeyword() != null
 				)
 		);
@@ -1253,6 +1318,44 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
+	public CaseSimpleExpression visitSimpleCaseStatement(HqlParser.SimpleCaseStatementContext ctx) {
+		final CaseSimpleExpression caseExpression = new CaseSimpleExpression(
+				(Expression) ctx.expression().accept( this )
+		);
+
+		for ( HqlParser.SimpleCaseWhenContext simpleCaseWhen : ctx.simpleCaseWhen() ) {
+			caseExpression.when(
+					(Expression) simpleCaseWhen.expression( 0 ).accept( this ),
+					(Expression) simpleCaseWhen.expression( 0 ).accept( this )
+			);
+		}
+
+		if ( ctx.caseOtherwise() != null ) {
+			caseExpression.otherwise( (Expression) ctx.caseOtherwise().expression().accept( this ) );
+		}
+
+		return caseExpression;
+	}
+
+	@Override
+	public CaseSearchedExpression visitSearchedCaseStatement(HqlParser.SearchedCaseStatementContext ctx) {
+		final CaseSearchedExpression caseExpression = new CaseSearchedExpression();
+
+		for ( HqlParser.SearchedCaseWhenContext whenFragment : ctx.searchedCaseWhen() ) {
+			caseExpression.when(
+					(Predicate) whenFragment.predicate().accept( this ),
+					(Expression) whenFragment.expression().accept( this )
+			);
+		}
+
+		if ( ctx.caseOtherwise() != null ) {
+			caseExpression.otherwise( (Expression) ctx.caseOtherwise().expression().accept( this ) );
+		}
+
+		return caseExpression;
+	}
+
+	@Override
 	@SuppressWarnings("UnnecessaryBoxing")
 	public LiteralExpression visitLiteralExpression(HqlParser.LiteralExpressionContext ctx) {
 		if ( ctx.literal().CHARACTER_LITERAL() != null ) {
@@ -1494,7 +1597,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final Expression expr = (Expression) ctx.expression().accept( this );
 		return new AvgFunction(
 				expr,
-				ctx.distinctKeyword() != null,
+				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
 		);
 	}
@@ -1503,12 +1606,12 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public AggregateFunction visitCountFunction(HqlParser.CountFunctionContext ctx) {
 		final BasicType longType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class );
 		if ( ctx.ASTERISK() != null ) {
-			return new CountStarFunction( ctx.distinctKeyword() != null, longType );
+			return new CountStarFunction( ctx.DISTINCT() != null, longType );
 		}
 		else {
 			return new CountFunction(
 					(Expression) ctx.expression().accept( this ),
-					ctx.distinctKeyword() != null,
+					ctx.DISTINCT() != null,
 					longType
 			);
 		}
@@ -1519,7 +1622,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final Expression expr = (Expression) ctx.expression().accept( this );
 		return new MaxFunction(
 				expr,
-				ctx.distinctKeyword() != null,
+				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
 		);
 	}
@@ -1529,7 +1632,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final Expression expr = (Expression) ctx.expression().accept( this );
 		return new MinFunction(
 				expr,
-				ctx.distinctKeyword() != null,
+				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
 		);
 	}
@@ -1539,7 +1642,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final Expression expr = (Expression) ctx.expression().accept( this );
 		return new SumFunction(
 				expr,
-				ctx.distinctKeyword() != null,
+				ctx.DISTINCT() != null,
 				ExpressionTypeHelper.resolveSingleNumericType(
 						(BasicType) expr.getExpressionType(),
 						parsingContext.getConsumerContext()

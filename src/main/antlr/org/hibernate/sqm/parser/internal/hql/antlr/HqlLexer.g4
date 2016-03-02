@@ -12,67 +12,14 @@ package org.hibernate.sqm.parser.internal.hql.antlr;
 }
 
 tokens {
-	COLLATE,
-	FUNCTION,
-//	GENERAL_FUNCTION_CALL,
-//	GENERAL_FUNCTION_ARGUMENTS,
-	GROUPING_VALUE,
-	IN_LIST,
-	INSERTABILITY_SPEC,
-	IS_NOT_EMPTY,
-	IS_NOT_NULL,
-	IS_NULL,
-	JAVA_CONSTANT,
-	JPA_POSITIONAL_PARAM,
-	NAMED_PARAM,
-	NOT_BETWEEN,
-	NOT_IN,
-	NOT_LIKE,
-	NOT_MEMBER_OF,
-	ORDER_SPEC,
-	PATH,
-	PERSISTER_JOIN,
-	PERSISTER_SPACE,
-	POSITIONAL_PARAM,
-	PROP_FETCH,
-	QUALIFIED_JOIN,
-	QUERY_SPEC,
-	QUERY,
-	SEARCHED_CASE,
-	SELECT_ITEM,
-	SELECT_LIST,
-	SIMPLE_CASE,
-	SORT_SPEC,
-	SUB_QUERY,
-	UNARY_MINUS,
-	UNARY_PLUS,
-	VECTOR_EXPR,
-	VERSIONED_VALUE,
-	CONST_STRING_VALUE,
 
 //SOFT KEYWORDS
-	ANY,
-	CHARACTER_LENGTH,
-	CLASS,
-	COALESCE,
-	CONCAT,
-	COUNT,
-	CROSS,
-	CURRENT_DATE,
-	CURRENT_TIME,
-	CURRENT_TIMESTAMP,
-	DAY,
-	DISTINCT,
-	ELEMENTS,
-	ELSE,
 	EMPTY,
-	END,
 	ESCAPE,
 	EXCEPT,
 	EXISTS,
 	EXTRACT,
 	FETCH,
-	FULL,
 	GROUP_BY,
 	HAVING,
 	HOUR,
@@ -83,9 +30,7 @@ tokens {
 	INTO,
 	IS_EMPTY,
 	IS,
-	JOIN,
 	LEADING,
-	LEFT,
 	LENGTH,
 	LIKE,
 	LOCATE,
@@ -100,14 +45,11 @@ tokens {
 	MINUTE,
 	MOD,
 	MONTH,
-	NEW,
 	NOT,
 	NULLIF,
 	OCTET_LENGTH,
-	OUTER,
 	POSITION,
 	PROPERTIES,
-	RIGHT,
 	SECOND,
 	SET,
 	SIZE,
@@ -123,7 +65,6 @@ tokens {
 	UNION,
 	UPPER,
 	VERSIONED,
-	WHEN,
 	YEAR
 }
 
@@ -230,40 +171,60 @@ DOUBLE_PIPE : '||';
 QUESTION_MARK :	'?';
 ARROW :	'->';
 
-SELECT 		: [sS] [eE] [lL] [eE] [cC] [tT];
-UPDATE 		: [uU] [pP] [dD] [aA] [tT] [eE];
-DELETE 		: [dD] [eE] [lL] [eE] [tT] [eE];
-INSERT 		: [iI] [nN] [sS] [eE] [rR] [tT];
-FROM 		: [fF] [rR] [oO] [mM];
-WHERE 		: [wW] [hH] [eE] [rR] [eE];
-ORDER 		: [oO] [rR] [dD] [eE] [rR];
-BY 			: [bB] [yY];
-IN 			: [iI] [nN];
-JOIN 		: [jJ] [oO] [iI] [nN];
-CROSS 		: [cC] [rR] [oO] [sS] [sS];
-INNER 		: [iI] [nN] [nN] [eE] [rR];
-LEFT 		: [lL] [eE] [fF] [tT];
-RIGHT 		: [rR] [iI] [gG] [hH] [tT];
-FULL 		: [fF] [uU] [lL] [lL];
-OUTER 		: [oO] [uU] [tT] [eE] [rR];
-ON			: [oO] [nN];
-WITH		: [wW] [iI] [tT] [hH];
-NEW			: [nN] [eE] [wW];
-AND 		: [aA] [nN] [dD];
-OR			: [oO] [rR];
-AS			: [aA] [sS];
-VALUE       : [vV] [aA] [lL] [uU] [eE];
-ENTRY       : [eE] [nN] [tT] [rR] [yY];
-ABS         : [aA] [bB] [sS];
-ALL         : [aA] [lL] [lL];
-AVG         : [aA] [vV] [gG];
-ASC         : [aA] [sS] [cC];
-DESC        : [dD] [eE] [sS] [cC];
-BETWEEN     : [bB] [eE] [tT] [wW] [eE] [eE] [nN];
-BIT_LENGTH  : [bB] [iI] [tT] [_] [lL] [eE] [nN] [gG] [tT] [hH];
-BOTH        : [bB] [oO] [tT] [hH];
-CAST        : [cC] [aA] [sS] [tT];
+// Keywords
+ABS					: [aA] [bB] [sS];
+AS					: [aA] [sS];
+ALL					: [aA] [lL] [lL];
+AND					: [aA] [nN] [dD];
+ANY					: [aA] [nN] [yY];
+ASC					: [aA] [sS] [cC];
+AVG					: [aA] [vV] [gG];
+BY					: [bB] [yY];
+BETWEEN     		: [bB] [eE] [tT] [wW] [eE] [eE] [nN];
+BIT_LENGTH  		: [bB] [iI] [tT] [_] [lL] [eE] [nN] [gG] [tT] [hH];
+BOTH        		: [bB] [oO] [tT] [hH];
+CASE        		: [cC] [aA] [sS] [eE];
+CAST        		: [cC] [aA] [sS] [tT];
+CHARACTER_LENGTH	: [cC] [hH] [aA] [rR] [aA] [cC] [tT] [eE] [rR] '_' [lL] [eE] [nN] [gG] [tT] [hH];
+COALESCE			: [cC] [oO] [aA] [lL] [eE] [sS] [cC] [eE];
+COLLATE				: [cC] [oO] [lL] [lL] [aA] [tT] [eE];
+CONCAT				: [cC] [oO] [nN] [cC] [aA] [tT];
+COUNT				: [cC] [oO] [uU] [nN] [tT];
+CURRENT_DATE		: [cC] [uU] [rR] [rR] [eE] [nN] [tT] '_' [dD] [aA] [tT] [eE];
+CURRENT_TIME		: [cC] [uU] [rR] [rR] [eE] [nN] [tT] '_' [tT] [iI] [mM] [eE];
+CURRENT_TIMESTAMP	: [cC] [uU] [rR] [rR] [eE] [nN] [tT] '_' [tT] [iI] [mM] [eE] [sS] [tT] [aA] [mM] [pP];
+CROSS				: [cC] [rR] [oO] [sS] [sS];
+DAY					: [dD] [aA] [yY];
+DELETE				: [dD] [eE] [lL] [eE] [tT] [eE];
+DESC				: [dD] [eE] [sS] [cC];
+DISTINCT			: [dD] [iI] [sS] [tT] [iI] [nN] [cC] [tT];
+ELEMENTS			: [eE] [lL] [eE] [mM] [eE] [nN] [tT] [sS];
+ELSE				: [eE] [lL] [sS] [eE];
+END					: [eE] [nN] [dD];
+ENTRY				: [eE] [nN] [tT] [rR] [yY];
+FROM				: [fF] [rR] [oO] [mM];
+FULL				: [fF] [uU] [lL] [lL];
+FUNCTION			: [fF] [uU] [nN] [cC] [tT] [iI] [oO] [nN];
+IN					: [iI] [nN];
+INNER				: [iI] [nN] [nN] [eE] [rR];
+INSERT				: [iI] [nN] [sS] [eE] [rR] [tT];
+JOIN				: [jJ] [oO] [iI] [nN];
+LEFT				: [lL] [eE] [fF] [tT];
+NEW					: [nN] [eE] [wW];
+ON					: [oO] [nN];
+OR					: [oO] [rR];
+ORDER				: [oO] [rR] [dD] [eE] [rR];
+OUTER				: [oO] [uU] [tT] [eE] [rR];
+RIGHT				: [rR] [iI] [gG] [hH] [tT];
+SELECT				: [sS] [eE] [lL] [eE] [cC] [tT];
+THEN				: [tT] [hH] [eE] [nN];
+UPDATE				: [uU] [pP] [dD] [aA] [tT] [eE];
+VALUE				: [vV] [aA] [lL] [uU] [eE];
+WHEN				: [wW] [hH] [eE] [nN];
+WHERE				: [wW] [hH] [eE] [rR] [eE];
+WITH				: [wW] [iI] [tT] [hH];
 
+// Identifiers
 IDENTIFIER
 	:	('a'..'z'|'A'..'Z'|'_'|'$'|'\u0080'..'\ufffe')('a'..'z'|'A'..'Z'|'_'|'$'|'0'..'9'|'\u0080'..'\ufffe')*
 	;

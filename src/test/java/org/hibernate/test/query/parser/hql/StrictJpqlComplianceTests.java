@@ -31,12 +31,12 @@ public class StrictJpqlComplianceTests {
 		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 		// first test HQL superset is allowed...
-		SemanticQueryInterpreter.interpret( "from Entity", consumerContext );
+		SemanticQueryInterpreter.interpret( query, consumerContext );
 
 		// now enable strict compliance and try again, should lead to error
 		consumerContext.enableStrictJpaCompliance();
 		try {
-			SemanticQueryInterpreter.interpret( "from Entity", consumerContext );
+			SemanticQueryInterpreter.interpret( query, consumerContext );
 			fail( "expected violation" );
 		}
 		catch (StrictJpaComplianceViolation v) {

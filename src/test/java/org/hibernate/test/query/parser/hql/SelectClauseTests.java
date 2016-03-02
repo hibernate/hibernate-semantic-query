@@ -129,15 +129,6 @@ public class SelectClauseTests {
 	}
 
 	@Test
-	public void testSelectionOfAttributeNamedFrom() {
-		SelectStatement statement = interpret( "select o.from from Entity o where o.from = ?1" );
-//		SelectStatement statement = interpret( "select o.basic from Entity o where o.from = ?1" );
-		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
-		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( AttributeReferenceExpression.class ) );
-	}
-
-	@Test
 	public void testCompoundAttributeSelection() {
 		SelectStatement statement = interpret( "select o.basic1, o.basic2 from Entity o" );
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );

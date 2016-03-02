@@ -16,6 +16,11 @@ package org.hibernate.sqm.parser.internal.hql.antlr;
 
 @members {
 	/**
+	 */
+	protected void logUseOfReservedWordAsIdentifier(Token token) {
+	}
+
+	/**
 	 * Determine if the text of the new upcoming token LT(1), if one, matches
 	 * the passed argument.  Internally calls doesUpcomingTokenMatchAny( 1, checks )
 	 */
@@ -115,7 +120,7 @@ sortSpecification
 	;
 
 collationSpecification
-	:	collateKeyword collateName
+	:	COLLATE collateName
 	;
 
 collateName
@@ -139,7 +144,7 @@ querySpec
 // SELECT clause
 
 selectClause
-	:	SELECT distinctKeyword? selectionList
+	:	SELECT DISTINCT? selectionList
 	;
 
 selectionList
@@ -150,7 +155,12 @@ selection
 	// I have noticed that without this predicate, Antlr will sometimes
 	// interpret `select a.b from Something ...` as `from` being the
 	// select-expression alias
-	: selectExpression (AS? identifier)?
+	: selectExpression (resultIdentifier)?
+	;
+
+resultIdentifier
+	: (AS identifier)
+	| IDENTIFIER
 	;
 
 selectExpression
@@ -213,7 +223,19 @@ fromElementSpaceRoot
 	;
 
 mainEntityPersisterReference
-	: dotIdentifierSequence (AS? {!doesUpcomingTokenMatchAny("where","join")}? identifier)?
+	: dotIdentifierSequence (identificationVariableDef)?
+	;
+
+identificationVariableDef
+//	: AS? {!doesUpcomingTokenMatchAny("where","join")}? identificationVariable
+//	: AS identificationVariable
+//	| {!doesUpcomingTokenMatchAny("where","join")}? identificationVariable
+	: (AS identificationVariable)
+	| IDENTIFIER
+	;
+
+identificationVariable
+	: identifier
 	;
 
 crossJoin
@@ -221,7 +243,7 @@ crossJoin
 	;
 
 jpaCollectionJoin
-	:	COMMA IN LEFT_PAREN path RIGHT_PAREN (AS? identifier)?
+	:	COMMA IN LEFT_PAREN path RIGHT_PAREN (identificationVariableDef)?
 	;
 
 qualifiedJoin
@@ -229,7 +251,7 @@ qualifiedJoin
 	;
 
 qualifiedJoinRhs
-	: path (AS? identifier)?
+	: path (identificationVariableDef)?
 	;
 
 qualifiedJoinPredicate
@@ -288,7 +310,7 @@ predicate
 	;
 
 inList
-	: elementsKeyword? LEFT_PAREN dotIdentifierSequence	RIGHT_PAREN	# PersistentCollectionReferenceInList
+	: ELEMENTS? LEFT_PAREN dotIdentifierSequence RIGHT_PAREN		# PersistentCollectionReferenceInList
 	| LEFT_PAREN expression (COMMA expression)*	RIGHT_PAREN			# ExplicitTupleInList
 	| expression													# SubQueryInList
 	;
@@ -306,11 +328,37 @@ expression
 	| expression PERCENT expression				# ModuloExpression
 	| MINUS expression							# UnaryMinusExpression
 	| PLUS expression							# UnaryPlusExpression
+	| caseStatement								# CaseExpression
 	| literal									# LiteralExpression
 	| parameter									# ParameterExpression
 	| function									# FunctionExpression
 	| path										# PathExpression
 	| LEFT_PAREN querySpec RIGHT_PAREN			# SubQueryExpression
+	;
+
+caseStatement
+	: simpleCaseStatement
+	| searchedCaseStatement
+	;
+
+simpleCaseStatement
+	: CASE expression (simpleCaseWhen)+ (caseOtherwise)? END
+	;
+
+simpleCaseWhen
+	: WHEN expression THEN expression
+	;
+
+caseOtherwise
+	: ELSE expression
+	;
+
+searchedCaseStatement
+	: CASE (searchedCaseWhen)+ (caseOtherwise)? END
+	;
+
+searchedCaseWhen
+	: WHEN predicate THEN expression
 	;
 
 literal
@@ -364,7 +412,7 @@ function
 	;
 
 jpaNonStandardFunction
-	: functionKeyword LEFT_PAREN nonStandardFunctionName (COMMA nonStandardFunctionArguments)? RIGHT_PAREN
+	: FUNCTION LEFT_PAREN nonStandardFunctionName (COMMA nonStandardFunctionArguments)? RIGHT_PAREN
 	;
 
 nonStandardFunctionName
@@ -403,23 +451,23 @@ aggregateFunction
 	;
 
 avgFunction
-	: AVG LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	: AVG LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 sumFunction
-	: sumKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	: sumKeyword LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 minFunction
-	: minKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	: minKeyword LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 maxFunction
-	: maxKeyword LEFT_PAREN distinctKeyword? expression RIGHT_PAREN
+	: maxKeyword LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 countFunction
-	: countKeyword LEFT_PAREN distinctKeyword? (expression | ASTERISK) RIGHT_PAREN
+	: COUNT LEFT_PAREN DISTINCT? (expression | ASTERISK) RIGHT_PAREN
 	;
 
 standardFunction
@@ -454,7 +502,7 @@ dataType
 	;
 
 concatFunction
-	: concatKeyword LEFT_PAREN expression (COMMA expression)+ RIGHT_PAREN
+	: CONCAT LEFT_PAREN expression (COMMA expression)+ RIGHT_PAREN
 	;
 
 substringFunction
@@ -532,15 +580,15 @@ modDivisorArgument
 	;
 
 currentDateFunction
-	: currentDateKeyword (LEFT_PAREN RIGHT_PAREN)?
+	: CURRENT_DATE (LEFT_PAREN RIGHT_PAREN)?
 	;
 
 currentTimeFunction
-	: currentTimeKeyword (LEFT_PAREN RIGHT_PAREN)?
+	: CURRENT_TIME (LEFT_PAREN RIGHT_PAREN)?
 	;
 
 currentTimestampFunction
-	: currentTimestampKeyword (LEFT_PAREN RIGHT_PAREN)?
+	: CURRENT_TIMESTAMP (LEFT_PAREN RIGHT_PAREN)?
 	;
 
 extractFunction
@@ -560,7 +608,7 @@ datetimeField
 nonSecondDatetimeField
 	: yearKeyword
 	| monthKeyword
-	| dayKeyword
+	| DAY
 	| hourKeyword
 	| minuteKeyword
 	;
@@ -607,83 +655,54 @@ bitLengthFunction
  */
 identifier
 	: IDENTIFIER
-	| FROM
-	| SELECT
-	| WHERE
-	| UPDATE
-	| DELETE
-	| INSERT
-	| ORDER
-	| BY
-	| IN
-	| JOIN
-	| CROSS
-	| INNER
-	| LEFT
-	| RIGHT
-	| FULL
-	| OUTER
-	| ON
-	| WITH
-	| AND
-	| OR
-	| AS
-	| VALUE
-	| ENTRY
-	| ABS
+	| (ABS
 	| ALL
-	| AVG
+	| AND
+	| ANY
+	| AS
 	| ASC
-	| DESC
+	| AVG
+	| BY
 	| BETWEEN
 	| BIT_LENGTH
 	| BOTH
 	| CAST
+	| COALESCE
+	| COLLATE
+	| CONCAT
+	| COUNT
+	| CROSS
+	| DAY
+	| DELETE
+	| DESC
+	| DISTINCT
+	| ELEMENTS
+	| ENTRY
+	| FROM
+	| FULL
+	| FUNCTION
+	| IN
+	| INNER
+	| INSERT
+	| JOIN
+	| LEFT
+	| ON
+	| OR
+	| ORDER
+	| OUTER
+	| RIGHT
+	| SELECT
+	| UPDATE
+	| VALUE
+	| WHERE
+	| WITH) {
+	    logUseOfReservedWordAsIdentifier(getCurrentToken());
+	}
 	;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Key word rules
-
-classKeyword
-	: {doesUpcomingTokenMatchAny("class")}? IDENTIFIER
-	;
-
-collateKeyword
-	: {doesUpcomingTokenMatchAny("collate")}? IDENTIFIER
-	;
-
-concatKeyword
-	: {doesUpcomingTokenMatchAny("concat")}? IDENTIFIER
-	;
-
-countKeyword
-	: {doesUpcomingTokenMatchAny("count")}? IDENTIFIER
-	;
-
-currentDateKeyword
-	: {doesUpcomingTokenMatchAny("current_date")}? IDENTIFIER
-	;
-
-currentTimeKeyword
-	: {doesUpcomingTokenMatchAny("current_time")}? IDENTIFIER
-	;
-
-currentTimestampKeyword
-	: {doesUpcomingTokenMatchAny("current_timestamp")}? IDENTIFIER
-	;
-
-dayKeyword
-	: {doesUpcomingTokenMatchAny("day")}? IDENTIFIER
-	;
-
-distinctKeyword
-	: {doesUpcomingTokenMatchAny("distinct")}? IDENTIFIER
-	;
-
-elementsKeyword
-	: {doesUpcomingTokenMatchAny("elements")}? IDENTIFIER
-	;
 
 emptyKeyword
 	: {doesUpcomingTokenMatchAny("escape")}? IDENTIFIER
@@ -693,20 +712,12 @@ escapeKeyword
 	: {doesUpcomingTokenMatchAny("escape")}? IDENTIFIER
 	;
 
-exceptKeyword
-	: {doesUpcomingTokenMatchAny("except")}? IDENTIFIER
-	;
-
 extractKeyword
 	: {doesUpcomingTokenMatchAny("extract")}? IDENTIFIER
 	;
 
 fetchKeyword
 	: {doesUpcomingTokenMatchAny("fetch")}? IDENTIFIER
-	;
-
-functionKeyword
-	: {doesUpcomingTokenMatchAny("function")}? IDENTIFIER
 	;
 
 groupByKeyword
@@ -731,10 +742,6 @@ indexKeyword
 
 isKeyword
 	: {doesUpcomingTokenMatchAny("is")}? IDENTIFIER
-	;
-
-intersectKeyword
-	: {doesUpcomingTokenMatchAny("intersect")}? IDENTIFIER
 	;
 
 keyKeyword
@@ -871,10 +878,6 @@ treatKeyword
 
 trimKeyword
 	: {doesUpcomingTokenMatchAny("trim")}?  IDENTIFIER
-	;
-
-unionKeyword
-	: {doesUpcomingTokenMatchAny("union")}?  IDENTIFIER
 	;
 
 upperKeyword

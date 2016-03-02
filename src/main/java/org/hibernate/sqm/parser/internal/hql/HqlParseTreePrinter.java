@@ -9,13 +9,27 @@ package org.hibernate.sqm.parser.internal.hql;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
 import org.hibernate.sqm.parser.internal.hql.antlr.HqlParserBaseListener;
 
+import org.jboss.logging.Logger;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  * @author Steve Ebersole
  */
 public class HqlParseTreePrinter extends HqlParserBaseListener {
+	private static final Logger HQL_LOGGER = Logger.getLogger( "org.hibernate.sqm.hql.parseTree" );
+
+	public static void logParseTree(HqlParser parser) {
+		if ( !HQL_LOGGER.isDebugEnabled() ) {
+			return;
+		}
+
+		ParseTreeWalker.DEFAULT.walk( new HqlParseTreePrinter( parser ), parser.statement() );
+		parser.reset();
+	}
+
 	private final HqlParser parser;
 
 	private int depth = 0;
@@ -29,14 +43,12 @@ public class HqlParseTreePrinter extends HqlParserBaseListener {
 		final String ruleName = parser.getRuleNames()[ctx.getRuleIndex()];
 
 		if ( !ruleName.endsWith( "Keyword" ) ) {
-			System.out.println(
-					String.format(
-							"%s %s (%s) [`%s`]",
-							enterRulePadding(),
-							ctx.getClass().getSimpleName(),
-							ruleName,
-							ctx.getText()
-					)
+			HQL_LOGGER.debugf(
+					"%s %s (%s) [`%s`]",
+					enterRulePadding(),
+					ctx.getClass().getSimpleName(),
+					ruleName,
+					ctx.getText()
 			);
 		}
 		super.enterEveryRule( ctx );
@@ -61,14 +73,12 @@ public class HqlParseTreePrinter extends HqlParserBaseListener {
 		final String ruleName = parser.getRuleNames()[ctx.getRuleIndex()];
 
 		if ( !ruleName.endsWith( "Keyword" ) ) {
-			System.out.println(
-					String.format(
-							"%s %s (%s) [`%s`]",
-							exitRulePadding(),
-							ctx.getClass().getSimpleName(),
-							parser.getRuleNames()[ctx.getRuleIndex()],
-							ctx.getText()
-					)
+			HQL_LOGGER.debugf(
+					"%s %s (%s) [`%s`]",
+					exitRulePadding(),
+					ctx.getClass().getSimpleName(),
+					parser.getRuleNames()[ctx.getRuleIndex()],
+					ctx.getText()
 			);
 		}
 	}

@@ -4,6 +4,17 @@
 * strict jpql compliance -> TREAT context (iirc spec allows in FROM and WHERE only)
 
 
+not supported
+--------------
+* keywords used as alias.  Using `where` and `join` and `order` are especially problematic for identification variables
+ 	as `from` is especially problematic for result variables.  `AS` can be used to force allowance.  For example:
+ 	`select a.from from from Appointment a` is illegal because of the attempt to use `from` as result variable.  However,
+ 	`select a.from as from from Appointment a` is but legal, albeit silly. Additionally, we always check JPA strict 
+ 	compliance and throw an exception if any reserved word is used as an identifier per spec 
+ 	(4.4.2 Identification Variables and 4.4.1 Identifiers).  See `org.hibernate.test.query.parser.hql.KeywordAsIdentifierTest`
+
+ 	
+
 from orm-sqm poc
 ----------------
 

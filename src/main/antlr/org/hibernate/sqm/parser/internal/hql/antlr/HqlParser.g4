@@ -329,6 +329,8 @@ expression
 	| MINUS expression							# UnaryMinusExpression
 	| PLUS expression							# UnaryPlusExpression
 	| caseStatement								# CaseExpression
+	| coalesce									# CoalesceExpression
+	| nullIf									# NullIfExpression
 	| literal									# LiteralExpression
 	| parameter									# ParameterExpression
 	| function									# FunctionExpression
@@ -359,6 +361,14 @@ searchedCaseStatement
 
 searchedCaseWhen
 	: WHEN predicate THEN expression
+	;
+
+coalesce
+	: COALESCE LEFT_PAREN expression (COMMA expression)+ RIGHT_PAREN
+	;
+
+nullIf
+	: NULLIF LEFT_PAREN expression COMMA expression RIGHT_PAREN
 	;
 
 literal

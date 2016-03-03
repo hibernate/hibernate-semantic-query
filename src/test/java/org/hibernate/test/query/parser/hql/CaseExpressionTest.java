@@ -11,8 +11,10 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedExpression;
+import org.hibernate.sqm.query.expression.CoalesceExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleExpression;
+import org.hibernate.sqm.query.expression.NullifExpression;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 
 import org.hibernate.test.query.parser.ConsumerContextImpl;
@@ -63,6 +65,37 @@ public class CaseExpressionTest {
 		assertThat( caseStatement.getOtherwise(), instanceOf( LiteralStringExpression.class ) );
 
 		assertThat( caseStatement.getWhenFragments().size(), is(1) );
+	}
+
+	@Test
+	public void testBasicCoalesceExpression() {
+		SelectStatement select = (SelectStatement) interpret( "select coalesce(e.basic2, e.basic3, e.basic4) from Entity e", consumerContext );
+
+		assertThat( select.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
+		assertThat(
+				select.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( CoalesceExpression.class )
+		);
+
+		CoalesceExpression coalesce = (CoalesceExpression) select.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertThat( coalesce.getValues().size(), is(3) );
+
+		assertThat( coalesce.getExpressionType().getTypeName(), is( String.class.getName() ) );
+	}
+
+	@Test
+	public void testBasicNullifExpression() {
+		SelectStatement select = (SelectStatement) interpret( "select nullif(e.basic2, e.basic3) from Entity e", consumerContext );
+
+		assertThat( select.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
+		assertThat(
+				select.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
+				instanceOf( NullifExpression.class )
+		);
+
+		NullifExpression nullif = (NullifExpression) select.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+
+		assertThat( nullif.getExpressionType().getTypeName(), is( String.class.getName() ) );
 	}
 
 	private DomainMetamodel buildMetamodel() {

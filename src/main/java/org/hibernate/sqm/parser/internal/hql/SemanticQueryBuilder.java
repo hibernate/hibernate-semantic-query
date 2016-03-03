@@ -51,6 +51,7 @@ import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedExpression;
+import org.hibernate.sqm.query.expression.CoalesceExpression;
 import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
 import org.hibernate.sqm.query.expression.CollectionValueFunction;
@@ -85,6 +86,7 @@ import org.hibernate.sqm.query.expression.MinElementFunction;
 import org.hibernate.sqm.query.expression.MinFunction;
 import org.hibernate.sqm.query.expression.MinIndexFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
+import org.hibernate.sqm.query.expression.NullifExpression;
 import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleExpression;
@@ -1353,6 +1355,23 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		return caseExpression;
+	}
+
+	@Override
+	public CoalesceExpression visitCoalesceExpression(HqlParser.CoalesceExpressionContext ctx) {
+		CoalesceExpression coalesceExpression = new CoalesceExpression();
+		for ( HqlParser.ExpressionContext expressionContext : ctx.coalesce().expression() ) {
+			coalesceExpression.value( (Expression) expressionContext.accept( this ) );
+		}
+		return coalesceExpression;
+	}
+
+	@Override
+	public NullifExpression visitNullIfExpression(HqlParser.NullIfExpressionContext ctx) {
+		return new NullifExpression(
+				(Expression) ctx.nullIf().expression( 0 ).accept( this ),
+				(Expression) ctx.nullIf().expression( 1 ).accept( this )
+		);
 	}
 
 	@Override

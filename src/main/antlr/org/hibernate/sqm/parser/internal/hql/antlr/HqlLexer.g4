@@ -184,6 +184,7 @@ MOD					: [mM] [oO] [dD];
 MONTH				: [mM] [oO] [nN] [tT] [hH];
 NEW					: [nN] [eE] [wW];
 NOT					: [nN] [oO] [tT];
+NULLIF				: [nN] [uU] [lL] [lL] [iI] [fF];
 OBJECT				: [oO] [bB] [jJ] [eE] [cC] [tT];
 OCTET_LENGTH		: [oO] [cC] [tT] [eE] [tT] '_' [lL] [eE] [nN] [gG] [tT] [hH];
 OF					: [oO] [fF];

@@ -325,11 +325,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public DynamicInstantiation visitDynamicInstantiation(HqlParser.DynamicInstantiationContext ctx) {
 		final DynamicInstantiation dynamicInstantiation;
 
-		if ( ctx.dynamicInstantiationTarget().mapKeyword() != null ) {
+		if ( ctx.dynamicInstantiationTarget().MAP() != null ) {
 			final BasicType<Map> mapType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Map.class );
 			dynamicInstantiation = DynamicInstantiation.forMapInstantiation( mapType );
 		}
-		else if ( ctx.dynamicInstantiationTarget().listKeyword() != null ) {
+		else if ( ctx.dynamicInstantiationTarget().LIST() != null ) {
 			final BasicType<List> listType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( List.class );
 			dynamicInstantiation = DynamicInstantiation.forListInstantiation( listType );
 		}
@@ -805,7 +805,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						currentFromElementSpace,
 						joinType,
 						interpretIdentificationVariable( ctx.qualifiedJoinRhs().identificationVariableDef() ),
-						ctx.fetchKeyword() != null
+						ctx.FETCH() != null
 				)
 		);
 

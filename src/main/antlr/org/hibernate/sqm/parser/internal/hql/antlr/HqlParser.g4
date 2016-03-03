@@ -78,7 +78,7 @@ updateStatement
 	;
 
 setClause
-	: setKeyword assignment+
+	: SET assignment+
 	;
 
 assignment
@@ -99,7 +99,7 @@ insertSpec
 	;
 
 intoSpec
-	: intoKeyword dotIdentifierSequence
+	: INTO dotIdentifierSequence
 	;
 
 targetFieldsSpec
@@ -174,8 +174,8 @@ dynamicInstantiation
 	;
 
 dynamicInstantiationTarget
-	: listKeyword
-	| mapKeyword
+	: LIST
+	| MAP
 	| dotIdentifierSequence
 	;
 
@@ -184,9 +184,9 @@ dotIdentifierSequence
 	;
 
 path
-	: dotIdentifierSequence																			# SimplePath
-	| treatKeyword LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN			# TreatedPath
-	| path LEFT_BRACKET expression RIGHT_BRACKET (DOT path)?										# IndexedPath
+	: dotIdentifierSequence																# SimplePath
+	| TREAT LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN		# TreatedPath
+	| path LEFT_BRACKET expression RIGHT_BRACKET (DOT path)?							# IndexedPath
 	;
 
 dynamicInstantiationArgs
@@ -203,7 +203,7 @@ dynamicInstantiationArgExpression
 	;
 
 jpaSelectObjectSyntax
-	:	objectKeyword LEFT_PAREN identifier RIGHT_PAREN
+	:	OBJECT LEFT_PAREN identifier RIGHT_PAREN
 	;
 
 
@@ -247,7 +247,7 @@ jpaCollectionJoin
 	;
 
 qualifiedJoin
-	: ( INNER | ((LEFT|RIGHT|FULL)? OUTER) )? JOIN fetchKeyword? qualifiedJoinRhs (qualifiedJoinPredicate)?
+	: ( INNER | ((LEFT|RIGHT|FULL)? OUTER) )? JOIN FETCH? qualifiedJoinRhs (qualifiedJoinPredicate)?
 	;
 
 qualifiedJoinRhs
@@ -264,7 +264,7 @@ qualifiedJoinPredicate
 // GROUP BY clause
 
 groupByClause
-	:	groupByKeyword groupingSpecification
+	:	GROUP BY groupingSpecification
 	;
 
 groupingSpecification
@@ -279,7 +279,7 @@ groupingValue
 //HAVING clause
 
 havingClause
-	:	havingKeyword predicate
+	:	HAVING predicate
 	;
 
 
@@ -291,22 +291,22 @@ whereClause
 	;
 
 predicate
-	: LEFT_PAREN predicate RIGHT_PAREN								# GroupedPredicate
-	| predicate OR predicate										# OrPredicate
-	| predicate AND predicate										# AndPredicate
-	| notKeyword predicate											# NegatedPredicate
-	| expression isKeyword (notKeyword)? NULL						# IsNullPredicate
-	| expression isKeyword (notKeyword)? emptyKeyword				# IsEmptyPredicate
-	| expression EQUAL expression									# EqualityPredicate
-	| expression NOT_EQUAL expression								# InequalityPredicate
-	| expression GREATER expression									# GreaterThanPredicate
-	| expression GREATER_EQUAL expression							# GreaterThanOrEqualPredicate
-	| expression LESS expression									# LessThanPredicate
-	| expression LESS_EQUAL expression								# LessThanOrEqualPredicate
-	| expression IN inList											# InPredicate
-	| expression BETWEEN expression AND expression			        # BetweenPredicate
-	| expression likeKeyword expression likeEscape					# LikePredicate
-	| memberOfKeyword path											# MemberOfPredicate
+	: LEFT_PAREN predicate RIGHT_PAREN					# GroupedPredicate
+	| predicate OR predicate							# OrPredicate
+	| predicate AND predicate							# AndPredicate
+	| NOT predicate										# NegatedPredicate
+	| expression IS (NOT)? NULL							# IsNullPredicate
+	| expression IS (NOT)? EMPTY						# IsEmptyPredicate
+	| expression EQUAL expression						# EqualityPredicate
+	| expression NOT_EQUAL expression					# InequalityPredicate
+	| expression GREATER expression						# GreaterThanPredicate
+	| expression GREATER_EQUAL expression				# GreaterThanOrEqualPredicate
+	| expression LESS expression						# LessThanPredicate
+	| expression LESS_EQUAL expression					# LessThanOrEqualPredicate
+	| expression IN inList								# InPredicate
+	| expression BETWEEN expression AND expression		# BetweenPredicate
+	| expression LIKE expression (likeEscape)?			# LikePredicate
+	| MEMBER OF path									# MemberOfPredicate
 	;
 
 inList
@@ -316,7 +316,7 @@ inList
 	;
 
 likeEscape
-	: escapeKeyword expression
+	: ESCAPE expression
 	;
 
 expression
@@ -428,18 +428,18 @@ nonStandardFunction
 	;
 
 jpaCollectionFunction
-	: sizeKeyword LEFT_PAREN path RIGHT_PAREN			# CollectionSizeFunction
-	| indexKeyword LEFT_PAREN identifier RIGHT_PAREN	# CollectionIndexFunction
-	| keyKeyword LEFT_PAREN path RIGHT_PAREN			# MapKeyFunction
+	: SIZE LEFT_PAREN path RIGHT_PAREN					# CollectionSizeFunction
+	| INDEX LEFT_PAREN identifier RIGHT_PAREN			# CollectionIndexFunction
+	| KEY LEFT_PAREN path RIGHT_PAREN					# MapKeyFunction
 	| VALUE LEFT_PAREN path RIGHT_PAREN			        # CollectionValueFunction
 	| ENTRY LEFT_PAREN path RIGHT_PAREN			        # MapEntryFunction
 	;
 
 hqlCollectionFunction
-	: maxindexKeyword LEFT_PAREN path RIGHT_PAREN		# MaxIndexFunction
-	| maxelementKeyword LEFT_PAREN path RIGHT_PAREN		# MaxElementFunction
-	| minindexKeyword LEFT_PAREN path RIGHT_PAREN		# MinIndexFunction
-	| minelementKeyword LEFT_PAREN path RIGHT_PAREN		# MinElementFunction
+	: MAXINDEX LEFT_PAREN path RIGHT_PAREN				# MaxIndexFunction
+	| MAXELEMENT LEFT_PAREN path RIGHT_PAREN			# MaxElementFunction
+	| MININDEX LEFT_PAREN path RIGHT_PAREN				# MinIndexFunction
+	| MINELEMENT LEFT_PAREN path RIGHT_PAREN			# MinElementFunction
 	;
 
 aggregateFunction
@@ -455,15 +455,15 @@ avgFunction
 	;
 
 sumFunction
-	: sumKeyword LEFT_PAREN DISTINCT? expression RIGHT_PAREN
+	: SUM LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 minFunction
-	: minKeyword LEFT_PAREN DISTINCT? expression RIGHT_PAREN
+	: MIN LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 maxFunction
-	: maxKeyword LEFT_PAREN DISTINCT? expression RIGHT_PAREN
+	: MAX LEFT_PAREN DISTINCT? expression RIGHT_PAREN
 	;
 
 countFunction
@@ -506,7 +506,7 @@ concatFunction
 	;
 
 substringFunction
-	: substringKeyword LEFT_PAREN expression COMMA substringFunctionStartArgument (COMMA substringFunctionLengthArgument)? RIGHT_PAREN
+	: SUBSTRING LEFT_PAREN expression COMMA substringFunctionStartArgument (COMMA substringFunctionLengthArgument)? RIGHT_PAREN
 	;
 
 substringFunctionStartArgument
@@ -518,12 +518,12 @@ substringFunctionLengthArgument
 	;
 
 trimFunction
-	: trimKeyword LEFT_PAREN trimSpecification? trimCharacter? FROM? expression RIGHT_PAREN
+	: TRIM LEFT_PAREN trimSpecification? trimCharacter? FROM? expression RIGHT_PAREN
 	;
 
 trimSpecification
-	: leadingKeyword
-	| trailingKeyword
+	: LEADING
+	| TRAILING
 	| BOTH
 	;
 
@@ -532,19 +532,19 @@ trimCharacter
 	;
 
 upperFunction
-	: upperKeyword LEFT_PAREN expression RIGHT_PAREN
+	: UPPER LEFT_PAREN expression RIGHT_PAREN
 	;
 
 lowerFunction
-	: lowerKeyword LEFT_PAREN expression RIGHT_PAREN
+	: LOWER LEFT_PAREN expression RIGHT_PAREN
 	;
 
 lengthFunction
-	: lengthKeyword LEFT_PAREN expression RIGHT_PAREN
+	: LENGTH LEFT_PAREN expression RIGHT_PAREN
 	;
 
 locateFunction
-	: locateKeyword LEFT_PAREN locateFunctionSubstrArgument COMMA locateFunctionStringArgument (COMMA locateFunctionStartArgument)? RIGHT_PAREN
+	: LOCATE LEFT_PAREN locateFunctionSubstrArgument COMMA locateFunctionStringArgument (COMMA locateFunctionStartArgument)? RIGHT_PAREN
 	;
 
 locateFunctionSubstrArgument
@@ -564,11 +564,11 @@ absFunction
 	;
 
 sqrtFunction
-	:	sqrtKeyword LEFT_PAREN expression RIGHT_PAREN
+	:	SQRT LEFT_PAREN expression RIGHT_PAREN
 	;
 
 modFunction
-	:	modKeyword LEFT_PAREN modDividendArgument COMMA modDivisorArgument RIGHT_PAREN
+	:	MOD LEFT_PAREN modDividendArgument COMMA modDivisorArgument RIGHT_PAREN
 	;
 
 modDividendArgument
@@ -592,7 +592,7 @@ currentTimestampFunction
 	;
 
 extractFunction
-	: extractKeyword LEFT_PAREN extractField FROM expression RIGHT_PAREN
+	: EXTRACT LEFT_PAREN extractField FROM expression RIGHT_PAREN
 	;
 
 extractField
@@ -602,24 +602,24 @@ extractField
 
 datetimeField
 	: nonSecondDatetimeField
-	| secondKeyword
+	| SECOND
 	;
 
 nonSecondDatetimeField
-	: yearKeyword
-	| monthKeyword
+	: YEAR
+	| MONTH
 	| DAY
-	| hourKeyword
-	| minuteKeyword
+	| HOUR
+	| MINUTE
 	;
 
 timeZoneField
-	: timezoneHourKeyword
-	| timezoneMinuteKeyword
+	: TIMEZONE_HOUR
+	| TIMEZONE_MINUTE
 	;
 
 positionFunction
-	: positionKeyword LEFT_PAREN positionSubstrArgument IN positionStringArgument RIGHT_PAREN
+	: POSITION LEFT_PAREN positionSubstrArgument IN positionStringArgument RIGHT_PAREN
 	;
 
 positionSubstrArgument
@@ -635,7 +635,7 @@ charLengthFunction
 	;
 
 octetLengthFunction
-	: octetLengthKeyword LEFT_PAREN expression RIGHT_PAREN
+	: OCTET_LENGTH LEFT_PAREN expression RIGHT_PAREN
 	;
 
 bitLengthFunction
@@ -651,7 +651,6 @@ bitLengthFunction
  * However we want to continue to allow users to use mopst keywords as identifiers (e.g., attribute names).
  * This parser rule helps with that.  Here we expect that the caller already understands their
  * context enough to know that keywords-as-identifiers are allowed.
- *
  */
 identifier
 	: IDENTIFIER
@@ -681,209 +680,48 @@ identifier
 	| FROM
 	| FULL
 	| FUNCTION
+	| GROUP
+	| HOUR
 	| IN
+	| INDEX
 	| INNER
 	| INSERT
 	| JOIN
+	| KEY
+	| LEADING
 	| LEFT
+	| LENGTH
+	| LIKE
+	| LIST
+	| LOWER
+	| MAP
+	| MAX
+	| MIN
+	| MINUTE
+	| MEMBER
+	| MONTH
+	| OBJECT
 	| ON
 	| OR
 	| ORDER
 	| OUTER
+	| POSITION
 	| RIGHT
 	| SELECT
+	| SECOND
+	| SET
+	| SQRT
+	| SUBSTRING
+	| SUM
+	| TRAILING
+	| TREAT
 	| UPDATE
+	| UPPER
 	| VALUE
 	| WHERE
-	| WITH) {
+	| WITH
+	| YEAR) {
 	    logUseOfReservedWordAsIdentifier(getCurrentToken());
 	}
 	;
 
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Key word rules
-
-emptyKeyword
-	: {doesUpcomingTokenMatchAny("escape")}? IDENTIFIER
-	;
-
-escapeKeyword
-	: {doesUpcomingTokenMatchAny("escape")}? IDENTIFIER
-	;
-
-extractKeyword
-	: {doesUpcomingTokenMatchAny("extract")}? IDENTIFIER
-	;
-
-fetchKeyword
-	: {doesUpcomingTokenMatchAny("fetch")}? IDENTIFIER
-	;
-
-groupByKeyword
-	: {doesUpcomingTokenMatchAny(1,"group") && doesUpcomingTokenMatchAny(2,"by")}? IDENTIFIER IDENTIFIER
-	;
-
-havingKeyword
-	: {doesUpcomingTokenMatchAny("having")}? IDENTIFIER
-	;
-
-hourKeyword
-	: {doesUpcomingTokenMatchAny("hour")}? IDENTIFIER
-	;
-
-intoKeyword
-	: {doesUpcomingTokenMatchAny("into")}? IDENTIFIER
-	;
-
-indexKeyword
-	: {doesUpcomingTokenMatchAny("index")}? IDENTIFIER
-	;
-
-isKeyword
-	: {doesUpcomingTokenMatchAny("is")}? IDENTIFIER
-	;
-
-keyKeyword
-	: {doesUpcomingTokenMatchAny("key")}? IDENTIFIER
-	;
-
-leadingKeyword
-	: {doesUpcomingTokenMatchAny("leading")}?  IDENTIFIER
-	;
-
-lengthKeyword
-	: {doesUpcomingTokenMatchAny("length")}?  IDENTIFIER
-	;
-
-likeKeyword
-	: {doesUpcomingTokenMatchAny("like")}?  IDENTIFIER
-	;
-
-listKeyword
-	: {doesUpcomingTokenMatchAny("list")}?  IDENTIFIER
-	;
-
-locateKeyword
-	: {doesUpcomingTokenMatchAny("locate")}?  IDENTIFIER
-	;
-
-lowerKeyword
-	: {doesUpcomingTokenMatchAny("lower")}?  IDENTIFIER
-	;
-
-mapKeyword
-	: {doesUpcomingTokenMatchAny("map")}?  IDENTIFIER
-	;
-
-maxKeyword
-	: {doesUpcomingTokenMatchAny("max")}?  IDENTIFIER
-	;
-
-maxelementKeyword
-	: {doesUpcomingTokenMatchAny("maxelement")}?  IDENTIFIER
-	;
-
-maxindexKeyword
-	: {doesUpcomingTokenMatchAny("maxindex")}?  IDENTIFIER
-	;
-
-memberOfKeyword
-	: {doesUpcomingTokenMatchAny(1,"member") && doesUpcomingTokenMatchAny(2,"of")}?  IDENTIFIER IDENTIFIER
-	;
-
-minKeyword
-	: {doesUpcomingTokenMatchAny("min")}?  IDENTIFIER
-	;
-
-minelementKeyword
-	: {doesUpcomingTokenMatchAny("minelement")}?  IDENTIFIER
-	;
-
-minindexKeyword
-	: {doesUpcomingTokenMatchAny("minindex")}?  IDENTIFIER
-	;
-
-minuteKeyword
-	: {doesUpcomingTokenMatchAny("minute")}?  IDENTIFIER
-	;
-
-modKeyword
-	: {doesUpcomingTokenMatchAny("mod")}?  IDENTIFIER
-	;
-
-monthKeyword
-	: {doesUpcomingTokenMatchAny("month")}?  IDENTIFIER
-	;
-
-notKeyword
-	: {doesUpcomingTokenMatchAny("not")}?  IDENTIFIER
-	;
-
-objectKeyword
-	: {doesUpcomingTokenMatchAny("object")}?  IDENTIFIER
-	;
-
-octetLengthKeyword
-	: {doesUpcomingTokenMatchAny("octet_length")}?  IDENTIFIER
-	;
-
-positionKeyword
-	: {doesUpcomingTokenMatchAny("position")}?  IDENTIFIER
-	;
-
-propertiesKeyword
-	: {doesUpcomingTokenMatchAny("properties")}?  IDENTIFIER
-	;
-
-secondKeyword
-	: {doesUpcomingTokenMatchAny("second")}?  IDENTIFIER
-	;
-
-setKeyword
-	: {doesUpcomingTokenMatchAny("set")}?  IDENTIFIER
-	;
-
-sizeKeyword
-	: {doesUpcomingTokenMatchAny("size")}?  IDENTIFIER
-	;
-
-sqrtKeyword
-	: {doesUpcomingTokenMatchAny("sqrt")}?  IDENTIFIER
-	;
-
-substringKeyword
-	: {doesUpcomingTokenMatchAny("substring")}?  IDENTIFIER
-	;
-
-sumKeyword
-	: {doesUpcomingTokenMatchAny("sum")}?  IDENTIFIER
-	;
-
-timezoneHourKeyword
-	: {doesUpcomingTokenMatchAny("timezone_hour")}?  IDENTIFIER
-	;
-
-timezoneMinuteKeyword
-	: {doesUpcomingTokenMatchAny("timezone_minute")}?  IDENTIFIER
-	;
-
-trailingKeyword
-	: {doesUpcomingTokenMatchAny("trailing")}?  IDENTIFIER
-	;
-
-treatKeyword
-	: {doesUpcomingTokenMatchAny("treat")}?  IDENTIFIER
-	;
-
-trimKeyword
-	: {doesUpcomingTokenMatchAny("trim")}?  IDENTIFIER
-	;
-
-upperKeyword
-	: {doesUpcomingTokenMatchAny("upper")}?  IDENTIFIER
-	;
-
-yearKeyword
-	: {doesUpcomingTokenMatchAny("year")}?  IDENTIFIER
-	;

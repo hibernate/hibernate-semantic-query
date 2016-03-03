@@ -11,63 +11,6 @@ lexer grammar HqlLexer;
 package org.hibernate.sqm.parser.internal.hql.antlr;
 }
 
-tokens {
-
-//SOFT KEYWORDS
-	EMPTY,
-	ESCAPE,
-	EXCEPT,
-	EXISTS,
-	EXTRACT,
-	FETCH,
-	GROUP_BY,
-	HAVING,
-	HOUR,
-	INDEX,
-	INDICES,
-	INNER,
-	INTERSECT,
-	INTO,
-	IS_EMPTY,
-	IS,
-	LEADING,
-	LENGTH,
-	LIKE,
-	LOCATE,
-	LOWER,
-	MAX,
-	MAXELEMENT,
-	MAXINDEX,
-	MEMBER_OF,
-	MIN,
-	MINELEMENT,
-	MININDEX,
-	MINUTE,
-	MOD,
-	MONTH,
-	NOT,
-	NULLIF,
-	OCTET_LENGTH,
-	POSITION,
-	PROPERTIES,
-	SECOND,
-	SET,
-	SIZE,
-	SOME,
-	SQRT,
-	SUBSTRING,
-	SUM,
-	THEN,
-	TIMEZONE_HOUR,
-	TIMEZONE_MINUTE,
-	TRAILING,
-	TRIM,
-	UNION,
-	UPPER,
-	VERSIONED,
-	YEAR
-}
-
 WS : ( ' ' | '\t' | '\f' | EOL ) -> skip;
 
 fragment
@@ -200,29 +143,76 @@ DESC				: [dD] [eE] [sS] [cC];
 DISTINCT			: [dD] [iI] [sS] [tT] [iI] [nN] [cC] [tT];
 ELEMENTS			: [eE] [lL] [eE] [mM] [eE] [nN] [tT] [sS];
 ELSE				: [eE] [lL] [sS] [eE];
+EMPTY				: [eE] [mM] [pP] [tT] [yY];
 END					: [eE] [nN] [dD];
 ENTRY				: [eE] [nN] [tT] [rR] [yY];
+ESCAPE				: [eE] [sS] [cC] [aA] [pP] [eE];
+EXISTS				: [eE] [xX] [iI] [sS] [tT] [sS];
+EXTRACT				: [eE] [xX] [tT] [rR] [aA] [cC] [tT];
+FETCH				: [fF] [eE] [tT] [cC] [hH];
 FROM				: [fF] [rR] [oO] [mM];
 FULL				: [fF] [uU] [lL] [lL];
 FUNCTION			: [fF] [uU] [nN] [cC] [tT] [iI] [oO] [nN];
+GROUP				: [gG] [rR] [oO] [uU] [pP];
+HAVING				: [hH] [aA] [vV] [iI] [nN] [gG];
+HOUR				: [hH] [oO] [uU] [rR];
 IN					: [iI] [nN];
+INDEX				: [iI] [nN] [dD] [eE] [xX];
 INNER				: [iI] [nN] [nN] [eE] [rR];
 INSERT				: [iI] [nN] [sS] [eE] [rR] [tT];
+INTO 				: [iI] [nN] [tT] [oO];
+IS					: [iI] [sS];
 JOIN				: [jJ] [oO] [iI] [nN];
+KEY					: [kK] [eE] [yY];
+LEADING				: [lL] [eE] [aA] [dD] [iI] [nN] [gG];
 LEFT				: [lL] [eE] [fF] [tT];
+LENGTH				: [lL] [eE] [nN] [gG] [tT] [hH];
+LIKE				: [lL] [iI] [kK] [eE];
+LIST				: [lL] [iI] [sS] [tT];
+LOCATE				: [lL] [oO] [cC] [aA] [tT] [eE];
+LOWER				: [lL] [oO] [wW] [eE] [rR];
+MAP					: [mM] [aA] [pP];
+MAX					: [mM] [aA] [xX];
+MAXELEMENT			: [mM] [aA] [xX] [eE] [lL] [eE] [mM] [eE] [nN] [tT];
+MAXINDEX			: [mM] [aA] [xX] [iI] [nN] [dD] [eE] [xX];
+MEMBER				: [mM] [eE] [mM] [bB] [eE] [rR];
+MIN					: [mM] [iI] [nN];
+MINELEMENT			: [mM] [iI] [nN] [eE] [lL] [eE] [mM] [eE] [nN] [tT];
+MININDEX			: [mM] [iI] [nN] [iI] [nN] [dD] [eE] [xX];
+MINUTE				: [mM] [iI] [nN] [uU] [tT] [eE];
+MOD					: [mM] [oO] [dD];
+MONTH				: [mM] [oO] [nN] [tT] [hH];
 NEW					: [nN] [eE] [wW];
+NOT					: [nN] [oO] [tT];
+OBJECT				: [oO] [bB] [jJ] [eE] [cC] [tT];
+OCTET_LENGTH		: [oO] [cC] [tT] [eE] [tT] '_' [lL] [eE] [nN] [gG] [tT] [hH];
+OF					: [oO] [fF];
 ON					: [oO] [nN];
 OR					: [oO] [rR];
 ORDER				: [oO] [rR] [dD] [eE] [rR];
 OUTER				: [oO] [uU] [tT] [eE] [rR];
+POSITION			: [pP] [oO] [sS] [iI] [tT] [iI] [oO] [nN];
 RIGHT				: [rR] [iI] [gG] [hH] [tT];
+SECOND				: [sS] [eE] [cC] [oO] [nN] [dD];
 SELECT				: [sS] [eE] [lL] [eE] [cC] [tT];
+SET					: [sS] [eE] [tT];
+SIZE				: [sS] [iI] [zZ] [eE];
+SQRT				: [sS] [qQ] [rR] [tT];
+SUBSTRING			: [sS] [uU] [bB] [sS] [tT] [rR] [iI] [nN] [gG];
+SUM					: [sS] [uU] [mM];
 THEN				: [tT] [hH] [eE] [nN];
+TIMEZONE_HOUR		: [tT] [iI] [mM] [eE] [zZ] [oO] [nN] [eE] '_' [hH] [oO] [uU] [rR];
+TIMEZONE_MINUTE		: [tT] [iI] [mM] [eE] [zZ] [oO] [nN] [eE] '_' [mM] [iI] [nN] [uU] [tT] [eE];
+TRAILING			: [tT] [rR] [aA] [iI] [lL] [iI] [nN] [gG];
+TREAT				: [tT] [rR] [eE] [aA] [tT];
+TRIM				: [tT] [rR] [iI] [mM];
 UPDATE				: [uU] [pP] [dD] [aA] [tT] [eE];
+UPPER				: [uU] [pP] [pP] [eE] [rR];
 VALUE				: [vV] [aA] [lL] [uU] [eE];
 WHEN				: [wW] [hH] [eE] [nN];
 WHERE				: [wW] [hH] [eE] [rR] [eE];
 WITH				: [wW] [iI] [tT] [hH];
+YEAR				: [yY] [eE] [aA] [rR];
 
 // Identifiers
 IDENTIFIER

@@ -44,7 +44,7 @@ repositories {
 sourceCompatibility = 1.6
 
 group = 'org.hibernate'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0.Beta1'
 
 configurations {
 	provided {

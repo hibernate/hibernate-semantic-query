@@ -85,431 +85,431 @@ import org.hibernate.sqm.query.set.SetClause;
 /**
  * @author Steve Ebersole
  */
-public class BaseSemanticQueryWalker implements SemanticQueryWalker {
+public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
-	public Statement visitStatement(Statement statement) {
-		return (Statement) statement.accept( this );
+	public T visitStatement(Statement statement) {
+		return (T) statement.accept( this );
 	}
 
 	@Override
-	public SelectStatement visitSelectStatement(SelectStatement statement) {
+	public T visitSelectStatement(SelectStatement statement) {
 		visitQuerySpec( statement.getQuerySpec() );
 		visitOrderByClause( statement.getOrderByClause() );
-		return statement;
+		return (T) statement;
 	}
 
 	@Override
-	public UpdateStatement visitUpdateStatement(UpdateStatement statement) {
+	public T visitUpdateStatement(UpdateStatement statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
 		visitSetClause( statement.getSetClause() );
 		visitWhereClause( statement.getWhereClause() );
-		return statement;
+		return (T) statement;
 	}
 
 	@Override
-	public SetClause visitSetClause(SetClause setClause) {
+	public T visitSetClause(SetClause setClause) {
 		for ( Assignment assignment : setClause.getAssignments() ) {
 			visitAssignment( assignment );
 		}
-		return setClause;
+		return (T) setClause;
 	}
 
 	@Override
-	public Assignment visitAssignment(Assignment assignment) {
+	public T visitAssignment(Assignment assignment) {
 		visitAttributeReferenceExpression( assignment.getStateField() );
 		assignment.getStateField().accept( this );
-		return assignment;
+		return (T) assignment;
 	}
 
 	@Override
-	public InsertSelectStatement visitInsertSelectStatement(InsertSelectStatement statement) {
+	public T visitInsertSelectStatement(InsertSelectStatement statement) {
 		visitRootEntityFromElement( statement.getInsertTarget() );
 		for ( AttributeReferenceExpression stateField : statement.getStateFields() ) {
 			stateField.accept( this );
 		}
 		visitQuerySpec( statement.getSelectQuery() );
-		return statement;
+		return (T) statement;
 	}
 
 	@Override
-	public DeleteStatement visitDeleteStatement(DeleteStatement statement) {
+	public T visitDeleteStatement(DeleteStatement statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
 		visitWhereClause( statement.getWhereClause() );
-		return statement;
+		return (T) statement;
 	}
 
 	@Override
-	public QuerySpec visitQuerySpec(QuerySpec querySpec) {
+	public T visitQuerySpec(QuerySpec querySpec) {
 		visitFromClause( querySpec.getFromClause() );
 		visitSelectClause( querySpec.getSelectClause() );
 		visitWhereClause( querySpec.getWhereClause() );
-		return querySpec;
+		return (T) querySpec;
 	}
 
 	@Override
-	public FromClause visitFromClause(FromClause fromClause) {
+	public T visitFromClause(FromClause fromClause) {
 		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			visitFromElementSpace( fromElementSpace );
 		}
-		return fromClause;
+		return (T) fromClause;
 	}
 
 	@Override
-	public FromElementSpace visitFromElementSpace(FromElementSpace fromElementSpace) {
+	public T visitFromElementSpace(FromElementSpace fromElementSpace) {
 		visitRootEntityFromElement( fromElementSpace.getRoot() );
 		for ( JoinedFromElement joinedFromElement : fromElementSpace.getJoins() ) {
 			joinedFromElement.accept( this );
 		}
-		return fromElementSpace;
+		return (T) fromElementSpace;
 	}
 
 	@Override
-	public Object visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement) {
-		return joinedFromElement;
+	public T visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement) {
+		return (T) joinedFromElement;
 	}
 
 	@Override
-	public Object visitQualifiedEntityJoinFromElement(QualifiedEntityJoinFromElement joinedFromElement) {
-		return joinedFromElement;
+	public T visitQualifiedEntityJoinFromElement(QualifiedEntityJoinFromElement joinedFromElement) {
+		return (T) joinedFromElement;
 	}
 
 	@Override
-	public Object visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement) {
-		return joinedFromElement;
+	public T visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement) {
+		return (T) joinedFromElement;
 	}
 
 	@Override
-	public RootEntityFromElement visitRootEntityFromElement(RootEntityFromElement rootEntityFromElement) {
-		return rootEntityFromElement;
+	public T visitRootEntityFromElement(RootEntityFromElement rootEntityFromElement) {
+		return (T) rootEntityFromElement;
 	}
 
 	@Override
-	public SelectClause visitSelectClause(SelectClause selectClause) {
+	public T visitSelectClause(SelectClause selectClause) {
 		for ( Selection selection : selectClause.getSelections() ) {
 			visitSelection( selection );
 		}
-		return selectClause;
+		return (T) selectClause;
 	}
 
 	@Override
-	public Selection visitSelection(Selection selection) {
+	public T visitSelection(Selection selection) {
 		selection.getExpression().accept( this );
-		return selection;
+		return (T) selection;
 	}
 
 	@Override
-	public DynamicInstantiation visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation) {
-		return dynamicInstantiation;
+	public T visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation) {
+		return (T) dynamicInstantiation;
 	}
 
 	@Override
-	public WhereClause visitWhereClause(WhereClause whereClause) {
+	public T visitWhereClause(WhereClause whereClause) {
 		whereClause.getPredicate().accept( this );
-		return whereClause;
+		return (T) whereClause;
 	}
 
 	@Override
-	public GroupedPredicate visitGroupedPredicate(GroupedPredicate predicate) {
+	public T visitGroupedPredicate(GroupedPredicate predicate) {
 		predicate.getSubPredicate().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public AndPredicate visitAndPredicate(AndPredicate predicate) {
+	public T visitAndPredicate(AndPredicate predicate) {
 		predicate.getLeftHandPredicate().accept( this );
 		predicate.getRightHandPredicate().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public OrPredicate visitOrPredicate(OrPredicate predicate) {
+	public T visitOrPredicate(OrPredicate predicate) {
 		predicate.getLeftHandPredicate().accept( this );
 		predicate.getRightHandPredicate().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public RelationalPredicate visitRelationalPredicate(RelationalPredicate predicate) {
+	public T visitRelationalPredicate(RelationalPredicate predicate) {
 		predicate.getLeftHandExpression().accept( this );
 		predicate.getRightHandExpression().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public EmptinessPredicate visitIsEmptyPredicate(EmptinessPredicate predicate) {
+	public T visitIsEmptyPredicate(EmptinessPredicate predicate) {
 		predicate.getExpression().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public NullnessPredicate visitIsNullPredicate(NullnessPredicate predicate) {
+	public T visitIsNullPredicate(NullnessPredicate predicate) {
 		predicate.getExpression().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public BetweenPredicate visitBetweenPredicate(BetweenPredicate predicate) {
+	public T visitBetweenPredicate(BetweenPredicate predicate) {
 		predicate.getExpression().accept( this );
 		predicate.getLowerBound().accept( this );
 		predicate.getUpperBound().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public LikePredicate visitLikePredicate(LikePredicate predicate) {
+	public T visitLikePredicate(LikePredicate predicate) {
 		predicate.getMatchExpression().accept( this );
 		predicate.getPattern().accept( this );
 		predicate.getEscapeCharacter().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public MemberOfPredicate visitMemberOfPredicate(MemberOfPredicate predicate) {
+	public T visitMemberOfPredicate(MemberOfPredicate predicate) {
 		predicate.getAttributeReferenceExpression().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public NegatedPredicate visitNegatedPredicate(NegatedPredicate predicate) {
+	public T visitNegatedPredicate(NegatedPredicate predicate) {
 		predicate.getWrappedPredicate().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public InTupleListPredicate visitInTupleListPredicate(InTupleListPredicate predicate) {
+	public T visitInTupleListPredicate(InTupleListPredicate predicate) {
 		predicate.getTestExpression().accept( this );
 		for ( Expression expression : predicate.getTupleListExpressions() ) {
 			expression.accept( this );
 		}
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public InSubQueryPredicate visitInSubQueryPredicate(InSubQueryPredicate predicate) {
+	public T visitInSubQueryPredicate(InSubQueryPredicate predicate) {
 		predicate.getTestExpression().accept( this );
 		predicate.getSubQueryExpression().accept( this );
-		return predicate;
+		return (T) predicate;
 	}
 
 	@Override
-	public OrderByClause visitOrderByClause(OrderByClause orderByClause) {
+	public T visitOrderByClause(OrderByClause orderByClause) {
 		for ( SortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
 			visitSortSpecification( sortSpecification );
 		}
-		return orderByClause;
+		return (T) orderByClause;
 	}
 
 	@Override
-	public SortSpecification visitSortSpecification(SortSpecification sortSpecification) {
+	public T visitSortSpecification(SortSpecification sortSpecification) {
 		sortSpecification.getSortExpression().accept( this );
-		return sortSpecification;
+		return (T) sortSpecification;
 	}
 
 	@Override
-	public PositionalParameterExpression visitPositionalParameterExpression(PositionalParameterExpression expression) {
-		return expression;
+	public T visitPositionalParameterExpression(PositionalParameterExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public NamedParameterExpression visitNamedParameterExpression(NamedParameterExpression expression) {
-		return expression;
+	public T visitNamedParameterExpression(NamedParameterExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public EntityTypeExpression visitEntityTypeExpression(EntityTypeExpression expression) {
-		return expression;
+	public T visitEntityTypeExpression(EntityTypeExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public UnaryOperationExpression visitUnaryOperationExpression(UnaryOperationExpression expression) {
+	public T visitUnaryOperationExpression(UnaryOperationExpression expression) {
 		expression.getOperand().accept( this );
-		return expression;
+		return (T) expression;
 	}
 
 	@Override
-	public AttributeReferenceExpression visitAttributeReferenceExpression(AttributeReferenceExpression expression) {
-		return expression;
+	public T visitAttributeReferenceExpression(AttributeReferenceExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public FunctionExpression visitFunctionExpression(FunctionExpression expression) {
-		return expression;
+	public T visitFunctionExpression(FunctionExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public AvgFunction visitAvgFunction(AvgFunction expression) {
-		return expression;
+	public T visitAvgFunction(AvgFunction expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public CountStarFunction visitCountStarFunction(CountStarFunction expression) {
-		return expression;
+	public T visitCountStarFunction(CountStarFunction expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public CountFunction visitCountFunction(CountFunction expression) {
-		return expression;
+	public T visitCountFunction(CountFunction expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public MaxFunction visitMaxFunction(MaxFunction expression) {
-		return expression;
+	public T visitMaxFunction(MaxFunction expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public MinFunction visitMinFunction(MinFunction expression) {
-		return expression;
+	public T visitMinFunction(MinFunction expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public SumFunction visitSumFunction(SumFunction expression) {
-		return expression;
+	public T visitSumFunction(SumFunction expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public CollectionSizeFunction visitCollectionSizeFunction(CollectionSizeFunction function) {
-		return function;
+	public T visitCollectionSizeFunction(CollectionSizeFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public CollectionValuePathExpression visitCollectionValueFunction(CollectionValuePathExpression function) {
-		return function;
+	public T visitCollectionValueFunction(CollectionValuePathExpression function) {
+		return (T) function;
 	}
 
 	@Override
-	public CollectionIndexFunction visitCollectionIndexFunction(CollectionIndexFunction function) {
-		return function;
+	public T visitCollectionIndexFunction(CollectionIndexFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public MapKeyPathExpression visitMapKeyFunction(MapKeyPathExpression function) {
-		return function;
+	public T visitMapKeyFunction(MapKeyPathExpression function) {
+		return (T) function;
 	}
 
 	@Override
-	public MapEntryFunction visitMapEntryFunction(MapEntryFunction function) {
-		return function;
+	public T visitMapEntryFunction(MapEntryFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public MaxElementFunction visitMaxElementFunction(MaxElementFunction function) {
-		return function;
+	public T visitMaxElementFunction(MaxElementFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public MinElementFunction visitMinElementFunction(MinElementFunction function) {
-		return function;
+	public T visitMinElementFunction(MinElementFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public MaxIndexFunction visitMaxIndexFunction(MaxIndexFunction function) {
-		return function;
+	public T visitMaxIndexFunction(MaxIndexFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public MinIndexFunction visitMinIndexFunction(MinIndexFunction function) {
-		return function;
+	public T visitMinIndexFunction(MinIndexFunction function) {
+		return (T) function;
 	}
 
 	@Override
-	public LiteralStringExpression visitLiteralStringExpression(LiteralStringExpression expression) {
-		return expression;
+	public T visitLiteralStringExpression(LiteralStringExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralCharacterExpression visitLiteralCharacterExpression(LiteralCharacterExpression expression) {
-		return expression;
+	public T visitLiteralCharacterExpression(LiteralCharacterExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralDoubleExpression visitLiteralDoubleExpression(LiteralDoubleExpression expression) {
-		return expression;
+	public T visitLiteralDoubleExpression(LiteralDoubleExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralIntegerExpression visitLiteralIntegerExpression(LiteralIntegerExpression expression) {
-		return expression;
+	public T visitLiteralIntegerExpression(LiteralIntegerExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralBigIntegerExpression visitLiteralBigIntegerExpression(LiteralBigIntegerExpression expression) {
-		return expression;
+	public T visitLiteralBigIntegerExpression(LiteralBigIntegerExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralBigDecimalExpression visitLiteralBigDecimalExpression(LiteralBigDecimalExpression expression) {
-		return expression;
+	public T visitLiteralBigDecimalExpression(LiteralBigDecimalExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralFloatExpression visitLiteralFloatExpression(LiteralFloatExpression expression) {
-		return expression;
+	public T visitLiteralFloatExpression(LiteralFloatExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralLongExpression visitLiteralLongExpression(LiteralLongExpression expression) {
-		return expression;
+	public T visitLiteralLongExpression(LiteralLongExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralTrueExpression visitLiteralTrueExpression(LiteralTrueExpression expression) {
-		return expression;
+	public T visitLiteralTrueExpression(LiteralTrueExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralFalseExpression visitLiteralFalseExpression(LiteralFalseExpression expression) {
-		return expression;
+	public T visitLiteralFalseExpression(LiteralFalseExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public LiteralNullExpression visitLiteralNullExpression(LiteralNullExpression expression) {
-		return expression;
+	public T visitLiteralNullExpression(LiteralNullExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public ConcatExpression visitConcatExpression(ConcatExpression expression) {
+	public T visitConcatExpression(ConcatExpression expression) {
 		expression.getLeftHandOperand().accept( this );
 		expression.getRightHandOperand().accept( this );
-		return expression;
+		return (T) expression;
 	}
 
 	@Override
-	public ConstantEnumExpression visitConstantEnumExpression(ConstantEnumExpression expression) {
-		return expression;
+	public T visitConstantEnumExpression(ConstantEnumExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public ConstantFieldExpression visitConstantFieldExpression(ConstantFieldExpression expression) {
-		return expression;
+	public T visitConstantFieldExpression(ConstantFieldExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public BinaryArithmeticExpression visitBinaryArithmeticExpression(BinaryArithmeticExpression expression) {
-		return expression;
+	public T visitBinaryArithmeticExpression(BinaryArithmeticExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public SubQueryExpression visitSubQueryExpression(SubQueryExpression expression) {
-		return expression;
+	public T visitSubQueryExpression(SubQueryExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public Object visitSimpleCaseExpression(CaseSimpleExpression expression) {
-		return expression;
+	public T visitSimpleCaseExpression(CaseSimpleExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public Object visitSearchedCaseExpression(CaseSearchedExpression expression) {
-		return expression;
+	public T visitSearchedCaseExpression(CaseSearchedExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public Object visitCoalesceExpression(CoalesceExpression expression) {
-		return expression;
+	public T visitCoalesceExpression(CoalesceExpression expression) {
+		return (T) expression;
 	}
 
 	@Override
-	public Object visitNullifExpression(NullifExpression expression) {
-		return expression;
+	public T visitNullifExpression(NullifExpression expression) {
+		return (T) expression;
 	}
 }

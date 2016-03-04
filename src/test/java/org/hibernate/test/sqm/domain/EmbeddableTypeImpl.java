@@ -8,6 +8,7 @@ package org.hibernate.test.sqm.domain;
 
 import org.hibernate.sqm.domain.EmbeddableType;
 import org.hibernate.sqm.domain.ManagedType;
+import org.hibernate.sqm.domain.Type;
 
 /**
  * @author Steve Ebersole
@@ -25,5 +26,15 @@ public class EmbeddableTypeImpl extends AbstractManagedType implements Embeddabl
 	public ManagedType getSuperType() {
 		// for now...
 		return null;
+	}
+
+	@Override
+	public Type getBoundType() {
+		return this;
+	}
+
+	@Override
+	public ManagedType asManagedType() {
+		return this;
 	}
 }

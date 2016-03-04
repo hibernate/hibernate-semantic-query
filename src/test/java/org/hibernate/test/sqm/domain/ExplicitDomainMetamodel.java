@@ -96,6 +96,14 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 
 	}
 
+	public EmbeddableTypeImpl makeEmbeddableType(String embeddableName) {
+		return new EmbeddableTypeImpl( embeddableName );
+	}
+
+	public EmbeddableTypeImpl makeEmbeddableType(Class embeddableClass) {
+		return new EmbeddableTypeImpl( embeddableClass );
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> BasicType<T> getBasicType(Class<T> javaType) {

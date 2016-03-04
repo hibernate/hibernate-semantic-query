@@ -84,7 +84,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 			String terminalName,
 			Attribute attribute,
 			EntityType subclassType) {
-		return resolutionContext().getFromElementBuilder().buildAttributeJoin(
+		return context().getFromElementBuilder().buildAttributeJoin(
 				fromElementSpace,
 				alias,
 				attribute,
@@ -98,6 +98,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 
 	@Override
 	protected FromElementBinding resolveTreatedTerminal(
+			ResolutionContext context,
 			AttributeBindingSource lhs,
 			String terminalName,
 			EntityType subclassIndicator) {

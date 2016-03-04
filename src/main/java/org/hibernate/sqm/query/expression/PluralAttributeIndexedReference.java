@@ -9,16 +9,19 @@ package org.hibernate.sqm.query.expression;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.path.FromElementBinding;
+import org.hibernate.sqm.query.from.FromElement;
 
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeIndexedReference implements AttributeBinding, Expression {
+public class PluralAttributeIndexedReference implements AttributeBinding, Expression, AttributeBindingSource {
 	private final AttributeBinding pluralAttributeBinding;
 	private final Expression indexSelectionExpression;
 
@@ -83,5 +86,26 @@ public class PluralAttributeIndexedReference implements AttributeBinding, Expres
 	@Override
 	public FromElementBinding getBoundFromElementBinding() {
 		return getAttributeBindingSource().getFromElement();
+	}
+
+	@Override
+	public FromElement getFromElement() {
+		return getBoundFromElementBinding().getFromElement();
+	}
+
+	@Override
+	public ManagedType getAttributeContributingType() {
+		return isBindable()
+				? (ManagedType) type
+				: null;
+	}
+
+	private boolean isBindable() {
+		return type instanceof ManagedType;
+	}
+
+	@Override
+	public EntityType getSubclassIndicator() {
+		return null;
 	}
 }

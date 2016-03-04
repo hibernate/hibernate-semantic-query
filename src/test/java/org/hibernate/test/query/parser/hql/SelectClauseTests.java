@@ -17,9 +17,9 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.CollectionValueFunction;
+import org.hibernate.sqm.query.expression.CollectionValuePathExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
-import org.hibernate.sqm.query.expression.MapKeyFunction;
+import org.hibernate.sqm.query.expression.MapKeyPathExpression;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationTarget;
 import org.hibernate.sqm.query.select.Selection;
@@ -29,7 +29,6 @@ import org.hibernate.test.sqm.domain.BasicTypeImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -350,14 +349,14 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( MapKeyFunction.class )
+				instanceOf( MapKeyPathExpression.class )
 		);
 
-		MapKeyFunction mapKeyFunction = (MapKeyFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		assertThat( mapKeyFunction.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );
-		assertThat( mapKeyFunction.getMapKeyType().getTypeName(), is( String.class.getName() ) );
+		MapKeyPathExpression mapKeyPathExpression = (MapKeyPathExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertThat( mapKeyPathExpression.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );
+		assertThat( mapKeyPathExpression.getMapKeyType().getTypeName(), is( String.class.getName() ) );
 
-		assertThat( mapKeyFunction.getCollectionAlias(), is("l") );
+		assertThat( mapKeyPathExpression.getCollectionAlias(), is( "l") );
 	}
 
 	@Test
@@ -367,14 +366,14 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( CollectionValueFunction.class )
+				instanceOf( CollectionValuePathExpression.class )
 		);
 
-		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		CollectionValuePathExpression collectionValuePathExpression = (CollectionValuePathExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 
-		assertThat( collectionValueFunction.getValueType(), instanceOf( EntityTypeImpl.class ) );
-		assertThat( collectionValueFunction.getValueType().getTypeName(), is( "com.acme.Leg" ) );
-		assertThat( collectionValueFunction.getPluralAttributeBinding().getIdentificationVariable(), is("l") );
+		assertThat( collectionValuePathExpression.getValueType(), instanceOf( EntityTypeImpl.class ) );
+		assertThat( collectionValuePathExpression.getValueType().getTypeName(), is( "com.acme.Leg" ) );
+		assertThat( collectionValuePathExpression.getPluralAttributeBinding().getIdentificationVariable(), is( "l") );
 	}
 
 	@Test
@@ -384,13 +383,13 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( CollectionValueFunction.class )
+				instanceOf( CollectionValuePathExpression.class )
 		);
 
-		CollectionValueFunction collectionValueFunction = (CollectionValueFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		assertThat( collectionValueFunction.getElementType(), instanceOf( EntityTypeImpl.class ) );
-		assertThat( collectionValueFunction.getElementType().getTypeName(), is( "com.acme.Leg" ) );
-		assertThat( collectionValueFunction.getPluralAttributeBinding().getIdentificationVariable(), is("l") );
+		CollectionValuePathExpression collectionValuePathExpression = (CollectionValuePathExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		assertThat( collectionValuePathExpression.getElementType(), instanceOf( EntityTypeImpl.class ) );
+		assertThat( collectionValuePathExpression.getElementType().getTypeName(), is( "com.acme.Leg" ) );
+		assertThat( collectionValuePathExpression.getPluralAttributeBinding().getIdentificationVariable(), is( "l") );
 	}
 
 	@Test

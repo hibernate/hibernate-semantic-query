@@ -183,10 +183,51 @@ dotIdentifierSequence
 	: identifier (DOT identifier)*
 	;
 
+//path
+//	: dotIdentifierSequence																# SimplePath
+//	| TREAT LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN		# TreatedPath
+//	| path LEFT_BRACKET expression RIGHT_BRACKET (DOT path)?							# IndexedPath
+//	| INDEX LEFT_PAREN identifier RIGHT_PAREN											# CollectionIndexPath
+//	| KEY LEFT_PAREN mapReference RIGHT_PAREN											# MapKeyPath
+//	| VALUE LEFT_PAREN collectionReference RIGHT_PAREN				   					# CollectionValuePath
+//	| ENTRY LEFT_PAREN mapReference RIGHT_PAREN			   								# MapEntryPath
+//	;
+
+
 path
-	: dotIdentifierSequence																# SimplePath
-	| TREAT LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN		# TreatedPath
-	| path LEFT_BRACKET expression RIGHT_BRACKET (DOT path)?							# IndexedPath
+	// a SimplePath may be any number of things like:
+	//		* Class FQN
+	//		* Java constant (enum/static)
+	//		* an identification variable
+	//		* an unqualified attribute name
+	: dotIdentifierSequence												# SimplePath
+	// a Map.Entry cannot be further dereferenced
+	| ENTRY LEFT_PAREN mapReference RIGHT_PAREN							# MapEntryPath
+	// only one index-access is allowed per path
+	| path LEFT_BRACKET expression RIGHT_BRACKET (pathTerminal)?		# IndexedPath
+	// most path expressions fall into this bucket
+	| pathRoot (pathTerminal)?											# CompoundPath
+	;
+
+pathRoot
+	: identifier																			# SimplePathRoot
+	| TREAT LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN			# TreatedPathRoot
+	| KEY LEFT_PAREN mapReference RIGHT_PAREN												# MapKeyPathRoot
+	| VALUE LEFT_PAREN collectionReference RIGHT_PAREN				   						# CollectionValuePathRoot
+	;
+
+pathTerminal
+	: (DOT identifier)+
+	;
+
+collectionReference
+// having as a separate rule allows us to validate that the path indeed resolves to a Collection attribute
+	: path
+	;
+
+mapReference
+// having as a separate rule allows us to validate that the path indeed resolves to a Map attribute
+	: path
 	;
 
 dynamicInstantiationArgs
@@ -333,8 +374,8 @@ expression
 	| nullIf									# NullIfExpression
 	| literal									# LiteralExpression
 	| parameter									# ParameterExpression
-	| function									# FunctionExpression
 	| path										# PathExpression
+	| function									# FunctionExpression
 	| LEFT_PAREN querySpec RIGHT_PAREN			# SubQueryExpression
 	;
 
@@ -440,9 +481,6 @@ nonStandardFunction
 jpaCollectionFunction
 	: SIZE LEFT_PAREN path RIGHT_PAREN					# CollectionSizeFunction
 	| INDEX LEFT_PAREN identifier RIGHT_PAREN			# CollectionIndexFunction
-	| KEY LEFT_PAREN path RIGHT_PAREN					# MapKeyFunction
-	| VALUE LEFT_PAREN path RIGHT_PAREN			        # CollectionValueFunction
-	| ENTRY LEFT_PAREN path RIGHT_PAREN			        # MapEntryFunction
 	;
 
 hqlCollectionFunction

@@ -12,7 +12,7 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
 import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
-import org.hibernate.sqm.query.expression.MapKeyFunction;
+import org.hibernate.sqm.query.expression.MapKeyPathExpression;
 import org.hibernate.sqm.query.predicate.Predicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.test.query.parser.ConsumerContextImpl;
@@ -87,9 +87,9 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
 		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyFunction.class ) );
-		assertThat( ( (MapKeyFunction) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
-		assertThat( ( (MapKeyFunction) relationalPredicate.getLeftHandExpression() ).getMapKeyType().getTypeName(), is( "java.lang.String" ) );
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyPathExpression.class ) );
+		assertThat( ( (MapKeyPathExpression) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
+		assertThat( ( (MapKeyPathExpression) relationalPredicate.getLeftHandExpression() ).getMapKeyType().getTypeName(), is( "java.lang.String" ) );
 	}
 
 	private SelectStatement interpret(String query) {

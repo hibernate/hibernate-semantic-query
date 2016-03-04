@@ -23,7 +23,9 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 	private final QualifiedJoinedFromElement joinRhs;
 	private FromElement joinLhs;
 
-	public PathResolverJoinPredicateImpl(ResolutionContext resolutionContext, QualifiedJoinedFromElement joinRhs) {
+	public PathResolverJoinPredicateImpl(
+			ResolutionContext resolutionContext,
+			QualifiedJoinedFromElement joinRhs) {
 		super( resolutionContext );
 		this.joinRhs = joinRhs;
 	}

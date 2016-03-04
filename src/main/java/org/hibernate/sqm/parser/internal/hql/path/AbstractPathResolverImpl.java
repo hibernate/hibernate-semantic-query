@@ -25,24 +25,29 @@ import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
  * @author Steve Ebersole
  */
 public abstract class AbstractPathResolverImpl implements PathResolver {
-	protected abstract ResolutionContext resolutionContext();
+	private final ResolutionContext context;
+
+	public AbstractPathResolverImpl(ResolutionContext context) {
+		this.context = context;
+	}
+
+	protected ResolutionContext context() {
+		return context;
+	}
 
 	protected AttributeBindingSource resolveAnyIntermediateAttributePathJoins(
 			AttributeBindingSource lhs,
-			String[] pathParts,
-			int start) {
-		int i = start;
-
+			String[] pathParts) {
 		// build joins for any intermediate path parts
-		while ( i < pathParts.length-1 ) {
+		for ( int i = 0, max = pathParts.length-1; i < max; i++ ) {
 			lhs = buildIntermediateAttributeJoin( lhs, pathParts[i] );
-			i++;
 		}
-
 		return lhs;
 	}
 
-	protected AttributeBindingSource buildIntermediateAttributeJoin(AttributeBindingSource lhs, String pathPart) {
+	protected AttributeBindingSource buildIntermediateAttributeJoin(
+			AttributeBindingSource lhs,
+			String pathPart) {
 		final Attribute joinedAttributeDescriptor = resolveAttributeDescriptor( lhs, pathPart );
 		validateIntermediateAttributeJoin( lhs, joinedAttributeDescriptor );
 
@@ -53,7 +58,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 			FromElement lhsFromElement,
 			Attribute joinedAttributeDescriptor,
 			EntityType subclassIndicator) {
-		return resolutionContext().getFromElementBuilder().buildAttributeJoin(
+		return context().getFromElementBuilder().buildAttributeJoin(
 				lhsFromElement.getContainingSpace(),
 				null,
 				joinedAttributeDescriptor,
@@ -90,7 +95,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 	}
 
 	protected ManagedType resolveManagedType(Bindable bindable, String path) {
-		if ( bindable instanceof EntityType ) {
+		if ( bindable instanceof ManagedType ) {
 			return (ManagedType) bindable;
 		}
 		else if ( bindable instanceof SingularAttribute ) {
@@ -118,21 +123,4 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		}
 
 	}
-
-//	protected AttributeReferenceExpression makeAttributeReferenceExpression(FromElement lhs, String attributeName) {
-//		final Attribute attribute = resolveAttributeDescriptor( lhs, attributeName );
-//		( (Bindable) attribute ).getBoundType()
-//		final Type type;
-//		if ( attribute instanceof SingularAttribute ) {
-//			type = ( (SingularAttribute) attribute ).getType();
-//		}
-//		else if ( attribute instanceof PluralAttribute ) {
-//			type = ( (PluralAttribute) attribute ).getElementType();
-//		}
-//		else {
-//			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );
-//		}
-//
-//		return new AttributeReferenceExpression( lhs, attribute, type );
-//	}
 }

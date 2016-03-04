@@ -11,5 +11,5 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface EmbeddableType extends ManagedType {
+public interface EmbeddableType extends ManagedType, Bindable {
 }

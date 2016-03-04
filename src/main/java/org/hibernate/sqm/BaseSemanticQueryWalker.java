@@ -21,7 +21,7 @@ import org.hibernate.sqm.query.expression.CaseSimpleExpression;
 import org.hibernate.sqm.query.expression.CoalesceExpression;
 import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
-import org.hibernate.sqm.query.expression.CollectionValueFunction;
+import org.hibernate.sqm.query.expression.CollectionValuePathExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
@@ -42,7 +42,7 @@ import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
-import org.hibernate.sqm.query.expression.MapKeyFunction;
+import org.hibernate.sqm.query.expression.MapKeyPathExpression;
 import org.hibernate.sqm.query.expression.MaxElementFunction;
 import org.hibernate.sqm.query.expression.MaxFunction;
 import org.hibernate.sqm.query.expression.MaxIndexFunction;
@@ -378,7 +378,7 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	}
 
 	@Override
-	public CollectionValueFunction visitCollectionValueFunction(CollectionValueFunction function) {
+	public CollectionValuePathExpression visitCollectionValueFunction(CollectionValuePathExpression function) {
 		return function;
 	}
 
@@ -388,7 +388,7 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	}
 
 	@Override
-	public MapKeyFunction visitMapKeyFunction(MapKeyFunction function) {
+	public MapKeyPathExpression visitMapKeyFunction(MapKeyPathExpression function) {
 		return function;
 	}
 

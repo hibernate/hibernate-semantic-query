@@ -180,9 +180,23 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 
 	@Override
 	public Attribute findAttribute(String name) {
-		return attributesByName == null
-				? null
-				: attributesByName.get( name );
+		if ( attributesByName != null ) {
+			if ( attributesByName.containsKey( name ) ) {
+				return attributesByName.get( name );
+			}
+		}
+
+		if ( "id".equals( name ) ) {
+			// for SQM testing we assume id is a singular Long attribute.
+			// for other id types, explicitly register the id attribute with the model (attributesByName)
+			return new PseudoIdAttributeImpl(
+					this,
+					StandardBasicTypeDescriptors.INSTANCE.LONG,
+					SingularAttribute.Classification.BASIC
+			);
+		}
+
+		return null;
 	}
 
 	@Override

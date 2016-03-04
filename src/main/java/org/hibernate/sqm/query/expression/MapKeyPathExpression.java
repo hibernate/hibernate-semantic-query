@@ -62,8 +62,11 @@ public class MapKeyPathExpression implements Expression, AttributeBindingSource 
 	}
 
 	@Override
-	public EntityType getSubclassIndicator() {
-		return null;
+	public ManagedType getSubclassIndicator() {
+		if ( !ManagedType.class.isInstance( getMapKeyType() ) ) {
+			return null;
+		}
+		return (ManagedType) getMapKeyType();
 	}
 
 	@Override

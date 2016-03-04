@@ -17,13 +17,22 @@ import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
+ * Models an "incidental downcast", as opposed to an intrinsic downcast.  Stated simply
+ * an intrinsic downcast occurs in the from-clause; the downcast target becomes an
+ * intrinsic part of the FromElement (see {@link FromElement#getIntrinsicSubclassIndicator()}.
+ * An incidental downcast, on the other hand, occurs outside the from-clause.
+ * <p/>
+ * For example,
+ * {@code .. from Person p where treat(p.address as USAddress).zip=? ...} represents
+ * such an intrinsic downcast of Address to one of its subclasses named USAddress.
+ *
  * @author Steve Ebersole
  */
-public class TreatedFromElement implements FromElementBinding {
+public class TreatedFromElementBinding implements FromElementBinding {
 	private final FromElement baseReference;
 	private final EntityType subclassIndicator;
 
-	public TreatedFromElement(FromElement baseReference, EntityType subclassIndicator) {
+	public TreatedFromElementBinding(FromElement baseReference, EntityType subclassIndicator) {
 		this.baseReference = baseReference;
 		this.subclassIndicator = subclassIndicator;
 	}

@@ -14,6 +14,7 @@ import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 import org.jboss.logging.Logger;
@@ -86,6 +87,33 @@ public class FromElementBuilder {
 				uid,
 				alias,
 				entityType
+		);
+		fromElementSpace.addJoin( join );
+		parsingContext.registerFromElementByUniqueId( join );
+		registerAlias( join );
+		return join;
+	}
+
+	public QualifiedEntityJoinFromElement buildEntityJoin(
+			FromElementSpace fromElementSpace,
+			String alias,
+			EntityType entityType,
+			JoinType joinType) {
+		if ( alias == null ) {
+			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+			log.debugf(
+					"Generated implicit alias [%s] for entity join [%s]",
+					alias,
+					entityType.getName()
+			);
+		}
+
+		final QualifiedEntityJoinFromElement join = new QualifiedEntityJoinFromElement(
+				fromElementSpace,
+				parsingContext.makeUniqueIdentifier(),
+				alias,
+				entityType,
+				joinType
 		);
 		fromElementSpace.addJoin( join );
 		parsingContext.registerFromElementByUniqueId( join );

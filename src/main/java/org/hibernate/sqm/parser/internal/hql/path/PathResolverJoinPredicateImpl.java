@@ -6,6 +6,8 @@
  */
 package org.hibernate.sqm.parser.internal.hql.path;
 
+import java.util.Locale;
+
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
@@ -21,7 +23,6 @@ import org.hibernate.sqm.query.from.QualifiedJoinedFromElement;
  */
 public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 	private final QualifiedJoinedFromElement joinRhs;
-	private FromElement joinLhs;
 
 	public PathResolverJoinPredicateImpl(
 			ResolutionContext resolutionContext,
@@ -32,18 +33,14 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 
 	@Override
 	@SuppressWarnings("StatementWithEmptyBody")
-	protected void validatePathRoot(FromElement root) {
-		if ( root == joinRhs ) {
-			// nothing to do
-		}
-		else if ( joinLhs == null ) {
-			// assume root is LHS
-			joinLhs = root;
-		}
-		else {
-			if ( joinLhs != root ) {
-				throw new SemanticException( "Qualified join predicate referred to more than 2 FromElements" );
-			}
+	protected void validatePathRoot(FromElement fromElement) {
+		// make sure no incoming FromElement comes from a FromElementSpace other
+		// than the FromElementSpace joinRhs comes from
+		if ( joinRhs.getContainingSpace() != fromElement.getContainingSpace() ) {
+			throw new SemanticException(
+					"Qualified join predicate referred to FromElement [" +
+							fromElement.asLoggableText() + "] outside the FromElementSpace containing the join"
+			);
 		}
 	}
 

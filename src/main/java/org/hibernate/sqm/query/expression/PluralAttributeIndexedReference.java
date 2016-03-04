@@ -105,7 +105,9 @@ public class PluralAttributeIndexedReference implements AttributeBinding, Expres
 	}
 
 	@Override
-	public EntityType getSubclassIndicator() {
-		return null;
+	public ManagedType getSubclassIndicator() {
+		return isBindable()
+				? (ManagedType) type
+				: null;
 	}
 }

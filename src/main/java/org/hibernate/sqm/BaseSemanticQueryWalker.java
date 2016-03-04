@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.parser.internal.hql.path.TreatedFromElement;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
@@ -330,11 +329,6 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 	@Override
 	public AttributeReferenceExpression visitAttributeReferenceExpression(AttributeReferenceExpression expression) {
 		return expression;
-	}
-
-	@Override
-	public Object visitTreatedFromElement(TreatedFromElement treatedFromElement) {
-		return treatedFromElement;
 	}
 
 	@Override

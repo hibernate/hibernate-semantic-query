@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.parser.internal.hql.path.TreatedFromElement;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.QuerySpec;
@@ -158,8 +157,6 @@ public interface SemanticQueryWalker<T> {
 	T visitUnaryOperationExpression(UnaryOperationExpression expression);
 
 	T visitAttributeReferenceExpression(AttributeReferenceExpression expression);
-
-	T visitTreatedFromElement(TreatedFromElement treatedFromElement);
 
 	T visitFunctionExpression(FunctionExpression expression);
 

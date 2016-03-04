@@ -814,26 +814,49 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			joinType = JoinType.INNER;
 		}
 
+		final String identificationVariable = interpretIdentificationVariable(
+				ctx.qualifiedJoinRhs().identificationVariableDef()
+		);
+
 		pathResolverStack.push(
 				new PathResolverJoinAttributeImpl(
 						currentQuerySpecProcessingState,
 						currentFromElementSpace,
 						joinType,
-						interpretIdentificationVariable( ctx.qualifiedJoinRhs().identificationVariableDef() ),
+						identificationVariable,
 						ctx.FETCH() != null
 				)
 		);
 
 		try {
-			QualifiedJoinedFromElement joinedPath = (QualifiedJoinedFromElement) ctx.qualifiedJoinRhs().path().accept( this );
-			currentJoinRhs = joinedPath;
+			final QualifiedJoinedFromElement joinedFromElement;
+
+			// Object because join-target might be either an EntityTypeExpression (... join Address a on ...)
+			// or an attribute-join (... from p.address a on ...)
+			final Object joinedPath = ctx.qualifiedJoinRhs().path().accept( this );
+			if ( joinedPath instanceof QualifiedJoinedFromElement ) {
+				joinedFromElement = (QualifiedJoinedFromElement) joinedPath;
+			}
+			else if ( joinedPath instanceof EntityTypeExpression ) {
+				joinedFromElement = currentQuerySpecProcessingState.getFromElementBuilder().buildEntityJoin(
+						currentFromElementSpace,
+						identificationVariable,
+						( (EntityTypeExpression) joinedPath ).getExpressionType(),
+						joinType
+				);
+			}
+			else {
+				throw new ParsingException( "Unexpected qualifiedJoin.path resolution type : " + joinedPath );
+			}
+
+			currentJoinRhs = joinedFromElement;
 
 			if ( joinedPath == null ) {
 				throw new ParsingException( "Could not resolve join path : " + ctx.qualifiedJoinRhs().getText() );
 			}
 
 			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
-				if ( !ImplicitAliasGenerator.isImplicitAlias( joinedPath.getIdentificationVariable() ) ) {
+				if ( !ImplicitAliasGenerator.isImplicitAlias( joinedFromElement.getIdentificationVariable() ) ) {
 					if ( QualifiedAttributeJoinFromElement.class.isInstance( joinedPath ) ) {
 						if ( QualifiedAttributeJoinFromElement.class.cast( joinedPath ).isFetched() ) {
 							throw new StrictJpaComplianceViolation(
@@ -846,10 +869,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 
 			if ( ctx.qualifiedJoinPredicate() != null ) {
-				joinedPath.setOnClausePredicate( visitQualifiedJoinPredicate( ctx.qualifiedJoinPredicate() ) );
+				joinedFromElement.setOnClausePredicate( visitQualifiedJoinPredicate( ctx.qualifiedJoinPredicate() ) );
 			}
 
-			return joinedPath;
+			return joinedFromElement;
 		}
 		finally {
 			currentJoinRhs = null;

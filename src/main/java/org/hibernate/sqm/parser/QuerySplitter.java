@@ -14,7 +14,6 @@ import java.util.Map;
 import org.hibernate.sqm.BaseSemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PolymorphicEntityType;
-import org.hibernate.sqm.parser.internal.hql.path.TreatedFromElement;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.QuerySpec;
@@ -517,14 +516,6 @@ public class QuerySplitter {
 			return new AttributeReferenceExpression(
 					attributeBindingSource,
 					expression.getBoundAttribute()
-			);
-		}
-
-		@Override
-		public TreatedFromElement visitTreatedFromElement(TreatedFromElement treatedFromElement) {
-			return new TreatedFromElement(
-					treatedFromElement.getFromElement(),
-					treatedFromElement.getSubclassIndicator()
 			);
 		}
 

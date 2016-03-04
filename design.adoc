@@ -1,0 +1,68 @@
+Discuss design of SQM model
+
+== FromClause
+
+The FromClause defines the parts of the domain model available to the query.  A FromClause
+is made up of one or more FromElementSpaces.  A FromElementSpace is defined by a "query root".
+
+For example, the following query defines a single FromElementSpace:
+
+.Single root example
+====
+[source]
+----
+select p from Person p
+----
+====
+
+A query may also define more than one FromElementSpace:
+
+.Multiple root example
+====
+[source]
+----
+select p from Person p, Service s
+----
+====
+
+It is important to note that a FromElementSpace defines a scope for the *use* of identification variables within the
+FromClause (these identification variables must still be unique across the whole FromClause).  E.g., the following
+query is not legal because the join to `p.address` occurs is defined in the second FromElementSpace but
+refers back to the first.
+
+.Illegal cross-space reference
+====
+[source]
+----
+select p from Person p, Service s join p.address a
+----
+====
+
+== Downcasts
+
+FromElements (others) act as a source of attribute bindings/references.  For example, given a query defining `Person` as a
+root we can now refer to any of the attributes defined on `Person` and its superclasses in the query.
+
+Sometimes we would like to refer to attributes defined on a subclass of an AttributeBindingSource.  This is where a
+downcast comes into play.  HQL historically offers implicit downcasting.  JPA supports downcasting too, but in an explicit
+form.
+
+[NOTE]
+====
+We may decided to remove support for implicit downcasts
+====
+
+Regardless of whether the downcast was implicit or explicit, the AttributeBindingSource needs to understand the set of
+attributes available to be referenced.  This is defined by the
+`org.hibernate.sqm.path.AttributeBindingSource.getAttributeContributingType` method.
+
+Additionally an explicit downcast can be defined in one of two ways:
+
+. "intrinsic downcasting" happens in the FromClause.  The downcast target is incorporated into the FromElement.  It
+	becomes an "intrinsic" part of the FromElement; any references to that FromElement in any part of the query refers
+	to the downcast form.  See `org.hibernate.sqm.query.from.FromElement.getIntrinsicSubclassIndicator`
+. "incidental downcasting" happens outside of the FromClause, as part of a path expression.  Here the downcast is
+	effective just for the path expression.  See `org.hibernate.sqm.path.AttributeBindingSource.getSubclassIndicator`
+
+All downcasts for a given FromElement are represented by the `org.hibernate.sqm.query.from.Downcastable` contract it
+implements.  `Downcastable#getDowncasts` returns information about all the downcast targets for a FromElement.

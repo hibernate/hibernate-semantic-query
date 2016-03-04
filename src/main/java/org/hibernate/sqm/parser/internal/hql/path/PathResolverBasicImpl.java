@@ -141,6 +141,6 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 
 		join.addDowncast( new Downcast( subclassIndicator ) );
 
-		return new TreatedFromElement( join, subclassIndicator );
+		return new TreatedFromElementBinding( join, subclassIndicator );
 	}
 }

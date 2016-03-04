@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.path;
 
-import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.query.from.FromElement;
 
@@ -39,5 +38,5 @@ public interface AttributeBindingSource extends Binding {
 	 *
 	 * @return The specific subclass.
 	 */
-	EntityType getSubclassIndicator();
+	ManagedType getSubclassIndicator();
 }

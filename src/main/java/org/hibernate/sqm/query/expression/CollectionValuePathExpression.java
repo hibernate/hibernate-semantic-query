@@ -71,13 +71,14 @@ public class CollectionValuePathExpression implements Expression, AttributeBindi
 	}
 
 	@Override
-	public EntityType getSubclassIndicator() {
-		return null;
+	public ManagedType getSubclassIndicator() {
+		return getAttributeContributingType();
 	}
 
 	@Override
 	public Bindable getBoundModelType() {
-		return null;
+		// for now just cast.  
+		return (Bindable) getAttributeContributingType();
 	}
 
 	@Override

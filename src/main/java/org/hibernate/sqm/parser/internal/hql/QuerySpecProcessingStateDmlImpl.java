@@ -25,6 +25,7 @@ import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.JoinedFromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 /**
@@ -133,6 +134,15 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		@Override
 		public CrossJoinedFromElement makeCrossJoinedFromElement(
 				FromElementSpace fromElementSpace, String uid, EntityType entityType, String alias) {
+			throw new ParsingException( "DML from-clause cannot define joins" );
+		}
+
+		@Override
+		public QualifiedEntityJoinFromElement buildEntityJoin(
+				FromElementSpace fromElementSpace,
+				String alias,
+				EntityType entityType,
+				JoinType joinType) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 

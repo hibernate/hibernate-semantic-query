@@ -140,8 +140,8 @@ public class BaseSemanticQueryWalker implements SemanticQueryWalker {
 
 	@Override
 	public QuerySpec visitQuerySpec(QuerySpec querySpec) {
-		visitSelectClause( querySpec.getSelectClause() );
 		visitFromClause( querySpec.getFromClause() );
+		visitSelectClause( querySpec.getSelectClause() );
 		visitWhereClause( querySpec.getWhereClause() );
 		return querySpec;
 	}

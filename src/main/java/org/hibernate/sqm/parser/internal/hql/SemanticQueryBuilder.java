@@ -1054,17 +1054,24 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public Object visitInPredicate(HqlParser.InPredicateContext ctx) {
+		final Expression testExpression = (Expression) ctx.expression().accept( this );
+
 		if ( HqlParser.ExplicitTupleInListContext.class.isInstance( ctx.inList() ) ) {
 			final HqlParser.ExplicitTupleInListContext tupleExpressionListContext = (HqlParser.ExplicitTupleInListContext) ctx.inList();
-			final List<Expression> tupleExpressions = new ArrayList<Expression>( tupleExpressionListContext.expression().size() );
+			final List<Expression> listExpressions = new ArrayList<Expression>( tupleExpressionListContext.expression().size() );
 			for ( HqlParser.ExpressionContext expressionContext : tupleExpressionListContext.expression() ) {
-				tupleExpressions.add( (Expression) expressionContext.accept( this ) );
+				final Expression listItemExpression = (Expression) expressionContext.accept( this );
+
+				if ( testExpression.getInferableType() != null ) {
+					if ( listItemExpression instanceof ImpliedTypeExpression ) {
+						( (ImpliedTypeExpression) listItemExpression ).impliedType( testExpression.getInferableType() );
+					}
+				}
+
+				listExpressions.add( listItemExpression );
 			}
 
-			return new InListPredicate(
-					(Expression) ctx.expression().accept( this ),
-					tupleExpressions
-			);
+			return new InListPredicate( testExpression, listExpressions );
 		}
 		else if ( HqlParser.SubQueryInListContext.class.isInstance( ctx.inList() ) ) {
 			final HqlParser.SubQueryInListContext subQueryContext = (HqlParser.SubQueryInListContext) ctx.inList();
@@ -1077,10 +1084,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				);
 			}
 
-			return new InSubQueryPredicate(
-					(Expression) ctx.expression().accept( this ),
-					(SubQueryExpression) subQueryExpression
-			);
+			return new InSubQueryPredicate( testExpression, (SubQueryExpression) subQueryExpression );
 		}
 
 		// todo : handle PersistentCollectionReferenceInList labeled branch

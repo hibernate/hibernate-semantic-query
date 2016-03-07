@@ -6,6 +6,9 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import org.hibernate.sqm.domain.EmbeddableType;
+import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.IdentifiableType;
 import org.hibernate.sqm.domain.IdentifierDescriptorSingleAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.domain.Type;
@@ -16,8 +19,18 @@ import org.hibernate.sqm.domain.Type;
 public class SingleAttributeIdentifierDescriptor implements IdentifierDescriptorSingleAttribute {
 	private final SingularAttribute idAttribute;
 
-	public SingleAttributeIdentifierDescriptor(SingularAttribute idAttribute) {
-		this.idAttribute = idAttribute;
+	public SingleAttributeIdentifierDescriptor(
+			IdentifiableType entityType,
+			String idAttributeName,
+			Type idType) {
+		this.idAttribute = new SingularAttributeImpl(
+				entityType,
+				idAttributeName,
+				idType instanceof EmbeddableType
+						? SingularAttribute.Classification.EMBEDDED
+						: SingularAttribute.Classification.BASIC,
+				idType
+		);
 	}
 
 	@Override
@@ -28,6 +41,11 @@ public class SingleAttributeIdentifierDescriptor implements IdentifierDescriptor
 	@Override
 	public boolean hasSingleIdAttribute() {
 		return true;
+	}
+
+	@Override
+	public String getReferableAttributeName() {
+		return idAttribute.getName();
 	}
 
 	@Override

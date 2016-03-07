@@ -14,4 +14,6 @@ package org.hibernate.sqm.domain;
 public interface IdentifierDescriptor {
 	Type getIdType();
 	boolean hasSingleIdAttribute();
+
+	String getReferableAttributeName();
 }

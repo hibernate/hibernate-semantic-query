@@ -9,6 +9,8 @@ package org.hibernate.sqm.parser.internal.hql.path;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.IdentifierDescriptor;
+import org.hibernate.sqm.domain.IdentifierDescriptorSingleAttribute;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
@@ -84,14 +86,30 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 	protected Attribute resolveAttributeDescriptor(AttributeBindingSource lhs, String attributeName) {
 		final ManagedType managedType = resolveManagedType( lhs.getBoundModelType(), lhs.asLoggableText() );
 		final Attribute attributeDescriptor = managedType.findAttribute( attributeName );
-		if ( attributeDescriptor == null ) {
-			throw new SemanticException(
-					"Name [" + attributeName + "] is not a valid attribute from type [" +
-							managedType + " (" + lhs.asLoggableText() + ")]"
-			);
+		if ( attributeDescriptor != null ) {
+			return attributeDescriptor;
 		}
 
-		return attributeDescriptor;
+		if ( managedType instanceof EntityType ) {
+			final EntityType entityType = (EntityType) managedType;
+			final IdentifierDescriptor entityIdDescriptor = entityType.getIdentifierDescriptor();
+			final String referableIdAttributeName = entityIdDescriptor.getReferableAttributeName();
+
+			if ( "id".equals( attributeName )
+					|| ( referableIdAttributeName != null && referableIdAttributeName.equals( attributeName ) ) ) {
+				if ( entityIdDescriptor instanceof IdentifierDescriptorSingleAttribute ) {
+					return ( (IdentifierDescriptorSingleAttribute) entityIdDescriptor ).getIdAttribute();
+				}
+				else {
+					return new PseudoIdAttributeImpl( entityType );
+				}
+			}
+		}
+
+		throw new SemanticException(
+				"Name [" + attributeName + "] is not a valid attribute from type [" +
+						managedType + " (" + lhs.asLoggableText() + ")]"
+		);
 	}
 
 	protected ManagedType resolveManagedType(Bindable bindable, String path) {

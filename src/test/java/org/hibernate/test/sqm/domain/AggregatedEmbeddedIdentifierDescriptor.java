@@ -31,6 +31,11 @@ public class AggregatedEmbeddedIdentifierDescriptor implements IdentifierDescrip
 	}
 
 	@Override
+	public String getReferableAttributeName() {
+		return embeddedIdAttribute.getName();
+	}
+
+	@Override
 	public SingularAttribute getIdAttribute() {
 		return embeddedIdAttribute;
 	}

@@ -24,6 +24,9 @@ public abstract class AbstractIdentifiableType extends AbstractManagedType imple
 			IdentifiableType superType) {
 		super( typeName );
 		this.superType = superType;
+
+		// by default define simple IdentifierDescriptor of Integer type named pk
+		this.identifierDescriptor = new SingleAttributeIdentifierDescriptor( this, "pk", StandardBasicTypeDescriptors.INSTANCE.INTEGER );
 	}
 
 	public AbstractIdentifiableType(
@@ -31,6 +34,9 @@ public abstract class AbstractIdentifiableType extends AbstractManagedType imple
 			IdentifiableType superType) {
 		super( javaType );
 		this.superType = superType;
+
+		// by default define simple IdentifierDescriptor of Integer type named pk
+		this.identifierDescriptor = new SingleAttributeIdentifierDescriptor( this, "pk", StandardBasicTypeDescriptors.INSTANCE.INTEGER );
 	}
 
 	@Override

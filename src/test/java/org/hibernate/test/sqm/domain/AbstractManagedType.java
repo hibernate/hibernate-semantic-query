@@ -186,16 +186,6 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 			}
 		}
 
-		if ( "id".equals( name ) ) {
-			// for SQM testing we assume id is a singular Long attribute.
-			// for other id types, explicitly register the id attribute with the model (attributesByName)
-			return new PseudoIdAttributeImpl(
-					this,
-					StandardBasicTypeDescriptors.INSTANCE.LONG,
-					SingularAttribute.Classification.BASIC
-			);
-		}
-
 		return null;
 	}
 

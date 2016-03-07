@@ -48,6 +48,8 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 	protected void validateIntermediateAttributeJoin(
 			AttributeBindingSource lhs,
 			Attribute joinedAttribute) {
+		super.validateIntermediateAttributeJoin( lhs, joinedAttribute );
+
 		if ( joinedAttribute instanceof SingularAttribute ) {
 			final SingularAttribute singularAttribute = (SingularAttribute) joinedAttribute;
 			if ( singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.ANY

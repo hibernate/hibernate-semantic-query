@@ -6,6 +6,8 @@
  */
 package org.hibernate.sqm.parser.internal.hql.path;
 
+import java.util.Locale;
+
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
@@ -73,6 +75,30 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 	}
 
 	protected void validateIntermediateAttributeJoin(AttributeBindingSource lhs, Attribute joinedAttributeDescriptor) {
+		if ( !SingularAttribute.class.isInstance( joinedAttributeDescriptor ) ) {
+			throw new SemanticException(
+					String.format(
+							Locale.ROOT,
+							"Attribute [%s -> %s] is plural, cannot be used in path expression",
+							lhs.asLoggableText(),
+							joinedAttributeDescriptor.getName()
+					)
+			);
+		}
+		else {
+			// make sure it is Bindable
+			final SingularAttribute singularAttribute = (SingularAttribute) joinedAttributeDescriptor;
+			if ( singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.BASIC ) {
+				throw new SemanticException(
+						String.format(
+								Locale.ROOT,
+								"Basic SingularAttribute [%s -> %s] cannot be used in path expression",
+								lhs.asLoggableText(),
+								joinedAttributeDescriptor.getName()
+						)
+				);
+			}
+		}
 	}
 
 	protected JoinType getIntermediateJoinType() {

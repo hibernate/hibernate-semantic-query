@@ -35,7 +35,7 @@ import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InTupleListPredicate;
+import org.hibernate.sqm.query.predicate.InListPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -155,7 +155,7 @@ public interface CriteriaVisitor {
 			Subquery subquery,
 			boolean negated);
 
-	InTupleListPredicate visitInTupleListPredicate(
+	InListPredicate visitInTupleListPredicate(
 			javax.persistence.criteria.Expression testExpression,
 			List<javax.persistence.criteria.Expression> listExpressions,
 			boolean negated);

@@ -21,7 +21,6 @@ import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.LiteralNumberFormatException;
-import org.hibernate.sqm.parser.NotYetImplementedException;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.StrictJpaComplianceViolation;
@@ -111,7 +110,7 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InTupleListPredicate;
+import org.hibernate.sqm.query.predicate.InListPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -1062,7 +1061,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				tupleExpressions.add( (Expression) expressionContext.accept( this ) );
 			}
 
-			return new InTupleListPredicate(
+			return new InListPredicate(
 					(Expression) ctx.expression().accept( this ),
 					tupleExpressions
 			);

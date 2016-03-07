@@ -63,7 +63,7 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InTupleListPredicate;
+import org.hibernate.sqm.query.predicate.InListPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -439,11 +439,11 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public InTupleListPredicate visitInTupleListPredicate(InTupleListPredicate predicate) {
-			InTupleListPredicate copy = new InTupleListPredicate(
+		public InListPredicate visitInListPredicate(InListPredicate predicate) {
+			InListPredicate copy = new InListPredicate(
 					(Expression) predicate.getTestExpression().accept( this )
 			);
-			for ( Expression expression : predicate.getTupleListExpressions() ) {
+			for ( Expression expression : predicate.getListExpressions() ) {
 				copy.addExpression( (Expression) expression.accept( this ) );
 			}
 			return copy;

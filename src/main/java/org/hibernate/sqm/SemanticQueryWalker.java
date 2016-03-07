@@ -66,7 +66,7 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InTupleListPredicate;
+import org.hibernate.sqm.query.predicate.InListPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -140,7 +140,7 @@ public interface SemanticQueryWalker<T> {
 
 	T visitNegatedPredicate(NegatedPredicate predicate);
 
-	T visitInTupleListPredicate(InTupleListPredicate predicate);
+	T visitInListPredicate(InListPredicate predicate);
 
 	T visitInSubQueryPredicate(InSubQueryPredicate predicate);
 

@@ -68,7 +68,7 @@ import org.hibernate.sqm.query.predicate.BetweenPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InTupleListPredicate;
+import org.hibernate.sqm.query.predicate.InListPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
@@ -276,9 +276,9 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitInTupleListPredicate(InTupleListPredicate predicate) {
+	public T visitInListPredicate(InListPredicate predicate) {
 		predicate.getTestExpression().accept( this );
-		for ( Expression expression : predicate.getTupleListExpressions() ) {
+		for ( Expression expression : predicate.getListExpressions() ) {
 			expression.accept( this );
 		}
 		return (T) predicate;

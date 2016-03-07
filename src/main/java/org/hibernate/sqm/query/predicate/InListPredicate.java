@@ -16,31 +16,31 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class InTupleListPredicate implements InPredicate {
+public class InListPredicate implements InPredicate {
 	private final Expression testExpression;
-	private final List<Expression> tupleListExpressions;
+	private final List<Expression> listExpressions;
 	private final boolean negated;
 
-	public InTupleListPredicate(Expression testExpression) {
+	public InListPredicate(Expression testExpression) {
 		this( testExpression, new ArrayList<Expression>() );
 	}
 
-	public InTupleListPredicate(Expression testExpression, Expression... tupleListExpressions) {
-		this( testExpression, Helper.toExpandableList( tupleListExpressions ) );
+	public InListPredicate(Expression testExpression, Expression... listExpressions) {
+		this( testExpression, Helper.toExpandableList( listExpressions ) );
 	}
 
-	public InTupleListPredicate(
+	public InListPredicate(
 			Expression testExpression,
-			List<Expression> tupleListExpressions) {
-		this( testExpression, tupleListExpressions, false );
+			List<Expression> listExpressions) {
+		this( testExpression, listExpressions, false );
 	}
 
-	public InTupleListPredicate(
+	public InListPredicate(
 			Expression testExpression,
-			List<Expression> tupleListExpressions,
+			List<Expression> listExpressions,
 			boolean negated) {
 		this.testExpression = testExpression;
-		this.tupleListExpressions = tupleListExpressions;
+		this.listExpressions = listExpressions;
 		this.negated = negated;
 	}
 
@@ -49,12 +49,12 @@ public class InTupleListPredicate implements InPredicate {
 		return testExpression;
 	}
 
-	public List<Expression> getTupleListExpressions() {
-		return tupleListExpressions;
+	public List<Expression> getListExpressions() {
+		return listExpressions;
 	}
 
 	public void addExpression(Expression expression) {
-		tupleListExpressions.add( expression );
+		listExpressions.add( expression );
 	}
 
 	@Override
@@ -64,6 +64,6 @@ public class InTupleListPredicate implements InPredicate {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitInTupleListPredicate( this );
+		return walker.visitInListPredicate( this );
 	}
 }

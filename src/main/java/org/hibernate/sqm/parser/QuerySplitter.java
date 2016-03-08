@@ -383,7 +383,7 @@ public class QuerySplitter {
 		@Override
 		public RelationalPredicate visitRelationalPredicate(RelationalPredicate predicate) {
 			return new RelationalPredicate(
-					predicate.getType(),
+					predicate.getOperator(),
 					(Expression) predicate.getLeftHandExpression().accept( this ),
 					(Expression) predicate.getRightHandExpression().accept( this )
 			);

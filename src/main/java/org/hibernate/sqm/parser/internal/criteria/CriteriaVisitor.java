@@ -141,7 +141,7 @@ public interface CriteriaVisitor {
 
 	RelationalPredicate visitRelationalPredicate(
 			javax.persistence.criteria.Expression expression1,
-			RelationalPredicate.Type type,
+			RelationalPredicate.Operator operator,
 			javax.persistence.criteria.Expression expression2);
 
 	LikePredicate visitLikePredicate(

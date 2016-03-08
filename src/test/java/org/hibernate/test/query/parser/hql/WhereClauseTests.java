@@ -67,7 +67,7 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
 		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
 
-		assertThat( relationalPredicate.getType(), is( RelationalPredicate.Type.EQUAL ) );
+		assertThat( relationalPredicate.getOperator(), is( RelationalPredicate.Operator.EQUAL ) );
 
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerExpression.class ) );
 		assertThat( ( (LiteralIntegerExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 311 ) );
@@ -95,7 +95,7 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
 		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
 
-		assertThat( relationalPredicate.getType(), is( RelationalPredicate.Type.GT ) );
+		assertThat( relationalPredicate.getOperator(), is( RelationalPredicate.Operator.GT ) );
 
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerExpression.class ) );
 		assertThat( ( (LiteralIntegerExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );

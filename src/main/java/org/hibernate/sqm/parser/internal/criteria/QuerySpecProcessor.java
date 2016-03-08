@@ -722,10 +722,10 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 	@Override
 	public RelationalPredicate visitRelationalPredicate(
 			javax.persistence.criteria.Expression expression1,
-			RelationalPredicate.Type type,
+			RelationalPredicate.Operator operator,
 			javax.persistence.criteria.Expression expression2) {
 		return new RelationalPredicate(
-				type,
+				operator,
 				visitExpression( expression1 ),
 				visitExpression( expression2 )
 		);

@@ -12,59 +12,59 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class RelationalPredicate implements Predicate {
-	public enum Type {
+public class RelationalPredicate implements Predicate, NegatablePredicate {
+	public enum Operator {
 		EQUAL {
 			@Override
-			public Type negate() {
+			public Operator negate() {
 				return NOT_EQUAL;
 			}
 		},
 		NOT_EQUAL {
 			@Override
-			public Type negate() {
+			public Operator negate() {
 				return EQUAL;
 			}
 		},
 		GT {
 			@Override
-			public Type negate() {
+			public Operator negate() {
 				return LE;
 			}
 		},
 		GE {
 			@Override
-			public Type negate() {
+			public Operator negate() {
 				return LT;
 			}
 		},
 		LT {
 			@Override
-			public Type negate() {
+			public Operator negate() {
 				return GE;
 			}
 		},
 		LE {
 			@Override
-			public Type negate() {
+			public Operator negate() {
 				return GT;
 			}
 		};
 
-		public abstract Type negate();
+		public abstract Operator negate();
 	}
 
 	private final Expression leftHandExpression;
 	private final Expression rightHandExpression;
-	private Type type;
+	private Operator operator;
 
 	public RelationalPredicate(
-			Type type,
+			Operator operator,
 			Expression leftHandExpression,
 			Expression rightHandExpression) {
 		this.leftHandExpression = leftHandExpression;
 		this.rightHandExpression = rightHandExpression;
-		this.type = type;
+		this.operator = operator;
 	}
 
 	public Expression getLeftHandExpression() {
@@ -75,8 +75,18 @@ public class RelationalPredicate implements Predicate {
 		return rightHandExpression;
 	}
 
-	public Type getType() {
-		return type;
+	public Operator getOperator() {
+		return operator;
+	}
+
+	@Override
+	public boolean isNegated() {
+		return false;
+	}
+
+	@Override
+	public void negate() {
+		this.operator = this.operator.negate();
 	}
 
 	@Override

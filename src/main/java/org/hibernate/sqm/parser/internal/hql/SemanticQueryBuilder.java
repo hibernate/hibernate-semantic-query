@@ -946,7 +946,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public RelationalPredicate visitEqualityPredicate(HqlParser.EqualityPredicateContext ctx) {
 		return new RelationalPredicate(
-				RelationalPredicate.Type.EQUAL,
+				RelationalPredicate.Operator.EQUAL,
 				(Expression) ctx.expression().get( 0 ).accept( this ),
 				(Expression) ctx.expression().get( 1 ).accept( this )
 		);
@@ -955,7 +955,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitInequalityPredicate(HqlParser.InequalityPredicateContext ctx) {
 		return new RelationalPredicate(
-				RelationalPredicate.Type.NOT_EQUAL,
+				RelationalPredicate.Operator.NOT_EQUAL,
 				(Expression) ctx.expression().get( 0 ).accept( this ),
 				(Expression) ctx.expression().get( 1 ).accept( this )
 		);
@@ -964,7 +964,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitGreaterThanPredicate(HqlParser.GreaterThanPredicateContext ctx) {
 		return new RelationalPredicate(
-				RelationalPredicate.Type.GT,
+				RelationalPredicate.Operator.GT,
 				(Expression) ctx.expression().get( 0 ).accept( this ),
 				(Expression) ctx.expression().get( 1 ).accept( this )
 		);
@@ -973,7 +973,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitGreaterThanOrEqualPredicate(HqlParser.GreaterThanOrEqualPredicateContext ctx) {
 		return new RelationalPredicate(
-				RelationalPredicate.Type.GE,
+				RelationalPredicate.Operator.GE,
 				(Expression) ctx.expression().get( 0 ).accept( this ),
 				(Expression) ctx.expression().get( 1 ).accept( this )
 		);
@@ -982,7 +982,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitLessThanPredicate(HqlParser.LessThanPredicateContext ctx) {
 		return new RelationalPredicate(
-				RelationalPredicate.Type.LT,
+				RelationalPredicate.Operator.LT,
 				(Expression) ctx.expression().get( 0 ).accept( this ),
 				(Expression) ctx.expression().get( 1 ).accept( this )
 		);
@@ -991,7 +991,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitLessThanOrEqualPredicate(HqlParser.LessThanOrEqualPredicateContext ctx) {
 		return new RelationalPredicate(
-				RelationalPredicate.Type.LE,
+				RelationalPredicate.Operator.LE,
 				(Expression) ctx.expression().get( 0 ).accept( this ),
 				(Expression) ctx.expression().get( 1 ).accept( this )
 		);

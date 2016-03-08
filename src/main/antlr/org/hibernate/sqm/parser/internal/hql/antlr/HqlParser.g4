@@ -332,22 +332,22 @@ whereClause
 	;
 
 predicate
-	: LEFT_PAREN predicate RIGHT_PAREN					# GroupedPredicate
-	| predicate OR predicate							# OrPredicate
-	| predicate AND predicate							# AndPredicate
-	| NOT predicate										# NegatedPredicate
-	| expression IS (NOT)? NULL							# IsNullPredicate
-	| expression IS (NOT)? EMPTY						# IsEmptyPredicate
-	| expression EQUAL expression						# EqualityPredicate
-	| expression NOT_EQUAL expression					# InequalityPredicate
-	| expression GREATER expression						# GreaterThanPredicate
-	| expression GREATER_EQUAL expression				# GreaterThanOrEqualPredicate
-	| expression LESS expression						# LessThanPredicate
-	| expression LESS_EQUAL expression					# LessThanOrEqualPredicate
-	| expression IN inList								# InPredicate
-	| expression BETWEEN expression AND expression		# BetweenPredicate
-	| expression LIKE expression (likeEscape)?			# LikePredicate
-	| MEMBER OF path									# MemberOfPredicate
+	: LEFT_PAREN predicate RIGHT_PAREN						# GroupedPredicate
+	| predicate OR predicate								# OrPredicate
+	| predicate AND predicate								# AndPredicate
+	| NOT predicate											# NegatedPredicate
+	| expression IS (NOT)? NULL								# IsNullPredicate
+	| expression IS (NOT)? EMPTY							# IsEmptyPredicate
+	| expression EQUAL expression							# EqualityPredicate
+	| expression NOT_EQUAL expression						# InequalityPredicate
+	| expression GREATER expression							# GreaterThanPredicate
+	| expression GREATER_EQUAL expression					# GreaterThanOrEqualPredicate
+	| expression LESS expression							# LessThanPredicate
+	| expression LESS_EQUAL expression						# LessThanOrEqualPredicate
+	| expression (NOT)? IN inList							# InPredicate
+	| expression (NOT)? BETWEEN expression AND expression	# BetweenPredicate
+	| expression (NOT)? LIKE expression (likeEscape)?		# LikePredicate
+	| MEMBER OF path										# MemberOfPredicate
 	;
 
 inList

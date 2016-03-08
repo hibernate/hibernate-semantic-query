@@ -12,11 +12,10 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class LikePredicate implements NegatablePredicate {
+public class LikePredicate extends AbstractNegatablePredicate {
 	private final Expression matchExpression;
 	private final Expression pattern;
 	private final Expression escapeCharacter;
-	private final boolean negated;
 
 	public LikePredicate(
 			Expression matchExpression,
@@ -29,10 +28,10 @@ public class LikePredicate implements NegatablePredicate {
 			Expression matchExpression,
 			Expression pattern,
 			Expression escapeCharacter, boolean negated) {
+		super( negated );
 		this.matchExpression = matchExpression;
 		this.pattern = pattern;
 		this.escapeCharacter = escapeCharacter;
-		this.negated = negated;
 	}
 
 	public LikePredicate(Expression matchExpression, Expression pattern) {
@@ -49,11 +48,6 @@ public class LikePredicate implements NegatablePredicate {
 
 	public Expression getEscapeCharacter() {
 		return escapeCharacter;
-	}
-
-	@Override
-	public boolean isNegated() {
-		return negated;
 	}
 
 	@Override

@@ -16,10 +16,9 @@ import org.hibernate.sqm.query.expression.Expression;
 /**
  * @author Steve Ebersole
  */
-public class InListPredicate implements InPredicate {
+public class InListPredicate extends AbstractNegatablePredicate implements InPredicate {
 	private final Expression testExpression;
 	private final List<Expression> listExpressions;
-	private final boolean negated;
 
 	public InListPredicate(Expression testExpression) {
 		this( testExpression, new ArrayList<Expression>() );
@@ -39,9 +38,9 @@ public class InListPredicate implements InPredicate {
 			Expression testExpression,
 			List<Expression> listExpressions,
 			boolean negated) {
+		super( negated );
 		this.testExpression = testExpression;
 		this.listExpressions = listExpressions;
-		this.negated = negated;
 	}
 
 	@Override
@@ -55,11 +54,6 @@ public class InListPredicate implements InPredicate {
 
 	public void addExpression(Expression expression) {
 		listExpressions.add( expression );
-	}
-
-	@Override
-	public boolean isNegated() {
-		return negated;
 	}
 
 	@Override

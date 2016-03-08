@@ -13,10 +13,9 @@ import org.hibernate.sqm.query.expression.SubQueryExpression;
 /**
  * @author Steve Ebersole
  */
-public class InSubQueryPredicate implements InPredicate {
+public class InSubQueryPredicate extends AbstractNegatablePredicate implements InPredicate {
 	private final Expression testExpression;
 	private final SubQueryExpression subQueryExpression;
-	private final boolean negated;
 
 	public InSubQueryPredicate(
 			Expression testExpression,
@@ -26,10 +25,11 @@ public class InSubQueryPredicate implements InPredicate {
 
 	public InSubQueryPredicate(
 			Expression testExpression,
-			SubQueryExpression subQueryExpression, boolean negated) {
+			SubQueryExpression subQueryExpression,
+			boolean negated) {
+		super( negated );
 		this.testExpression = testExpression;
 		this.subQueryExpression = subQueryExpression;
-		this.negated = negated;
 	}
 
 	@Override
@@ -39,11 +39,6 @@ public class InSubQueryPredicate implements InPredicate {
 
 	public SubQueryExpression getSubQueryExpression() {
 		return subQueryExpression;
-	}
-
-	@Override
-	public boolean isNegated() {
-		return negated;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import org.hibernate.sqm.query.expression.CollectionIndexFunction;
 import org.hibernate.sqm.query.expression.CollectionSizeFunction;
 import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathExpression;
+import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.Predicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 import org.hibernate.test.query.parser.ConsumerContextImpl;
@@ -33,6 +34,30 @@ import static org.junit.Assert.assertThat;
 public class WhereClauseTests {
 
 	private final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
+
+	@Test
+	public void testIsNotNullPredicate() {
+		SelectStatement statement = interpret( "select l from Leg l where l.basicName is not null" );
+		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessPredicate.class ) );
+		NullnessPredicate predicate = (NullnessPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate.isNegated(), is(true) );
+	}
+
+	@Test
+	public void testNotIsNullPredicate() {
+		SelectStatement statement = interpret( "select l from Leg l where not l.basicName is null" );
+		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessPredicate.class ) );
+		NullnessPredicate predicate = (NullnessPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate.isNegated(), is(true) );
+	}
+
+	@Test
+	public void testNotIsNotNullPredicate() {
+		SelectStatement statement = interpret( "select l from Leg l where not l.basicName is not null" );
+		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessPredicate.class ) );
+		NullnessPredicate predicate = (NullnessPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate.isNegated(), is(false) );
+	}
 
 	@Test
 	public void testCollectionSizeFunction() {

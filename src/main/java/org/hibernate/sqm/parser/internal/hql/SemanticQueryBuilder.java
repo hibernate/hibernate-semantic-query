@@ -113,6 +113,7 @@ import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
 import org.hibernate.sqm.query.predicate.InListPredicate;
 import org.hibernate.sqm.query.predicate.LikePredicate;
 import org.hibernate.sqm.query.predicate.MemberOfPredicate;
+import org.hibernate.sqm.query.predicate.NegatablePredicate;
 import org.hibernate.sqm.query.predicate.NegatedPredicate;
 import org.hibernate.sqm.query.predicate.NullnessPredicate;
 import org.hibernate.sqm.query.predicate.OrPredicate;
@@ -899,7 +900,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 	@Override
-	public AndPredicate visitAndPredicate(HqlParser.AndPredicateContext ctx) {
+	public Predicate visitAndPredicate(HqlParser.AndPredicateContext ctx) {
 		return new AndPredicate(
 				(Predicate) ctx.predicate( 0 ).accept( this ),
 				(Predicate) ctx.predicate( 1 ).accept( this )
@@ -907,7 +908,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public OrPredicate visitOrPredicate(HqlParser.OrPredicateContext ctx) {
+	public Predicate visitOrPredicate(HqlParser.OrPredicateContext ctx) {
 		return new OrPredicate(
 				(Predicate) ctx.predicate( 0 ).accept( this ),
 				(Predicate) ctx.predicate( 1 ).accept( this )
@@ -915,22 +916,35 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public NegatedPredicate visitNegatedPredicate(HqlParser.NegatedPredicateContext ctx) {
-		return new NegatedPredicate( (Predicate) ctx.predicate().accept( this ) );
+	public Predicate visitNegatedPredicate(HqlParser.NegatedPredicateContext ctx) {
+		Predicate predicate = (Predicate) ctx.predicate().accept( this );
+		if ( predicate instanceof NegatablePredicate ) {
+			( (NegatablePredicate) predicate ).negate();
+			return predicate;
+		}
+		else {
+			return new NegatedPredicate( predicate );
+		}
 	}
 
 	@Override
 	public NullnessPredicate visitIsNullPredicate(HqlParser.IsNullPredicateContext ctx) {
-		return new NullnessPredicate( (Expression) ctx.expression().accept( this ) );
+		return new NullnessPredicate(
+				(Expression) ctx.expression().accept( this ),
+				ctx.NOT() != null
+		);
 	}
 
 	@Override
 	public EmptinessPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
-		return new EmptinessPredicate( (Expression) ctx.expression().accept( this ) );
+		return new EmptinessPredicate(
+				(Expression) ctx.expression().accept( this ),
+				ctx.NOT() != null
+		);
 	}
 
 	@Override
-	public Object visitEqualityPredicate(HqlParser.EqualityPredicateContext ctx) {
+	public RelationalPredicate visitEqualityPredicate(HqlParser.EqualityPredicateContext ctx) {
 		return new RelationalPredicate(
 				RelationalPredicate.Type.EQUAL,
 				(Expression) ctx.expression().get( 0 ).accept( this ),

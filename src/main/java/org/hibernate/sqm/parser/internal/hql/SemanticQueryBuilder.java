@@ -945,56 +945,122 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public RelationalPredicate visitEqualityPredicate(HqlParser.EqualityPredicateContext ctx) {
-		return new RelationalPredicate(
-				RelationalPredicate.Operator.EQUAL,
-				(Expression) ctx.expression().get( 0 ).accept( this ),
-				(Expression) ctx.expression().get( 1 ).accept( this )
-		);
+		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
+		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+
+		if ( lhs.getInferableType() != null ) {
+			if ( rhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			}
+		}
+
+		if ( rhs.getInferableType() != null ) {
+			if ( lhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			}
+		}
+
+		return new RelationalPredicate( RelationalPredicate.Operator.EQUAL, lhs, rhs );
 	}
 
 	@Override
 	public Object visitInequalityPredicate(HqlParser.InequalityPredicateContext ctx) {
-		return new RelationalPredicate(
-				RelationalPredicate.Operator.NOT_EQUAL,
-				(Expression) ctx.expression().get( 0 ).accept( this ),
-				(Expression) ctx.expression().get( 1 ).accept( this )
-		);
+		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
+		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+
+		if ( lhs.getInferableType() != null ) {
+			if ( rhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			}
+		}
+
+		if ( rhs.getInferableType() != null ) {
+			if ( lhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			}
+		}
+
+		return new RelationalPredicate( RelationalPredicate.Operator.NOT_EQUAL, lhs, rhs );
 	}
 
 	@Override
 	public Object visitGreaterThanPredicate(HqlParser.GreaterThanPredicateContext ctx) {
-		return new RelationalPredicate(
-				RelationalPredicate.Operator.GT,
-				(Expression) ctx.expression().get( 0 ).accept( this ),
-				(Expression) ctx.expression().get( 1 ).accept( this )
-		);
+		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
+		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+
+		if ( lhs.getInferableType() != null ) {
+			if ( rhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			}
+		}
+
+		if ( rhs.getInferableType() != null ) {
+			if ( lhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			}
+		}
+
+		return new RelationalPredicate( RelationalPredicate.Operator.GT, lhs, rhs );
 	}
 
 	@Override
 	public Object visitGreaterThanOrEqualPredicate(HqlParser.GreaterThanOrEqualPredicateContext ctx) {
-		return new RelationalPredicate(
-				RelationalPredicate.Operator.GE,
-				(Expression) ctx.expression().get( 0 ).accept( this ),
-				(Expression) ctx.expression().get( 1 ).accept( this )
-		);
+		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
+		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+
+		if ( lhs.getInferableType() != null ) {
+			if ( rhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			}
+		}
+
+		if ( rhs.getInferableType() != null ) {
+			if ( lhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			}
+		}
+
+		return new RelationalPredicate( RelationalPredicate.Operator.GE, lhs, rhs );
 	}
 
 	@Override
 	public Object visitLessThanPredicate(HqlParser.LessThanPredicateContext ctx) {
-		return new RelationalPredicate(
-				RelationalPredicate.Operator.LT,
-				(Expression) ctx.expression().get( 0 ).accept( this ),
-				(Expression) ctx.expression().get( 1 ).accept( this )
-		);
+		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
+		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+
+		if ( lhs.getInferableType() != null ) {
+			if ( rhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			}
+		}
+
+		if ( rhs.getInferableType() != null ) {
+			if ( lhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			}
+		}
+
+		return new RelationalPredicate( RelationalPredicate.Operator.LT, lhs, rhs );
 	}
 
 	@Override
 	public Object visitLessThanOrEqualPredicate(HqlParser.LessThanOrEqualPredicateContext ctx) {
-		return new RelationalPredicate(
-				RelationalPredicate.Operator.LE,
-				(Expression) ctx.expression().get( 0 ).accept( this ),
-				(Expression) ctx.expression().get( 1 ).accept( this )
-		);
+		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
+		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+
+		if ( lhs.getInferableType() != null ) {
+			if ( rhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			}
+		}
+
+		if ( rhs.getInferableType() != null ) {
+			if ( lhs instanceof ImpliedTypeExpression ) {
+				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			}
+		}
+
+		return new RelationalPredicate( RelationalPredicate.Operator.LE, lhs, rhs );
 	}
 
 	@Override

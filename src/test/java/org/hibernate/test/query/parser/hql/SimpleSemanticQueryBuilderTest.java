@@ -203,7 +203,7 @@ public class SimpleSemanticQueryBuilderTest {
 
 	@Test
 	public void testUncorrelatedSubQueriesInAndPredicate() throws Exception {
-		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
+		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic1 = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
 		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
@@ -346,11 +346,15 @@ public class SimpleSemanticQueryBuilderTest {
 
 		EntityTypeImpl somethingElseType = metamodel.makeEntityType( "com.acme.SomethingElse" );
 		somethingElseType.makeSingularAttribute(
-				"basic",
+				"basic1",
+				StandardBasicTypeDescriptors.INSTANCE.LONG
+		);
+		somethingElseType.makeSingularAttribute(
+				"related1",
 				relatedType
 		);
 		somethingElseType.makeSingularAttribute(
-				"basic1",
+				"related2",
 				relatedType
 		);
 

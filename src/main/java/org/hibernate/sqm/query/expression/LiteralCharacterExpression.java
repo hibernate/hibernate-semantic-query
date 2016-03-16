@@ -24,8 +24,8 @@ public class LiteralCharacterExpression extends AbstractLiteralExpressionImpl<Ch
 
 	@Override
 	protected void validateInferredType(Class javaType) {
-		if ( !Character.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Character" );
+		if ( !Compatibility.areAssignmentCompatible( javaType, char.class ) ) {
+			throw new TypeInferenceException( "Character literal is not convertible to inferred type [" + javaType + "]" );
 		}
 	}
 }

@@ -213,16 +213,13 @@ public class QuerySpecProcessor implements CriteriaVisitor {
 				containerForSelections = container;
 			}
 			else if ( List.class.equals( selectionResultType ) ) {
-				final BasicType<List> listType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( List.class );
-				containerForSelections = DynamicInstantiation.forListInstantiation( listType );
+				containerForSelections = DynamicInstantiation.forListInstantiation();
 			}
 			else if ( Map.class.equals( selectionResultType ) ) {
-				final BasicType<Map> mapType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Map.class );
-				containerForSelections = DynamicInstantiation.forMapInstantiation( mapType );
+				containerForSelections = DynamicInstantiation.forMapInstantiation();
 			}
 			else {
-				final BasicType instantiationType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( selectionResultType );
-				containerForSelections = DynamicInstantiation.forClassInstantiation( instantiationType );
+				containerForSelections = DynamicInstantiation.forClassInstantiation( selectionResultType );
 			}
 
 			for ( Selection<?> nestedSelection : selection.getCompoundSelectionItems() ) {

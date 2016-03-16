@@ -331,20 +331,17 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 		if ( ctx.dynamicInstantiationTarget().MAP() != null ) {
 			final BasicType<Map> mapType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Map.class );
-			dynamicInstantiation = DynamicInstantiation.forMapInstantiation( mapType );
+			dynamicInstantiation = DynamicInstantiation.forMapInstantiation();
 		}
 		else if ( ctx.dynamicInstantiationTarget().LIST() != null ) {
 			final BasicType<List> listType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( List.class );
-			dynamicInstantiation = DynamicInstantiation.forListInstantiation( listType );
+			dynamicInstantiation = DynamicInstantiation.forListInstantiation();
 		}
 		else {
 			final String className = ctx.dynamicInstantiationTarget().dotIdentifierSequence().getText();
 			try {
-				final BasicType instantiationType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType(
-						parsingContext.getConsumerContext().classByName( className )
-				);
-
-				dynamicInstantiation = DynamicInstantiation.forClassInstantiation( instantiationType );
+				final Class targetJavaType = parsingContext.getConsumerContext().classByName( className );
+				dynamicInstantiation = DynamicInstantiation.forClassInstantiation( targetJavaType );
 			}
 			catch (ClassNotFoundException e) {
 				throw new SemanticException( "Unable to resolve class named for dynamic instantiation : " + className );

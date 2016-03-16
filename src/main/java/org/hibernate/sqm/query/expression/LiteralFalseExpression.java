@@ -24,8 +24,8 @@ public class LiteralFalseExpression extends AbstractLiteralExpressionImpl<Boolea
 
 	@Override
 	protected void validateInferredType(Class javaType) {
-		if ( !Boolean.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Boolean" );
+		if ( !Compatibility.areAssignmentCompatible( javaType, boolean.class ) ) {
+			throw new TypeInferenceException( "Boolean (false) literal is not convertible to inferred type [" + javaType + "]" );
 		}
 	}
 }

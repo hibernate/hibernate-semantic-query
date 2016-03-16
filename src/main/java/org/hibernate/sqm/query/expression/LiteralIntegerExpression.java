@@ -24,8 +24,8 @@ public class LiteralIntegerExpression extends AbstractLiteralExpressionImpl<Inte
 
 	@Override
 	protected void validateInferredType(Class javaType) {
-		if ( !Integer.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Integer" );
+		if ( !Compatibility.areAssignmentCompatible( javaType, Integer.class ) ) {
+			throw new TypeInferenceException( "Integer literal is not convertible to inferred type [" + javaType + "]" );
 		}
 	}
 }

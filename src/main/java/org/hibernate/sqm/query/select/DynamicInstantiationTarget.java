@@ -26,11 +26,11 @@ public interface DynamicInstantiationTarget<T> {
 	Nature getNature();
 
 	/**
-	 * For {@link Nature#CLASS} this will return the descriptor for the Class to be instantiated.  For
-	 * {@link Nature#MAP} and {@link Nature#LIST} this will return the descriptor for {@code Map.class}
+	 * For {@link Nature#CLASS} this will return the Class to be instantiated.  For
+	 * {@link Nature#MAP} and {@link Nature#LIST} this will return {@code Map.class}
 	 * and {@code List.class} respectively.
 	 *
 	 * @return The type to be instantiated.
 	 */
-	Type getTargetType();
+	Class getJavaType();
 }

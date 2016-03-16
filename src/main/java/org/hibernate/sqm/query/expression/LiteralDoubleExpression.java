@@ -24,8 +24,8 @@ public class LiteralDoubleExpression extends AbstractLiteralExpressionImpl<Doubl
 
 	@Override
 	protected void validateInferredType(Class javaType) {
-		if ( !Double.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Double" );
+		if ( !Compatibility.areAssignmentCompatible( javaType, double.class ) ) {
+			throw new TypeInferenceException( "Double literal is not convertible to inferred type [" + javaType + "]" );
 		}
 	}
 }

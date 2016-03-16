@@ -24,8 +24,8 @@ public class LiteralFloatExpression extends AbstractLiteralExpressionImpl<Float>
 
 	@Override
 	protected void validateInferredType(Class javaType) {
-		if ( !Float.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Float" );
+		if ( !Compatibility.areAssignmentCompatible( javaType, float.class ) ) {
+			throw new TypeInferenceException( "Float literal is not convertible to inferred type [" + javaType + "]" );
 		}
 	}
 }

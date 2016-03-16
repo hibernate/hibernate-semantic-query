@@ -18,37 +18,26 @@ import org.hibernate.sqm.query.expression.Expression;
 
 import org.jboss.logging.Logger;
 
+import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.CLASS;
+import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.LIST;
+import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.MAP;
+
 /**
  * @author Steve Ebersole
  */
 public class DynamicInstantiation implements Expression, AliasedExpressionContainer<DynamicInstantiationArgument> {
 	private static final Logger log = Logger.getLogger( DynamicInstantiation.class );
 
-	public static DynamicInstantiation forClassInstantiation(Type type) {
-		return new DynamicInstantiation(
-				new DynamicInstantiationTargetImpl(
-						DynamicInstantiationTarget.Nature.CLASS,
-						type
-				)
-		);
+	public static DynamicInstantiation forClassInstantiation(Class targetJavaType) {
+		return new DynamicInstantiation( new DynamicInstantiationTargetImpl( CLASS, targetJavaType ) );
 	}
 
-	public static DynamicInstantiation forMapInstantiation(BasicType<Map> mapType) {
-		return new DynamicInstantiation(
-				new DynamicInstantiationTargetImpl(
-						DynamicInstantiationTarget.Nature.MAP,
-						mapType
-				)
-		);
+	public static DynamicInstantiation forMapInstantiation() {
+		return new DynamicInstantiation( new DynamicInstantiationTargetImpl( MAP, Map.class ) );
 	}
 
-	public static DynamicInstantiation forListInstantiation(BasicType<List> listType) {
-		return new DynamicInstantiation(
-				new DynamicInstantiationTargetImpl(
-						DynamicInstantiationTarget.Nature.LIST,
-						listType
-				)
-		);
+	public static DynamicInstantiation forListInstantiation() {
+		return new DynamicInstantiation( new DynamicInstantiationTargetImpl( LIST, List.class ) );
 	}
 
 	private final DynamicInstantiationTarget instantiationTarget;
@@ -59,8 +48,18 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 	}
 
 	@Override
-	public Type getExpressionType() {
-		return instantiationTarget.getTargetType();
+	public BasicType getExpressionType() {
+		return new BasicType() {
+			@Override
+			public Class getJavaType() {
+				return instantiationTarget.getJavaType();
+			}
+
+			@Override
+			public String getTypeName() {
+				return instantiationTarget.getJavaType().getName();
+			}
+		};
 	}
 
 	@Override
@@ -77,7 +76,7 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 	}
 
 	public void addArgument(DynamicInstantiationArgument argument) {
-		if ( instantiationTarget.getNature() == DynamicInstantiationTarget.Nature.LIST ) {
+		if ( instantiationTarget.getNature() == LIST ) {
 			// really should not have an alias...
 			if ( argument.getAlias() != null ) {
 				log.debugf(
@@ -88,7 +87,7 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 				);
 			}
 		}
-		else if ( instantiationTarget.getNature() == DynamicInstantiationTarget.Nature.MAP ) {
+		else if ( instantiationTarget.getNature() == MAP ) {
 			// must(?) have an alias...
 			log.warnf(
 					"Argument [%s] for dynamic Map instantiation did not declare an 'injection alias' [%s] " +
@@ -128,12 +127,12 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 
 	private static class DynamicInstantiationTargetImpl implements DynamicInstantiationTarget {
 		private final Nature nature;
-		private final Type typeDescriptor;
+		private final Class javaType;
 
 
-		public DynamicInstantiationTargetImpl(Nature nature, Type typeDescriptor) {
+		public DynamicInstantiationTargetImpl(Nature nature, Class javaType) {
 			this.nature = nature;
-			this.typeDescriptor = typeDescriptor;
+			this.javaType = javaType;
 		}
 
 		@Override
@@ -142,8 +141,8 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 		}
 
 		@Override
-		public Type getTargetType() {
-			return typeDescriptor;
+		public Class getJavaType() {
+			return javaType;
 		}
 	}
 }

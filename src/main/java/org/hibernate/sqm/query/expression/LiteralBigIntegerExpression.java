@@ -26,6 +26,7 @@ public class LiteralBigIntegerExpression extends AbstractLiteralExpressionImpl<B
 
 	@Override
 	protected void validateInferredType(Class javaType) {
+		// Consider BigDecimal/BigInteger for Compatibility
 		if ( !BigInteger.class.equals( javaType ) ) {
 			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to BigInteger" );
 		}

@@ -24,8 +24,8 @@ public class LiteralLongExpression extends AbstractLiteralExpressionImpl<Long> {
 
 	@Override
 	protected void validateInferredType(Class javaType) {
-		if ( !Long.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to Long" );
+		if ( !Compatibility.areAssignmentCompatible( javaType, long.class ) ) {
+			throw new TypeInferenceException( "Long literal is not convertible to inferred type [" + javaType + "]" );
 		}
 	}
 }

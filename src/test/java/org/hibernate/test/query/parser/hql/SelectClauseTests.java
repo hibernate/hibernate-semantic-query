@@ -6,11 +6,13 @@
  */
 package org.hibernate.test.query.parser.hql;
 
-import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.StrictJpaComplianceViolation;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.QuerySpec;
@@ -221,8 +223,8 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.CLASS )
 		);
 		assertThat(
-				dynamicInstantiation.getInstantiationTarget().getTargetType().getTypeName(),
-				equalTo( DTO.class.getName() )
+				dynamicInstantiation.getInstantiationTarget().getJavaType(),
+				CoreMatchers.<Class>equalTo( DTO.class )
 		);
 
 		assertEquals( 3, dynamicInstantiation.getArguments().size() );
@@ -244,8 +246,8 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.CLASS )
 		);
 		assertThat(
-				nestedInstantiation.getInstantiationTarget().getTargetType().getTypeName(),
-				equalTo( DTO.class.getName() )
+				nestedInstantiation.getInstantiationTarget().getJavaType(),
+				CoreMatchers.<Class>equalTo( DTO.class )
 		);
 
 	}
@@ -264,8 +266,8 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.LIST )
 		);
 		assertThat(
-				instantiation.getInstantiationTarget().getTargetType(),
-				CoreMatchers.<Type>sameInstance( StandardBasicTypeDescriptors.INSTANCE.LIST )
+				instantiation.getInstantiationTarget().getJavaType(),
+				CoreMatchers.<Class>equalTo( List.class )
 		);
 
 		assertEquals( 2, instantiation.getArguments().size() );
@@ -293,8 +295,8 @@ public class SelectClauseTests {
 				equalTo( DynamicInstantiationTarget.Nature.MAP )
 		);
 		assertThat(
-				instantiation.getInstantiationTarget().getTargetType(),
-				CoreMatchers.<Type>sameInstance( StandardBasicTypeDescriptors.INSTANCE.MAP )
+				instantiation.getInstantiationTarget().getJavaType(),
+				CoreMatchers.<Class>equalTo( Map.class )
 		);
 
 		assertEquals( 2, instantiation.getArguments().size() );

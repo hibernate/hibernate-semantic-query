@@ -7,7 +7,6 @@
 package org.hibernate.test.sqm.domain;
 
 import org.hibernate.sqm.domain.EmbeddableType;
-import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.IdentifiableType;
 import org.hibernate.sqm.domain.IdentifierDescriptorSingleAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;

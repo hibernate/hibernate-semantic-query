@@ -11,7 +11,7 @@ not supported
  	`select a.from from from Appointment a` is illegal because of the attempt to use `from` as result variable.  However,
  	`select a.from as from from Appointment a` is but legal, albeit silly. Additionally, we always check JPA strict 
  	compliance and throw an exception if any reserved word is used as an identifier per spec 
- 	(4.4.2 Identification Variables and 4.4.1 Identifiers).  See `org.hibernate.test.query.parser.hql.KeywordAsIdentifierTest`
+ 	(4.4.2 Identification Variables and 4.4.1 Identifiers).  See `org.hibernate.test.sqm.parser.hql.KeywordAsIdentifierTest`
 
  	
 

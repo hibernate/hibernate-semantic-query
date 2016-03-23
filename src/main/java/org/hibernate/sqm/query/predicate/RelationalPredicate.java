@@ -26,28 +26,28 @@ public class RelationalPredicate implements Predicate, NegatablePredicate {
 				return EQUAL;
 			}
 		},
-		GT {
+		GREATER_THAN {
 			@Override
 			public Operator negate() {
-				return LE;
+				return LESS_THAN_OR_EQUAL;
 			}
 		},
-		GE {
+		GREATER_THAN_OR_EQUAL {
 			@Override
 			public Operator negate() {
-				return LT;
+				return LESS_THAN;
 			}
 		},
-		LT {
+		LESS_THAN {
 			@Override
 			public Operator negate() {
-				return GE;
+				return GREATER_THAN_OR_EQUAL;
 			}
 		},
-		LE {
+		LESS_THAN_OR_EQUAL {
 			@Override
 			public Operator negate() {
-				return GT;
+				return GREATER_THAN;
 			}
 		};
 

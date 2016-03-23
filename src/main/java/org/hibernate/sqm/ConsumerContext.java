@@ -23,7 +23,7 @@ public interface ConsumerContext {
 	DomainMetamodel getDomainMetamodel();
 
 	/**
-	 * Resolve any (potential) non-entity class reference encountered in the query.
+	 * Resolve any (potential) non-entity class reference encountered in the sqm.
 	 *
 	 * @param name The name of the class to locate
 	 *

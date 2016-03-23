@@ -7,7 +7,7 @@
 package org.hibernate.sqm.parser;
 
 /**
- * Represents an error in the semantics (meaning) of the passed query.
+ * Represents an error in the semantics (meaning) of the passed sqm.
  *
  * @author Steve Ebersole
  */

@@ -65,6 +65,7 @@ import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
+import org.hibernate.sqm.query.predicate.BooleanExpressionPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
@@ -85,10 +86,11 @@ import org.hibernate.sqm.query.set.SetClause;
 /**
  * @author Steve Ebersole
  */
+@SuppressWarnings({"unchecked", "WeakerAccess"})
 public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
 	public T visitStatement(Statement statement) {
-		return (T) statement.accept( this );
+		return statement.accept( this );
 	}
 
 	@Override
@@ -292,9 +294,17 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
+	public T visitBooleanExpressionPredicate(BooleanExpressionPredicate predicate) {
+		predicate.getBooleanExpression().accept( this );
+		return (T) predicate;
+	}
+
+	@Override
 	public T visitOrderByClause(OrderByClause orderByClause) {
-		for ( SortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
-			visitSortSpecification( sortSpecification );
+		if ( orderByClause.getSortSpecifications() != null ) {
+			for ( SortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
+				visitSortSpecification( sortSpecification );
+			}
 		}
 		return (T) orderByClause;
 	}

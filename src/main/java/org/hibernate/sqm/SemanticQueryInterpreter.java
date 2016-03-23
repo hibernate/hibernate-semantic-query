@@ -11,14 +11,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 
 import org.hibernate.sqm.parser.InterpretationException;
-import org.hibernate.sqm.parser.NotYetImplementedException;
 import org.hibernate.sqm.parser.QueryException;
-import org.hibernate.sqm.parser.internal.ParsingContext;
-import org.hibernate.sqm.parser.internal.criteria.OrderByProcessor;
-import org.hibernate.sqm.parser.internal.criteria.QuerySpecProcessor;
-import org.hibernate.sqm.parser.internal.hql.HqlParseTreeBuilder;
-import org.hibernate.sqm.parser.internal.hql.antlr.HqlParser;
-import org.hibernate.sqm.parser.internal.hql.SemanticQueryBuilder;
+import org.hibernate.sqm.parser.common.ParsingContext;
+import org.hibernate.sqm.parser.criteria.internal.CriteriaInterpreter;
+import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
+import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
+import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
@@ -31,12 +29,12 @@ import org.hibernate.sqm.query.UpdateStatement;
  */
 public class SemanticQueryInterpreter {
 	/**
-	 * Performs the interpretation of a HQL/JPQL query string.
+	 * Performs the interpretation of a HQL/JPQL sqm string.
 	 *
-	 * @param query The HQL/JPQL query to interpret
+	 * @param query The HQL/JPQL sqm to interpret
 	 * @param consumerContext Callback information
 	 *
-	 * @return The semantic representation of the incoming query.
+	 * @return The semantic representation of the incoming sqm.
 	 */
 	public static Statement interpret(String query, ConsumerContext consumerContext) {
 		final ParsingContext parsingContext = new ParsingContext( consumerContext );
@@ -44,9 +42,9 @@ public class SemanticQueryInterpreter {
 		// first, ask Antlr to build the parse tree
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( query );
 
-		// then we perform semantic analysis and building the semantic representation...
+		// then we perform semantic analysis and build the semantic representation...
 		try {
-			return new SemanticQueryBuilder( parsingContext ).visitStatement( parser.statement() );
+			return SemanticQueryBuilder.buildSemanticModel( parser.statement(), parsingContext );
 		}
 		catch (QueryException e) {
 			throw e;
@@ -57,43 +55,36 @@ public class SemanticQueryInterpreter {
 	}
 
 	/**
-	 * Perform the interpretation of a (select) criteria query.
+	 * Perform the interpretation of a (select) criteria sqm.
 	 *
-	 * @param query The criteria query
+	 * @param query The criteria sqm
 	 * @param consumerContext Callback information
 	 *
-	 * @return The semantic representation of the incoming query.
+	 * @return The semantic representation of the incoming sqm.
 	 */
 	public static SelectStatement interpret(CriteriaQuery query, ConsumerContext consumerContext) {
-		final ParsingContext parsingContext = new ParsingContext( consumerContext );
-		final QuerySpecProcessor rootQuerySpecProcessor = QuerySpecProcessor.buildRootQuerySpecProcessor( parsingContext );
-
-		final SelectStatement selectStatement = new SelectStatement();
-		selectStatement.applyQuerySpec( rootQuerySpecProcessor.visitQuerySpec( query ) );
-		selectStatement.applyOrderByClause( OrderByProcessor.processOrderBy( rootQuerySpecProcessor, query ) );
-
-		return selectStatement;
+		return CriteriaInterpreter.interpretSelectCriteria( query, new ParsingContext( consumerContext ) );
 	}
 
 	/**
-	 * Perform the interpretation of a (delete) criteria query.
+	 * Perform the interpretation of a (delete) criteria sqm.
 	 *
-	 * @param query The criteria query
+	 * @param query The criteria sqm
 	 * @param consumerContext Callback information
 	 *
-	 * @return The semantic representation of the incoming query.
+	 * @return The semantic representation of the incoming sqm.
 	 */
 	public static DeleteStatement interpret(CriteriaDelete query, ConsumerContext consumerContext) {
 		throw new NotYetImplementedException();
 	}
 
 	/**
-	 * Perform the interpretation of a (update) criteria query.
+	 * Perform the interpretation of a (update) criteria sqm.
 	 *
-	 * @param query The criteria query
+	 * @param query The criteria sqm
 	 * @param consumerContext Callback information
 	 *
-	 * @return The semantic representation of the incoming query.
+	 * @return The semantic representation of the incoming sqm.
 	 */
 	public static UpdateStatement interpret(CriteriaUpdate query, ConsumerContext consumerContext) {
 		throw new NotYetImplementedException();

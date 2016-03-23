@@ -92,7 +92,7 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 			log.warnf(
 					"Argument [%s] for dynamic Map instantiation did not declare an 'injection alias' [%s] " +
 							"but such aliases are needed for dynamic Map instantiations; " +
-							"will likely cause problems later translating query",
+							"will likely cause problems later translating sqm",
 					argument.getExpression().toString(),
 					argument.getAlias()
 			);

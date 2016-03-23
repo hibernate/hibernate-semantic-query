@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 /**
- * Represents a literal value in the query, e.g.<ul>
+ * Represents a literal value in the sqm, e.g.<ul>
  *     <li>1</li>
  *     <li>'some string'</li>
  *     <li>some.JavaClass.CONSTANT</li>

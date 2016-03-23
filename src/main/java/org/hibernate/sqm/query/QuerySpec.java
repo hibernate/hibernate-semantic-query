@@ -13,7 +13,7 @@ import org.hibernate.sqm.query.predicate.WhereClauseContainer;
 import org.hibernate.sqm.query.select.SelectClause;
 
 /**
- * Defines the commonality between a root query and a subquery.
+ * Defines the commonality between a root sqm and a subquery.
  *
  * @author Steve Ebersole
  */

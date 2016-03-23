@@ -79,7 +79,7 @@ tasks.withType( JavaCompile ).each {
 }
 
 tasks.generateGrammarSource {
-	outputDirectory = file( "${outputDirectory}/org/hibernate/sqm/parser/internal/hql/antlr" )
+	outputDirectory = file( "${outputDirectory}/org/hibernate/sqm/parser/hql/internal/antlr" )
 	// ugh!  https://discuss.gradle.org/t/antlr-v4-visitor-generation/10017/1
 	if ( arguments == null ) {
 		arguments = ['-visitor']

@@ -63,6 +63,7 @@ import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndPredicate;
 import org.hibernate.sqm.query.predicate.BetweenPredicate;
+import org.hibernate.sqm.query.predicate.BooleanExpressionPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessPredicate;
 import org.hibernate.sqm.query.predicate.GroupedPredicate;
 import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
@@ -143,6 +144,8 @@ public interface SemanticQueryWalker<T> {
 	T visitInListPredicate(InListPredicate predicate);
 
 	T visitInSubQueryPredicate(InSubQueryPredicate predicate);
+
+	T visitBooleanExpressionPredicate(BooleanExpressionPredicate predicate);
 
 	T visitOrderByClause(OrderByClause orderByClause);
 

@@ -9,7 +9,7 @@ package org.hibernate.sqm.path;
 import org.hibernate.sqm.domain.Attribute;
 
 /**
- * Represents an Attribute binding (reference) in the query.
+ * Represents an Attribute binding (reference) in the sqm.
  *
  * @author Steve Ebersole
  */

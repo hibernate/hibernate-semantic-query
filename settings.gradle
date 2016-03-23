@@ -1,5 +1,5 @@
 // Rename the root project in Gradle terms.  This allows the
-// "nicer" `hibernate-semantic-query` name to be used in as
+// "nicer" `hibernate-semantic-sqm` name to be used in as
 // the git repo name, but the more concise `hibernate-sqm`
 // name to be used for the artifact(s)
 rootProject.name = 'hibernate-sqm'

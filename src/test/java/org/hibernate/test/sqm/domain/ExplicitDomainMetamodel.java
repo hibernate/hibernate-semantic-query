@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.TemporalType;
 
+import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.EntityType;
@@ -143,5 +144,10 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 			throw new IllegalArgumentException( "Per JPA spec : no entity named " + name );
 		}
 		return entityType;
+	}
+
+	@Override
+	public BasicType resolveCastTargetType(String name) {
+		throw new NotYetImplementedException(  );
 	}
 }

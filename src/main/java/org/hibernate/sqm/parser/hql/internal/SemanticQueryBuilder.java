@@ -63,6 +63,8 @@ import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
+import org.hibernate.sqm.query.expression.function.CastFunctionExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionExpression;
 import org.hibernate.sqm.query.expression.function.CountFunction;
 import org.hibernate.sqm.query.expression.function.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
@@ -84,6 +86,7 @@ import org.hibernate.sqm.query.expression.LiteralTrueExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyPathExpression;
 import org.hibernate.sqm.query.expression.MaxElementFunction;
+import org.hibernate.sqm.query.expression.function.LowerFunctionExpression;
 import org.hibernate.sqm.query.expression.function.MaxFunction;
 import org.hibernate.sqm.query.expression.MaxIndexFunction;
 import org.hibernate.sqm.query.expression.MinElementFunction;
@@ -95,8 +98,11 @@ import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
+import org.hibernate.sqm.query.expression.function.SubstringFunctionExpression;
 import org.hibernate.sqm.query.expression.function.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
+import org.hibernate.sqm.query.expression.function.TrimFunctionExpression;
+import org.hibernate.sqm.query.expression.function.UpperFunctionExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -1379,10 +1385,28 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public Binding visitCollectionReference(HqlParser.CollectionReferenceContext ctx) {
-		final Binding pathResolution = (Binding) ctx.path().accept( this );
-		if ( !PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
+		return toPluralAttributeBinding( ctx.path() );
+	}
+
+	protected Binding toPluralAttributeBinding(HqlParser.PathContext ctx) {
+		final Binding binding = (Binding) ctx.accept( this );
+		if ( !PluralAttribute.class.isInstance( binding.getBoundModelType() ) ) {
 			throw new SemanticException(
 					"Expecting a collection (plural attribute) reference, but specified path [" +
+							ctx.getText() + "] resolved to " + binding
+			);
+		}
+
+		return binding;
+	}
+
+	@Override
+	public Binding visitMapReference(HqlParser.MapReferenceContext ctx) {
+		final Binding pathResolution = toPluralAttributeBinding( ctx.path() );
+		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
+		if ( pluralAttribute.getCollectionClassification() != PluralAttribute.CollectionClassification.MAP ) {
+			throw new SemanticException(
+					"Expecting a persistent-Map (plural attribute) reference, but specified path [" +
 							ctx.path().getText() + "] resolved to " + pathResolution
 			);
 		}
@@ -1846,11 +1870,20 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
+	public GenericFunctionExpression visitJpaNonStandardFunction(HqlParser.JpaNonStandardFunctionContext ctx) {
+		final String functionName = ctx.nonStandardFunctionName().getText();
+		final List<Expression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
+
+		// todo : integrate some form of SqlFunction look-up using the ParsingContext so we can resolve the "type"
+		return new GenericFunctionExpression( functionName, null, functionArguments );
+	}
+
+	@Override
 	public GenericFunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation(
 					"Encountered non-compliant non-standard function call [" +
-							ctx.nonStandardFunctionName() + "], but strict JPQL compliance was requested",
+							ctx.nonStandardFunctionName() + "], but strict JPQL compliance was requested; use JPA's FUNCTION(functionName[,...]) syntax name instead",
 					StrictJpaComplianceViolation.Type.FUNCTION_CALL
 			);
 		}
@@ -1889,6 +1922,24 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
+	public CastFunctionExpression visitCastFunction(HqlParser.CastFunctionContext ctx) {
+		return new CastFunctionExpression(
+				(Expression) ctx.expression().accept( this ),
+				parsingContext.getConsumerContext().getDomainMetamodel().resolveCastTargetType( ctx.dataType().IDENTIFIER().getText() )
+		);
+	}
+
+	@Override
+	public ConcatFunctionExpression visitConcatFunction(HqlParser.ConcatFunctionContext ctx) {
+		final List<Expression> arguments = new ArrayList<Expression>();
+		for ( HqlParser.ExpressionContext argument : ctx.expression() ) {
+			arguments.add( (Expression) argument.accept( this ) );
+		}
+
+		return new ConcatFunctionExpression( (BasicType) arguments.get( 0 ).getExpressionType(), arguments );
+	}
+
+	@Override
 	public AggregateFunction visitCountFunction(HqlParser.CountFunctionContext ctx) {
 		final BasicType longType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class );
 		if ( ctx.ASTERISK() != null ) {
@@ -1924,6 +1975,16 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
+	public SubstringFunctionExpression visitSubstringFunction(HqlParser.SubstringFunctionContext ctx) {
+		final Expression source = (Expression) ctx.expression().accept( this );
+		final Expression start = (Expression) ctx.substringFunctionStartArgument().accept( this );
+		final Expression length = ctx.substringFunctionLengthArgument() == null
+				? null
+				: (Expression) ctx.substringFunctionLengthArgument().accept( this );
+		return new SubstringFunctionExpression( (BasicType) source.getExpressionType(), source, start, length );
+	}
+
+	@Override
 	public SumFunction visitSumFunction(HqlParser.SumFunctionContext ctx) {
 		final Expression expr = (Expression) ctx.expression().accept( this );
 		return new SumFunction(
@@ -1933,6 +1994,69 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						(BasicType) expr.getExpressionType(),
 						parsingContext.getConsumerContext()
 				)
+		);
+	}
+
+	@Override
+	public TrimFunctionExpression visitTrimFunction(HqlParser.TrimFunctionContext ctx) {
+		final Expression source = (Expression) ctx.expression().accept( this );
+		return new TrimFunctionExpression(
+				(BasicType) source.getExpressionType(),
+				visitTrimSpecification( ctx.trimSpecification() ),
+				visitTrimCharacter( ctx.trimCharacter() ),
+				source
+		);
+	}
+
+	@Override
+	public TrimFunctionExpression.Specification visitTrimSpecification(HqlParser.TrimSpecificationContext ctx) {
+		if ( ctx.LEADING() != null ) {
+			return TrimFunctionExpression.Specification.LEADING;
+		}
+		else if ( ctx.TRAILING() != null ) {
+			return TrimFunctionExpression.Specification.TRAILING;
+		}
+
+		// JPA says the default is BOTH
+		return TrimFunctionExpression.Specification.BOTH;
+	}
+
+	@Override
+	public LiteralCharacterExpression visitTrimCharacter(HqlParser.TrimCharacterContext ctx) {
+		if ( ctx.CHARACTER_LITERAL() != null ) {
+			final String trimCharText = ctx.CHARACTER_LITERAL().getText();
+			if ( trimCharText.length() != 1 ) {
+				throw new SemanticException( "Expecting [trim character] for TRIM function to be  single character, found : " + trimCharText );
+			}
+			return new LiteralCharacterExpression( trimCharText.charAt( 0 ), parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
+		}
+		if ( ctx.STRING_LITERAL() != null ) {
+			final String trimCharText = ctx.STRING_LITERAL().getText();
+			if ( trimCharText.length() != 1 ) {
+				throw new SemanticException( "Expecting [trim character] for TRIM function to be  single character, found : " + trimCharText );
+			}
+			return new LiteralCharacterExpression( trimCharText.charAt( 0 ), parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
+		}
+
+		// JPA says space is the default
+		return new LiteralCharacterExpression( ' ',  parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
+	}
+
+	@Override
+	public UpperFunctionExpression visitUpperFunction(HqlParser.UpperFunctionContext ctx) {
+		final Expression expression = (Expression) ctx.expression().accept( this );
+		return new UpperFunctionExpression(
+				(BasicType) expression.getExpressionType(),
+				expression
+		);
+	}
+
+	@Override
+	public LowerFunctionExpression visitLowerFunction(HqlParser.LowerFunctionContext ctx) {
+		final Expression expression = (Expression) ctx.expression().accept( this );
+		return new LowerFunctionExpression(
+				(BasicType) expression.getExpressionType(),
+				expression
 		);
 	}
 

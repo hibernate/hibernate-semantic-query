@@ -26,6 +26,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionExpression;
 import org.hibernate.sqm.query.expression.function.CountFunction;
 import org.hibernate.sqm.query.expression.function.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
@@ -667,6 +668,16 @@ public class QuerySplitter {
 					(Expression) expression.getLeftHandOperand().accept( this ),
 					(Expression) expression.getRightHandOperand().accept( this )
 			);
+		}
+
+		@Override
+		public ConcatFunctionExpression visitConcatFunction(ConcatFunctionExpression expression) {
+			final List<Expression> arguments = new ArrayList<Expression>();
+			for ( Expression argument : expression.getExpressions() ) {
+				arguments.add( (Expression) argument.accept( this ) );
+			}
+
+			return new ConcatFunctionExpression( expression.getFunctionResultType(), arguments );
 		}
 
 		@Override

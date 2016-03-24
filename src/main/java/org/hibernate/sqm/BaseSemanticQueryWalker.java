@@ -25,6 +25,7 @@ import org.hibernate.sqm.query.expression.CollectionValuePathExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionExpression;
 import org.hibernate.sqm.query.expression.function.CountFunction;
 import org.hibernate.sqm.query.expression.function.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
@@ -44,6 +45,7 @@ import org.hibernate.sqm.query.expression.LiteralTrueExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyPathExpression;
 import org.hibernate.sqm.query.expression.MaxElementFunction;
+import org.hibernate.sqm.query.expression.function.LowerFunctionExpression;
 import org.hibernate.sqm.query.expression.function.MaxFunction;
 import org.hibernate.sqm.query.expression.MaxIndexFunction;
 import org.hibernate.sqm.query.expression.MinElementFunction;
@@ -53,8 +55,11 @@ import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.NullifExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
+import org.hibernate.sqm.query.expression.function.SubstringFunctionExpression;
 import org.hibernate.sqm.query.expression.function.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
+import org.hibernate.sqm.query.expression.function.TrimFunctionExpression;
+import org.hibernate.sqm.query.expression.function.UpperFunctionExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
@@ -490,6 +495,14 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
+	public T visitConcatFunction(ConcatFunctionExpression expression) {
+		for ( Expression argument : expression.getExpressions() ) {
+			argument.accept( this );
+		}
+		return (T) expression;
+	}
+
+	@Override
 	public T visitConstantEnumExpression(ConstantEnumExpression expression) {
 		return (T) expression;
 	}
@@ -526,6 +539,26 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 
 	@Override
 	public T visitNullifExpression(NullifExpression expression) {
+		return (T) expression;
+	}
+
+	@Override
+	public T visitSubstringFunction(SubstringFunctionExpression expression) {
+		return (T) expression;
+	}
+
+	@Override
+	public T visitTrimFunction(TrimFunctionExpression expression) {
+		return (T) expression;
+	}
+
+	@Override
+	public T visitLowerFunction(LowerFunctionExpression expression) {
+		return (T) expression;
+	}
+
+	@Override
+	public T visitUpperFunction(UpperFunctionExpression expression) {
 		return (T) expression;
 	}
 }

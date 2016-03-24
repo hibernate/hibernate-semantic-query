@@ -19,4 +19,6 @@ public interface DomainMetamodel {
 
 	EntityType resolveEntityType(Class javaType);
 	EntityType resolveEntityType(String name);
+
+	BasicType resolveCastTargetType(String name);
 }

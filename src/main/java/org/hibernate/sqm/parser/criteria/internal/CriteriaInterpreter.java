@@ -9,6 +9,7 @@ package org.hibernate.sqm.parser.criteria.internal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,24 +40,33 @@ import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.ExpressionImplementor;
-import org.hibernate.sqm.parser.criteria.spi.PredicateImplementor;
+import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.SelectionImplementor;
+import org.hibernate.sqm.parser.criteria.spi.expression.function.CastFunctionCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
+import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.AvgFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
+import org.hibernate.sqm.query.expression.function.CastFunctionExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
-import org.hibernate.sqm.query.expression.CountFunction;
-import org.hibernate.sqm.query.expression.CountStarFunction;
+import org.hibernate.sqm.query.expression.function.CountFunction;
+import org.hibernate.sqm.query.expression.function.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.FunctionExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterExpression;
@@ -69,13 +79,13 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
-import org.hibernate.sqm.query.expression.MaxFunction;
-import org.hibernate.sqm.query.expression.MinFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunction;
+import org.hibernate.sqm.query.expression.function.MinFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.ParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
-import org.hibernate.sqm.query.expression.SumFunction;
+import org.hibernate.sqm.query.expression.function.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -320,93 +330,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// Expressions
 
 	private Expression visitExpression(javax.persistence.criteria.Expression<?> expression) {
-		return ( (ExpressionImplementor) expression ).visitExpression( this );
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> LiteralExpression<T> visitLiteral(T value) {
-		if ( value == null ) {
-			return (LiteralExpression<T>) new LiteralNullExpression();
-		}
-
-		return visitLiteral(
-				value,
-				(BasicType<T>) parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( value.getClass() )
-		);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> LiteralExpression<T> visitLiteral(T value, BasicType<T> typeDescriptor) {
-		assert typeDescriptor != null : "BasicTypeDescriptor passed cannot be null";
-
-		if ( value == null ) {
-			return (LiteralExpression<T>) new LiteralNullExpression();
-		}
-
-		if ( Boolean.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			if ( (Boolean) value ) {
-				return (LiteralExpression<T>) new LiteralTrueExpression( (BasicType<Boolean>) typeDescriptor );
-			}
-			else {
-				return (LiteralExpression<T>) new LiteralFalseExpression( (BasicType<Boolean>) typeDescriptor );
-			}
-		}
-		else if ( Integer.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralIntegerExpression(
-					(Integer) value,
-					(BasicType<Integer>) typeDescriptor
-			);
-		}
-		else if ( Long.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralLongExpression(
-					(Long) value,
-					(BasicType<Long>) typeDescriptor
-			);
-		}
-		else if ( Float.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralFloatExpression(
-					(Float) value,
-					(BasicType<Float>) typeDescriptor
-			);
-		}
-		else if ( Double.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralDoubleExpression(
-					(Double) value,
-					(BasicType<Double>) typeDescriptor
-			);
-		}
-		else if ( BigInteger.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralBigIntegerExpression(
-					(BigInteger) value,
-					(BasicType<BigInteger>) typeDescriptor
-			);
-		}
-		else if ( BigDecimal.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralBigDecimalExpression(
-					(BigDecimal) value,
-					(BasicType<BigDecimal>) typeDescriptor
-			);
-		}
-		else if ( Character.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralCharacterExpression(
-					(Character) value,
-					(BasicType<Character>) typeDescriptor
-			);
-		}
-		else if ( String.class.isAssignableFrom( typeDescriptor.getJavaType() ) ) {
-			return (LiteralExpression<T>) new LiteralStringExpression(
-					(String) value,
-					(BasicType<String>) typeDescriptor
-			);
-		}
-
-		throw new QueryException(
-				"Unexpected literal expression [value=" + value +
-						", javaType=" + typeDescriptor.getJavaType().getName() +
-						"]; expecting boolean, int, long, float, double, BigInteger, BigDecimal, char, or String"
-		);
+		return ( (CriteriaExpression) expression ).visitExpression( this );
 	}
 
 	@Override
@@ -434,29 +358,6 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	@Override
 	public <T> ConstantFieldExpression<T> visitConstant(T value, BasicType<T> typeDescriptor) {
 		return new ConstantFieldExpression<T>( value, typeDescriptor );
-	}
-
-	@Override
-	public ParameterExpression visitParameter(javax.persistence.criteria.ParameterExpression param) {
-		return visitParameter(
-				param,
-				// we assume basic types here.  I *think* JPA only allows basic types, but double check
-				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( param.getParameterType() )
-		);
-	}
-
-	@Override
-	public ParameterExpression visitParameter(
-			javax.persistence.criteria.ParameterExpression param,
-			Type typeDescriptor) {
-		if ( isNotEmpty( param.getName() ) ) {
-			return new NamedParameterExpression( param.getName(), typeDescriptor );
-		}
-		else if ( param.getPosition() != null ) {
-			return new PositionalParameterExpression( param.getPosition(), typeDescriptor );
-		}
-
-		throw new QueryException( "ParameterExpression did not define name nor position" );
 	}
 
 	@Override
@@ -531,7 +432,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public FunctionExpression visitFunction(
+	public GenericFunctionExpression visitFunction(
 			String name,
 			BasicType resultTypeDescriptor,
 			List<javax.persistence.criteria.Expression<?>> expressions) {
@@ -540,11 +441,11 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			sqmExpressions.add( visitExpression( expression ) );
 		}
 
-		return new FunctionExpression( name, resultTypeDescriptor, sqmExpressions );
+		return new GenericFunctionExpression( name, resultTypeDescriptor, sqmExpressions );
 	}
 
 	@Override
-	public FunctionExpression visitFunction(
+	public GenericFunctionExpression visitFunction(
 			String name,
 			BasicType resultTypeDescriptor,
 			javax.persistence.criteria.Expression<?>... expressions) {
@@ -557,7 +458,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			}
 
 		}
-		return new FunctionExpression(
+		return new GenericFunctionExpression(
 				name,
 				resultTypeDescriptor,
 				arguments
@@ -701,11 +602,11 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	private Predicate visitPredicate(javax.persistence.criteria.Predicate predicate) {
-		return ( (PredicateImplementor) predicate ).visitPredicate( this );
+		return ( (CriteriaPredicate) predicate ).visitPredicate( this );
 	}
 
 	private Predicate visitPredicate(javax.persistence.criteria.Expression<Boolean> predicate) {
-		return ( (PredicateImplementor) predicate ).visitPredicate( this );
+		return ( (CriteriaPredicate) predicate ).visitPredicate( this );
 	}
 
 	@Override
@@ -763,16 +664,6 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public NegatedPredicate visitPredicateNegation(javax.persistence.criteria.Expression<Boolean> expression) {
-		return new NegatedPredicate( visitPredicate( expression ) );
-	}
-
-	@Override
-	public NullnessPredicate visitNullnessPredicate(javax.persistence.criteria.Expression expression, boolean negated) {
-		return new NullnessPredicate( visitExpression( expression ), negated );
-	}
-
-	@Override
 	public EmptinessPredicate visitEmptinessPredicate(From attributeSource, String attributeName, boolean negated) {
 		final AttributeReferenceExpression attributeReference = visitAttributeReference( attributeSource, attributeName );
 		return new EmptinessPredicate( attributeReference, negated );
@@ -794,18 +685,6 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 				visitExpression( lowerBound ),
 				visitExpression( upperBound ),
 				negated
-		);
-	}
-
-	@Override
-	public RelationalPredicate visitRelationalPredicate(
-			javax.persistence.criteria.Expression expression1,
-			RelationalPredicate.Operator operator,
-			javax.persistence.criteria.Expression expression2) {
-		return new RelationalPredicate(
-				operator,
-				visitExpression( expression1 ),
-				visitExpression( expression2 )
 		);
 	}
 
@@ -853,8 +732,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public BooleanExpressionPredicate visitBooleanExpressionPredicate(javax.persistence.criteria.Expression<Boolean> expression) {
-		return new BooleanExpressionPredicate( visitExpression( expression ) );
+	public BooleanExpressionPredicate visitBooleanExpressionPredicate(BooleanExpressionCriteriaPredicate predicate) {
+		return new BooleanExpressionPredicate( visitExpression( predicate.getOperand() ) );
 	}
 
 	@Override
@@ -864,4 +743,139 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 		return fromElement;
 	}
+
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// New sigs
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> LiteralExpression<T> visitLiteral(LiteralCriteriaExpression expression) {
+		if ( expression.getLiteral() == null ) {
+			return (LiteralExpression<T>) new LiteralNullExpression();
+		}
+
+		final Class literalJavaType = expression.getJavaType();
+		if ( Boolean.class.isAssignableFrom( literalJavaType ) ) {
+			if ( (Boolean) expression.getLiteral() ) {
+				return (LiteralExpression<T>) new LiteralTrueExpression( (BasicType<Boolean>) expression.getLiteral() );
+			}
+			else {
+				return (LiteralExpression<T>) new LiteralFalseExpression( (BasicType<Boolean>) expression.getLiteral() );
+			}
+		}
+		else if ( Integer.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralIntegerExpression(
+					(Integer) expression.getLiteral(),
+					(BasicType<Integer>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( Long.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralLongExpression(
+					(Long) expression.getLiteral(),
+					(BasicType<Long>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( Float.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralFloatExpression(
+					(Float) expression.getLiteral(),
+					(BasicType<Float>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( Double.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralDoubleExpression(
+					(Double) expression.getLiteral(),
+					(BasicType<Double>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( BigInteger.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralBigIntegerExpression(
+					(BigInteger) expression.getLiteral(),
+					(BasicType<BigInteger>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( BigDecimal.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralBigDecimalExpression(
+					(BigDecimal) expression.getLiteral(),
+					(BasicType<BigDecimal>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( Character.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralCharacterExpression(
+					(Character) expression.getLiteral(),
+					(BasicType<Character>) expression.getExpressionSqmType()
+			);
+		}
+		else if ( String.class.isAssignableFrom( literalJavaType ) ) {
+			return (LiteralExpression<T>) new LiteralStringExpression(
+					(String) expression.getLiteral(),
+					(BasicType<String>) expression.getExpressionSqmType()
+			);
+		}
+
+		throw new QueryException(
+				"Unexpected literal expression [value=" + expression.getLiteral() +
+						", javaType=" + literalJavaType.getName() +
+						"]; expecting boolean, int, long, float, double, BigInteger, BigDecimal, char, or String"
+		);
+	}
+
+	@Override
+	public <T> ParameterExpression visitParameter(ParameterCriteriaExpression<T> expression) {
+		if ( isNotEmpty( expression.getName() ) ) {
+			return new NamedParameterExpression( expression.getName(), expression.getExpressionSqmType() );
+		}
+		else if ( expression.getPosition() != null ) {
+			return new PositionalParameterExpression( expression.getPosition(), expression.getExpressionSqmType() );
+		}
+
+		throw new QueryException( "ParameterExpression did not define name nor position" );
+	}
+
+	@Override
+	public <T,Y> CastFunctionExpression visitCastFunction(CastFunctionCriteriaExpression<T,Y> function) {
+		return new CastFunctionExpression(
+				function.getExpressionToCast().visitExpression( this ),
+				function.getFunctionResultType()
+		);
+	}
+
+	@Override
+	public <T> GenericFunctionExpression visitGenericFunction(GenericFunctionCriteriaExpression<T> function) {
+		final List<Expression> arguments;
+		if ( function.getArguments() != null && !function.getArguments().isEmpty() ) {
+			arguments = new ArrayList<Expression>();
+			for ( CriteriaExpression<?> argument : function.getArguments() ) {
+				arguments.add( argument.visitExpression( this ) );
+			}
+		}
+		else {
+			arguments = Collections.emptyList();
+		}
+		return new GenericFunctionExpression(
+				function.getFunctionName(),
+				function.getFunctionResultType(),
+				arguments
+		);
+	}
+
+	@Override
+	public RelationalPredicate visitRelationalPredicate(ComparisonCriteriaPredicate predicate) {
+		return new RelationalPredicate(
+				predicate.getComparisonOperator(),
+				visitExpression( predicate.getLeftHandOperand() ),
+				visitExpression( predicate.getRightHandOperand() )
+		);
+	}
+
+	@Override
+	public NegatedPredicate visitNegatedPredicate(NegatedCriteriaPredicate predicate) {
+		return new NegatedPredicate( visitPredicate( predicate.getPredicateToBeNegated() ) );
+	}
+
+	@Override
+	public NullnessPredicate visitNullnessPredicate(NullnessCriteriaPredicate predicate) {
+		return new NullnessPredicate( visitExpression( predicate.getOperand() ) );
+	}
+
 }

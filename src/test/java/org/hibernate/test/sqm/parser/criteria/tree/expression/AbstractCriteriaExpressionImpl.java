@@ -13,6 +13,9 @@ import java.util.Collection;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
+
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.CastFunction;
 
@@ -21,19 +24,33 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.function.CastFunct
  *
  * @author Steve Ebersole
  */
-public abstract class ExpressionImpl<T>
+public abstract class AbstractCriteriaExpressionImpl<T>
 		extends SelectionImpl<T>
 		implements ExpressionImplementor<T>, Serializable {
-	public ExpressionImpl(CriteriaBuilderImpl criteriaBuilder, Class<T> javaType) {
+	private Type sqmType;
+
+	public AbstractCriteriaExpressionImpl(
+			CriteriaBuilderImpl criteriaBuilder,
+			Type sqmType,
+			Class<T> javaType) {
 		super( criteriaBuilder, javaType );
+	}
+
+	@Override
+	public Type getExpressionSqmType() {
+		return sqmType;
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
 	public <X> Expression<X> as(Class<X> type) {
-		return type.equals( getJavaType() )
-				? (Expression<X>) this
-				: new CastFunction<X, T>( criteriaBuilder(), type, this );
+		if ( type.equals( getJavaType() ) ) {
+			return (Expression<X>) this;
+		}
+		else {
+			final BasicType targetSqmType = criteriaBuilder().consumerContext().getDomainMetamodel().getBasicType( type );
+			return new CastFunction<X, T>( this, targetSqmType, type, criteriaBuilder() );
+		}
 	}
 
 	@Override

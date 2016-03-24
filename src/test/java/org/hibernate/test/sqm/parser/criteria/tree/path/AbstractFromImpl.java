@@ -49,12 +49,14 @@ public abstract class AbstractFromImpl<Z, X>
 	private Set<Join<X, ?>> joins;
 	private Set<Fetch<X, ?>> fetches;
 
-	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, Class<X> javaType) {
-		this( criteriaBuilder, javaType, null );
+	public AbstractFromImpl(
+			CriteriaBuilderImpl criteriaBuilder,
+			org.hibernate.sqm.domain.Type sqmType, Class<X> javaType) {
+		this( criteriaBuilder, sqmType, javaType, null );
 	}
 
-	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, Class<X> javaType, PathSource pathSource) {
-		super( criteriaBuilder, javaType, pathSource );
+	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, org.hibernate.sqm.domain.Type sqmType, Class<X> javaType, PathSource pathSource) {
+		super( criteriaBuilder, sqmType, javaType, pathSource );
 	}
 
 	@Override

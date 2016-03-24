@@ -9,9 +9,11 @@ package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 import java.io.Serializable;
 import javax.persistence.criteria.Expression;
 
+import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.query.predicate.Predicate;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -23,29 +25,26 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  */
 public class BooleanExpressionPredicate
 		extends AbstractSimplePredicate
-		implements Serializable {
-	private final Expression<Boolean> expression;
+		implements BooleanExpressionCriteriaPredicate, Serializable {
+	private final CriteriaExpression<Boolean> expression;
 	private final Boolean assertedValue;
 
-	public BooleanExpressionPredicate(CriteriaBuilderImpl criteriaBuilder, Expression<Boolean> expression) {
+	public BooleanExpressionPredicate(CriteriaBuilderImpl criteriaBuilder, CriteriaExpression<Boolean> expression) {
 		this( criteriaBuilder, expression, Boolean.TRUE );
 	}
 
+	@SuppressWarnings("unchecked")
 	public BooleanExpressionPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
-			Expression<Boolean> expression,
+			CriteriaExpression<Boolean> expression,
 			Boolean assertedValue) {
-		super( criteriaBuilder );
+		super( criteriaBuilder, (BasicType<Boolean>) expression.getExpressionSqmType() );
 		this.expression = expression;
 		this.assertedValue = assertedValue;
 	}
 
-	/**
-	 * Get the boolean expression defining the predicate.
-	 * 
-	 * @return The underlying boolean expression.
-	 */
-	public Expression<Boolean> getExpression() {
+	@Override
+	public CriteriaExpression<Boolean> getOperand() {
 		return expression;
 	}
 
@@ -55,6 +54,6 @@ public class BooleanExpressionPredicate
 
 	@Override
 	public Predicate visitPredicate(CriteriaVisitor visitor) {
-		return visitor.visitBooleanExpressionPredicate( expression );
+		return visitor.visitBooleanExpressionPredicate( this );
 	}
 }

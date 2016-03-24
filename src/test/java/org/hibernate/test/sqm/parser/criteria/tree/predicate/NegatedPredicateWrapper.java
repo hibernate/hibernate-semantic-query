@@ -14,22 +14,30 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 
 /**
  * @author Steve Ebersole
  */
-public class NegatedPredicateWrapper extends ExpressionImpl<Boolean> implements PredicateImplementor, Serializable {
+public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Boolean>
+		implements PredicateImplementor, NegatedCriteriaPredicate, Serializable {
 	private final PredicateImplementor predicate;
 	private final BooleanOperator negatedOperator;
 	private final List<Expression<Boolean>> negatedExpressions;
 
 	@SuppressWarnings("unchecked")
 	public NegatedPredicateWrapper(PredicateImplementor predicate) {
-		super( predicate.criteriaBuilder(), Boolean.class );
+		super(
+				predicate.criteriaBuilder(),
+				( (CriteriaExpression) predicate ).getExpressionSqmType(),
+				Boolean.class
+		);
 		this.predicate = predicate;
 		this.negatedOperator = predicate.isJunction()
 				? CompoundPredicate.reverseOperator( predicate.getOperator() )
@@ -88,12 +96,17 @@ public class NegatedPredicateWrapper extends ExpressionImpl<Boolean> implements 
 
 	@Override
 	public org.hibernate.sqm.query.predicate.Predicate visitPredicate(CriteriaVisitor visitor) {
-		return visitor.visitPredicateNegation( predicate );
+		return visitor.visitNegatedPredicate( this );
 	}
 
 	@Override
 	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
 		throw new UnsupportedOperationException( "Predicates cannot be used as select expression" );
 
+	}
+
+	@Override
+	public CriteriaPredicate getPredicateToBeNegated() {
+		return predicate;
 	}
 }

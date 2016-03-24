@@ -8,11 +8,16 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
 import java.io.Serializable;
 
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.function.CastFunctionCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.function.FunctionCriteriaExpression;
 import org.hibernate.sqm.query.expression.Expression;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 
 
 /**
@@ -25,29 +30,27 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
  */
 public class CastFunction<T,Y>
 		extends AbstractFunctionExpression<T>
-		implements FunctionExpression<T>, Serializable {
-	public static final String CAST_NAME = "cast";
+		implements CastFunctionCriteriaExpression<T,Y>, Serializable {
+	public static final String NAME = "cast";
 
-	private final ExpressionImpl<Y> castSource;
+	private final AbstractCriteriaExpressionImpl<Y> expressionToCast;
 
 	public CastFunction(
-			CriteriaBuilderImpl criteriaBuilder,
+			AbstractCriteriaExpressionImpl<Y> expressionToCast,
+			BasicType<T> castTargetType,
 			Class<T> javaType,
-			ExpressionImpl<Y> castSource) {
-		super( criteriaBuilder, CAST_NAME, javaType );
-		this.castSource = castSource;
+			CriteriaBuilderImpl criteriaBuilder) {
+		super( NAME, castTargetType, javaType, criteriaBuilder );
+		this.expressionToCast = expressionToCast;
 	}
 
-	public ExpressionImpl<Y> getCastSource() {
-		return castSource;
+	@Override
+	public CriteriaExpression<Y> getExpressionToCast() {
+		return expressionToCast;
 	}
 
 	@Override
 	public Expression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitFunction(
-				CAST_NAME,
-				criteriaBuilder().consumerContext().getDomainMetamodel().getBasicType( getJavaType() ),
-				getCastSource()
-		);
+		return visitor.visitCastFunction( this );
 	}
 }

@@ -8,12 +8,14 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
 import java.io.Serializable;
 
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.parser.criteria.spi.expression.function.FunctionCriteriaExpression;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 
 /**
  * Models the basic concept of a SQL function.
@@ -21,16 +23,17 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
  * @author Steve Ebersole
  */
 public abstract class AbstractFunctionExpression<X>
-		extends ExpressionImpl<X>
-		implements FunctionExpression<X>, Serializable {
+		extends AbstractCriteriaExpressionImpl<X>
+		implements FunctionCriteriaExpression<X>, Serializable {
 
 	private final String functionName;
 
 	public AbstractFunctionExpression(
-			CriteriaBuilderImpl criteriaBuilder,
 			String functionName,
-			Class<X> javaType) {
-		super( criteriaBuilder, javaType );
+			BasicType sqmType,
+			Class<X> javaType,
+			CriteriaBuilderImpl criteriaBuilder) {
+		super( criteriaBuilder, sqmType, javaType );
 		this.functionName = functionName;
 	}
 
@@ -41,6 +44,17 @@ public abstract class AbstractFunctionExpression<X>
 	@Override
 	public String getFunctionName() {
 		return functionName;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public BasicType<X> getExpressionSqmType() {
+		return (BasicType<X>) super.getExpressionSqmType();
+	}
+
+	@Override
+	public BasicType<X> getFunctionResultType() {
+		return getExpressionSqmType();
 	}
 
 	@Override

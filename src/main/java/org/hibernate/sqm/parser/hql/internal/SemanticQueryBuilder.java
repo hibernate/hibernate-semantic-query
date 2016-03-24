@@ -50,9 +50,9 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-import org.hibernate.sqm.query.expression.AggregateFunction;
+import org.hibernate.sqm.query.expression.function.AggregateFunction;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.AvgFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedExpression;
 import org.hibernate.sqm.query.expression.CoalesceExpression;
@@ -63,11 +63,11 @@ import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
-import org.hibernate.sqm.query.expression.CountFunction;
-import org.hibernate.sqm.query.expression.CountStarFunction;
+import org.hibernate.sqm.query.expression.function.CountFunction;
+import org.hibernate.sqm.query.expression.function.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.FunctionExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionExpression;
 import org.hibernate.sqm.query.expression.ImpliedTypeExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
@@ -84,10 +84,10 @@ import org.hibernate.sqm.query.expression.LiteralTrueExpression;
 import org.hibernate.sqm.query.expression.MapEntryFunction;
 import org.hibernate.sqm.query.expression.MapKeyPathExpression;
 import org.hibernate.sqm.query.expression.MaxElementFunction;
-import org.hibernate.sqm.query.expression.MaxFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunction;
 import org.hibernate.sqm.query.expression.MaxIndexFunction;
 import org.hibernate.sqm.query.expression.MinElementFunction;
-import org.hibernate.sqm.query.expression.MinFunction;
+import org.hibernate.sqm.query.expression.function.MinFunction;
 import org.hibernate.sqm.query.expression.MinIndexFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.NullifExpression;
@@ -95,7 +95,7 @@ import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
-import org.hibernate.sqm.query.expression.SumFunction;
+import org.hibernate.sqm.query.expression.function.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
@@ -1846,7 +1846,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public FunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
+	public GenericFunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation(
 					"Encountered non-compliant non-standard function call [" +
@@ -1859,7 +1859,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final List<Expression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
 
 		// todo : integrate some form of SqlFunction look-up using the ParsingContext so we can resolve the "type"
-		return new FunctionExpression( functionName, null, functionArguments );
+		return new GenericFunctionExpression( functionName, null, functionArguments );
 	}
 
 	@Override

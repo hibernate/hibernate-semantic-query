@@ -8,12 +8,13 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import javax.persistence.criteria.Expression;
+
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 
 /**
  * @author Steve Ebersole
  */
-public interface ExpressionImplementor<T> extends Expression<T>, org.hibernate.sqm.parser.criteria.spi.ExpressionImplementor<T> {
+public interface ExpressionImplementor<T> extends CriteriaExpression<T> {
 	/**
 	 * See {@link javax.persistence.criteria.CriteriaBuilder#toLong}
 	 *

@@ -7,9 +7,10 @@
 package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
-import javax.persistence.criteria.ParameterExpression;
 
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
 import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
@@ -22,41 +23,46 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  * @author Steve Ebersole
  */
 public class ParameterExpressionImpl<T>
-		extends ExpressionImpl<T>
-		implements ParameterExpression<T>, Serializable {
+		extends AbstractCriteriaExpressionImpl<T>
+		implements ParameterCriteriaExpression<T>, Serializable {
 	private final String name;
 	private final Integer position;
 
 	public ParameterExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
+			Type sqmType,
 			Class<T> javaType,
 			String name) {
-		super( criteriaBuilder, javaType );
+		super( criteriaBuilder, sqmType, javaType );
 		this.name = name;
 		this.position = null;
 	}
 
 	public ParameterExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
+			Type sqmType,
 			Class<T> javaType,
 			Integer position) {
-		super( criteriaBuilder, javaType );
+		super( criteriaBuilder, sqmType, javaType );
 		this.name = null;
 		this.position = position;
 	}
 
 	public ParameterExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
+			Type sqmType,
 			Class<T> javaType) {
-		super( criteriaBuilder, javaType );
+		super( criteriaBuilder, sqmType, javaType );
 		this.name = null;
 		this.position = null;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public Integer getPosition() {
 		return position;
 	}
@@ -67,10 +73,7 @@ public class ParameterExpressionImpl<T>
 
 	@Override
 	public Expression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitParameter(
-				this,
-				criteriaBuilder().consumerContext().getDomainMetamodel().getBasicType( getParameterType() )
-		);
+		return visitor.visitParameter( this );
 	}
 
 	@Override

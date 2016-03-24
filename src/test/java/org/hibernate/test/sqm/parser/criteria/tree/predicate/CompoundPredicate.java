@@ -39,7 +39,7 @@ public class CompoundPredicate
 	 * as a conjunction or disjunction.
 	 */
 	public CompoundPredicate(CriteriaBuilderImpl criteriaBuilder, BooleanOperator operator) {
-		super( criteriaBuilder );
+		super( criteriaBuilder, criteriaBuilder.consumerContext().getDomainMetamodel().getBasicType( Boolean.class ) );
 		this.operator = operator;
 	}
 

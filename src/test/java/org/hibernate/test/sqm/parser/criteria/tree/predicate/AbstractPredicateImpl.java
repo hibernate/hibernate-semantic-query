@@ -11,11 +11,12 @@ import java.util.List;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Selection;
 
+import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 
 /**
  * Basic template support for {@link Predicate} implementors providing
@@ -24,11 +25,11 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
  * @author Steve Ebersole
  */
 public abstract class AbstractPredicateImpl
-		extends ExpressionImpl<Boolean>
+		extends AbstractCriteriaExpressionImpl<Boolean>
 		implements PredicateImplementor, Serializable {
 
-	protected AbstractPredicateImpl(CriteriaBuilderImpl criteriaBuilder) {
-		super( criteriaBuilder, Boolean.class );
+	protected AbstractPredicateImpl(CriteriaBuilderImpl criteriaBuilder, BasicType<Boolean> sqmType) {
+		super( criteriaBuilder, sqmType, Boolean.class );
 	}
 
 	public boolean isNegated() {

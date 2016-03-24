@@ -9,6 +9,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 import java.io.Serializable;
 
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
@@ -21,11 +22,15 @@ import org.hibernate.test.sqm.parser.criteria.tree.path.AbstractPathImpl;
  *
  * @author Steve Ebersole
  */
-public class PathTypeExpression<T> extends ExpressionImpl<T> implements Serializable {
+public class PathTypeExpression<T> extends AbstractCriteriaExpressionImpl<T> implements Serializable {
 	private final AbstractPathImpl<T> pathImpl;
 
-	public PathTypeExpression(CriteriaBuilderImpl criteriaBuilder, Class<T> javaType, AbstractPathImpl<T> pathImpl) {
-		super( criteriaBuilder, javaType );
+	public PathTypeExpression(
+			CriteriaBuilderImpl criteriaBuilder,
+			Type sqmType,
+			Class<T> javaType,
+			AbstractPathImpl<T> pathImpl) {
+		super( criteriaBuilder, sqmType, javaType );
 		this.pathImpl = pathImpl;
 	}
 

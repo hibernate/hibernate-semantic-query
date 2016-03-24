@@ -36,6 +36,9 @@ import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.expression.CompoundSelectionImpl;
@@ -221,7 +224,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			return ( (Predicate) expression );
 		}
 		else {
-			return new BooleanExpressionPredicate( this, expression );
+			return new BooleanExpressionPredicate( this, (CriteriaExpression<Boolean>) expression );
 		}
 	}
 
@@ -267,7 +270,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 		if ( Predicate.class.isInstance( expression ) ) {
 			return (Predicate) expression;
 		}
-		return new BooleanExpressionPredicate( this, expression );
+		return new BooleanExpressionPredicate( this, (CriteriaExpression<Boolean>) expression );
 	}
 
 	@Override
@@ -277,12 +280,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			predicate.not();
 			return predicate;
 		}
-		return new BooleanExpressionPredicate( this, expression, Boolean.FALSE );
+		return new BooleanExpressionPredicate( this, (CriteriaExpression<Boolean>) expression, Boolean.FALSE );
 	}
 
 	@Override
 	public Predicate isNull(Expression<?> x) {
-		return new NullnessPredicate( this, x );
+		return new NullnessPredicate( this, (CriteriaExpression<?>) x );
 	}
 
 	@Override
@@ -293,31 +296,56 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate equal(Expression<?> x, Expression<?> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.EQUAL,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate notEqual(Expression<?> x, Expression<?> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.NOT_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.NOT_EQUAL,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate equal(Expression<?> x, Object y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.EQUAL,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate notEqual(Expression<?> x, Object y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.NOT_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.NOT_EQUAL,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public <Y extends Comparable<? super Y>> Predicate greaterThan(Expression<? extends Y> x, Expression<? extends Y> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
@@ -325,7 +353,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate lessThan(
 			Expression<? extends Y> x,
 			Expression<? extends Y> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
@@ -333,7 +366,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThanOrEqualTo(
 			Expression<? extends Y> x,
 			Expression<? extends Y> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
@@ -341,7 +379,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate lessThanOrEqualTo(
 			Expression<? extends Y> x,
 			Expression<? extends Y> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
@@ -349,7 +392,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThan(
 			Expression<? extends Y> x,
 			Y y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
@@ -357,7 +405,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate lessThan(
 			Expression<? extends Y> x,
 			Y y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
@@ -365,7 +418,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThanOrEqualTo(
 			Expression<? extends Y> x,
 			Y y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
@@ -373,55 +431,99 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public<Y extends Comparable<? super Y>> Predicate lessThanOrEqualTo(
 			Expression<? extends Y> x,
 			Y y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate gt(Expression<? extends Number> x, Expression<? extends Number> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate lt(Expression<? extends Number> x, Expression<? extends Number> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate ge(Expression<? extends Number> x, Expression<? extends Number> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate le(Expression<? extends Number> x, Expression<? extends Number> y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this, RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				(CriteriaExpression<?>) y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate gt(Expression<? extends Number> x, Number y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate lt(Expression<? extends Number> x, Number y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate ge(Expression<? extends Number> x, Number y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate le(Expression<? extends Number> x, Number y) {
-		return new ComparisonPredicate( this, RelationalPredicate.Operator.LESS_THAN_OR_EQUAL, x, y );
+		return new ComparisonPredicate(
+				this,
+				RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				(CriteriaExpression<?>) x,
+				y
+		);
 	}
 
 	@Override
@@ -534,12 +636,14 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 
 	@Override
 	public <T> ParameterExpression<T> parameter(Class<T> paramClass) {
-		return new ParameterExpressionImpl<T>( this, paramClass );
+		final Type sqmType = consumerContext().getDomainMetamodel().getBasicType( paramClass );
+		return new ParameterExpressionImpl<T>( this, sqmType, paramClass );
 	}
 
 	@Override
 	public <T> ParameterExpression<T> parameter(Class<T> paramClass, String name) {
-		return new ParameterExpressionImpl<T>( this, paramClass, name );
+		final Type sqmType = consumerContext().getDomainMetamodel().getBasicType( paramClass );
+		return new ParameterExpressionImpl<T>( this, sqmType, paramClass, name );
 	}
 
 	@Override
@@ -626,11 +730,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 
 	@Override
 	public <T> Expression<T> function(String name, Class<T> returnType, Expression<?>... arguments) {
+		final BasicType<T> returnSqmType = consumerContext().getDomainMetamodel().getBasicType( returnType );
 		return new GenericFunctionExpression<T>(
-				this,
 				name,
+				returnSqmType,
 				returnType,
-				arguments
+				this,
+				(CriteriaExpression<?>[]) arguments
 		);
 	}
 
@@ -643,7 +749,8 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 * @return The function expression
 	 */
 	public <T> Expression<T> function(String name, Class<T> returnType) {
-		return new GenericFunctionExpression<T>( this, name, returnType );
+		final BasicType<T> returnSqmType = consumerContext().getDomainMetamodel().getBasicType( returnType );
+		return new GenericFunctionExpression<T>( name, returnSqmType, returnType, this );
 	}
 
 	@Override

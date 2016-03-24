@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.sqm.BaseSemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.parser.ParsingException;
@@ -22,16 +21,16 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.AvgFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunction;
 import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
 import org.hibernate.sqm.query.expression.ConcatExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldExpression;
-import org.hibernate.sqm.query.expression.CountFunction;
-import org.hibernate.sqm.query.expression.CountStarFunction;
+import org.hibernate.sqm.query.expression.function.CountFunction;
+import org.hibernate.sqm.query.expression.function.CountStarFunction;
 import org.hibernate.sqm.query.expression.EntityTypeExpression;
 import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.FunctionExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterExpression;
@@ -43,12 +42,12 @@ import org.hibernate.sqm.query.expression.LiteralLongExpression;
 import org.hibernate.sqm.query.expression.LiteralNullExpression;
 import org.hibernate.sqm.query.expression.LiteralStringExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueExpression;
-import org.hibernate.sqm.query.expression.MaxFunction;
-import org.hibernate.sqm.query.expression.MinFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunction;
+import org.hibernate.sqm.query.expression.function.MinFunction;
 import org.hibernate.sqm.query.expression.NamedParameterExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterExpression;
 import org.hibernate.sqm.query.expression.SubQueryExpression;
-import org.hibernate.sqm.query.expression.SumFunction;
+import org.hibernate.sqm.query.expression.function.SumFunction;
 import org.hibernate.sqm.query.expression.UnaryOperationExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
@@ -521,12 +520,12 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public FunctionExpression visitFunctionExpression(FunctionExpression expression) {
+		public GenericFunctionExpression visitGenericFunction(GenericFunctionExpression expression) {
 			List<Expression> argumentsCopy = new ArrayList<Expression>();
 			for ( Expression argument : expression.getArguments() ) {
 				argumentsCopy.add( (Expression) argument.accept( this ) );
 			}
-			return new FunctionExpression(
+			return new GenericFunctionExpression(
 					expression.getFunctionName(),
 					expression.getExpressionType(),
 					argumentsCopy

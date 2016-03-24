@@ -10,11 +10,14 @@ import java.io.Serializable;
 import javax.persistence.criteria.Expression;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.predicate.BinaryCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
 import org.hibernate.sqm.query.predicate.Predicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.BinaryOperatorExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.BinaryOperatorCriteriaExpression;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 
 /**
@@ -24,16 +27,16 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
  */
 public class ComparisonPredicate
 		extends AbstractSimplePredicate
-		implements BinaryOperatorExpression<Boolean>, Serializable {
+		implements ComparisonCriteriaPredicate, Serializable {
 	private final RelationalPredicate.Operator comparisonOperator;
-	private final Expression<?> leftHandSide;
-	private final Expression<?> rightHandSide;
+	private final CriteriaExpression<?> leftHandSide;
+	private final CriteriaExpression<?> rightHandSide;
 
 	public ComparisonPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
 			RelationalPredicate.Operator comparisonOperator,
-			Expression<?> leftHandSide,
-			Expression<?> rightHandSide) {
+			CriteriaExpression<?> leftHandSide,
+			CriteriaExpression<?> rightHandSide) {
 		super( criteriaBuilder );
 		this.comparisonOperator = comparisonOperator;
 		this.leftHandSide = leftHandSide;
@@ -44,7 +47,7 @@ public class ComparisonPredicate
 	public ComparisonPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
 			RelationalPredicate.Operator comparisonOperator,
-			Expression<?> leftHandSide,
+			CriteriaExpression<?> leftHandSide,
 			Object rightHandSide) {
 		super( criteriaBuilder );
 		this.comparisonOperator = comparisonOperator;
@@ -56,7 +59,7 @@ public class ComparisonPredicate
 	public <N extends Number> ComparisonPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
 			RelationalPredicate.Operator comparisonOperator,
-			Expression<N> leftHandSide,
+			CriteriaExpression<N> leftHandSide,
 			Number rightHandSide) {
 		super( criteriaBuilder );
 		this.comparisonOperator = comparisonOperator;
@@ -75,21 +78,17 @@ public class ComparisonPredicate
 	}
 
 	@Override
-	public Expression getLeftHandOperand() {
+	public CriteriaExpression<?> getLeftHandOperand() {
 		return leftHandSide;
 	}
 
 	@Override
-	public Expression getRightHandOperand() {
+	public CriteriaExpression<?> getRightHandOperand() {
 		return rightHandSide;
 	}
 
 	@Override
 	public Predicate visitPredicate(CriteriaVisitor visitor) {
-		return visitor.visitRelationalPredicate(
-				getLeftHandOperand(),
-				getComparisonOperator(),
-				getRightHandOperand()
-		);
+		return visitor.visitRelationalPredicate( this );
 	}
 }

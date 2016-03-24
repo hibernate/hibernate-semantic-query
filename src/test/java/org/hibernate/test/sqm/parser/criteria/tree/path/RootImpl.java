@@ -34,7 +34,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 
 	public RootImpl(CriteriaBuilderImpl criteriaBuilder, EntityType entityType, boolean allowJoins) {
 //		super( criteriaBuilder, entityType.getJavaType() );
-		super( criteriaBuilder, null );
+		super( criteriaBuilder, entityType, null );
 		this.entityType = entityType;
 		this.allowJoins = allowJoins;
 	}

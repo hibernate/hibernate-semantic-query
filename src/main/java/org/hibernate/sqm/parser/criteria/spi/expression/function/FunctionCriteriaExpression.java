@@ -4,9 +4,10 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
+package org.hibernate.sqm.parser.criteria.spi.expression.function;
 
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImplementor;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 
 /**
  * Contract for expressions which model a SQL function call.
@@ -15,13 +16,18 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImplemen
  *
  * @author Steve Ebersole
  */
-public interface FunctionExpression<T> extends ExpressionImplementor<T> {
+public interface FunctionCriteriaExpression<T> extends CriteriaExpression<T> {
 	/**
 	 * Retrieve the name of the function.
 	 *
 	 * @return The function name.
 	 */
 	String getFunctionName();
+
+	@Override
+	BasicType<T> getExpressionSqmType();
+
+	BasicType<T> getFunctionResultType();
 
 	/**
 	 * Is this function a value aggregator (like a <tt>COUNT</tt> or <tt>MAX</tt> function e.g.)?

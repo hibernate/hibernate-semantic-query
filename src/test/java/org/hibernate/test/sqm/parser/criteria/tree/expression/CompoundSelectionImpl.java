@@ -7,13 +7,13 @@
 package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Tuple;
 import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.Selection;
 
 import org.hibernate.sqm.parser.criteria.spi.*;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
@@ -53,7 +53,7 @@ public class CompoundSelectionImpl<X>
 	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
 		for ( Selection<?> selectionItem : selectionItems ) {
 			container.add(
-					( ( org.hibernate.sqm.parser.criteria.spi.ExpressionImplementor) selectionItem ).visitExpression( visitor ),
+					( (CriteriaExpression) selectionItem ).visitExpression( visitor ),
 					getAlias()
 			);
 		}

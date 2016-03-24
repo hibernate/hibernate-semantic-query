@@ -6,14 +6,14 @@
  */
 package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 
-import javax.persistence.criteria.Predicate;
+import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
  * @author Steve Ebersole
  */
-public interface PredicateImplementor extends Predicate, org.hibernate.sqm.parser.criteria.spi.PredicateImplementor {
+public interface PredicateImplementor extends CriteriaPredicate {
 	/**
 	 * Access to the CriteriaBuilder
 	 *

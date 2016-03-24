@@ -6,47 +6,53 @@
  */
 package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
+import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;
 import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
 
 /**
  * Models the basic concept of a SQL function.
  *
  * @author Steve Ebersole
  */
-public class GenericFunctionExpression<X> extends AbstractFunctionExpression<X> {
-	private final List<javax.persistence.criteria.Expression<?>> arguments;
+public class GenericFunctionExpression<X>
+		extends AbstractFunctionExpression<X>
+		implements GenericFunctionCriteriaExpression<X> {
+	private final List<CriteriaExpression<?>> arguments;
 
 	public GenericFunctionExpression(
-			CriteriaBuilderImpl criteriaBuilder,
 			String functionName,
-			Class<X> javaType) {
-		this( criteriaBuilder, functionName, javaType, Collections.<javax.persistence.criteria.Expression<?>>emptyList() );
+			BasicType sqmType,
+			Class<X> javaType,
+			CriteriaBuilderImpl criteriaBuilder) {
+		this( functionName, sqmType, javaType, criteriaBuilder, Collections.<CriteriaExpression<?>>emptyList() );
 	}
 
 	public GenericFunctionExpression(
-			CriteriaBuilderImpl criteriaBuilder,
 			String functionName,
+			BasicType sqmType,
 			Class<X> javaType,
-			javax.persistence.criteria.Expression<?>... arguments) {
-		this( criteriaBuilder, functionName, javaType, Arrays.asList( arguments ) );
+			CriteriaBuilderImpl criteriaBuilder,
+			CriteriaExpression<?>... arguments) {
+		this( functionName, sqmType, javaType, criteriaBuilder, Arrays.asList( arguments ) );
 	}
 
 	public GenericFunctionExpression(
-			CriteriaBuilderImpl criteriaBuilder,
 			String functionName,
+			BasicType sqmType,
 			Class<X> javaType,
-			List<javax.persistence.criteria.Expression<?>> arguments) {
-		super( criteriaBuilder, functionName, javaType );
+			CriteriaBuilderImpl criteriaBuilder,
+			List<CriteriaExpression<?>> arguments) {
+		super( functionName, sqmType, javaType, criteriaBuilder);
 		this.arguments = arguments;
 	}
 
@@ -60,16 +66,17 @@ public class GenericFunctionExpression<X> extends AbstractFunctionExpression<X> 
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
-		container.add( visitExpression( visitor ), getAlias() );
+	public List<CriteriaExpression<?>> getArguments() {
+		return arguments;
 	}
 
 	@Override
 	public Expression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitFunction(  
-				getFunctionName(),
-				criteriaBuilder().consumerContext().getDomainMetamodel().getBasicType( getJavaType() ),
-				arguments
-		);
+		return visitor.visitGenericFunction( this );
+	}
+
+	@Override
+	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

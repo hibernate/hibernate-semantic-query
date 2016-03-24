@@ -8,7 +8,9 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
 
+import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.query.expression.Expression;
 import org.hibernate.sqm.query.select.AliasedExpressionContainer;
 
@@ -19,7 +21,8 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  *
  * @author Steve Ebersole
  */
-public class LiteralExpression<T> extends ExpressionImpl<T> implements Serializable {
+public class LiteralExpression<T> extends AbstractCriteriaExpressionImpl<T>
+		implements LiteralCriteriaExpression<T>, Serializable {
 	private Object literal;
 
 	@SuppressWarnings({ "unchecked" })
@@ -31,8 +34,18 @@ public class LiteralExpression<T> extends ExpressionImpl<T> implements Serializa
 		return literal == null ? null : literal.getClass();
 	}
 
-	public LiteralExpression(CriteriaBuilderImpl criteriaBuilder, Class<T> type, T literal) {
-		super( criteriaBuilder, type );
+	public LiteralExpression(CriteriaBuilderImpl criteriaBuilder, Class<T> javaType, T literal) {
+		this( criteriaBuilder, criteriaBuilder.consumerContext().getDomainMetamodel().getBasicType( javaType ), javaType, literal );
+		this.literal = literal;
+	}
+
+	public LiteralExpression(
+			CriteriaBuilderImpl criteriaBuilder,
+			BasicType<T> sqmType,
+			Class<T> javaType,
+			T literal) {
+		super( criteriaBuilder, sqmType, javaType );
+		assert sqmType != null;
 		this.literal = literal;
 	}
 
@@ -43,10 +56,7 @@ public class LiteralExpression<T> extends ExpressionImpl<T> implements Serializa
 
 	@Override
 	public Expression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitLiteral(
-				getLiteral(),
-				criteriaBuilder().consumerContext().getDomainMetamodel().getBasicType( getJavaType() )
-		);
+		return visitor.visitLiteral( this );
 	}
 
 	@Override

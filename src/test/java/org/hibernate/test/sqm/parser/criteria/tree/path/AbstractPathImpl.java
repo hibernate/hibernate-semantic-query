@@ -18,11 +18,11 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
+import org.hibernate.sqm.domain.Type;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.PathTypeExpression;
 
 /**
@@ -31,7 +31,7 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.PathTypeExpression
  * @author Steve Ebersole
  */
 public abstract class AbstractPathImpl<X>
-		extends ExpressionImpl<X>
+		extends AbstractCriteriaExpressionImpl<X>
 		implements PathImplementor<X>, PathSource<X>, Serializable {
 
 	private final PathSource pathSource;
@@ -41,18 +41,19 @@ public abstract class AbstractPathImpl<X>
 	/**
 	 * Constructs a basic path instance.
 	 *
-	 * @param criteriaBuilder The criteria builder
 	 * @param javaType The java type of this path
+	 * @param criteriaBuilder The criteria builder
 	 * @param pathSource The source (or origin) from which this path originates
 	 */
 	@SuppressWarnings({ "unchecked" })
 	public AbstractPathImpl(
 			CriteriaBuilderImpl criteriaBuilder,
+			Type sqmType,
 			Class<X> javaType,
 			PathSource pathSource) {
-		super( criteriaBuilder, javaType );
+		super( criteriaBuilder, sqmType, javaType );
 		this.pathSource = pathSource;
-		this.typeExpression =  new PathTypeExpression( criteriaBuilder(), getJavaType(), this );
+		this.typeExpression =  new PathTypeExpression( criteriaBuilder(), sqmType, getJavaType(), this );
 	}
 
 	public PathSource getPathSource() {

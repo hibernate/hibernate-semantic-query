@@ -11,10 +11,10 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.LiteralCharacterExpression;
-import org.hibernate.sqm.query.expression.NamedParameterExpression;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
+import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.set.Assignment;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -55,21 +55,21 @@ public class BasicUpdateTests {
 
 		assertThat( updateStatement.getEntityFromElement().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
-		assertThat( updateStatement.getWhereClause().getPredicate(), instanceOf( RelationalPredicate.class ) );
-		RelationalPredicate predicate = (RelationalPredicate) updateStatement.getWhereClause().getPredicate();
+		assertThat( updateStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
+		RelationalSqmPredicate predicate = (RelationalSqmPredicate) updateStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceExpression.class ) );
-		AttributeReferenceExpression attributeReferenceExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
+		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
+		AttributeReferenceSqmExpression attributeReferenceExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
 		assertSame( attributeReferenceExpression.getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
 
-		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterExpression.class ) );
+		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 
 		assertEquals( 1, updateStatement.getSetClause().getAssignments().size() );
 
 		Assignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
 		assertSame( assignment.getStateField().getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
 
-		assertThat( assignment.getValue(), instanceOf( LiteralCharacterExpression.class ) );
+		assertThat( assignment.getValue(), instanceOf( LiteralCharacterSqmExpression.class ) );
 	}
 
 	private DomainMetamodel buildMetamodel() {

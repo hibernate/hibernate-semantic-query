@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.parser.criteria.spi.predicate;
 
-import org.hibernate.sqm.query.predicate.RelationalPredicate.Operator;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate.Operator;
 
 /**
  * @author Steve Ebersole

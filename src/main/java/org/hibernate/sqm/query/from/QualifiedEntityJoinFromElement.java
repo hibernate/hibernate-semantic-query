@@ -10,7 +10,7 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.predicate.Predicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 /**
  * @author Steve Ebersole
@@ -20,7 +20,7 @@ public class QualifiedEntityJoinFromElement
 		implements QualifiedJoinedFromElement {
 	private final String entityName;
 
-	private Predicate onClausePredicate;
+	private SqmPredicate onClausePredicate;
 
 	public QualifiedEntityJoinFromElement(
 			FromElementSpace fromElementSpace,
@@ -47,11 +47,11 @@ public class QualifiedEntityJoinFromElement
 	}
 
 	@Override
-	public Predicate getOnClausePredicate() {
+	public SqmPredicate getOnClausePredicate() {
 		return onClausePredicate;
 	}
 
-	public void setOnClausePredicate(Predicate predicate) {
+	public void setOnClausePredicate(SqmPredicate predicate) {
 		this.onClausePredicate = predicate;
 	}
 

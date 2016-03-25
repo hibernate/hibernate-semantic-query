@@ -17,7 +17,9 @@ import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
@@ -90,17 +92,17 @@ public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Bool
 	}
 
 	@Override
-	public org.hibernate.sqm.query.expression.Expression visitExpression(CriteriaVisitor visitor) {
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
 		throw new UnsupportedOperationException( "Not expecting call to visitExpression on predicate" );
 	}
 
 	@Override
-	public org.hibernate.sqm.query.predicate.Predicate visitPredicate(CriteriaVisitor visitor) {
+	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
 		return visitor.visitNegatedPredicate( this );
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
 		throw new UnsupportedOperationException( "Predicates cannot be used as select expression" );
 
 	}

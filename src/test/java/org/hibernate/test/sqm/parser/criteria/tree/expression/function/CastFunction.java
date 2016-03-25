@@ -9,12 +9,10 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 import java.io.Serializable;
 
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.CastFunctionCriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.function.FunctionCriteriaExpression;
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
@@ -50,7 +48,7 @@ public class CastFunction<T,Y>
 	}
 
 	@Override
-	public Expression visitExpression(CriteriaVisitor visitor) {
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
 		return visitor.visitCastFunction( this );
 	}
 }

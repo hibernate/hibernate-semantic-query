@@ -13,7 +13,7 @@ import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.Downcast;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
@@ -119,7 +119,7 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			String terminalName) {
 		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
 		log.debugf( "Resolved terminal attribute-binding [%s -> %s] : %s", lhs.asLoggableText(), terminalName, attribute );
-		return new AttributeReferenceExpression( lhs, attribute );
+		return new AttributeReferenceSqmExpression( lhs, attribute );
 	}
 
 	protected FromElementBinding resolveFromElementAliasAsTerminal(FromElement aliasedFromElement) {

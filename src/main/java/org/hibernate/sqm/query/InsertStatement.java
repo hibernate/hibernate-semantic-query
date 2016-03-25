@@ -8,7 +8,7 @@ package org.hibernate.sqm.query;
 
 import java.util.List;
 
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 /**
@@ -16,5 +16,5 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
  */
 public interface InsertStatement extends Statement {
 	RootEntityFromElement getInsertTarget();
-	List<AttributeReferenceExpression> getStateFields();
+	List<AttributeReferenceSqmExpression> getStateFields();
 }

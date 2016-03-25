@@ -7,7 +7,7 @@
 package org.hibernate.sqm.parser.criteria.spi.expression;
 
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 
@@ -17,6 +17,6 @@ import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
  * @author Steve Ebersole
  */
 public interface CriteriaExpression<X> extends javax.persistence.criteria.Expression<X> {
-	Expression visitExpression(CriteriaVisitor visitor);
+	SqmExpression visitExpression(CriteriaVisitor visitor);
 	Type getExpressionSqmType();
 }

@@ -15,15 +15,15 @@ import org.hibernate.sqm.parser.AliasCollisionException;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.SubQueryExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
-import org.hibernate.sqm.query.predicate.AndPredicate;
-import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.predicate.AndSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.Selection;
 
@@ -294,7 +294,7 @@ public class AliasTest {
 			String alias) {
 		List<Selection> selections = querySpect.getSelectClause().getSelections();
 		Selection selection = selections.get( attributeIndex );
-		AttributeReferenceExpression expression = (AttributeReferenceExpression) selection.getExpression();
+		AttributeReferenceSqmExpression expression = (AttributeReferenceSqmExpression) selection.getExpression();
 		assertThat( expression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( expression.getBoundAttribute().getName(), is( attributeName ) );
 		if ( alias == null ) {
@@ -308,7 +308,7 @@ public class AliasTest {
 	private void checkElementSelection(QuerySpec querySpec, int selectionIndex, String typeName, String alias) {
 		List<Selection> selections = querySpec.getSelectClause().getSelections();
 		Selection selection = selections.get( selectionIndex );
-		Expression expression = selection.getExpression();
+		SqmExpression expression = selection.getExpression();
 		EntityTypeImpl entityType = (EntityTypeImpl) expression.getExpressionType();
 		assertThat( entityType.getTypeName(), is( typeName ) );
 		if ( alias == null ) {
@@ -326,8 +326,8 @@ public class AliasTest {
 			String alias
 	) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		InSubQueryPredicate predicate = (InSubQueryPredicate) whereClause.getPredicate();
-		AttributeReferenceExpression testExpression = (AttributeReferenceExpression) predicate.getTestExpression();
+		InSubQuerySqmPredicate predicate = (InSubQuerySqmPredicate) whereClause.getPredicate();
+		AttributeReferenceSqmExpression testExpression = (AttributeReferenceSqmExpression) predicate.getTestExpression();
 		assertThat( testExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( testExpression.getBoundAttribute().getName(), is( attributeName ) );
 		assertThat(
@@ -342,8 +342,8 @@ public class AliasTest {
 			String attributeName,
 			String alias) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
-		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
+		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
+		AttributeReferenceSqmExpression leftHandExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
 		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
 		assertThat(
@@ -358,8 +358,8 @@ public class AliasTest {
 			String attributeName,
 			String alias) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
-		AttributeReferenceExpression leftHandExpression = (AttributeReferenceExpression) predicate.getRightHandExpression();
+		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
+		AttributeReferenceSqmExpression leftHandExpression = (AttributeReferenceSqmExpression) predicate.getRightHandExpression();
 		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
 		assertThat(
 				leftHandExpression.getAttributeBindingSource().getFromElement().getIdentificationVariable(),
@@ -368,35 +368,35 @@ public class AliasTest {
 		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 	}
 
-	private SubQueryExpression getInSubQueryExpression(SelectStatement selectStatement) {
+	private SubQuerySqmExpression getInSubQueryExpression(SelectStatement selectStatement) {
 		return getInSubQueryExpression( selectStatement.getQuerySpec() );
 	}
 
-	private SubQueryExpression getInSubQueryExpression(QuerySpec querySpec) {
+	private SubQuerySqmExpression getInSubQueryExpression(QuerySpec querySpec) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		InSubQueryPredicate predicate = (InSubQueryPredicate) whereClause.getPredicate();
+		InSubQuerySqmPredicate predicate = (InSubQuerySqmPredicate) whereClause.getPredicate();
 
 		return predicate.getSubQueryExpression();
 	}
 
-	private SubQueryExpression getLeftAndPredicateSubQueryExpression(QuerySpec querySpec) {
+	private SubQuerySqmExpression getLeftAndPredicateSubQueryExpression(QuerySpec querySpec) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		AndPredicate predicate = (AndPredicate) whereClause.getPredicate();
+		AndSqmPredicate predicate = (AndSqmPredicate) whereClause.getPredicate();
 
-		return ((InSubQueryPredicate) predicate.getLeftHandPredicate()).getSubQueryExpression();
+		return ((InSubQuerySqmPredicate) predicate.getLeftHandPredicate()).getSubQueryExpression();
 	}
 
-	private SubQueryExpression getRightAndPredicateSubQueryExpression(QuerySpec querySpec) {
+	private SubQuerySqmExpression getRightAndPredicateSubQueryExpression(QuerySpec querySpec) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		AndPredicate predicate = (AndPredicate) whereClause.getPredicate();
+		AndSqmPredicate predicate = (AndSqmPredicate) whereClause.getPredicate();
 
-		return ((InSubQueryPredicate) predicate.getRightHandPredicate()).getSubQueryExpression();
+		return ((InSubQuerySqmPredicate) predicate.getRightHandPredicate()).getSubQueryExpression();
 	}
 
-	private SubQueryExpression getRelationaSubQueryExpression(QuerySpec querySpec) {
+	private SubQuerySqmExpression getRelationaSubQueryExpression(QuerySpec querySpec) {
 		WhereClause whereClause = querySpec.getWhereClause();
-		RelationalPredicate predicate = (RelationalPredicate) whereClause.getPredicate();
-		return (SubQueryExpression) predicate.getRightHandExpression();
+		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
+		return (SubQuerySqmExpression) predicate.getRightHandExpression();
 	}
 
 	private SelectStatement interpretQuery(String query) {

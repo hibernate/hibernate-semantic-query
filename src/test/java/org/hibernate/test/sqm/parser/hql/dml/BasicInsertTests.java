@@ -11,7 +11,7 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.InsertSelectStatement;
 import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -43,7 +43,7 @@ public class BasicInsertTests {
 
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
-		for ( AttributeReferenceExpression stateField : insertStatement.getStateFields() ) {
+		for ( AttributeReferenceSqmExpression stateField : insertStatement.getStateFields() ) {
 			assertSame( insertStatement.getInsertTarget(), stateField.getBoundFromElementBinding().getFromElement() );
 		}
 	}

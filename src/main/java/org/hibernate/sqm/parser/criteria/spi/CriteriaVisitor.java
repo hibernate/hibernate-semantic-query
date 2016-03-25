@@ -11,7 +11,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
@@ -22,102 +21,102 @@ import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredica
 import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
 import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.function.AvgFunction;
-import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.function.CastFunctionExpression;
-import org.hibernate.sqm.query.expression.ConcatExpression;
-import org.hibernate.sqm.query.expression.ConstantEnumExpression;
-import org.hibernate.sqm.query.expression.ConstantFieldExpression;
-import org.hibernate.sqm.query.expression.function.CountFunction;
-import org.hibernate.sqm.query.expression.function.CountStarFunction;
-import org.hibernate.sqm.query.expression.EntityTypeExpression;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.function.GenericFunctionExpression;
-import org.hibernate.sqm.query.expression.LiteralExpression;
-import org.hibernate.sqm.query.expression.function.MaxFunction;
-import org.hibernate.sqm.query.expression.function.MinFunction;
-import org.hibernate.sqm.query.expression.ParameterExpression;
-import org.hibernate.sqm.query.expression.SubQueryExpression;
-import org.hibernate.sqm.query.expression.function.SumFunction;
-import org.hibernate.sqm.query.expression.UnaryOperationExpression;
-import org.hibernate.sqm.query.predicate.AndPredicate;
-import org.hibernate.sqm.query.predicate.BetweenPredicate;
-import org.hibernate.sqm.query.predicate.BooleanExpressionPredicate;
-import org.hibernate.sqm.query.predicate.EmptinessPredicate;
-import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InListPredicate;
-import org.hibernate.sqm.query.predicate.LikePredicate;
-import org.hibernate.sqm.query.predicate.MemberOfPredicate;
-import org.hibernate.sqm.query.predicate.NegatedPredicate;
-import org.hibernate.sqm.query.predicate.NullnessPredicate;
-import org.hibernate.sqm.query.predicate.OrPredicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.ConcatSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralSqmExpression;
+import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
+import org.hibernate.sqm.query.expression.function.MinSqmFunction;
+import org.hibernate.sqm.query.expression.ParameterSqmExpression;
+import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
+import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
+import org.hibernate.sqm.query.predicate.AndSqmPredicate;
+import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
+import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
+import org.hibernate.sqm.query.predicate.InListSqmPredicate;
+import org.hibernate.sqm.query.predicate.LikeSqmPredicate;
+import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
+import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
+import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
+import org.hibernate.sqm.query.predicate.OrSqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
 /**
  * @author Steve Ebersole
  */
 public interface CriteriaVisitor {
 
-	<T extends Enum> ConstantEnumExpression<T> visitEnumConstant(T value);
-	<T> ConstantFieldExpression<T> visitConstant(T value);
-	<T> ConstantFieldExpression<T> visitConstant(T value, BasicType<T> typeDescriptor);
+	<T extends Enum> ConstantEnumSqmExpression<T> visitEnumConstant(T value);
+	<T> ConstantFieldSqmExpression<T> visitConstant(T value);
+	<T> ConstantFieldSqmExpression<T> visitConstant(T value, BasicType<T> typeDescriptor);
 
-	UnaryOperationExpression visitUnaryOperation(
-			UnaryOperationExpression.Operation operation,
+	UnaryOperationSqmExpression visitUnaryOperation(
+			UnaryOperationSqmExpression.Operation operation,
 			javax.persistence.criteria.Expression expression);
 
-	UnaryOperationExpression visitUnaryOperation(
-			UnaryOperationExpression.Operation operation,
+	UnaryOperationSqmExpression visitUnaryOperation(
+			UnaryOperationSqmExpression.Operation operation,
 			javax.persistence.criteria.Expression expression,
 			BasicType resultType);
 
-	BinaryArithmeticExpression visitArithmetic(
-			BinaryArithmeticExpression.Operation operation,
+	BinaryArithmeticSqmExpression visitArithmetic(
+			BinaryArithmeticSqmExpression.Operation operation,
 			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2);
 
-	BinaryArithmeticExpression visitArithmetic(
-			BinaryArithmeticExpression.Operation operation,
+	BinaryArithmeticSqmExpression visitArithmetic(
+			BinaryArithmeticSqmExpression.Operation operation,
 			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2,
 			BasicType resultType);
 
 	FromElementBinding visitIdentificationVariableReference(From reference);
-	AttributeReferenceExpression visitAttributeReference(From attributeSource, String attributeName);
+	AttributeReferenceSqmExpression visitAttributeReference(From attributeSource, String attributeName);
 
-	GenericFunctionExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression<?>> expressions);
-	GenericFunctionExpression visitFunction(String name, BasicType resultTypeDescriptor, javax.persistence.criteria.Expression<?>... expressions);
+	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression<?>> expressions);
+	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, javax.persistence.criteria.Expression<?>... expressions);
 
-	AvgFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	AvgFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	AvgSqmFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	AvgSqmFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	CountFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	CountFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	CountSqmFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	CountSqmFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	CountStarFunction visitCountStarFunction(boolean distinct);
-	CountStarFunction visitCountStarFunction(boolean distinct, BasicType resultType);
+	CountStarSqmFunction visitCountStarFunction(boolean distinct);
+	CountStarSqmFunction visitCountStarFunction(boolean distinct, BasicType resultType);
 
-	MaxFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	MaxFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	MaxSqmFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	MaxSqmFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	MinFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	MinFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	MinSqmFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	MinSqmFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	SumFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	SumFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	SumSqmFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	SumSqmFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	ConcatExpression visitConcat(
+	ConcatSqmExpression visitConcat(
 			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2);
 
-	ConcatExpression visitConcat(
+	ConcatSqmExpression visitConcat(
 			javax.persistence.criteria.Expression expression1,
 			javax.persistence.criteria.Expression expression2,
 			BasicType resultType);
 
-	EntityTypeExpression visitEntityType(String identificationVariable);
-	EntityTypeExpression visitEntityType(String identificationVariable, String attributeName);
+	EntityTypeSqmExpression visitEntityType(String identificationVariable);
+	EntityTypeSqmExpression visitEntityType(String identificationVariable, String attributeName);
 
 //	CollectionSizeFunction visitCollectionSizeFunction();
 //
@@ -125,57 +124,57 @@ public interface CriteriaVisitor {
 //	MapKeyFunction visitMapKeyFunction();
 //	MapEntryFunction visitMapEntryFunction();
 
-	SubQueryExpression visitSubQuery(Subquery subquery);
+	SubQuerySqmExpression visitSubQuery(Subquery subquery);
 
-	AndPredicate visitAndPredicate(List<javax.persistence.criteria.Expression<Boolean>> predicates);
-	OrPredicate visitOrPredicate(List<javax.persistence.criteria.Expression<Boolean>> predicates);
+	AndSqmPredicate visitAndPredicate(List<javax.persistence.criteria.Expression<Boolean>> predicates);
+	OrSqmPredicate visitOrPredicate(List<javax.persistence.criteria.Expression<Boolean>> predicates);
 
-	EmptinessPredicate visitEmptinessPredicate(From attributeSource, String attributeName, boolean negated);
-	MemberOfPredicate visitMemberOfPredicate(From attributeSource, String attributeName, boolean negated);
+	EmptinessSqmPredicate visitEmptinessPredicate(From attributeSource, String attributeName, boolean negated);
+	MemberOfSqmPredicate visitMemberOfPredicate(From attributeSource, String attributeName, boolean negated);
 
-	BetweenPredicate visitBetweenPredicate(
+	BetweenSqmPredicate visitBetweenPredicate(
 			javax.persistence.criteria.Expression expression,
 			javax.persistence.criteria.Expression lowerBound,
 			javax.persistence.criteria.Expression upperBound,
 			boolean negated);
 
 
-	LikePredicate visitLikePredicate(
+	LikeSqmPredicate visitLikePredicate(
 			javax.persistence.criteria.Expression<String> matchExpression,
 			javax.persistence.criteria.Expression<String> pattern,
 			javax.persistence.criteria.Expression<Character> escapeCharacter,
 			boolean negated);
 
-	InSubQueryPredicate visitInSubQueryPredicate(
+	InSubQuerySqmPredicate visitInSubQueryPredicate(
 			javax.persistence.criteria.Expression testExpression,
 			Subquery subquery,
 			boolean negated);
 
-	InListPredicate visitInTupleListPredicate(
+	InListSqmPredicate visitInTupleListPredicate(
 			javax.persistence.criteria.Expression testExpression,
 			List<javax.persistence.criteria.Expression> listExpressions,
 			boolean negated);
 
-	Expression visitRoot(RootImplementor root);
+	SqmExpression visitRoot(RootImplementor root);
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// New signatures
 
-	<T> LiteralExpression<T> visitLiteral(LiteralCriteriaExpression expression);
+	<T> LiteralSqmExpression<T> visitLiteral(LiteralCriteriaExpression expression);
 
-	<T> ParameterExpression visitParameter(ParameterCriteriaExpression<T> expression);
+	<T> ParameterSqmExpression visitParameter(ParameterCriteriaExpression<T> expression);
 
-	<T,Y> CastFunctionExpression visitCastFunction(CastFunctionCriteriaExpression<T,Y> function);
-	<T> GenericFunctionExpression visitGenericFunction(GenericFunctionCriteriaExpression<T> function);
+	<T,Y> CastFunctionSqmExpression visitCastFunction(CastFunctionCriteriaExpression<T,Y> function);
+	<T> GenericFunctionSqmExpression visitGenericFunction(GenericFunctionCriteriaExpression<T> function);
 
 
 
-	NegatedPredicate visitNegatedPredicate(NegatedCriteriaPredicate predicate);
+	NegatedSqmPredicate visitNegatedPredicate(NegatedCriteriaPredicate predicate);
 
-	BooleanExpressionPredicate visitBooleanExpressionPredicate(BooleanExpressionCriteriaPredicate predicate);
+	BooleanExpressionSqmPredicate visitBooleanExpressionPredicate(BooleanExpressionCriteriaPredicate predicate);
 
-	NullnessPredicate visitNullnessPredicate(NullnessCriteriaPredicate predicate);
+	NullnessSqmPredicate visitNullnessPredicate(NullnessCriteriaPredicate predicate);
 
-	RelationalPredicate visitRelationalPredicate(ComparisonCriteriaPredicate predicate);
+	RelationalSqmPredicate visitRelationalPredicate(ComparisonCriteriaPredicate predicate);
 
 }

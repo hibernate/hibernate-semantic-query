@@ -50,59 +50,59 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-import org.hibernate.sqm.query.expression.function.AggregateFunction;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.function.AvgFunction;
-import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.CaseSearchedExpression;
-import org.hibernate.sqm.query.expression.CoalesceExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeFunction;
-import org.hibernate.sqm.query.expression.CollectionValuePathExpression;
-import org.hibernate.sqm.query.expression.ConcatExpression;
-import org.hibernate.sqm.query.expression.ConstantEnumExpression;
-import org.hibernate.sqm.query.expression.ConstantExpression;
-import org.hibernate.sqm.query.expression.ConstantFieldExpression;
-import org.hibernate.sqm.query.expression.function.CastFunctionExpression;
-import org.hibernate.sqm.query.expression.function.ConcatFunctionExpression;
-import org.hibernate.sqm.query.expression.function.CountFunction;
-import org.hibernate.sqm.query.expression.function.CountStarFunction;
-import org.hibernate.sqm.query.expression.EntityTypeExpression;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.function.GenericFunctionExpression;
-import org.hibernate.sqm.query.expression.ImpliedTypeExpression;
-import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
-import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
-import org.hibernate.sqm.query.expression.LiteralCharacterExpression;
-import org.hibernate.sqm.query.expression.LiteralDoubleExpression;
-import org.hibernate.sqm.query.expression.LiteralExpression;
-import org.hibernate.sqm.query.expression.LiteralFalseExpression;
-import org.hibernate.sqm.query.expression.LiteralFloatExpression;
-import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
-import org.hibernate.sqm.query.expression.LiteralLongExpression;
-import org.hibernate.sqm.query.expression.LiteralNullExpression;
-import org.hibernate.sqm.query.expression.LiteralStringExpression;
-import org.hibernate.sqm.query.expression.LiteralTrueExpression;
-import org.hibernate.sqm.query.expression.MapEntryFunction;
-import org.hibernate.sqm.query.expression.MapKeyPathExpression;
-import org.hibernate.sqm.query.expression.MaxElementFunction;
-import org.hibernate.sqm.query.expression.function.LowerFunctionExpression;
-import org.hibernate.sqm.query.expression.function.MaxFunction;
-import org.hibernate.sqm.query.expression.MaxIndexFunction;
-import org.hibernate.sqm.query.expression.MinElementFunction;
-import org.hibernate.sqm.query.expression.function.MinFunction;
-import org.hibernate.sqm.query.expression.MinIndexFunction;
-import org.hibernate.sqm.query.expression.NamedParameterExpression;
-import org.hibernate.sqm.query.expression.NullifExpression;
+import org.hibernate.sqm.query.expression.function.AggregateSqmFunction;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
+import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
+import org.hibernate.sqm.query.expression.CollectionIndexSqmFunction;
+import org.hibernate.sqm.query.expression.CollectionSizeSqmFunction;
+import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
+import org.hibernate.sqm.query.expression.ConcatSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
+import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.ImpliedTypeSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralDoubleSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralFalseSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralFloatSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
+import org.hibernate.sqm.query.expression.MapEntrySqmFunction;
+import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
+import org.hibernate.sqm.query.expression.MaxElementSqmFunction;
+import org.hibernate.sqm.query.expression.function.LowerFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
+import org.hibernate.sqm.query.expression.MaxIndexSqmFunction;
+import org.hibernate.sqm.query.expression.MinElementSqmFunction;
+import org.hibernate.sqm.query.expression.function.MinSqmFunction;
+import org.hibernate.sqm.query.expression.MinIndexSqmFunction;
+import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
+import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
-import org.hibernate.sqm.query.expression.PositionalParameterExpression;
-import org.hibernate.sqm.query.expression.CaseSimpleExpression;
-import org.hibernate.sqm.query.expression.SubQueryExpression;
-import org.hibernate.sqm.query.expression.function.SubstringFunctionExpression;
-import org.hibernate.sqm.query.expression.function.SumFunction;
-import org.hibernate.sqm.query.expression.UnaryOperationExpression;
-import org.hibernate.sqm.query.expression.function.TrimFunctionExpression;
-import org.hibernate.sqm.query.expression.function.UpperFunctionExpression;
+import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
+import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
+import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
+import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
+import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -114,20 +114,20 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
 import org.hibernate.sqm.query.order.SortSpecification;
-import org.hibernate.sqm.query.predicate.AndPredicate;
-import org.hibernate.sqm.query.predicate.BetweenPredicate;
-import org.hibernate.sqm.query.predicate.EmptinessPredicate;
-import org.hibernate.sqm.query.predicate.GroupedPredicate;
-import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InListPredicate;
-import org.hibernate.sqm.query.predicate.LikePredicate;
-import org.hibernate.sqm.query.predicate.MemberOfPredicate;
-import org.hibernate.sqm.query.predicate.NegatablePredicate;
-import org.hibernate.sqm.query.predicate.NegatedPredicate;
-import org.hibernate.sqm.query.predicate.NullnessPredicate;
-import org.hibernate.sqm.query.predicate.OrPredicate;
-import org.hibernate.sqm.query.predicate.Predicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.predicate.AndSqmPredicate;
+import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
+import org.hibernate.sqm.query.predicate.GroupedSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
+import org.hibernate.sqm.query.predicate.InListSqmPredicate;
+import org.hibernate.sqm.query.predicate.LikeSqmPredicate;
+import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
+import org.hibernate.sqm.query.predicate.NegatableSqmPredicate;
+import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
+import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
+import org.hibernate.sqm.query.predicate.OrSqmPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
@@ -330,7 +330,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Expression visitSelectExpression(HqlParser.SelectExpressionContext ctx) {
+	public SqmExpression visitSelectExpression(HqlParser.SelectExpressionContext ctx) {
 		if ( ctx.dynamicInstantiation() != null ) {
 			return visitDynamicInstantiation( ctx.dynamicInstantiation() );
 		}
@@ -338,7 +338,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			return visitJpaSelectObjectSyntax( ctx.jpaSelectObjectSyntax() );
 		}
 		else if ( ctx.expression() != null ) {
-			return (Expression) ctx.expression().accept( this );
+			return (SqmExpression) ctx.expression().accept( this );
 		}
 
 		throw new ParsingException( "Unexpected selection rule type : " + ctx.getText() );
@@ -383,12 +383,12 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Expression visitDynamicInstantiationArgExpression(HqlParser.DynamicInstantiationArgExpressionContext ctx) {
+	public SqmExpression visitDynamicInstantiationArgExpression(HqlParser.DynamicInstantiationArgExpressionContext ctx) {
 		if ( ctx.dynamicInstantiation() != null ) {
 			return visitDynamicInstantiation( ctx.dynamicInstantiation() );
 		}
 		else if ( ctx.expression() != null ) {
-			return (Expression) ctx.expression().accept( this );
+			return (SqmExpression) ctx.expression().accept( this );
 		}
 
 		throw new ParsingException( "Unexpected dynamic-instantiation-argument rule type : " + ctx.getText() );
@@ -409,7 +409,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		inWhereClause = true;
 
 		try {
-			return new WhereClause( (Predicate) ctx.predicate().accept( this ) );
+			return new WhereClause( (SqmPredicate) ctx.predicate().accept( this ) );
 		}
 		finally {
 			inWhereClause = false;
@@ -427,8 +427,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public GroupedPredicate visitGroupedPredicate(HqlParser.GroupedPredicateContext ctx) {
-		return new GroupedPredicate( (Predicate) ctx.predicate().accept( this ) );
+	public GroupedSqmPredicate visitGroupedPredicate(HqlParser.GroupedPredicateContext ctx) {
+		return new GroupedSqmPredicate( (SqmPredicate) ctx.predicate().accept( this ) );
 	}
 
 	private static class OrderByResolutionContext implements ResolutionContext, FromElementLocator {
@@ -503,7 +503,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public SortSpecification visitSortSpecification(HqlParser.SortSpecificationContext ctx) {
-		final Expression sortExpression = (Expression) ctx.expression().accept( this );
+		final SqmExpression sortExpression = (SqmExpression) ctx.expression().accept( this );
 		final String collation;
 		if ( ctx.collationSpecification() != null && ctx.collationSpecification().collateName() != null ) {
 			collation = ctx.collationSpecification().collateName().dotIdentifierSequence().getText();
@@ -552,7 +552,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
 			try {
-				deleteStatement.getWhereClause().setPredicate( (Predicate) ctx.whereClause()
+				deleteStatement.getWhereClause().setPredicate( (SqmPredicate) ctx.whereClause()
 						.predicate()
 						.accept( this ) );
 			}
@@ -625,17 +625,17 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
 			try {
 				updateStatement.getWhereClause().setPredicate(
-						(Predicate) ctx.whereClause().predicate().accept( this )
+						(SqmPredicate) ctx.whereClause().predicate().accept( this )
 				);
 
 				for ( HqlParser.AssignmentContext assignmentContext : ctx.setClause().assignment() ) {
-					final AttributeReferenceExpression stateField = (AttributeReferenceExpression) pathResolverStack.getCurrent().resolvePath(
+					final AttributeReferenceSqmExpression stateField = (AttributeReferenceSqmExpression) pathResolverStack.getCurrent().resolvePath(
 							splitPathParts( assignmentContext.dotIdentifierSequence() )
 					);
 					// todo : validate "state field" expression
 					updateStatement.getSetClause().addAssignment(
 							stateField,
-							(Expression) assignmentContext.expression().accept( this )
+							(SqmExpression) assignmentContext.expression().accept( this )
 					);
 				}
 			}
@@ -681,7 +681,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				insertStatement.setSelectQuery( visitQuerySpec( ctx.querySpec() ) );
 
 				for ( HqlParser.DotIdentifierSequenceContext stateFieldCtx : ctx.insertSpec().targetFieldsSpec().dotIdentifierSequence() ) {
-					final AttributeReferenceExpression stateField = (AttributeReferenceExpression) pathResolverStack.getCurrent().resolvePath(
+					final AttributeReferenceSqmExpression stateField = (AttributeReferenceSqmExpression) pathResolverStack.getCurrent().resolvePath(
 							splitPathParts( stateFieldCtx )
 					);
 					// todo : validate each resolved stateField...
@@ -853,11 +853,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			if ( joinedPath instanceof QualifiedJoinedFromElement ) {
 				joinedFromElement = (QualifiedJoinedFromElement) joinedPath;
 			}
-			else if ( joinedPath instanceof EntityTypeExpression ) {
+			else if ( joinedPath instanceof EntityTypeSqmExpression ) {
 				joinedFromElement = currentQuerySpecProcessingState.getFromElementBuilder().buildEntityJoin(
 						currentFromElementSpace,
 						identificationVariable,
-						( (EntityTypeExpression) joinedPath ).getExpressionType(),
+						( (EntityTypeSqmExpression) joinedPath ).getExpressionType(),
 						joinType
 				);
 			}
@@ -899,7 +899,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	private QualifiedJoinedFromElement currentJoinRhs;
 
 	@Override
-	public Predicate visitQualifiedJoinPredicate(HqlParser.QualifiedJoinPredicateContext ctx) {
+	public SqmPredicate visitQualifiedJoinPredicate(HqlParser.QualifiedJoinPredicateContext ctx) {
 		if ( currentJoinRhs == null ) {
 			throw new ParsingException( "Expecting join RHS to be set" );
 		}
@@ -908,7 +908,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				new PathResolverJoinPredicateImpl( currentQuerySpecProcessingState, currentJoinRhs )
 		);
 		try {
-			return (Predicate) ctx.predicate().accept( this );
+			return (SqmPredicate) ctx.predicate().accept( this );
 		}
 		finally {
 
@@ -916,201 +916,201 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 	@Override
-	public Predicate visitAndPredicate(HqlParser.AndPredicateContext ctx) {
-		return new AndPredicate(
-				(Predicate) ctx.predicate( 0 ).accept( this ),
-				(Predicate) ctx.predicate( 1 ).accept( this )
+	public SqmPredicate visitAndPredicate(HqlParser.AndPredicateContext ctx) {
+		return new AndSqmPredicate(
+				(SqmPredicate) ctx.predicate( 0 ).accept( this ),
+				(SqmPredicate) ctx.predicate( 1 ).accept( this )
 		);
 	}
 
 	@Override
-	public Predicate visitOrPredicate(HqlParser.OrPredicateContext ctx) {
-		return new OrPredicate(
-				(Predicate) ctx.predicate( 0 ).accept( this ),
-				(Predicate) ctx.predicate( 1 ).accept( this )
+	public SqmPredicate visitOrPredicate(HqlParser.OrPredicateContext ctx) {
+		return new OrSqmPredicate(
+				(SqmPredicate) ctx.predicate( 0 ).accept( this ),
+				(SqmPredicate) ctx.predicate( 1 ).accept( this )
 		);
 	}
 
 	@Override
-	public Predicate visitNegatedPredicate(HqlParser.NegatedPredicateContext ctx) {
-		Predicate predicate = (Predicate) ctx.predicate().accept( this );
-		if ( predicate instanceof NegatablePredicate ) {
-			( (NegatablePredicate) predicate ).negate();
+	public SqmPredicate visitNegatedPredicate(HqlParser.NegatedPredicateContext ctx) {
+		SqmPredicate predicate = (SqmPredicate) ctx.predicate().accept( this );
+		if ( predicate instanceof NegatableSqmPredicate ) {
+			( (NegatableSqmPredicate) predicate ).negate();
 			return predicate;
 		}
 		else {
-			return new NegatedPredicate( predicate );
+			return new NegatedSqmPredicate( predicate );
 		}
 	}
 
 	@Override
-	public NullnessPredicate visitIsNullPredicate(HqlParser.IsNullPredicateContext ctx) {
-		return new NullnessPredicate(
-				(Expression) ctx.expression().accept( this ),
+	public NullnessSqmPredicate visitIsNullPredicate(HqlParser.IsNullPredicateContext ctx) {
+		return new NullnessSqmPredicate(
+				(SqmExpression) ctx.expression().accept( this ),
 				ctx.NOT() != null
 		);
 	}
 
 	@Override
-	public EmptinessPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
-		return new EmptinessPredicate(
-				(Expression) ctx.expression().accept( this ),
+	public EmptinessSqmPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
+		return new EmptinessSqmPredicate(
+				(SqmExpression) ctx.expression().accept( this ),
 				ctx.NOT() != null
 		);
 	}
 
 	@Override
-	public RelationalPredicate visitEqualityPredicate(HqlParser.EqualityPredicateContext ctx) {
-		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+	public RelationalSqmPredicate visitEqualityPredicate(HqlParser.EqualityPredicateContext ctx) {
+		final SqmExpression lhs = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression rhs = (SqmExpression) ctx.expression().get( 1 ).accept( this );
 
 		if ( lhs.getInferableType() != null ) {
-			if ( rhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			if ( rhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) rhs ).impliedType( lhs.getInferableType() );
 			}
 		}
 
 		if ( rhs.getInferableType() != null ) {
-			if ( lhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			if ( lhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lhs ).impliedType( rhs.getInferableType() );
 			}
 		}
 
-		return new RelationalPredicate( RelationalPredicate.Operator.EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.EQUAL, lhs, rhs );
 	}
 
 	@Override
 	public Object visitInequalityPredicate(HqlParser.InequalityPredicateContext ctx) {
-		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+		final SqmExpression lhs = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression rhs = (SqmExpression) ctx.expression().get( 1 ).accept( this );
 
 		if ( lhs.getInferableType() != null ) {
-			if ( rhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			if ( rhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) rhs ).impliedType( lhs.getInferableType() );
 			}
 		}
 
 		if ( rhs.getInferableType() != null ) {
-			if ( lhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			if ( lhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lhs ).impliedType( rhs.getInferableType() );
 			}
 		}
 
-		return new RelationalPredicate( RelationalPredicate.Operator.NOT_EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.NOT_EQUAL, lhs, rhs );
 	}
 
 	@Override
 	public Object visitGreaterThanPredicate(HqlParser.GreaterThanPredicateContext ctx) {
-		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+		final SqmExpression lhs = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression rhs = (SqmExpression) ctx.expression().get( 1 ).accept( this );
 
 		if ( lhs.getInferableType() != null ) {
-			if ( rhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			if ( rhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) rhs ).impliedType( lhs.getInferableType() );
 			}
 		}
 
 		if ( rhs.getInferableType() != null ) {
-			if ( lhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			if ( lhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lhs ).impliedType( rhs.getInferableType() );
 			}
 		}
 
-		return new RelationalPredicate( RelationalPredicate.Operator.GREATER_THAN, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.GREATER_THAN, lhs, rhs );
 	}
 
 	@Override
 	public Object visitGreaterThanOrEqualPredicate(HqlParser.GreaterThanOrEqualPredicateContext ctx) {
-		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+		final SqmExpression lhs = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression rhs = (SqmExpression) ctx.expression().get( 1 ).accept( this );
 
 		if ( lhs.getInferableType() != null ) {
-			if ( rhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			if ( rhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) rhs ).impliedType( lhs.getInferableType() );
 			}
 		}
 
 		if ( rhs.getInferableType() != null ) {
-			if ( lhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			if ( lhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lhs ).impliedType( rhs.getInferableType() );
 			}
 		}
 
-		return new RelationalPredicate( RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL, lhs, rhs );
 	}
 
 	@Override
 	public Object visitLessThanPredicate(HqlParser.LessThanPredicateContext ctx) {
-		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+		final SqmExpression lhs = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression rhs = (SqmExpression) ctx.expression().get( 1 ).accept( this );
 
 		if ( lhs.getInferableType() != null ) {
-			if ( rhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			if ( rhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) rhs ).impliedType( lhs.getInferableType() );
 			}
 		}
 
 		if ( rhs.getInferableType() != null ) {
-			if ( lhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			if ( lhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lhs ).impliedType( rhs.getInferableType() );
 			}
 		}
 
-		return new RelationalPredicate( RelationalPredicate.Operator.LESS_THAN, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.LESS_THAN, lhs, rhs );
 	}
 
 	@Override
 	public Object visitLessThanOrEqualPredicate(HqlParser.LessThanOrEqualPredicateContext ctx) {
-		final Expression lhs = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression rhs = (Expression) ctx.expression().get( 1 ).accept( this );
+		final SqmExpression lhs = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression rhs = (SqmExpression) ctx.expression().get( 1 ).accept( this );
 
 		if ( lhs.getInferableType() != null ) {
-			if ( rhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) rhs ).impliedType( lhs.getInferableType() );
+			if ( rhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) rhs ).impliedType( lhs.getInferableType() );
 			}
 		}
 
 		if ( rhs.getInferableType() != null ) {
-			if ( lhs instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lhs ).impliedType( rhs.getInferableType() );
+			if ( lhs instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lhs ).impliedType( rhs.getInferableType() );
 			}
 		}
 
-		return new RelationalPredicate( RelationalPredicate.Operator.LESS_THAN_OR_EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL, lhs, rhs );
 	}
 
 	@Override
 	public Object visitBetweenPredicate(HqlParser.BetweenPredicateContext ctx) {
-		final Expression expression = (Expression) ctx.expression().get( 0 ).accept( this );
-		final Expression lowerBound = (Expression) ctx.expression().get( 1 ).accept( this );
-		final Expression upperBound = (Expression) ctx.expression().get( 2 ).accept( this );
+		final SqmExpression expression = (SqmExpression) ctx.expression().get( 0 ).accept( this );
+		final SqmExpression lowerBound = (SqmExpression) ctx.expression().get( 1 ).accept( this );
+		final SqmExpression upperBound = (SqmExpression) ctx.expression().get( 2 ).accept( this );
 
 		if ( expression.getInferableType() != null ) {
-			if ( lowerBound instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lowerBound ).impliedType( expression.getInferableType() );
+			if ( lowerBound instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lowerBound ).impliedType( expression.getInferableType() );
 			}
-			if ( upperBound instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) upperBound ).impliedType( expression.getInferableType() );
+			if ( upperBound instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) upperBound ).impliedType( expression.getInferableType() );
 			}
 		}
 		else if ( lowerBound.getInferableType() != null ) {
-			if ( expression instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) expression ).impliedType( lowerBound.getInferableType() );
+			if ( expression instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) expression ).impliedType( lowerBound.getInferableType() );
 			}
-			if ( upperBound instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) upperBound ).impliedType( lowerBound.getInferableType() );
+			if ( upperBound instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) upperBound ).impliedType( lowerBound.getInferableType() );
 			}
 		}
 		else if ( upperBound.getInferableType() != null ) {
-			if ( expression instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) expression ).impliedType( upperBound.getInferableType() );
+			if ( expression instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) expression ).impliedType( upperBound.getInferableType() );
 			}
-			if ( lowerBound instanceof ImpliedTypeExpression ) {
-				( (ImpliedTypeExpression) lowerBound ).impliedType( upperBound.getInferableType() );
+			if ( lowerBound instanceof ImpliedTypeSqmExpression ) {
+				( (ImpliedTypeSqmExpression) lowerBound ).impliedType( upperBound.getInferableType() );
 			}
 		}
 
-		return new BetweenPredicate(
+		return new BetweenSqmPredicate(
 				expression,
 				lowerBound,
 				upperBound,
@@ -1121,16 +1121,16 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitLikePredicate(HqlParser.LikePredicateContext ctx) {
 		if ( ctx.likeEscape() != null ) {
-			return new LikePredicate(
-					(Expression) ctx.expression().get( 0 ).accept( this ),
-					(Expression) ctx.expression().get( 1 ).accept( this ),
-					(Expression) ctx.likeEscape().expression().accept( this )
+			return new LikeSqmPredicate(
+					(SqmExpression) ctx.expression().get( 0 ).accept( this ),
+					(SqmExpression) ctx.expression().get( 1 ).accept( this ),
+					(SqmExpression) ctx.likeEscape().expression().accept( this )
 			);
 		}
 		else {
-			return new LikePredicate(
-					(Expression) ctx.expression().get( 0 ).accept( this ),
-					(Expression) ctx.expression().get( 1 ).accept( this )
+			return new LikeSqmPredicate(
+					(SqmExpression) ctx.expression().get( 0 ).accept( this ),
+					(SqmExpression) ctx.expression().get( 1 ).accept( this )
 			);
 		}
 	}
@@ -1138,49 +1138,49 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Object visitMemberOfPredicate(HqlParser.MemberOfPredicateContext ctx) {
 		final Object pathResolution = ctx.path().accept( this );
-		if ( !AttributeReferenceExpression.class.isInstance( pathResolution ) ) {
+		if ( !AttributeReferenceSqmExpression.class.isInstance( pathResolution ) ) {
 			throw new SemanticException( "Could not resolve path [" + ctx.path().getText() + "] as an attribute reference" );
 		}
-		final AttributeReferenceExpression attributeReference = (AttributeReferenceExpression) pathResolution;
+		final AttributeReferenceSqmExpression attributeReference = (AttributeReferenceSqmExpression) pathResolution;
 		if ( !PluralAttribute.class.isInstance( attributeReference.getBoundAttribute() ) ) {
 			throw new SemanticException( "Path argument to MEMBER OF must be a collection" );
 		}
-		return new MemberOfPredicate( attributeReference );
+		return new MemberOfSqmPredicate( attributeReference );
 	}
 
 	@Override
 	public Object visitInPredicate(HqlParser.InPredicateContext ctx) {
-		final Expression testExpression = (Expression) ctx.expression().accept( this );
+		final SqmExpression testExpression = (SqmExpression) ctx.expression().accept( this );
 
 		if ( HqlParser.ExplicitTupleInListContext.class.isInstance( ctx.inList() ) ) {
 			final HqlParser.ExplicitTupleInListContext tupleExpressionListContext = (HqlParser.ExplicitTupleInListContext) ctx.inList();
-			final List<Expression> listExpressions = new ArrayList<Expression>( tupleExpressionListContext.expression().size() );
+			final List<SqmExpression> listExpressions = new ArrayList<SqmExpression>( tupleExpressionListContext.expression().size() );
 			for ( HqlParser.ExpressionContext expressionContext : tupleExpressionListContext.expression() ) {
-				final Expression listItemExpression = (Expression) expressionContext.accept( this );
+				final SqmExpression listItemExpression = (SqmExpression) expressionContext.accept( this );
 
 				if ( testExpression.getInferableType() != null ) {
-					if ( listItemExpression instanceof ImpliedTypeExpression ) {
-						( (ImpliedTypeExpression) listItemExpression ).impliedType( testExpression.getInferableType() );
+					if ( listItemExpression instanceof ImpliedTypeSqmExpression ) {
+						( (ImpliedTypeSqmExpression) listItemExpression ).impliedType( testExpression.getInferableType() );
 					}
 				}
 
 				listExpressions.add( listItemExpression );
 			}
 
-			return new InListPredicate( testExpression, listExpressions );
+			return new InListSqmPredicate( testExpression, listExpressions );
 		}
 		else if ( HqlParser.SubQueryInListContext.class.isInstance( ctx.inList() ) ) {
 			final HqlParser.SubQueryInListContext subQueryContext = (HqlParser.SubQueryInListContext) ctx.inList();
-			final Expression subQueryExpression = (Expression) subQueryContext.expression().accept( this );
+			final SqmExpression subQueryExpression = (SqmExpression) subQueryContext.expression().accept( this );
 
-			if ( !SubQueryExpression.class.isInstance( subQueryExpression ) ) {
+			if ( !SubQuerySqmExpression.class.isInstance( subQueryExpression ) ) {
 				throw new ParsingException(
 						"Was expecting a SubQueryExpression, but found " + subQueryExpression.getClass().getSimpleName()
 								+ " : " + subQueryContext.expression().toString()
 				);
 			}
 
-			return new InSubQueryPredicate( testExpression, (SubQueryExpression) subQueryExpression );
+			return new InSubQuerySqmPredicate( testExpression, (SubQuerySqmExpression) subQueryExpression );
 		}
 
 		// todo : handle PersistentCollectionReferenceInList labeled branch
@@ -1201,7 +1201,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		try {
 			final EntityType entityType = parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityType( pathText );
 			if ( entityType != null ) {
-				return new EntityTypeExpression( entityType );
+				return new EntityTypeSqmExpression( entityType );
 			}
 		}
 		catch (IllegalArgumentException ignore) {
@@ -1220,7 +1220,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MapEntryFunction visitMapEntryPath(HqlParser.MapEntryPathContext ctx) {
+	public MapEntrySqmFunction visitMapEntryPath(HqlParser.MapEntryPathContext ctx) {
 		final Binding pathResolution = (Binding) ctx.mapReference().path().accept( this );
 
 		if ( inWhereClause ) {
@@ -1232,7 +1232,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
-				return new MapEntryFunction(
+				return new MapEntrySqmFunction(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						pluralAttribute.getIndexType(),
 						pluralAttribute.getElementType()
@@ -1249,7 +1249,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public Binding visitIndexedPath(HqlParser.IndexedPathContext ctx) {
 		final AttributeBinding pluralAttributeBinding = (AttributeBinding) ctx.path().accept( this );
-		final Expression indexExpression = (Expression) ctx.expression().accept( this );
+		final SqmExpression indexExpression = (SqmExpression) ctx.expression().accept( this );
 
 		// the source TypeDescriptor needs to be an indexed collection for this to be valid...
 		if ( !PluralAttribute.class.isInstance( pluralAttributeBinding.getBoundModelType() ) ) {
@@ -1344,11 +1344,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new MapKeyPathExpression( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getIndexType() );
+		return new MapKeyPathSqmExpression( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getIndexType() );
 	}
 
 	@Override
-	public CollectionValuePathExpression visitCollectionValuePathRoot(HqlParser.CollectionValuePathRootContext ctx) {
+	public CollectionValuePathSqmExpression visitCollectionValuePathRoot(HqlParser.CollectionValuePathRootContext ctx) {
 		final Binding pathResolution = visitCollectionReference( ctx.collectionReference() );
 		if ( !QualifiedAttributeJoinFromElement.class.isInstance( pathResolution ) ) {
 			throw new SemanticException(
@@ -1377,7 +1377,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new CollectionValuePathExpression(
+		return new CollectionValuePathSqmExpression(
 				attributeBinding,
 				collectionReference.getElementType()
 		);
@@ -1431,7 +1431,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ConstantExpression resolveConstantExpression(String reference) {
+	protected ConstantSqmExpression resolveConstantExpression(String reference) {
 		// todo : hook in "import" resolution using the ParsingContext
 		final int dotPosition = reference.lastIndexOf( '.' );
 		final String className = reference.substring( 0, dotPosition - 1 );
@@ -1441,7 +1441,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			final Class clazz = parsingContext.getConsumerContext().classByName( className );
 			if ( clazz.isEnum() ) {
 				try {
-					return new ConstantEnumExpression(
+					return new ConstantEnumSqmExpression(
 							Enum.valueOf( clazz, fieldName ),
 							parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( clazz )
 					);
@@ -1457,7 +1457,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						throw new SemanticException( "Field [" + fieldName + "] is not static on class [" + className + "]" );
 					}
 					field.setAccessible( true );
-					return new ConstantFieldExpression(
+					return new ConstantFieldSqmExpression(
 							field.get( null ),
 							parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( field.getType() )
 					);
@@ -1479,13 +1479,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public ConcatExpression visitConcatenationExpression(HqlParser.ConcatenationExpressionContext ctx) {
+	public ConcatSqmExpression visitConcatenationExpression(HqlParser.ConcatenationExpressionContext ctx) {
 		if ( ctx.expression().size() != 2 ) {
 			throw new ParsingException( "Expecting 2 operands to the concat operator" );
 		}
-		return new ConcatExpression(
-				(Expression) ctx.expression( 0 ).accept( this ),
-				(Expression) ctx.expression( 1 ).accept( this )
+		return new ConcatSqmExpression(
+				(SqmExpression) ctx.expression( 0 ).accept( this ),
+				(SqmExpression) ctx.expression( 1 ).accept( this )
 		);
 	}
 
@@ -1495,10 +1495,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			throw new ParsingException( "Expecting 2 operands to the + operator" );
 		}
 
-		final Expression firstOperand = (Expression) ctx.expression( 0 ).accept( this );
-		final Expression secondOperand = (Expression) ctx.expression( 1 ).accept( this );
-		return new BinaryArithmeticExpression(
-				BinaryArithmeticExpression.Operation.ADD,
+		final SqmExpression firstOperand = (SqmExpression) ctx.expression( 0 ).accept( this );
+		final SqmExpression secondOperand = (SqmExpression) ctx.expression( 1 ).accept( this );
+		return new BinaryArithmeticSqmExpression(
+				BinaryArithmeticSqmExpression.Operation.ADD,
 				firstOperand,
 				secondOperand,
 				ExpressionTypeHelper.resolveArithmeticType(
@@ -1516,10 +1516,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			throw new ParsingException( "Expecting 2 operands to the - operator" );
 		}
 
-		final Expression firstOperand = (Expression) ctx.expression( 0 ).accept( this );
-		final Expression secondOperand = (Expression) ctx.expression( 1 ).accept( this );
-		return new BinaryArithmeticExpression(
-				BinaryArithmeticExpression.Operation.SUBTRACT,
+		final SqmExpression firstOperand = (SqmExpression) ctx.expression( 0 ).accept( this );
+		final SqmExpression secondOperand = (SqmExpression) ctx.expression( 1 ).accept( this );
+		return new BinaryArithmeticSqmExpression(
+				BinaryArithmeticSqmExpression.Operation.SUBTRACT,
 				firstOperand,
 				secondOperand,
 				ExpressionTypeHelper.resolveArithmeticType(
@@ -1537,10 +1537,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			throw new ParsingException( "Expecting 2 operands to the * operator" );
 		}
 
-		final Expression firstOperand = (Expression) ctx.expression( 0 ).accept( this );
-		final Expression secondOperand = (Expression) ctx.expression( 1 ).accept( this );
-		return new BinaryArithmeticExpression(
-				BinaryArithmeticExpression.Operation.MULTIPLY,
+		final SqmExpression firstOperand = (SqmExpression) ctx.expression( 0 ).accept( this );
+		final SqmExpression secondOperand = (SqmExpression) ctx.expression( 1 ).accept( this );
+		return new BinaryArithmeticSqmExpression(
+				BinaryArithmeticSqmExpression.Operation.MULTIPLY,
 				firstOperand,
 				secondOperand,
 				ExpressionTypeHelper.resolveArithmeticType(
@@ -1558,10 +1558,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			throw new ParsingException( "Expecting 2 operands to the / operator" );
 		}
 
-		final Expression firstOperand = (Expression) ctx.expression( 0 ).accept( this );
-		final Expression secondOperand = (Expression) ctx.expression( 1 ).accept( this );
-		return new BinaryArithmeticExpression(
-				BinaryArithmeticExpression.Operation.DIVIDE,
+		final SqmExpression firstOperand = (SqmExpression) ctx.expression( 0 ).accept( this );
+		final SqmExpression secondOperand = (SqmExpression) ctx.expression( 1 ).accept( this );
+		return new BinaryArithmeticSqmExpression(
+				BinaryArithmeticSqmExpression.Operation.DIVIDE,
 				firstOperand,
 				secondOperand,
 				ExpressionTypeHelper.resolveArithmeticType(
@@ -1579,10 +1579,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			throw new ParsingException( "Expecting 2 operands to the % operator" );
 		}
 
-		final Expression firstOperand = (Expression) ctx.expression( 0 ).accept( this );
-		final Expression secondOperand = (Expression) ctx.expression( 1 ).accept( this );
-		return new BinaryArithmeticExpression(
-				BinaryArithmeticExpression.Operation.MODULO,
+		final SqmExpression firstOperand = (SqmExpression) ctx.expression( 0 ).accept( this );
+		final SqmExpression secondOperand = (SqmExpression) ctx.expression( 1 ).accept( this );
+		return new BinaryArithmeticSqmExpression(
+				BinaryArithmeticSqmExpression.Operation.MODULO,
 				firstOperand,
 				secondOperand,
 				ExpressionTypeHelper.resolveArithmeticType(
@@ -1596,78 +1596,78 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public Object visitUnaryPlusExpression(HqlParser.UnaryPlusExpressionContext ctx) {
-		return new UnaryOperationExpression(
-				UnaryOperationExpression.Operation.PLUS,
-				(Expression) ctx.expression().accept( this )
+		return new UnaryOperationSqmExpression(
+				UnaryOperationSqmExpression.Operation.PLUS,
+				(SqmExpression) ctx.expression().accept( this )
 		);
 	}
 
 	@Override
 	public Object visitUnaryMinusExpression(HqlParser.UnaryMinusExpressionContext ctx) {
-		return new UnaryOperationExpression(
-				UnaryOperationExpression.Operation.MINUS,
-				(Expression) ctx.expression().accept( this )
+		return new UnaryOperationSqmExpression(
+				UnaryOperationSqmExpression.Operation.MINUS,
+				(SqmExpression) ctx.expression().accept( this )
 		);
 	}
 
 	@Override
-	public CaseSimpleExpression visitSimpleCaseStatement(HqlParser.SimpleCaseStatementContext ctx) {
-		final CaseSimpleExpression caseExpression = new CaseSimpleExpression(
-				(Expression) ctx.expression().accept( this )
+	public CaseSimpleSqmExpression visitSimpleCaseStatement(HqlParser.SimpleCaseStatementContext ctx) {
+		final CaseSimpleSqmExpression caseExpression = new CaseSimpleSqmExpression(
+				(SqmExpression) ctx.expression().accept( this )
 		);
 
 		for ( HqlParser.SimpleCaseWhenContext simpleCaseWhen : ctx.simpleCaseWhen() ) {
 			caseExpression.when(
-					(Expression) simpleCaseWhen.expression( 0 ).accept( this ),
-					(Expression) simpleCaseWhen.expression( 0 ).accept( this )
+					(SqmExpression) simpleCaseWhen.expression( 0 ).accept( this ),
+					(SqmExpression) simpleCaseWhen.expression( 0 ).accept( this )
 			);
 		}
 
 		if ( ctx.caseOtherwise() != null ) {
-			caseExpression.otherwise( (Expression) ctx.caseOtherwise().expression().accept( this ) );
+			caseExpression.otherwise( (SqmExpression) ctx.caseOtherwise().expression().accept( this ) );
 		}
 
 		return caseExpression;
 	}
 
 	@Override
-	public CaseSearchedExpression visitSearchedCaseStatement(HqlParser.SearchedCaseStatementContext ctx) {
-		final CaseSearchedExpression caseExpression = new CaseSearchedExpression();
+	public CaseSearchedSqmExpression visitSearchedCaseStatement(HqlParser.SearchedCaseStatementContext ctx) {
+		final CaseSearchedSqmExpression caseExpression = new CaseSearchedSqmExpression();
 
 		for ( HqlParser.SearchedCaseWhenContext whenFragment : ctx.searchedCaseWhen() ) {
 			caseExpression.when(
-					(Predicate) whenFragment.predicate().accept( this ),
-					(Expression) whenFragment.expression().accept( this )
+					(SqmPredicate) whenFragment.predicate().accept( this ),
+					(SqmExpression) whenFragment.expression().accept( this )
 			);
 		}
 
 		if ( ctx.caseOtherwise() != null ) {
-			caseExpression.otherwise( (Expression) ctx.caseOtherwise().expression().accept( this ) );
+			caseExpression.otherwise( (SqmExpression) ctx.caseOtherwise().expression().accept( this ) );
 		}
 
 		return caseExpression;
 	}
 
 	@Override
-	public CoalesceExpression visitCoalesceExpression(HqlParser.CoalesceExpressionContext ctx) {
-		CoalesceExpression coalesceExpression = new CoalesceExpression();
+	public CoalesceSqmExpression visitCoalesceExpression(HqlParser.CoalesceExpressionContext ctx) {
+		CoalesceSqmExpression coalesceExpression = new CoalesceSqmExpression();
 		for ( HqlParser.ExpressionContext expressionContext : ctx.coalesce().expression() ) {
-			coalesceExpression.value( (Expression) expressionContext.accept( this ) );
+			coalesceExpression.value( (SqmExpression) expressionContext.accept( this ) );
 		}
 		return coalesceExpression;
 	}
 
 	@Override
-	public NullifExpression visitNullIfExpression(HqlParser.NullIfExpressionContext ctx) {
-		return new NullifExpression(
-				(Expression) ctx.nullIf().expression( 0 ).accept( this ),
-				(Expression) ctx.nullIf().expression( 1 ).accept( this )
+	public NullifSqmExpression visitNullIfExpression(HqlParser.NullIfExpressionContext ctx) {
+		return new NullifSqmExpression(
+				(SqmExpression) ctx.nullIf().expression( 0 ).accept( this ),
+				(SqmExpression) ctx.nullIf().expression( 1 ).accept( this )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("UnnecessaryBoxing")
-	public LiteralExpression visitLiteralExpression(HqlParser.LiteralExpressionContext ctx) {
+	public LiteralSqmExpression visitLiteralExpression(HqlParser.LiteralExpressionContext ctx) {
 		if ( ctx.literal().CHARACTER_LITERAL() != null ) {
 			return characterLiteral( ctx.literal().CHARACTER_LITERAL().getText() );
 		}
@@ -1717,43 +1717,43 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			booleanLiteral( true );
 		}
 		else if ( ctx.literal().NULL() != null ) {
-			return new LiteralNullExpression();
+			return new LiteralNullSqmExpression();
 		}
 
 		// otherwise we have a problem
 		throw new ParsingException( "Unexpected literal expression type [" + ctx.getText() + "]" );
 	}
 
-	private LiteralExpression<Boolean> booleanLiteral(boolean value) {
+	private LiteralSqmExpression<Boolean> booleanLiteral(boolean value) {
 		final BasicType<Boolean> type = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Boolean.class );
 
 		return value
-				? new LiteralTrueExpression( type )
-				: new LiteralFalseExpression( type );
+				? new LiteralTrueSqmExpression( type )
+				: new LiteralFalseSqmExpression( type );
 	}
 
-	private LiteralCharacterExpression characterLiteral(String text) {
+	private LiteralCharacterSqmExpression characterLiteral(String text) {
 		if ( text.length() > 1 ) {
 			// todo : or just treat it as a String literal?
 			throw new ParsingException( "Value for CHARACTER_LITERAL token was more than 1 character" );
 		}
-		return new LiteralCharacterExpression(
+		return new LiteralCharacterSqmExpression(
 				text.charAt( 0 ),
 				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class )
 		);
 	}
 
-	private LiteralExpression stringLiteral(String text) {
-		return new LiteralStringExpression(
+	private LiteralSqmExpression stringLiteral(String text) {
+		return new LiteralStringSqmExpression(
 				text,
 				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( String.class )
 		);
 	}
 
-	protected LiteralIntegerExpression integerLiteral(String text) {
+	protected LiteralIntegerSqmExpression integerLiteral(String text) {
 		try {
 			final Integer value = Integer.valueOf( text );
-			return new LiteralIntegerExpression(
+			return new LiteralIntegerSqmExpression(
 					value,
 					parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Integer.class )
 			);
@@ -1766,14 +1766,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 
-	protected LiteralLongExpression longLiteral(String text) {
+	protected LiteralLongSqmExpression longLiteral(String text) {
 		final String originalText = text;
 		try {
 			if ( text.endsWith( "l" ) || text.endsWith( "L" ) ) {
 				text = text.substring( 0, text.length() - 1 );
 			}
 			final Long value = Long.valueOf( text );
-			return new LiteralLongExpression(
+			return new LiteralLongSqmExpression(
 					value,
 					parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class )
 			);
@@ -1786,13 +1786,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 
-	protected LiteralBigIntegerExpression bigIntegerLiteral(String text) {
+	protected LiteralBigIntegerSqmExpression bigIntegerLiteral(String text) {
 		final String originalText = text;
 		try {
 			if ( text.endsWith( "bi" ) || text.endsWith( "BI" ) ) {
 				text = text.substring( 0, text.length() - 2 );
 			}
-			return new LiteralBigIntegerExpression(
+			return new LiteralBigIntegerSqmExpression(
 					new BigInteger( text ),
 					parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( BigInteger.class )
 			);
@@ -1805,9 +1805,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 
-	protected LiteralFloatExpression floatLiteral(String text) {
+	protected LiteralFloatSqmExpression floatLiteral(String text) {
 		try {
-			return new LiteralFloatExpression(
+			return new LiteralFloatSqmExpression(
 					Float.valueOf( text ),
 					parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Float.class )
 			);
@@ -1820,9 +1820,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 
-	protected LiteralDoubleExpression doubleLiteral(String text) {
+	protected LiteralDoubleSqmExpression doubleLiteral(String text) {
 		try {
-			return new LiteralDoubleExpression(
+			return new LiteralDoubleSqmExpression(
 					Double.valueOf( text ),
 					parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Double.class )
 			);
@@ -1835,13 +1835,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 
-	protected LiteralBigDecimalExpression bigDecimalLiteral(String text) {
+	protected LiteralBigDecimalSqmExpression bigDecimalLiteral(String text) {
 		final String originalText = text;
 		try {
 			if ( text.endsWith( "bd" ) || text.endsWith( "BD" ) ) {
 				text = text.substring( 0, text.length() - 2 );
 			}
-			return new LiteralBigDecimalExpression(
+			return new LiteralBigDecimalSqmExpression(
 					new BigDecimal( text ),
 					parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( BigDecimal.class )
 			);
@@ -1860,26 +1860,26 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public NamedParameterExpression visitNamedParameter(HqlParser.NamedParameterContext ctx) {
-		return new NamedParameterExpression( ctx.identifier().getText() );
+	public NamedParameterSqmExpression visitNamedParameter(HqlParser.NamedParameterContext ctx) {
+		return new NamedParameterSqmExpression( ctx.identifier().getText() );
 	}
 
 	@Override
-	public PositionalParameterExpression visitPositionalParameter(HqlParser.PositionalParameterContext ctx) {
-		return new PositionalParameterExpression( Integer.valueOf( ctx.INTEGER_LITERAL().getText() ) );
+	public PositionalParameterSqmExpression visitPositionalParameter(HqlParser.PositionalParameterContext ctx) {
+		return new PositionalParameterSqmExpression( Integer.valueOf( ctx.INTEGER_LITERAL().getText() ) );
 	}
 
 	@Override
-	public GenericFunctionExpression visitJpaNonStandardFunction(HqlParser.JpaNonStandardFunctionContext ctx) {
+	public GenericFunctionSqmExpression visitJpaNonStandardFunction(HqlParser.JpaNonStandardFunctionContext ctx) {
 		final String functionName = ctx.nonStandardFunctionName().getText();
-		final List<Expression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
+		final List<SqmExpression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
 
 		// todo : integrate some form of SqlFunction look-up using the ParsingContext so we can resolve the "type"
-		return new GenericFunctionExpression( functionName, null, functionArguments );
+		return new GenericFunctionSqmExpression( functionName, null, functionArguments );
 	}
 
 	@Override
-	public GenericFunctionExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
+	public GenericFunctionSqmExpression visitNonStandardFunction(HqlParser.NonStandardFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation(
 					"Encountered non-compliant non-standard function call [" +
@@ -1889,32 +1889,32 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final String functionName = ctx.nonStandardFunctionName().getText();
-		final List<Expression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
+		final List<SqmExpression> functionArguments = visitNonStandardFunctionArguments( ctx.nonStandardFunctionArguments() );
 
 		// todo : integrate some form of SqlFunction look-up using the ParsingContext so we can resolve the "type"
-		return new GenericFunctionExpression( functionName, null, functionArguments );
+		return new GenericFunctionSqmExpression( functionName, null, functionArguments );
 	}
 
 	@Override
-	public List<Expression> visitNonStandardFunctionArguments(HqlParser.NonStandardFunctionArgumentsContext ctx) {
-		final List<Expression> arguments = new ArrayList<Expression>();
+	public List<SqmExpression> visitNonStandardFunctionArguments(HqlParser.NonStandardFunctionArgumentsContext ctx) {
+		final List<SqmExpression> arguments = new ArrayList<SqmExpression>();
 
 		for ( HqlParser.ExpressionContext expressionContext : ctx.expression() ) {
-			arguments.add( (Expression) expressionContext.accept( this ) );
+			arguments.add( (SqmExpression) expressionContext.accept( this ) );
 		}
 
 		return arguments;
 	}
 
 	@Override
-	public AggregateFunction visitAggregateFunction(HqlParser.AggregateFunctionContext ctx) {
-		return (AggregateFunction) super.visitAggregateFunction( ctx );
+	public AggregateSqmFunction visitAggregateFunction(HqlParser.AggregateFunctionContext ctx) {
+		return (AggregateSqmFunction) super.visitAggregateFunction( ctx );
 	}
 
 	@Override
-	public AvgFunction visitAvgFunction(HqlParser.AvgFunctionContext ctx) {
-		final Expression expr = (Expression) ctx.expression().accept( this );
-		return new AvgFunction(
+	public AvgSqmFunction visitAvgFunction(HqlParser.AvgFunctionContext ctx) {
+		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
+		return new AvgSqmFunction(
 				expr,
 				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
@@ -1922,32 +1922,32 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public CastFunctionExpression visitCastFunction(HqlParser.CastFunctionContext ctx) {
-		return new CastFunctionExpression(
-				(Expression) ctx.expression().accept( this ),
+	public CastFunctionSqmExpression visitCastFunction(HqlParser.CastFunctionContext ctx) {
+		return new CastFunctionSqmExpression(
+				(SqmExpression) ctx.expression().accept( this ),
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveCastTargetType( ctx.dataType().IDENTIFIER().getText() )
 		);
 	}
 
 	@Override
-	public ConcatFunctionExpression visitConcatFunction(HqlParser.ConcatFunctionContext ctx) {
-		final List<Expression> arguments = new ArrayList<Expression>();
+	public ConcatFunctionSqmExpression visitConcatFunction(HqlParser.ConcatFunctionContext ctx) {
+		final List<SqmExpression> arguments = new ArrayList<SqmExpression>();
 		for ( HqlParser.ExpressionContext argument : ctx.expression() ) {
-			arguments.add( (Expression) argument.accept( this ) );
+			arguments.add( (SqmExpression) argument.accept( this ) );
 		}
 
-		return new ConcatFunctionExpression( (BasicType) arguments.get( 0 ).getExpressionType(), arguments );
+		return new ConcatFunctionSqmExpression( (BasicType) arguments.get( 0 ).getExpressionType(), arguments );
 	}
 
 	@Override
-	public AggregateFunction visitCountFunction(HqlParser.CountFunctionContext ctx) {
+	public AggregateSqmFunction visitCountFunction(HqlParser.CountFunctionContext ctx) {
 		final BasicType longType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class );
 		if ( ctx.ASTERISK() != null ) {
-			return new CountStarFunction( ctx.DISTINCT() != null, longType );
+			return new CountStarSqmFunction( ctx.DISTINCT() != null, longType );
 		}
 		else {
-			return new CountFunction(
-					(Expression) ctx.expression().accept( this ),
+			return new CountSqmFunction(
+					(SqmExpression) ctx.expression().accept( this ),
 					ctx.DISTINCT() != null,
 					longType
 			);
@@ -1955,9 +1955,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MaxFunction visitMaxFunction(HqlParser.MaxFunctionContext ctx) {
-		final Expression expr = (Expression) ctx.expression().accept( this );
-		return new MaxFunction(
+	public MaxSqmFunction visitMaxFunction(HqlParser.MaxFunctionContext ctx) {
+		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
+		return new MaxSqmFunction(
 				expr,
 				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
@@ -1965,9 +1965,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MinFunction visitMinFunction(HqlParser.MinFunctionContext ctx) {
-		final Expression expr = (Expression) ctx.expression().accept( this );
-		return new MinFunction(
+	public MinSqmFunction visitMinFunction(HqlParser.MinFunctionContext ctx) {
+		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
+		return new MinSqmFunction(
 				expr,
 				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
@@ -1975,19 +1975,19 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public SubstringFunctionExpression visitSubstringFunction(HqlParser.SubstringFunctionContext ctx) {
-		final Expression source = (Expression) ctx.expression().accept( this );
-		final Expression start = (Expression) ctx.substringFunctionStartArgument().accept( this );
-		final Expression length = ctx.substringFunctionLengthArgument() == null
+	public SubstringFunctionSqmExpression visitSubstringFunction(HqlParser.SubstringFunctionContext ctx) {
+		final SqmExpression source = (SqmExpression) ctx.expression().accept( this );
+		final SqmExpression start = (SqmExpression) ctx.substringFunctionStartArgument().accept( this );
+		final SqmExpression length = ctx.substringFunctionLengthArgument() == null
 				? null
-				: (Expression) ctx.substringFunctionLengthArgument().accept( this );
-		return new SubstringFunctionExpression( (BasicType) source.getExpressionType(), source, start, length );
+				: (SqmExpression) ctx.substringFunctionLengthArgument().accept( this );
+		return new SubstringFunctionSqmExpression( (BasicType) source.getExpressionType(), source, start, length );
 	}
 
 	@Override
-	public SumFunction visitSumFunction(HqlParser.SumFunctionContext ctx) {
-		final Expression expr = (Expression) ctx.expression().accept( this );
-		return new SumFunction(
+	public SumSqmFunction visitSumFunction(HqlParser.SumFunctionContext ctx) {
+		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
+		return new SumSqmFunction(
 				expr,
 				ctx.DISTINCT() != null,
 				ExpressionTypeHelper.resolveSingleNumericType(
@@ -1998,9 +1998,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public TrimFunctionExpression visitTrimFunction(HqlParser.TrimFunctionContext ctx) {
-		final Expression source = (Expression) ctx.expression().accept( this );
-		return new TrimFunctionExpression(
+	public TrimFunctionSqmExpression visitTrimFunction(HqlParser.TrimFunctionContext ctx) {
+		final SqmExpression source = (SqmExpression) ctx.expression().accept( this );
+		return new TrimFunctionSqmExpression(
 				(BasicType) source.getExpressionType(),
 				visitTrimSpecification( ctx.trimSpecification() ),
 				visitTrimCharacter( ctx.trimCharacter() ),
@@ -2009,59 +2009,59 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public TrimFunctionExpression.Specification visitTrimSpecification(HqlParser.TrimSpecificationContext ctx) {
+	public TrimFunctionSqmExpression.Specification visitTrimSpecification(HqlParser.TrimSpecificationContext ctx) {
 		if ( ctx.LEADING() != null ) {
-			return TrimFunctionExpression.Specification.LEADING;
+			return TrimFunctionSqmExpression.Specification.LEADING;
 		}
 		else if ( ctx.TRAILING() != null ) {
-			return TrimFunctionExpression.Specification.TRAILING;
+			return TrimFunctionSqmExpression.Specification.TRAILING;
 		}
 
 		// JPA says the default is BOTH
-		return TrimFunctionExpression.Specification.BOTH;
+		return TrimFunctionSqmExpression.Specification.BOTH;
 	}
 
 	@Override
-	public LiteralCharacterExpression visitTrimCharacter(HqlParser.TrimCharacterContext ctx) {
+	public LiteralCharacterSqmExpression visitTrimCharacter(HqlParser.TrimCharacterContext ctx) {
 		if ( ctx.CHARACTER_LITERAL() != null ) {
 			final String trimCharText = ctx.CHARACTER_LITERAL().getText();
 			if ( trimCharText.length() != 1 ) {
 				throw new SemanticException( "Expecting [trim character] for TRIM function to be  single character, found : " + trimCharText );
 			}
-			return new LiteralCharacterExpression( trimCharText.charAt( 0 ), parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
+			return new LiteralCharacterSqmExpression( trimCharText.charAt( 0 ), parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
 		}
 		if ( ctx.STRING_LITERAL() != null ) {
 			final String trimCharText = ctx.STRING_LITERAL().getText();
 			if ( trimCharText.length() != 1 ) {
 				throw new SemanticException( "Expecting [trim character] for TRIM function to be  single character, found : " + trimCharText );
 			}
-			return new LiteralCharacterExpression( trimCharText.charAt( 0 ), parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
+			return new LiteralCharacterSqmExpression( trimCharText.charAt( 0 ), parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
 		}
 
 		// JPA says space is the default
-		return new LiteralCharacterExpression( ' ',  parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
+		return new LiteralCharacterSqmExpression( ' ', parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Character.class ) );
 	}
 
 	@Override
-	public UpperFunctionExpression visitUpperFunction(HqlParser.UpperFunctionContext ctx) {
-		final Expression expression = (Expression) ctx.expression().accept( this );
-		return new UpperFunctionExpression(
+	public UpperFunctionSqmExpression visitUpperFunction(HqlParser.UpperFunctionContext ctx) {
+		final SqmExpression expression = (SqmExpression) ctx.expression().accept( this );
+		return new UpperFunctionSqmExpression(
 				(BasicType) expression.getExpressionType(),
 				expression
 		);
 	}
 
 	@Override
-	public LowerFunctionExpression visitLowerFunction(HqlParser.LowerFunctionContext ctx) {
-		final Expression expression = (Expression) ctx.expression().accept( this );
-		return new LowerFunctionExpression(
+	public LowerFunctionSqmExpression visitLowerFunction(HqlParser.LowerFunctionContext ctx) {
+		final SqmExpression expression = (SqmExpression) ctx.expression().accept( this );
+		return new LowerFunctionSqmExpression(
 				(BasicType) expression.getExpressionType(),
 				expression
 		);
 	}
 
 	@Override
-	public CollectionSizeFunction visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
+	public CollectionSizeSqmFunction visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
 		final Binding pathResolution = (Binding) ctx.path().accept( this );
 
 		if ( !AttributeBinding.class.isInstance( pathResolution ) ) {
@@ -2079,14 +2079,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionSizeFunction(
+		return new CollectionSizeSqmFunction(
 				attributeBinding,
 				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class )
 		);
 	}
 
 	@Override
-	public CollectionIndexFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
+	public CollectionIndexSqmFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
 		final String alias = ctx.identifier().getText();
 		final FromElement fromElement = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 
@@ -2107,11 +2107,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionIndexFunction( fromElement, collectionDescriptor.getIndexType() );
+		return new CollectionIndexSqmFunction( fromElement, collectionDescriptor.getIndexType() );
 	}
 
 	@Override
-	public MaxElementFunction visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
+	public MaxElementSqmFunction visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2127,11 +2127,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
-		return new MaxElementFunction( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
+		return new MaxElementSqmFunction( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
 	}
 
 	@Override
-	public MinElementFunction visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
+	public MinElementSqmFunction visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2146,11 +2146,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
-		return new MinElementFunction( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
+		return new MinElementSqmFunction( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
 	}
 
 	@Override
-	public MaxIndexFunction visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
+	public MaxIndexSqmFunction visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2159,13 +2159,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.LIST ) {
-				return new MaxIndexFunction(
+				return new MaxIndexSqmFunction(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Integer.class )
 				);
 			}
 			else if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
-				return new MaxIndexFunction(
+				return new MaxIndexSqmFunction(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						pluralAttribute.getIndexType()
 				);
@@ -2180,7 +2180,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MinIndexFunction visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
+	public MinIndexSqmFunction visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2189,13 +2189,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.LIST ) {
-				return new MinIndexFunction(
+				return new MinIndexSqmFunction(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Integer.class )
 				);
 			}
 			else if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
-				return new MinIndexFunction(
+				return new MinIndexSqmFunction(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						pluralAttribute.getIndexType()
 				);
@@ -2210,9 +2210,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public SubQueryExpression visitSubQueryExpression(HqlParser.SubQueryExpressionContext ctx) {
+	public SubQuerySqmExpression visitSubQueryExpression(HqlParser.SubQueryExpressionContext ctx) {
 		final QuerySpec querySpec = visitQuerySpec( ctx.querySpec() );
-		return new SubQueryExpression( querySpec, determineTypeDescriptor( querySpec.getSelectClause() ) );
+		return new SubQuerySqmExpression( querySpec, determineTypeDescriptor( querySpec.getSelectClause() ) );
 	}
 
 	private static Type determineTypeDescriptor(SelectClause selectClause) {

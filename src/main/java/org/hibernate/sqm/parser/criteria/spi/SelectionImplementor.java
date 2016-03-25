@@ -8,11 +8,11 @@ package org.hibernate.sqm.parser.criteria.spi;
 
 import javax.persistence.criteria.Selection;
 
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 /**
  * @author Steve Ebersole
  */
 public interface SelectionImplementor<T> extends Selection<T> {
-	void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container);
+	void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container);
 }

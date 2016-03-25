@@ -9,13 +9,13 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.expression.CollectionIndexFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeFunction;
-import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
-import org.hibernate.sqm.query.expression.MapKeyPathExpression;
-import org.hibernate.sqm.query.predicate.NullnessPredicate;
-import org.hibernate.sqm.query.predicate.Predicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.expression.CollectionIndexSqmFunction;
+import org.hibernate.sqm.query.expression.CollectionSizeSqmFunction;
+import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
+import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
+import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
@@ -38,24 +38,24 @@ public class WhereClauseTests {
 	@Test
 	public void testIsNotNullPredicate() {
 		SelectStatement statement = interpret( "select l from Leg l where l.basicName is not null" );
-		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessPredicate.class ) );
-		NullnessPredicate predicate = (NullnessPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessSqmPredicate.class ) );
+		NullnessSqmPredicate predicate = (NullnessSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate.isNegated(), is(true) );
 	}
 
 	@Test
 	public void testNotIsNullPredicate() {
 		SelectStatement statement = interpret( "select l from Leg l where not l.basicName is null" );
-		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessPredicate.class ) );
-		NullnessPredicate predicate = (NullnessPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessSqmPredicate.class ) );
+		NullnessSqmPredicate predicate = (NullnessSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate.isNegated(), is(true) );
 	}
 
 	@Test
 	public void testNotIsNotNullPredicate() {
 		SelectStatement statement = interpret( "select l from Leg l where not l.basicName is not null" );
-		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessPredicate.class ) );
-		NullnessPredicate predicate = (NullnessPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessSqmPredicate.class ) );
+		NullnessSqmPredicate predicate = (NullnessSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate.isNegated(), is(false) );
 	}
 
@@ -63,20 +63,20 @@ public class WhereClauseTests {
 	public void testCollectionSizeFunction() {
 		SelectStatement statement = interpret( "SELECT t FROM Trip t WHERE SIZE( t.basicCollection ) = 311" );
 
-		Predicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
-		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
-		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
+		SqmPredicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
+		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getOperator(), is( RelationalPredicate.Operator.EQUAL ) );
+		assertThat( relationalPredicate.getOperator(), is( RelationalSqmPredicate.Operator.EQUAL ) );
 
-		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerExpression.class ) );
-		assertThat( ( (LiteralIntegerExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 311 ) );
+		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
+		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 311 ) );
 
 		assertThat(
 				relationalPredicate.getLeftHandExpression(),
-				instanceOf( CollectionSizeFunction.class )
+				instanceOf( CollectionSizeSqmFunction.class )
 		);
-		final CollectionSizeFunction func = (CollectionSizeFunction) relationalPredicate.getLeftHandExpression();
+		final CollectionSizeSqmFunction func = (CollectionSizeSqmFunction) relationalPredicate.getLeftHandExpression();
 		assertThat(
 				func.getPluralAttributeBinding().getAttributeBindingSource().getFromElement().getIdentificationVariable(),
 				is( "t" )
@@ -91,30 +91,30 @@ public class WhereClauseTests {
 	public void testCollectionIndexFunction() {
 		SelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.indexedCollectionLegs l WHERE INDEX( l ) > 2" );
 
-		Predicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
-		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
-		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
+		SqmPredicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
+		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getOperator(), is( RelationalPredicate.Operator.GREATER_THAN ) );
+		assertThat( relationalPredicate.getOperator(), is( RelationalSqmPredicate.Operator.GREATER_THAN ) );
 
-		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerExpression.class ) );
-		assertThat( ( (LiteralIntegerExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
+		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
+		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexFunction.class ) );
-		assertThat( ( (CollectionIndexFunction) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexSqmFunction.class ) );
+		assertThat( ( (CollectionIndexSqmFunction) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
 	}
 
 	@Test
 	public void testMapKeyFunction() {
 		SelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.mapLegs l WHERE KEY( l ) = 'foo'" );
 
-		Predicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
-		assertThat( predicate, instanceOf( RelationalPredicate.class ) );
-		RelationalPredicate relationalPredicate = ( (RelationalPredicate) predicate );
+		SqmPredicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
+		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyPathExpression.class ) );
-		assertThat( ( (MapKeyPathExpression) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
-		assertThat( ( (MapKeyPathExpression) relationalPredicate.getLeftHandExpression() ).getMapKeyType().getTypeName(), is( "java.lang.String" ) );
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyPathSqmExpression.class ) );
+		assertThat( ( (MapKeyPathSqmExpression) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
+		assertThat( ( (MapKeyPathSqmExpression) relationalPredicate.getLeftHandExpression() ).getMapKeyType().getTypeName(), is( "java.lang.String" ) );
 	}
 
 	private SelectStatement interpret(String query) {

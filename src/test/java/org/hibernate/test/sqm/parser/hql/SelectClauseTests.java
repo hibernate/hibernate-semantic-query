@@ -17,11 +17,11 @@ import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.CollectionValuePathExpression;
-import org.hibernate.sqm.query.expression.MapEntryFunction;
-import org.hibernate.sqm.query.expression.MapKeyPathExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
+import org.hibernate.sqm.query.expression.MapEntrySqmFunction;
+import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationTarget;
 import org.hibernate.sqm.query.select.Selection;
@@ -126,7 +126,7 @@ public class SelectClauseTests {
 		SelectStatement statement = interpret( "select o.basic from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( AttributeReferenceExpression.class ) );
+		assertThat( selection.getExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
 	}
 
 	@Test
@@ -135,11 +135,11 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 	}
 
@@ -197,7 +197,7 @@ public class SelectClauseTests {
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 	}
 
@@ -230,11 +230,11 @@ public class SelectClauseTests {
 		assertEquals( 3, dynamicInstantiation.getArguments().size() );
 		assertThat(
 				dynamicInstantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
@@ -273,11 +273,11 @@ public class SelectClauseTests {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 	}
 
@@ -302,11 +302,11 @@ public class SelectClauseTests {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( AttributeReferenceExpression.class )
+				instanceOf( AttributeReferenceSqmExpression.class )
 		);
 	}
 
@@ -317,12 +317,12 @@ public class SelectClauseTests {
 
 		final QuerySpec querySpec = selectStatement.getQuerySpec();
 		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
-		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
-		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
+		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
+		AttributeReferenceSqmExpression leftHandOperand = (AttributeReferenceSqmExpression) expression.getLeftHandOperand();
 		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( leftHandOperand.getBoundAttribute().getName(), is( "basic" ) );
 
-		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
+		AttributeReferenceSqmExpression rightHandOperand = (AttributeReferenceSqmExpression) expression.getRightHandOperand();
 		assertThat( rightHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( rightHandOperand.getBoundAttribute().getName(), is( "basic1" ) );
 	}
@@ -334,12 +334,12 @@ public class SelectClauseTests {
 
 		final QuerySpec querySpec = selectStatement.getQuerySpec();
 		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
-		BinaryArithmeticExpression expression = (BinaryArithmeticExpression) selection.getExpression();
-		AttributeReferenceExpression leftHandOperand = (AttributeReferenceExpression) expression.getLeftHandOperand();
+		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
+		AttributeReferenceSqmExpression leftHandOperand = (AttributeReferenceSqmExpression) expression.getLeftHandOperand();
 		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( leftHandOperand.getBoundAttribute().getName(), is( "basic" ) );
 
-		AttributeReferenceExpression rightHandOperand = (AttributeReferenceExpression) expression.getRightHandOperand();
+		AttributeReferenceSqmExpression rightHandOperand = (AttributeReferenceSqmExpression) expression.getRightHandOperand();
 		assertThat( rightHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity2" ) );
 		assertThat( rightHandOperand.getBoundAttribute().getName(), is( "basic1" ) );
 	}
@@ -351,10 +351,10 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( MapKeyPathExpression.class )
+				instanceOf( MapKeyPathSqmExpression.class )
 		);
 
-		MapKeyPathExpression mapKeyPathExpression = (MapKeyPathExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		MapKeyPathSqmExpression mapKeyPathExpression = (MapKeyPathSqmExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( mapKeyPathExpression.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );
 		assertThat( mapKeyPathExpression.getMapKeyType().getTypeName(), is( String.class.getName() ) );
 
@@ -368,10 +368,10 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( CollectionValuePathExpression.class )
+				instanceOf( CollectionValuePathSqmExpression.class )
 		);
 
-		CollectionValuePathExpression collectionValuePathExpression = (CollectionValuePathExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		CollectionValuePathSqmExpression collectionValuePathExpression = (CollectionValuePathSqmExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 
 		assertThat( collectionValuePathExpression.getValueType(), instanceOf( EntityTypeImpl.class ) );
 		assertThat( collectionValuePathExpression.getValueType().getTypeName(), is( "com.acme.Leg" ) );
@@ -385,10 +385,10 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( CollectionValuePathExpression.class )
+				instanceOf( CollectionValuePathSqmExpression.class )
 		);
 
-		CollectionValuePathExpression collectionValuePathExpression = (CollectionValuePathExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		CollectionValuePathSqmExpression collectionValuePathExpression = (CollectionValuePathSqmExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( collectionValuePathExpression.getElementType(), instanceOf( EntityTypeImpl.class ) );
 		assertThat( collectionValuePathExpression.getElementType().getTypeName(), is( "com.acme.Leg" ) );
 		assertThat( collectionValuePathExpression.getPluralAttributeBinding().getIdentificationVariable(), is( "l") );
@@ -411,10 +411,10 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( MapEntryFunction.class )
+				instanceOf( MapEntrySqmFunction.class )
 		);
 
-		MapEntryFunction mapEntryFunction = (MapEntryFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		MapEntrySqmFunction mapEntryFunction = (MapEntrySqmFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 
 		// Key
 		assertThat( mapEntryFunction.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );

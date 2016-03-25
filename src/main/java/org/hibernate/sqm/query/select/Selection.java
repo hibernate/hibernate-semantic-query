@@ -6,28 +6,28 @@
  */
 package org.hibernate.sqm.query.select;
 
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * Represents an individual selection within a select clause.
  *
  * @author Steve Ebersole
  */
-public class Selection implements AliasedExpression {
-	private final Expression selectExpression;
+public class Selection implements AliasedSqmExpression {
+	private final SqmExpression selectExpression;
 	private final String alias;
 
-	public Selection(Expression selectExpression, String alias) {
+	public Selection(SqmExpression selectExpression, String alias) {
 		this.selectExpression = selectExpression;
 		this.alias = alias;
 	}
 
-	public Selection(Expression selectExpression) {
+	public Selection(SqmExpression selectExpression) {
 		this( selectExpression, null );
 	}
 
 	@Override
-	public Expression getExpression() {
+	public SqmExpression getExpression() {
 		return selectExpression;
 	}
 

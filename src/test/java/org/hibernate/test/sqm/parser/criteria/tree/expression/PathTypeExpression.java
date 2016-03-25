@@ -11,8 +11,8 @@ import java.io.Serializable;
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.path.AbstractPathImpl;
@@ -35,12 +35,12 @@ public class PathTypeExpression<T> extends AbstractCriteriaExpressionImpl<T> imp
 	}
 
 	@Override
-	public Expression visitExpression(CriteriaVisitor visitor) {
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
 		throw new NotYetImplementedException(  );
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
 		throw new NotYetImplementedException(  );
 	}
 }

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
@@ -27,7 +27,7 @@ public class SetClause {
 		assignments.add( assignment );
 	}
 
-	public void addAssignment(AttributeReferenceExpression stateField, Expression value) {
+	public void addAssignment(AttributeReferenceSqmExpression stateField, SqmExpression value) {
 		addAssignment( new Assignment( stateField, value ) );
 	}
 }

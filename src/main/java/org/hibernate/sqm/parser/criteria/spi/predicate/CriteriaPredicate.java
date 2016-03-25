@@ -9,10 +9,11 @@ package org.hibernate.sqm.parser.criteria.spi.predicate;
 import javax.persistence.criteria.Predicate;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 /**
  * @author Steve Ebersole
  */
 public interface CriteriaPredicate extends Predicate {
-	org.hibernate.sqm.query.predicate.Predicate visitPredicate(CriteriaVisitor visitor);
+	SqmPredicate visitPredicate(CriteriaVisitor visitor);
 }

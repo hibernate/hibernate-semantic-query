@@ -13,7 +13,8 @@ import javax.persistence.criteria.Selection;
 
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
@@ -42,12 +43,12 @@ public abstract class AbstractPredicateImpl
 
 
 	@Override
-	public org.hibernate.sqm.query.expression.Expression visitExpression(CriteriaVisitor visitor) {
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
 		throw new UnsupportedOperationException( "Not expecting call to visitExpression on predicate" );
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
 		throw new UnsupportedOperationException( "Predicates cannot be used as select expression" );
 	}
 

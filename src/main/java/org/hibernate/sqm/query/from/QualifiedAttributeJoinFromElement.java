@@ -16,7 +16,7 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.predicate.Predicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.jboss.logging.Logger;
 
@@ -35,7 +35,7 @@ public class QualifiedAttributeJoinFromElement
 	private final EntityType intrinsicSubclassIndicator;
 	private final boolean fetched;
 
-	private Predicate onClausePredicate;
+	private SqmPredicate onClausePredicate;
 
 	public QualifiedAttributeJoinFromElement(
 			FromElementSpace fromElementSpace,
@@ -128,11 +128,11 @@ public class QualifiedAttributeJoinFromElement
 	}
 
 	@Override
-	public Predicate getOnClausePredicate() {
+	public SqmPredicate getOnClausePredicate() {
 		return onClausePredicate;
 	}
 
-	public void setOnClausePredicate(Predicate predicate) {
+	public void setOnClausePredicate(SqmPredicate predicate) {
 		log.tracef(
 				"Setting join predicate [%s] (was [%s])",
 				predicate.toString(),

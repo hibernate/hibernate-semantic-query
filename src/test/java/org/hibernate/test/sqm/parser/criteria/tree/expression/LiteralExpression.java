@@ -11,8 +11,8 @@ import java.io.Serializable;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -55,12 +55,12 @@ public class LiteralExpression<T> extends AbstractCriteriaExpressionImpl<T>
 	}
 
 	@Override
-	public Expression visitExpression(CriteriaVisitor visitor) {
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
 		return visitor.visitLiteral( this );
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
 		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

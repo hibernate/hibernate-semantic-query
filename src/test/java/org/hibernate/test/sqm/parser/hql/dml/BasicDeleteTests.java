@@ -11,9 +11,9 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.DeleteStatement;
 import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.NamedParameterExpression;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -52,14 +52,14 @@ public class BasicDeleteTests {
 
 		assertThat( deleteStatement.getEntityFromElement().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
-		assertThat( deleteStatement.getWhereClause().getPredicate(), instanceOf( RelationalPredicate.class ) );
-		RelationalPredicate predicate = (RelationalPredicate) deleteStatement.getWhereClause().getPredicate();
+		assertThat( deleteStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
+		RelationalSqmPredicate predicate = (RelationalSqmPredicate) deleteStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceExpression.class ) );
-		AttributeReferenceExpression attributeReferenceExpression = (AttributeReferenceExpression) predicate.getLeftHandExpression();
+		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
+		AttributeReferenceSqmExpression attributeReferenceExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
 		assertSame( attributeReferenceExpression.getBoundFromElementBinding().getFromElement(), deleteStatement.getEntityFromElement() );
 
-		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterExpression.class ) );
+		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 	}
 
 	private DomainMetamodel buildMetamodel() {

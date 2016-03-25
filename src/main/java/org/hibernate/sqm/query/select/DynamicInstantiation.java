@@ -14,7 +14,7 @@ import org.hibernate.sqm.domain.BasicType;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.jboss.logging.Logger;
 
@@ -25,7 +25,8 @@ import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.M
 /**
  * @author Steve Ebersole
  */
-public class DynamicInstantiation implements Expression, AliasedExpressionContainer<DynamicInstantiationArgument> {
+public class DynamicInstantiation implements SqmExpression,
+											 AliasedSqmExpressionContainer<DynamicInstantiationArgument> {
 	private static final Logger log = Logger.getLogger( DynamicInstantiation.class );
 
 	public static DynamicInstantiation forClassInstantiation(Class targetJavaType) {
@@ -105,7 +106,7 @@ public class DynamicInstantiation implements Expression, AliasedExpressionContai
 	}
 
 	@Override
-	public DynamicInstantiationArgument add(Expression expression, String alias) {
+	public DynamicInstantiationArgument add(SqmExpression expression, String alias) {
 		DynamicInstantiationArgument argument = new DynamicInstantiationArgument( expression, alias );
 		addArgument( argument );
 		return argument;

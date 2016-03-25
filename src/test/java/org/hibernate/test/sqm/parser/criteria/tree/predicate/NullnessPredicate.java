@@ -7,16 +7,13 @@
 package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 
 import java.io.Serializable;
-import javax.persistence.criteria.Expression;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.predicate.UnaryCriteriaPredicate;
-import org.hibernate.sqm.query.predicate.Predicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.sqm.parser.criteria.spi.expression.UnaryOperatorCriteriaExpression;
 
 /**
  * Defines a {@link javax.persistence.criteria.Predicate} for checking the
@@ -51,7 +48,7 @@ public class NullnessPredicate
 	}
 
 	@Override
-	public Predicate visitPredicate(CriteriaVisitor visitor) {
+	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
 		return visitor.visitNullnessPredicate( this );
 	}
 }

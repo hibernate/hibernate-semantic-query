@@ -6,31 +6,31 @@
  */
 package org.hibernate.sqm.query.order;
 
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class SortSpecification {
-	private final Expression sortExpression;
+	private final SqmExpression sortExpression;
 	private final String collation;
 	private final SortOrder sortOrder;
 
-	public SortSpecification(Expression sortExpression, String collation, SortOrder sortOrder) {
+	public SortSpecification(SqmExpression sortExpression, String collation, SortOrder sortOrder) {
 		this.sortExpression = sortExpression;
 		this.collation = collation;
 		this.sortOrder = sortOrder;
 	}
 
-	public SortSpecification(Expression sortExpression) {
+	public SortSpecification(SqmExpression sortExpression) {
 		this( sortExpression, null, null );
 	}
 
-	public SortSpecification(Expression sortExpression, SortOrder sortOrder) {
+	public SortSpecification(SqmExpression sortExpression, SortOrder sortOrder) {
 		this( sortExpression, null, sortOrder );
 	}
 
-	public Expression getSortExpression() {
+	public SqmExpression getSortExpression() {
 		return sortExpression;
 	}
 

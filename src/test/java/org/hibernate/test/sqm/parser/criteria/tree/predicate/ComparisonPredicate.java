@@ -7,17 +7,14 @@
 package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 
 import java.io.Serializable;
-import javax.persistence.criteria.Expression;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.predicate.BinaryCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
-import org.hibernate.sqm.query.predicate.Predicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.sqm.parser.criteria.spi.expression.BinaryOperatorCriteriaExpression;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 
 /**
@@ -28,13 +25,13 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 public class ComparisonPredicate
 		extends AbstractSimplePredicate
 		implements ComparisonCriteriaPredicate, Serializable {
-	private final RelationalPredicate.Operator comparisonOperator;
+	private final RelationalSqmPredicate.Operator comparisonOperator;
 	private final CriteriaExpression<?> leftHandSide;
 	private final CriteriaExpression<?> rightHandSide;
 
 	public ComparisonPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
-			RelationalPredicate.Operator comparisonOperator,
+			RelationalSqmPredicate.Operator comparisonOperator,
 			CriteriaExpression<?> leftHandSide,
 			CriteriaExpression<?> rightHandSide) {
 		super( criteriaBuilder );
@@ -46,7 +43,7 @@ public class ComparisonPredicate
 	@SuppressWarnings({ "unchecked" })
 	public ComparisonPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
-			RelationalPredicate.Operator comparisonOperator,
+			RelationalSqmPredicate.Operator comparisonOperator,
 			CriteriaExpression<?> leftHandSide,
 			Object rightHandSide) {
 		super( criteriaBuilder );
@@ -58,7 +55,7 @@ public class ComparisonPredicate
 	@SuppressWarnings( {"unchecked"})
 	public <N extends Number> ComparisonPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
-			RelationalPredicate.Operator comparisonOperator,
+			RelationalSqmPredicate.Operator comparisonOperator,
 			CriteriaExpression<N> leftHandSide,
 			Number rightHandSide) {
 		super( criteriaBuilder );
@@ -67,11 +64,11 @@ public class ComparisonPredicate
 		this.rightHandSide = new LiteralExpression( criteriaBuilder, rightHandSide );
 	}
 
-	public RelationalPredicate.Operator getComparisonOperator() {
+	public RelationalSqmPredicate.Operator getComparisonOperator() {
 		return getComparisonOperator( isNegated() );
 	}
 
-	public RelationalPredicate.Operator getComparisonOperator(boolean isNegated) {
+	public RelationalSqmPredicate.Operator getComparisonOperator(boolean isNegated) {
 		return isNegated
 				? comparisonOperator.negate()
 				: comparisonOperator;
@@ -88,7 +85,7 @@ public class ComparisonPredicate
 	}
 
 	@Override
-	public Predicate visitPredicate(CriteriaVisitor visitor) {
+	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
 		return visitor.visitRelationalPredicate( this );
 	}
 }

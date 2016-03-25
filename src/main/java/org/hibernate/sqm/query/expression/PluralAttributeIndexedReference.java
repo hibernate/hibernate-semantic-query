@@ -9,7 +9,6 @@ package org.hibernate.sqm.query.expression;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.Type;
@@ -21,15 +20,15 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeIndexedReference implements AttributeBinding, Expression, AttributeBindingSource {
+public class PluralAttributeIndexedReference implements AttributeBinding, SqmExpression, AttributeBindingSource {
 	private final AttributeBinding pluralAttributeBinding;
-	private final Expression indexSelectionExpression;
+	private final SqmExpression indexSelectionExpression;
 
 	private final Type type;
 
 	public PluralAttributeIndexedReference(
 			AttributeBinding pluralAttributeBinding,
-			Expression indexSelectionExpression,
+			SqmExpression indexSelectionExpression,
 			Type type) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 		this.indexSelectionExpression = indexSelectionExpression;
@@ -44,7 +43,7 @@ public class PluralAttributeIndexedReference implements AttributeBinding, Expres
 		return (PluralAttribute) getPluralAttributeBinding().getBoundAttribute();
 	}
 
-	public Expression getIndexSelectionExpression() {
+	public SqmExpression getIndexSelectionExpression() {
 		return indexSelectionExpression;
 	}
 

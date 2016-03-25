@@ -11,14 +11,14 @@ import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
-import org.hibernate.sqm.query.expression.LiteralLongExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.predicate.AndPredicate;
-import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.predicate.AndSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -44,18 +44,18 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void simpleIntegerLiteralsTest() {
 		SelectStatement selectStatement = interpret( "select a.basic from Something a where 1=2" );
-		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalPredicate.class ) );
-		final RelationalPredicate predicate = (RelationalPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
+		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
-		Expression lhs = predicate.getLeftHandExpression();
+		SqmExpression lhs = predicate.getLeftHandExpression();
 		assertNotNull( lhs );
-		assertTrue( lhs instanceof LiteralIntegerExpression );
-		assertEquals( 1, ((LiteralIntegerExpression) lhs).getLiteralValue().intValue() );
+		assertTrue( lhs instanceof LiteralIntegerSqmExpression );
+		assertEquals( 1, ((LiteralIntegerSqmExpression) lhs).getLiteralValue().intValue() );
 
 		Object rhs = predicate.getRightHandExpression();
 		assertNotNull( rhs );
-		assertTrue( rhs instanceof LiteralIntegerExpression );
-		assertEquals( 2, ((LiteralIntegerExpression) rhs).getLiteralValue().intValue() );
+		assertTrue( rhs instanceof LiteralIntegerSqmExpression );
+		assertEquals( 2, ((LiteralIntegerSqmExpression) rhs).getLiteralValue().intValue() );
 	}
 
 	private SelectStatement interpret(String query) {
@@ -65,18 +65,18 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void simpleLongLiteralsTest() {
 		SelectStatement selectStatement = interpret( "select a.basic from Something a where 1L=2L" );
-		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalPredicate.class ) );
-		final RelationalPredicate predicate = (RelationalPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
+		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
+		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
-		Expression lhs = predicate.getLeftHandExpression();
+		SqmExpression lhs = predicate.getLeftHandExpression();
 		assertNotNull( lhs );
-		assertTrue( lhs instanceof LiteralLongExpression );
-		assertEquals( 1L, ((LiteralLongExpression) lhs).getLiteralValue().longValue() );
+		assertTrue( lhs instanceof LiteralLongSqmExpression );
+		assertEquals( 1L, ((LiteralLongSqmExpression) lhs).getLiteralValue().longValue() );
 
 		Object rhs = predicate.getRightHandExpression();
 		assertNotNull( rhs );
-		assertTrue( rhs instanceof LiteralLongExpression );
-		assertEquals( 2L, ( (LiteralLongExpression) rhs ).getLiteralValue().longValue() );
+		assertTrue( rhs instanceof LiteralLongSqmExpression );
+		assertEquals( 2L, ( (LiteralLongSqmExpression) rhs ).getLiteralValue().longValue() );
 
 	}
 
@@ -114,10 +114,10 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), notNullValue() );
 		assertThat(
 				selectStatement.getQuerySpec().getWhereClause().getPredicate(),
-				is( instanceOf( InSubQueryPredicate.class ) )
+				is( instanceOf( InSubQuerySqmPredicate.class ) )
 		);
 
-		InSubQueryPredicate subQueryPredicate = (InSubQueryPredicate) selectStatement.getQuerySpec()
+		InSubQuerySqmPredicate subQueryPredicate = (InSubQuerySqmPredicate) selectStatement.getQuerySpec()
 				.getWhereClause()
 				.getPredicate();
 		FromClause subqueryFromClause = subQueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
@@ -159,10 +159,10 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), notNullValue() );
 		assertThat(
 				selectStatement.getQuerySpec().getWhereClause().getPredicate(),
-				is( instanceOf( InSubQueryPredicate.class ) )
+				is( instanceOf( InSubQuerySqmPredicate.class ) )
 		);
 
-		InSubQueryPredicate subQueryPredicate = (InSubQueryPredicate) selectStatement.getQuerySpec()
+		InSubQuerySqmPredicate subQueryPredicate = (InSubQuerySqmPredicate) selectStatement.getQuerySpec()
 				.getWhereClause()
 				.getPredicate();
 		FromClause subqueryFromClause = subQueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
@@ -181,7 +181,7 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( subqueryFromElementSpace.getRoot().getIdentificationVariable(), is( "e" ) );
 
 		// assertions against the root sqm predicate that defines the su-sqm of sub-sqm
-		InSubQueryPredicate subSubqueryPredicate = (InSubQueryPredicate) subQueryPredicate.getSubQueryExpression()
+		InSubQuerySqmPredicate subSubqueryPredicate = (InSubQuerySqmPredicate) subQueryPredicate.getSubQueryExpression()
 				.getQuerySpec()
 				.getWhereClause()
 				.getPredicate();
@@ -224,18 +224,18 @@ public class SimpleSemanticQueryBuilderTest {
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), notNullValue() );
 		assertThat(
 				selectStatement.getQuerySpec().getWhereClause().getPredicate(),
-				is( instanceOf( AndPredicate.class ) )
+				is( instanceOf( AndSqmPredicate.class ) )
 		);
 
-		AndPredicate andPredicate = (AndPredicate) selectStatement.getQuerySpec()
+		AndSqmPredicate andPredicate = (AndSqmPredicate) selectStatement.getQuerySpec()
 				.getWhereClause()
 				.getPredicate();
 
-		assertThat( andPredicate.getLeftHandPredicate(), is( instanceOf( InSubQueryPredicate.class ) ) );
+		assertThat( andPredicate.getLeftHandPredicate(), is( instanceOf( InSubQuerySqmPredicate.class ) ) );
 
-		assertThat( andPredicate.getRightHandPredicate(), is( instanceOf( InSubQueryPredicate.class ) ) );
+		assertThat( andPredicate.getRightHandPredicate(), is( instanceOf( InSubQuerySqmPredicate.class ) ) );
 
-		InSubQueryPredicate leftHandPredicate = (InSubQueryPredicate) andPredicate.getLeftHandPredicate();
+		InSubQuerySqmPredicate leftHandPredicate = (InSubQuerySqmPredicate) andPredicate.getLeftHandPredicate();
 
 		FromClause leftHandPredicateFromClause = leftHandPredicate.getSubQueryExpression()
 				.getQuerySpec()
@@ -254,7 +254,7 @@ public class SimpleSemanticQueryBuilderTest {
 		);
 		assertThat( leftHandPredicateFromElementSpace.getRoot().getIdentificationVariable(), is( "b" ) );
 
-		InSubQueryPredicate rightHandPredicate = (InSubQueryPredicate) andPredicate.getRightHandPredicate();
+		InSubQuerySqmPredicate rightHandPredicate = (InSubQuerySqmPredicate) andPredicate.getRightHandPredicate();
 
 		FromClause rightHandPredicateFromClause = rightHandPredicate.getSubQueryExpression()
 				.getQuerySpec()

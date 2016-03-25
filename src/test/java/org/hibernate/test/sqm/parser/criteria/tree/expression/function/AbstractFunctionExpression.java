@@ -9,10 +9,9 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 import java.io.Serializable;
 
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.FunctionCriteriaExpression;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
@@ -63,7 +62,7 @@ public abstract class AbstractFunctionExpression<X>
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
 		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

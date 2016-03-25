@@ -13,7 +13,7 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.query.predicate.Predicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -53,7 +53,7 @@ public class BooleanExpressionPredicate
 	}
 
 	@Override
-	public Predicate visitPredicate(CriteriaVisitor visitor) {
+	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
 		return visitor.visitBooleanExpressionPredicate( this );
 	}
 }

@@ -7,7 +7,7 @@
 package org.hibernate.sqm.path;
 
 import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * Very similar in concept to Bindable, but here represents a specific binding
@@ -18,7 +18,7 @@ import org.hibernate.sqm.query.expression.Expression;
  *
  * @author Steve Ebersole
  */
-public interface Binding extends Expression {
+public interface Binding extends SqmExpression {
 	/**
 	 * Obtain the Bindable referenced by this FromElement.
 	 *

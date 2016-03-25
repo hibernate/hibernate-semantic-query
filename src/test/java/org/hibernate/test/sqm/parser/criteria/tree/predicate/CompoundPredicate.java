@@ -14,8 +14,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.query.predicate.AndPredicate;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -126,7 +125,7 @@ public class CompoundPredicate
 	}
 
 	@Override
-	public org.hibernate.sqm.query.predicate.Predicate visitPredicate(CriteriaVisitor visitor) {
+	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
 		if ( operator == BooleanOperator.AND ) {
 			return visitor.visitAndPredicate( getExpressions() );
 		}

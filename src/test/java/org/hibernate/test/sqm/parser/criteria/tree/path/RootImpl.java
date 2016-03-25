@@ -10,11 +10,10 @@ import java.io.Serializable;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.select.AliasedExpressionContainer;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
@@ -87,12 +86,12 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 	}
 
 	@Override
-	public Expression visitExpression(CriteriaVisitor visitor) {
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
 		return visitor.visitRoot( this );
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
 		container.add( visitExpression( visitor ), getAlias() );
 	}
 

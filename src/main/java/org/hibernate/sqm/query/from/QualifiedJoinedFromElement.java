@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.query.predicate.Predicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 /**
  * Common contract for qualified/restricted/predicated joins.
@@ -19,12 +19,12 @@ public interface QualifiedJoinedFromElement extends JoinedFromElement {
 	 *
 	 * @return The join predicate
 	 */
-	Predicate getOnClausePredicate();
+	SqmPredicate getOnClausePredicate();
 
 	/**
 	 * Inject the join predicate
 	 *
 	 * @param predicate The join predicate
 	 */
-	void setOnClausePredicate(Predicate predicate);
+	void setOnClausePredicate(SqmPredicate predicate);
 }

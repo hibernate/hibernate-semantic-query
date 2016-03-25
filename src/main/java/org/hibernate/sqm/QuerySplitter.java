@@ -20,36 +20,36 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
-import org.hibernate.sqm.query.expression.function.AvgFunction;
-import org.hibernate.sqm.query.expression.BinaryArithmeticExpression;
-import org.hibernate.sqm.query.expression.ConcatExpression;
-import org.hibernate.sqm.query.expression.ConstantEnumExpression;
-import org.hibernate.sqm.query.expression.ConstantFieldExpression;
-import org.hibernate.sqm.query.expression.function.ConcatFunctionExpression;
-import org.hibernate.sqm.query.expression.function.CountFunction;
-import org.hibernate.sqm.query.expression.function.CountStarFunction;
-import org.hibernate.sqm.query.expression.EntityTypeExpression;
-import org.hibernate.sqm.query.expression.Expression;
-import org.hibernate.sqm.query.expression.function.GenericFunctionExpression;
-import org.hibernate.sqm.query.expression.LiteralBigDecimalExpression;
-import org.hibernate.sqm.query.expression.LiteralBigIntegerExpression;
-import org.hibernate.sqm.query.expression.LiteralCharacterExpression;
-import org.hibernate.sqm.query.expression.LiteralDoubleExpression;
-import org.hibernate.sqm.query.expression.LiteralFalseExpression;
-import org.hibernate.sqm.query.expression.LiteralFloatExpression;
-import org.hibernate.sqm.query.expression.LiteralIntegerExpression;
-import org.hibernate.sqm.query.expression.LiteralLongExpression;
-import org.hibernate.sqm.query.expression.LiteralNullExpression;
-import org.hibernate.sqm.query.expression.LiteralStringExpression;
-import org.hibernate.sqm.query.expression.LiteralTrueExpression;
-import org.hibernate.sqm.query.expression.function.MaxFunction;
-import org.hibernate.sqm.query.expression.function.MinFunction;
-import org.hibernate.sqm.query.expression.NamedParameterExpression;
-import org.hibernate.sqm.query.expression.PositionalParameterExpression;
-import org.hibernate.sqm.query.expression.SubQueryExpression;
-import org.hibernate.sqm.query.expression.function.SumFunction;
-import org.hibernate.sqm.query.expression.UnaryOperationExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+import org.hibernate.sqm.query.expression.ConcatSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
+import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralDoubleSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralFalseSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralFloatSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
+import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
+import org.hibernate.sqm.query.expression.function.MinSqmFunction;
+import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
+import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
+import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
+import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -59,19 +59,19 @@ import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
-import org.hibernate.sqm.query.predicate.AndPredicate;
-import org.hibernate.sqm.query.predicate.BetweenPredicate;
-import org.hibernate.sqm.query.predicate.EmptinessPredicate;
-import org.hibernate.sqm.query.predicate.GroupedPredicate;
-import org.hibernate.sqm.query.predicate.InSubQueryPredicate;
-import org.hibernate.sqm.query.predicate.InListPredicate;
-import org.hibernate.sqm.query.predicate.LikePredicate;
-import org.hibernate.sqm.query.predicate.MemberOfPredicate;
-import org.hibernate.sqm.query.predicate.NegatedPredicate;
-import org.hibernate.sqm.query.predicate.NullnessPredicate;
-import org.hibernate.sqm.query.predicate.OrPredicate;
-import org.hibernate.sqm.query.predicate.Predicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.predicate.AndSqmPredicate;
+import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
+import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
+import org.hibernate.sqm.query.predicate.GroupedSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
+import org.hibernate.sqm.query.predicate.InListSqmPredicate;
+import org.hibernate.sqm.query.predicate.LikeSqmPredicate;
+import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
+import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
+import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
+import org.hibernate.sqm.query.predicate.OrSqmPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.predicate.WhereClause;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
@@ -333,7 +333,7 @@ public class QuerySplitter {
 		@Override
 		public Selection visitSelection(Selection selection) {
 			return new Selection(
-					(Expression) selection.getExpression().accept( this ),
+					(SqmExpression) selection.getExpression().accept( this ),
 					selection.getAlias()
 			);
 		}
@@ -344,7 +344,7 @@ public class QuerySplitter {
 			for ( DynamicInstantiationArgument aliasedArgument : dynamicInstantiation.getArguments() ) {
 				copy.addArgument(
 						new DynamicInstantiationArgument(
-								(Expression) aliasedArgument.getExpression().accept( this ),
+								(SqmExpression) aliasedArgument.getExpression().accept( this ),
 								aliasedArgument.getAlias()
 						)
 				);
@@ -357,103 +357,103 @@ public class QuerySplitter {
 			if ( whereClause == null ) {
 				return null;
 			}
-			return new WhereClause( (Predicate) whereClause.getPredicate().accept( this ) );
+			return new WhereClause( (SqmPredicate) whereClause.getPredicate().accept( this ) );
 		}
 
 		@Override
-		public GroupedPredicate visitGroupedPredicate(GroupedPredicate predicate) {
-			return new GroupedPredicate( (Predicate) predicate.accept( this ) );
+		public GroupedSqmPredicate visitGroupedPredicate(GroupedSqmPredicate predicate) {
+			return new GroupedSqmPredicate( (SqmPredicate) predicate.accept( this ) );
 		}
 
 		@Override
-		public AndPredicate visitAndPredicate(AndPredicate predicate) {
-			return new AndPredicate(
-					(Predicate) predicate.getLeftHandPredicate().accept( this ),
-					(Predicate) predicate.getRightHandPredicate().accept( this )
+		public AndSqmPredicate visitAndPredicate(AndSqmPredicate predicate) {
+			return new AndSqmPredicate(
+					(SqmPredicate) predicate.getLeftHandPredicate().accept( this ),
+					(SqmPredicate) predicate.getRightHandPredicate().accept( this )
 			);
 		}
 
 		@Override
-		public OrPredicate visitOrPredicate(OrPredicate predicate) {
-			return new OrPredicate(
-					(Predicate) predicate.getLeftHandPredicate().accept( this ),
-					(Predicate) predicate.getRightHandPredicate().accept( this )
+		public OrSqmPredicate visitOrPredicate(OrSqmPredicate predicate) {
+			return new OrSqmPredicate(
+					(SqmPredicate) predicate.getLeftHandPredicate().accept( this ),
+					(SqmPredicate) predicate.getRightHandPredicate().accept( this )
 			);
 		}
 
 		@Override
-		public RelationalPredicate visitRelationalPredicate(RelationalPredicate predicate) {
-			return new RelationalPredicate(
+		public RelationalSqmPredicate visitRelationalPredicate(RelationalSqmPredicate predicate) {
+			return new RelationalSqmPredicate(
 					predicate.getOperator(),
-					(Expression) predicate.getLeftHandExpression().accept( this ),
-					(Expression) predicate.getRightHandExpression().accept( this )
+					(SqmExpression) predicate.getLeftHandExpression().accept( this ),
+					(SqmExpression) predicate.getRightHandExpression().accept( this )
 			);
 		}
 
 		@Override
-		public EmptinessPredicate visitIsEmptyPredicate(EmptinessPredicate predicate) {
-			return new EmptinessPredicate(
-					(Expression) predicate.getExpression().accept( this ),
+		public EmptinessSqmPredicate visitIsEmptyPredicate(EmptinessSqmPredicate predicate) {
+			return new EmptinessSqmPredicate(
+					(SqmExpression) predicate.getExpression().accept( this ),
 					predicate.isNegated()
 			);
 		}
 
 		@Override
-		public NullnessPredicate visitIsNullPredicate(NullnessPredicate predicate) {
-			return new NullnessPredicate(
-					(Expression) predicate.getExpression().accept( this ),
+		public NullnessSqmPredicate visitIsNullPredicate(NullnessSqmPredicate predicate) {
+			return new NullnessSqmPredicate(
+					(SqmExpression) predicate.getExpression().accept( this ),
 					predicate.isNegated()
 			);
 		}
 
 		@Override
-		public BetweenPredicate visitBetweenPredicate(BetweenPredicate predicate) {
-			return new BetweenPredicate(
-					(Expression) predicate.getExpression().accept( this ),
-					(Expression) predicate.getLowerBound().accept( this ),
-					(Expression) predicate.getUpperBound().accept( this ),
+		public BetweenSqmPredicate visitBetweenPredicate(BetweenSqmPredicate predicate) {
+			return new BetweenSqmPredicate(
+					(SqmExpression) predicate.getExpression().accept( this ),
+					(SqmExpression) predicate.getLowerBound().accept( this ),
+					(SqmExpression) predicate.getUpperBound().accept( this ),
 					predicate.isNegated()
 			);
 		}
 
 		@Override
-		public LikePredicate visitLikePredicate(LikePredicate predicate) {
-			return new LikePredicate(
-					(Expression) predicate.getMatchExpression().accept( this ),
-					(Expression) predicate.getPattern().accept( this ),
-					(Expression) predicate.getEscapeCharacter().accept( this )
+		public LikeSqmPredicate visitLikePredicate(LikeSqmPredicate predicate) {
+			return new LikeSqmPredicate(
+					(SqmExpression) predicate.getMatchExpression().accept( this ),
+					(SqmExpression) predicate.getPattern().accept( this ),
+					(SqmExpression) predicate.getEscapeCharacter().accept( this )
 			);
 		}
 
 		@Override
-		public MemberOfPredicate visitMemberOfPredicate(MemberOfPredicate predicate) {
-			return new MemberOfPredicate(
+		public MemberOfSqmPredicate visitMemberOfPredicate(MemberOfSqmPredicate predicate) {
+			return new MemberOfSqmPredicate(
 					visitAttributeReferenceExpression( predicate.getAttributeReferenceExpression() )
 			);
 		}
 
 		@Override
-		public NegatedPredicate visitNegatedPredicate(NegatedPredicate predicate) {
-			return new NegatedPredicate(
-					(Predicate) predicate.getWrappedPredicate().accept( this )
+		public NegatedSqmPredicate visitNegatedPredicate(NegatedSqmPredicate predicate) {
+			return new NegatedSqmPredicate(
+					(SqmPredicate) predicate.getWrappedPredicate().accept( this )
 			);
 		}
 
 		@Override
-		public InListPredicate visitInListPredicate(InListPredicate predicate) {
-			InListPredicate copy = new InListPredicate(
-					(Expression) predicate.getTestExpression().accept( this )
+		public InListSqmPredicate visitInListPredicate(InListSqmPredicate predicate) {
+			InListSqmPredicate copy = new InListSqmPredicate(
+					(SqmExpression) predicate.getTestExpression().accept( this )
 			);
-			for ( Expression expression : predicate.getListExpressions() ) {
-				copy.addExpression( (Expression) expression.accept( this ) );
+			for ( SqmExpression expression : predicate.getListExpressions() ) {
+				copy.addExpression( (SqmExpression) expression.accept( this ) );
 			}
 			return copy;
 		}
 
 		@Override
-		public InSubQueryPredicate visitInSubQueryPredicate(InSubQueryPredicate predicate) {
-			return new InSubQueryPredicate(
-					(Expression) predicate.getTestExpression().accept( this ),
+		public InSubQuerySqmPredicate visitInSubQueryPredicate(InSubQuerySqmPredicate predicate) {
+			return new InSubQuerySqmPredicate(
+					(SqmExpression) predicate.getTestExpression().accept( this ),
 					visitSubQueryExpression( predicate.getSubQueryExpression() )
 			);
 		}
@@ -474,37 +474,37 @@ public class QuerySplitter {
 		@Override
 		public SortSpecification visitSortSpecification(SortSpecification sortSpecification) {
 			return new SortSpecification(
-					(Expression) sortSpecification.getSortExpression().accept( this ),
+					(SqmExpression) sortSpecification.getSortExpression().accept( this ),
 					sortSpecification.getCollation(),
 					sortSpecification.getSortOrder()
 			);
 		}
 
 		@Override
-		public PositionalParameterExpression visitPositionalParameterExpression(PositionalParameterExpression expression) {
-			return new PositionalParameterExpression( expression.getPosition() );
+		public PositionalParameterSqmExpression visitPositionalParameterExpression(PositionalParameterSqmExpression expression) {
+			return new PositionalParameterSqmExpression( expression.getPosition() );
 		}
 
 		@Override
-		public NamedParameterExpression visitNamedParameterExpression(NamedParameterExpression expression) {
-			return new NamedParameterExpression( expression.getName() );
+		public NamedParameterSqmExpression visitNamedParameterExpression(NamedParameterSqmExpression expression) {
+			return new NamedParameterSqmExpression( expression.getName() );
 		}
 
 		@Override
-		public EntityTypeExpression visitEntityTypeExpression(EntityTypeExpression expression) {
-			return new EntityTypeExpression( expression.getExpressionType() );
+		public EntityTypeSqmExpression visitEntityTypeExpression(EntityTypeSqmExpression expression) {
+			return new EntityTypeSqmExpression( expression.getExpressionType() );
 		}
 
 		@Override
-		public UnaryOperationExpression visitUnaryOperationExpression(UnaryOperationExpression expression) {
-			return new UnaryOperationExpression(
+		public UnaryOperationSqmExpression visitUnaryOperationExpression(UnaryOperationSqmExpression expression) {
+			return new UnaryOperationSqmExpression(
 					expression.getOperation(),
-					(Expression) expression.getOperand().accept( this )
+					(SqmExpression) expression.getOperand().accept( this )
 			);
 		}
 
 		@Override
-		public AttributeReferenceExpression visitAttributeReferenceExpression(AttributeReferenceExpression expression) {
+		public AttributeReferenceSqmExpression visitAttributeReferenceExpression(AttributeReferenceSqmExpression expression) {
 			AttributeBindingSource attributeBindingSource = expression.getAttributeBindingSource();
 			if ( attributeBindingSource instanceof FromElement ) {
 				// find the FromElement copy
@@ -514,19 +514,19 @@ public class QuerySplitter {
 				}
 				attributeBindingSource = sourceCopy;
 			}
-			return new AttributeReferenceExpression(
+			return new AttributeReferenceSqmExpression(
 					attributeBindingSource,
 					expression.getBoundAttribute()
 			);
 		}
 
 		@Override
-		public GenericFunctionExpression visitGenericFunction(GenericFunctionExpression expression) {
-			List<Expression> argumentsCopy = new ArrayList<Expression>();
-			for ( Expression argument : expression.getArguments() ) {
-				argumentsCopy.add( (Expression) argument.accept( this ) );
+		public GenericFunctionSqmExpression visitGenericFunction(GenericFunctionSqmExpression expression) {
+			List<SqmExpression> argumentsCopy = new ArrayList<SqmExpression>();
+			for ( SqmExpression argument : expression.getArguments() ) {
+				argumentsCopy.add( (SqmExpression) argument.accept( this ) );
 			}
-			return new GenericFunctionExpression(
+			return new GenericFunctionSqmExpression(
 					expression.getFunctionName(),
 					expression.getExpressionType(),
 					argumentsCopy
@@ -534,177 +534,177 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public AvgFunction visitAvgFunction(AvgFunction expression) {
-			return new AvgFunction(
-					(Expression) expression.getArgument().accept( this ),
+		public AvgSqmFunction visitAvgFunction(AvgSqmFunction expression) {
+			return new AvgSqmFunction(
+					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public CountStarFunction visitCountStarFunction(CountStarFunction expression) {
-			return new CountStarFunction( expression.isDistinct(), expression.getExpressionType() );
+		public CountStarSqmFunction visitCountStarFunction(CountStarSqmFunction expression) {
+			return new CountStarSqmFunction( expression.isDistinct(), expression.getExpressionType() );
 		}
 
 		@Override
-		public CountFunction visitCountFunction(CountFunction expression) {
-			return new CountFunction(
-					(Expression) expression.getArgument().accept( this ),
+		public CountSqmFunction visitCountFunction(CountSqmFunction expression) {
+			return new CountSqmFunction(
+					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public MaxFunction visitMaxFunction(MaxFunction expression) {
-			return new MaxFunction(
-					(Expression) expression.getArgument().accept( this ),
+		public MaxSqmFunction visitMaxFunction(MaxSqmFunction expression) {
+			return new MaxSqmFunction(
+					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public MinFunction visitMinFunction(MinFunction expression) {
-			return new MinFunction(
-					(Expression) expression.getArgument().accept( this ),
+		public MinSqmFunction visitMinFunction(MinSqmFunction expression) {
+			return new MinSqmFunction(
+					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public SumFunction visitSumFunction(SumFunction expression) {
-			return new SumFunction(
-					(Expression) expression.getArgument().accept( this ),
+		public SumSqmFunction visitSumFunction(SumSqmFunction expression) {
+			return new SumSqmFunction(
+					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralStringExpression visitLiteralStringExpression(LiteralStringExpression expression) {
-			return new LiteralStringExpression(
+		public LiteralStringSqmExpression visitLiteralStringExpression(LiteralStringSqmExpression expression) {
+			return new LiteralStringSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralCharacterExpression visitLiteralCharacterExpression(LiteralCharacterExpression expression) {
-			return new LiteralCharacterExpression(
+		public LiteralCharacterSqmExpression visitLiteralCharacterExpression(LiteralCharacterSqmExpression expression) {
+			return new LiteralCharacterSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralDoubleExpression visitLiteralDoubleExpression(LiteralDoubleExpression expression) {
-			return new LiteralDoubleExpression(
+		public LiteralDoubleSqmExpression visitLiteralDoubleExpression(LiteralDoubleSqmExpression expression) {
+			return new LiteralDoubleSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralIntegerExpression visitLiteralIntegerExpression(LiteralIntegerExpression expression) {
-			return new LiteralIntegerExpression(
+		public LiteralIntegerSqmExpression visitLiteralIntegerExpression(LiteralIntegerSqmExpression expression) {
+			return new LiteralIntegerSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralBigIntegerExpression visitLiteralBigIntegerExpression(LiteralBigIntegerExpression expression) {
-			return new LiteralBigIntegerExpression(
+		public LiteralBigIntegerSqmExpression visitLiteralBigIntegerExpression(LiteralBigIntegerSqmExpression expression) {
+			return new LiteralBigIntegerSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralBigDecimalExpression visitLiteralBigDecimalExpression(LiteralBigDecimalExpression expression) {
-			return new LiteralBigDecimalExpression(
+		public LiteralBigDecimalSqmExpression visitLiteralBigDecimalExpression(LiteralBigDecimalSqmExpression expression) {
+			return new LiteralBigDecimalSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralFloatExpression visitLiteralFloatExpression(LiteralFloatExpression expression) {
-			return new LiteralFloatExpression(
+		public LiteralFloatSqmExpression visitLiteralFloatExpression(LiteralFloatSqmExpression expression) {
+			return new LiteralFloatSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralLongExpression visitLiteralLongExpression(LiteralLongExpression expression) {
-			return new LiteralLongExpression(
+		public LiteralLongSqmExpression visitLiteralLongExpression(LiteralLongSqmExpression expression) {
+			return new LiteralLongSqmExpression(
 					expression.getLiteralValue(),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public LiteralTrueExpression visitLiteralTrueExpression(LiteralTrueExpression expression) {
-			return new LiteralTrueExpression( expression.getExpressionType() );
+		public LiteralTrueSqmExpression visitLiteralTrueExpression(LiteralTrueSqmExpression expression) {
+			return new LiteralTrueSqmExpression( expression.getExpressionType() );
 		}
 
 		@Override
-		public LiteralFalseExpression visitLiteralFalseExpression(LiteralFalseExpression expression) {
-			return new LiteralFalseExpression( expression.getExpressionType() );
+		public LiteralFalseSqmExpression visitLiteralFalseExpression(LiteralFalseSqmExpression expression) {
+			return new LiteralFalseSqmExpression( expression.getExpressionType() );
 		}
 
 		@Override
-		public LiteralNullExpression visitLiteralNullExpression(LiteralNullExpression expression) {
-			return new LiteralNullExpression();
+		public LiteralNullSqmExpression visitLiteralNullExpression(LiteralNullSqmExpression expression) {
+			return new LiteralNullSqmExpression();
 		}
 
 		@Override
-		public ConcatExpression visitConcatExpression(ConcatExpression expression) {
-			return new ConcatExpression(
-					(Expression) expression.getLeftHandOperand().accept( this ),
-					(Expression) expression.getRightHandOperand().accept( this )
+		public ConcatSqmExpression visitConcatExpression(ConcatSqmExpression expression) {
+			return new ConcatSqmExpression(
+					(SqmExpression) expression.getLeftHandOperand().accept( this ),
+					(SqmExpression) expression.getRightHandOperand().accept( this )
 			);
 		}
 
 		@Override
-		public ConcatFunctionExpression visitConcatFunction(ConcatFunctionExpression expression) {
-			final List<Expression> arguments = new ArrayList<Expression>();
-			for ( Expression argument : expression.getExpressions() ) {
-				arguments.add( (Expression) argument.accept( this ) );
+		public ConcatFunctionSqmExpression visitConcatFunction(ConcatFunctionSqmExpression expression) {
+			final List<SqmExpression> arguments = new ArrayList<SqmExpression>();
+			for ( SqmExpression argument : expression.getExpressions() ) {
+				arguments.add( (SqmExpression) argument.accept( this ) );
 			}
 
-			return new ConcatFunctionExpression( expression.getFunctionResultType(), arguments );
+			return new ConcatFunctionSqmExpression( expression.getFunctionResultType(), arguments );
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ConstantEnumExpression visitConstantEnumExpression(ConstantEnumExpression expression) {
-			return new ConstantEnumExpression( expression.getValue(), expression.getExpressionType() );
+		public ConstantEnumSqmExpression visitConstantEnumExpression(ConstantEnumSqmExpression expression) {
+			return new ConstantEnumSqmExpression( expression.getValue(), expression.getExpressionType() );
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ConstantFieldExpression visitConstantFieldExpression(ConstantFieldExpression expression) {
-			return new ConstantFieldExpression( expression.getValue(), expression.getExpressionType() );
+		public ConstantFieldSqmExpression visitConstantFieldExpression(ConstantFieldSqmExpression expression) {
+			return new ConstantFieldSqmExpression( expression.getValue(), expression.getExpressionType() );
 		}
 
 		@Override
-		public BinaryArithmeticExpression visitBinaryArithmeticExpression(BinaryArithmeticExpression expression) {
-			return new BinaryArithmeticExpression(
+		public BinaryArithmeticSqmExpression visitBinaryArithmeticExpression(BinaryArithmeticSqmExpression expression) {
+			return new BinaryArithmeticSqmExpression(
 					expression.getOperation(),
-					(Expression) expression.getLeftHandOperand().accept( this ),
-					(Expression) expression.getRightHandOperand().accept( this ),
+					(SqmExpression) expression.getLeftHandOperand().accept( this ),
+					(SqmExpression) expression.getRightHandOperand().accept( this ),
 					expression.getExpressionType()
 			);
 		}
 
 		@Override
-		public SubQueryExpression visitSubQueryExpression(SubQueryExpression expression) {
-			return new SubQueryExpression(
+		public SubQuerySqmExpression visitSubQueryExpression(SubQuerySqmExpression expression) {
+			return new SubQuerySqmExpression(
 					visitQuerySpec( expression.getQuerySpec() ),
 					// assume already validated
 					expression.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression().getExpressionType()

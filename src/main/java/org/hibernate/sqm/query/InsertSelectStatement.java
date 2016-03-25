@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.query.expression.AttributeReferenceExpression;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
 /**
@@ -19,7 +19,7 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
  */
 public class InsertSelectStatement implements InsertStatement {
 	private final RootEntityFromElement insertTarget;
-	private List<AttributeReferenceExpression> stateFields;
+	private List<AttributeReferenceSqmExpression> stateFields;
 	private QuerySpec selectQuery;
 
 	public InsertSelectStatement(RootEntityFromElement insertTarget) {
@@ -36,7 +36,7 @@ public class InsertSelectStatement implements InsertStatement {
 		return insertTarget;
 	}
 
-	public List<AttributeReferenceExpression> getStateFields() {
+	public List<AttributeReferenceSqmExpression> getStateFields() {
 		if ( stateFields == null ) {
 			return Collections.emptyList();
 		}
@@ -45,9 +45,9 @@ public class InsertSelectStatement implements InsertStatement {
 		}
 	}
 
-	public void addInsertTargetStateField(AttributeReferenceExpression stateField) {
+	public void addInsertTargetStateField(AttributeReferenceSqmExpression stateField) {
 		if ( stateFields == null ) {
-			stateFields = new ArrayList<AttributeReferenceExpression>();
+			stateFields = new ArrayList<AttributeReferenceSqmExpression>();
 		}
 		stateFields.add( stateField );
 	}

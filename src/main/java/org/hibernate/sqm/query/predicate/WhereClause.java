@@ -10,20 +10,20 @@ package org.hibernate.sqm.query.predicate;
  * @author Steve Ebersole
  */
 public class WhereClause {
-	private Predicate predicate;
+	private SqmPredicate predicate;
 
 	public WhereClause() {
 	}
 
-	public WhereClause(Predicate predicate) {
+	public WhereClause(SqmPredicate predicate) {
 		this.predicate = predicate;
 	}
 
-	public Predicate getPredicate() {
+	public SqmPredicate getPredicate() {
 		return predicate;
 	}
 
-	public void setPredicate(Predicate predicate) {
+	public void setPredicate(SqmPredicate predicate) {
 		this.predicate = predicate;
 	}
 

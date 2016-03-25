@@ -39,7 +39,7 @@ import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.query.predicate.RelationalPredicate;
+import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.expression.CompoundSelectionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImplementor;
@@ -298,7 +298,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate equal(Expression<?> x, Expression<?> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.EQUAL,
+				RelationalSqmPredicate.Operator.EQUAL,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -309,7 +309,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate notEqual(Expression<?> x, Expression<?> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.NOT_EQUAL,
+				RelationalSqmPredicate.Operator.NOT_EQUAL,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -320,7 +320,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate equal(Expression<?> x, Object y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.EQUAL,
+				RelationalSqmPredicate.Operator.EQUAL,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -331,7 +331,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate notEqual(Expression<?> x, Object y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.NOT_EQUAL,
+				RelationalSqmPredicate.Operator.NOT_EQUAL,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -342,7 +342,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThan(Expression<? extends Y> x, Expression<? extends Y> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN,
+				RelationalSqmPredicate.Operator.GREATER_THAN,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -355,7 +355,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Expression<? extends Y> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN,
+				RelationalSqmPredicate.Operator.LESS_THAN,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -368,7 +368,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Expression<? extends Y> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -381,7 +381,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Expression<? extends Y> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -394,7 +394,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Y y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN,
+				RelationalSqmPredicate.Operator.GREATER_THAN,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -407,7 +407,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Y y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN,
+				RelationalSqmPredicate.Operator.LESS_THAN,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -420,7 +420,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Y y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -433,7 +433,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			Y y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -444,7 +444,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate gt(Expression<? extends Number> x, Expression<? extends Number> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN,
+				RelationalSqmPredicate.Operator.GREATER_THAN,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -455,7 +455,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate lt(Expression<? extends Number> x, Expression<? extends Number> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN,
+				RelationalSqmPredicate.Operator.LESS_THAN,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -466,7 +466,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate ge(Expression<? extends Number> x, Expression<? extends Number> y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -476,7 +476,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate le(Expression<? extends Number> x, Expression<? extends Number> y) {
 		return new ComparisonPredicate(
-				this, RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				this, RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				(CriteriaExpression<?>) y
 		);
@@ -487,7 +487,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate gt(Expression<? extends Number> x, Number y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN,
+				RelationalSqmPredicate.Operator.GREATER_THAN,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -498,7 +498,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate lt(Expression<? extends Number> x, Number y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN,
+				RelationalSqmPredicate.Operator.LESS_THAN,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -509,7 +509,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate ge(Expression<? extends Number> x, Number y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.GREATER_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				y
 		);
@@ -520,7 +520,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public Predicate le(Expression<? extends Number> x, Number y) {
 		return new ComparisonPredicate(
 				this,
-				RelationalPredicate.Operator.LESS_THAN_OR_EQUAL,
+				RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
 				(CriteriaExpression<?>) x,
 				y
 		);

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.query.expression.Expression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
@@ -29,7 +29,7 @@ public class OrderByClause {
 		return this;
 	}
 
-	public OrderByClause addSortSpecification(Expression expression) {
+	public OrderByClause addSortSpecification(SqmExpression expression) {
 		addSortSpecification( new SortSpecification( expression ) );
 		return this;
 	}

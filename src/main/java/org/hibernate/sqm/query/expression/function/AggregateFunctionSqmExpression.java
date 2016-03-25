@@ -13,7 +13,7 @@ import org.hibernate.sqm.query.expression.SqmExpression;
  *
  * @author Steve Ebersole
  */
-public interface AggregateSqmFunction extends FunctionSqmExpression {
+public interface AggregateFunctionSqmExpression extends FunctionSqmExpression {
 	SqmExpression getArgument();
 	boolean isDistinct();
 }

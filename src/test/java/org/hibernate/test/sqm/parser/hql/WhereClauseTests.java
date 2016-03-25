@@ -9,8 +9,8 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeSqmFunction;
+import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
@@ -74,9 +74,9 @@ public class WhereClauseTests {
 
 		assertThat(
 				relationalPredicate.getLeftHandExpression(),
-				instanceOf( CollectionSizeSqmFunction.class )
+				instanceOf( CollectionSizeSqmExpression.class )
 		);
-		final CollectionSizeSqmFunction func = (CollectionSizeSqmFunction) relationalPredicate.getLeftHandExpression();
+		final CollectionSizeSqmExpression func = (CollectionSizeSqmExpression) relationalPredicate.getLeftHandExpression();
 		assertThat(
 				func.getPluralAttributeBinding().getAttributeBindingSource().getFromElement().getIdentificationVariable(),
 				is( "t" )
@@ -100,8 +100,8 @@ public class WhereClauseTests {
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexSqmFunction.class ) );
-		assertThat( ( (CollectionIndexSqmFunction) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexSqmExpression.class ) );
+		assertThat( ( (CollectionIndexSqmExpression) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
 	}
 
 	@Test

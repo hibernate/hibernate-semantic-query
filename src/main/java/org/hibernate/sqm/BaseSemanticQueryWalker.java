@@ -13,21 +13,21 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeSqmFunction;
+import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountSqmFunction;
-import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
@@ -42,21 +42,21 @@ import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
-import org.hibernate.sqm.query.expression.MapEntrySqmFunction;
+import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
-import org.hibernate.sqm.query.expression.MaxElementSqmFunction;
+import org.hibernate.sqm.query.expression.MaxElementSqmExpression;
 import org.hibernate.sqm.query.expression.function.LowerFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
-import org.hibernate.sqm.query.expression.MaxIndexSqmFunction;
-import org.hibernate.sqm.query.expression.MinElementSqmFunction;
-import org.hibernate.sqm.query.expression.function.MinSqmFunction;
-import org.hibernate.sqm.query.expression.MinIndexSqmFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.MaxIndexSqmExpression;
+import org.hibernate.sqm.query.expression.MinElementSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.MinIndexSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
@@ -358,37 +358,37 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitAvgFunction(AvgSqmFunction expression) {
+	public T visitAvgFunction(AvgFunctionSqmExpression expression) {
 		return (T) expression;
 	}
 
 	@Override
-	public T visitCountStarFunction(CountStarSqmFunction expression) {
+	public T visitCountStarFunction(CountStarFunctionSqmExpression expression) {
 		return (T) expression;
 	}
 
 	@Override
-	public T visitCountFunction(CountSqmFunction expression) {
+	public T visitCountFunction(CountFunctionSqmExpression expression) {
 		return (T) expression;
 	}
 
 	@Override
-	public T visitMaxFunction(MaxSqmFunction expression) {
+	public T visitMaxFunction(MaxFunctionSqmExpression expression) {
 		return (T) expression;
 	}
 
 	@Override
-	public T visitMinFunction(MinSqmFunction expression) {
+	public T visitMinFunction(MinFunctionSqmExpression expression) {
 		return (T) expression;
 	}
 
 	@Override
-	public T visitSumFunction(SumSqmFunction expression) {
+	public T visitSumFunction(SumFunctionSqmExpression expression) {
 		return (T) expression;
 	}
 
 	@Override
-	public T visitCollectionSizeFunction(CollectionSizeSqmFunction function) {
+	public T visitCollectionSizeFunction(CollectionSizeSqmExpression function) {
 		return (T) function;
 	}
 
@@ -398,7 +398,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitCollectionIndexFunction(CollectionIndexSqmFunction function) {
+	public T visitCollectionIndexFunction(CollectionIndexSqmExpression function) {
 		return (T) function;
 	}
 
@@ -408,27 +408,27 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitMapEntryFunction(MapEntrySqmFunction function) {
+	public T visitMapEntryFunction(MapEntrySqmExpression function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitMaxElementFunction(MaxElementSqmFunction function) {
+	public T visitMaxElementFunction(MaxElementSqmExpression function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitMinElementFunction(MinElementSqmFunction function) {
+	public T visitMinElementFunction(MinElementSqmExpression function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitMaxIndexFunction(MaxIndexSqmFunction function) {
+	public T visitMaxIndexFunction(MaxIndexSqmExpression function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitMinIndexFunction(MinIndexSqmFunction function) {
+	public T visitMinIndexFunction(MinIndexSqmExpression function) {
 		return (T) function;
 	}
 

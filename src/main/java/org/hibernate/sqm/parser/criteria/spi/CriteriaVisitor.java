@@ -22,23 +22,23 @@ import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountSqmFunction;
-import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
-import org.hibernate.sqm.query.expression.function.MinSqmFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
@@ -88,23 +88,23 @@ public interface CriteriaVisitor {
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression<?>> expressions);
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, javax.persistence.criteria.Expression<?>... expressions);
 
-	AvgSqmFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	AvgSqmFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	AvgFunctionSqmExpression visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	AvgFunctionSqmExpression visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	CountSqmFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	CountSqmFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	CountFunctionSqmExpression visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	CountFunctionSqmExpression visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	CountStarSqmFunction visitCountStarFunction(boolean distinct);
-	CountStarSqmFunction visitCountStarFunction(boolean distinct, BasicType resultType);
+	CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct);
+	CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct, BasicType resultType);
 
-	MaxSqmFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	MaxSqmFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	MaxFunctionSqmExpression visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	MaxFunctionSqmExpression visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	MinSqmFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	MinSqmFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	MinFunctionSqmExpression visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	MinFunctionSqmExpression visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
-	SumSqmFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct);
-	SumSqmFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
+	SumFunctionSqmExpression visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct);
+	SumFunctionSqmExpression visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType);
 
 	ConcatSqmExpression visitConcat(
 			javax.persistence.criteria.Expression expression1,

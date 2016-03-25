@@ -17,11 +17,11 @@ import org.hibernate.sqm.path.AttributeBinding;
  * @author Steve Ebersole
  * @author Gunnar Morling
  */
-public class CollectionSizeSqmFunction implements SqmExpression {
+public class CollectionSizeSqmExpression implements SqmExpression {
 	AttributeBinding pluralAttributeBinding;
 	private final BasicType resultType;
 
-	public CollectionSizeSqmFunction(AttributeBinding pluralAttributeBinding, BasicType resultType) {
+	public CollectionSizeSqmExpression(AttributeBinding pluralAttributeBinding, BasicType resultType) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 		this.resultType = resultType;
 	}

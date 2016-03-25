@@ -56,14 +56,14 @@ import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountSqmFunction;
-import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
@@ -79,13 +79,13 @@ import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
-import org.hibernate.sqm.query.expression.function.MinSqmFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.from.FromClause;
 import org.hibernate.sqm.query.from.FromElement;
@@ -466,9 +466,9 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public AvgSqmFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
+	public AvgFunctionSqmExpression visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
 		final SqmExpression sqmExpression = visitExpression( expression );
-		return new AvgSqmFunction(
+		return new AvgFunctionSqmExpression(
 				sqmExpression,
 				distinct,
 				(BasicType) sqmExpression.getExpressionType()
@@ -476,14 +476,14 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public AvgSqmFunction visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new AvgSqmFunction( visitExpression( expression ), distinct, resultType );
+	public AvgFunctionSqmExpression visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new AvgFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
-	public CountSqmFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
+	public CountFunctionSqmExpression visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
 		final SqmExpression sqmExpression = visitExpression( expression );
-		return new CountSqmFunction(
+		return new CountFunctionSqmExpression(
 				sqmExpression,
 				distinct,
 				(BasicType) sqmExpression.getExpressionType()
@@ -491,49 +491,49 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public CountSqmFunction visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new CountSqmFunction( visitExpression( expression ), distinct, resultType );
+	public CountFunctionSqmExpression visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new CountFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
-	public CountStarSqmFunction visitCountStarFunction(boolean distinct) {
-		return new CountStarSqmFunction(
+	public CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct) {
+		return new CountStarFunctionSqmExpression(
 				distinct,
 				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class )
 		);
 	}
 
 	@Override
-	public CountStarSqmFunction visitCountStarFunction(boolean distinct, BasicType resultType) {
-		return new CountStarSqmFunction( distinct, resultType );
+	public CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct, BasicType resultType) {
+		return new CountStarFunctionSqmExpression( distinct, resultType );
 	}
 
 	@Override
-	public MaxSqmFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
+	public MaxFunctionSqmExpression visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
 		final SqmExpression sqmExpression = visitExpression( expression );
-		return new MaxSqmFunction( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
+		return new MaxFunctionSqmExpression( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
 	}
 
 	@Override
-	public MaxSqmFunction visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new MaxSqmFunction( visitExpression( expression ), distinct, resultType );
+	public MaxFunctionSqmExpression visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new MaxFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
-	public MinSqmFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
+	public MinFunctionSqmExpression visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
 		final SqmExpression sqmExpression = visitExpression( expression );
-		return new MinSqmFunction( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
+		return new MinFunctionSqmExpression( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
 	}
 
 	@Override
-	public MinSqmFunction visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new MinSqmFunction( visitExpression( expression ), distinct, resultType );
+	public MinFunctionSqmExpression visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new MinFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override
-	public SumSqmFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
+	public SumFunctionSqmExpression visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
 		final SqmExpression sqmExpression = visitExpression( expression );
-		return new SumSqmFunction(
+		return new SumFunctionSqmExpression(
 				sqmExpression,
 				distinct,
 				ExpressionTypeHelper.resolveSingleNumericType(
@@ -544,8 +544,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SumSqmFunction visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new SumSqmFunction( visitExpression( expression ), distinct, resultType );
+	public SumFunctionSqmExpression visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
+		return new SumFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
 	}
 
 	@Override

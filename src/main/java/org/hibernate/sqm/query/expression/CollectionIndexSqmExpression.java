@@ -6,6 +6,7 @@
  */
 package org.hibernate.sqm.query.expression;
 
+
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.from.FromElement;
@@ -13,11 +14,11 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class MinIndexSqmFunction implements SqmExpression {
+public class CollectionIndexSqmExpression implements SqmExpression {
 	private final String collectionAlias;
 	private final Type indexType;
 
-	public MinIndexSqmFunction(FromElement collectionReference, Type indexType) {
+	public CollectionIndexSqmExpression(FromElement collectionReference, Type indexType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 	}
@@ -42,6 +43,6 @@ public class MinIndexSqmFunction implements SqmExpression {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitMinIndexFunction( this );
+		return walker.visitCollectionIndexFunction( this );
 	}
 }

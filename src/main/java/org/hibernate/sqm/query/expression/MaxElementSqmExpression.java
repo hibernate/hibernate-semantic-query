@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.query.expression;
 
-
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.from.FromElement;
@@ -14,35 +13,35 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class CollectionIndexSqmFunction implements SqmExpression {
+public class MaxElementSqmExpression implements SqmExpression {
 	private final String collectionAlias;
-	private final Type indexType;
+	private final Type elementType;
 
-	public CollectionIndexSqmFunction(FromElement collectionReference, Type indexType) {
+	public MaxElementSqmExpression(FromElement collectionReference, Type elementType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
-		this.indexType = indexType;
+		this.elementType = elementType;
 	}
 
 	public String getCollectionAlias() {
 		return collectionAlias;
 	}
 
-	public Type getIndexType() {
-		return indexType;
+	public Type getElementType() {
+		return elementType;
 	}
 
 	@Override
 	public Type getExpressionType() {
-		return getIndexType();
+		return getElementType();
 	}
 
 	@Override
 	public Type getInferableType() {
-		return getIndexType();
+		return getElementType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitCollectionIndexFunction( this );
+		return walker.visitMaxElementFunction( this );
 	}
 }

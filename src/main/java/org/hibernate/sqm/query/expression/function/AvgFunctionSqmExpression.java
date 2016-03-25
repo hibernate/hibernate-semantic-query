@@ -13,10 +13,11 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class AvgSqmFunction extends AbstractAggregateSqmFunction implements AggregateSqmFunction {
+public class AvgFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression
+		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "avg";
 
-	public AvgSqmFunction(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public AvgFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
 		super( argument, distinct, resultType );
 	}
 

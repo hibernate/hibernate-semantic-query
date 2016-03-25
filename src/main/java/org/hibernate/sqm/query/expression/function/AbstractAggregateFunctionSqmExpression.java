@@ -12,11 +12,12 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public abstract class AbstractAggregateSqmFunction extends AbstractFunctionSqmExpression implements AggregateSqmFunction {
+public abstract class AbstractAggregateFunctionSqmExpression extends AbstractFunctionSqmExpression implements
+																								   AggregateFunctionSqmExpression {
 	private final SqmExpression argument;
 	private final boolean distinct;
 
-	public AbstractAggregateSqmFunction(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
 		super( resultType );
 		this.argument = argument;
 		this.distinct = distinct;

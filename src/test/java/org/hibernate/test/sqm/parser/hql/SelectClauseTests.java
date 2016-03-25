@@ -20,7 +20,7 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
-import org.hibernate.sqm.query.expression.MapEntrySqmFunction;
+import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
 import org.hibernate.sqm.query.select.DynamicInstantiation;
 import org.hibernate.sqm.query.select.DynamicInstantiationTarget;
@@ -411,10 +411,10 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( MapEntrySqmFunction.class )
+				instanceOf( MapEntrySqmExpression.class )
 		);
 
-		MapEntrySqmFunction mapEntryFunction = (MapEntrySqmFunction) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		MapEntrySqmExpression mapEntryFunction = (MapEntrySqmExpression) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 
 		// Key
 		assertThat( mapEntryFunction.getMapKeyType(), instanceOf( BasicTypeImpl.class ) );

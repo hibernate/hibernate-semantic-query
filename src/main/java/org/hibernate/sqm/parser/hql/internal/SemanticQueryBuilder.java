@@ -50,14 +50,14 @@ import org.hibernate.sqm.query.QuerySpec;
 import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
-import org.hibernate.sqm.query.expression.function.AggregateSqmFunction;
+import org.hibernate.sqm.query.expression.function.AggregateFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmFunction;
-import org.hibernate.sqm.query.expression.CollectionSizeSqmFunction;
+import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -65,8 +65,8 @@ import org.hibernate.sqm.query.expression.ConstantSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountSqmFunction;
-import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
@@ -83,15 +83,15 @@ import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
-import org.hibernate.sqm.query.expression.MapEntrySqmFunction;
+import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
-import org.hibernate.sqm.query.expression.MaxElementSqmFunction;
+import org.hibernate.sqm.query.expression.MaxElementSqmExpression;
 import org.hibernate.sqm.query.expression.function.LowerFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
-import org.hibernate.sqm.query.expression.MaxIndexSqmFunction;
-import org.hibernate.sqm.query.expression.MinElementSqmFunction;
-import org.hibernate.sqm.query.expression.function.MinSqmFunction;
-import org.hibernate.sqm.query.expression.MinIndexSqmFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.MaxIndexSqmExpression;
+import org.hibernate.sqm.query.expression.MinElementSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.MinIndexSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.expression.PluralAttributeIndexedReference;
@@ -99,7 +99,7 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
@@ -1220,7 +1220,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MapEntrySqmFunction visitMapEntryPath(HqlParser.MapEntryPathContext ctx) {
+	public MapEntrySqmExpression visitMapEntryPath(HqlParser.MapEntryPathContext ctx) {
 		final Binding pathResolution = (Binding) ctx.mapReference().path().accept( this );
 
 		if ( inWhereClause ) {
@@ -1232,7 +1232,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
-				return new MapEntrySqmFunction(
+				return new MapEntrySqmExpression(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						pluralAttribute.getIndexType(),
 						pluralAttribute.getElementType()
@@ -1907,14 +1907,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public AggregateSqmFunction visitAggregateFunction(HqlParser.AggregateFunctionContext ctx) {
-		return (AggregateSqmFunction) super.visitAggregateFunction( ctx );
+	public AggregateFunctionSqmExpression visitAggregateFunction(HqlParser.AggregateFunctionContext ctx) {
+		return (AggregateFunctionSqmExpression) super.visitAggregateFunction( ctx );
 	}
 
 	@Override
-	public AvgSqmFunction visitAvgFunction(HqlParser.AvgFunctionContext ctx) {
+	public AvgFunctionSqmExpression visitAvgFunction(HqlParser.AvgFunctionContext ctx) {
 		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
-		return new AvgSqmFunction(
+		return new AvgFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
@@ -1940,13 +1940,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public AggregateSqmFunction visitCountFunction(HqlParser.CountFunctionContext ctx) {
+	public AggregateFunctionSqmExpression visitCountFunction(HqlParser.CountFunctionContext ctx) {
 		final BasicType longType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class );
 		if ( ctx.ASTERISK() != null ) {
-			return new CountStarSqmFunction( ctx.DISTINCT() != null, longType );
+			return new CountStarFunctionSqmExpression( ctx.DISTINCT() != null, longType );
 		}
 		else {
-			return new CountSqmFunction(
+			return new CountFunctionSqmExpression(
 					(SqmExpression) ctx.expression().accept( this ),
 					ctx.DISTINCT() != null,
 					longType
@@ -1955,9 +1955,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MaxSqmFunction visitMaxFunction(HqlParser.MaxFunctionContext ctx) {
+	public MaxFunctionSqmExpression visitMaxFunction(HqlParser.MaxFunctionContext ctx) {
 		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
-		return new MaxSqmFunction(
+		return new MaxFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
@@ -1965,9 +1965,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MinSqmFunction visitMinFunction(HqlParser.MinFunctionContext ctx) {
+	public MinFunctionSqmExpression visitMinFunction(HqlParser.MinFunctionContext ctx) {
 		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
-		return new MinSqmFunction(
+		return new MinFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
 				(BasicType) expr.getExpressionType()
@@ -1985,9 +1985,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public SumSqmFunction visitSumFunction(HqlParser.SumFunctionContext ctx) {
+	public SumFunctionSqmExpression visitSumFunction(HqlParser.SumFunctionContext ctx) {
 		final SqmExpression expr = (SqmExpression) ctx.expression().accept( this );
-		return new SumSqmFunction(
+		return new SumFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
 				ExpressionTypeHelper.resolveSingleNumericType(
@@ -2061,7 +2061,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public CollectionSizeSqmFunction visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
+	public CollectionSizeSqmExpression visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
 		final Binding pathResolution = (Binding) ctx.path().accept( this );
 
 		if ( !AttributeBinding.class.isInstance( pathResolution ) ) {
@@ -2079,14 +2079,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionSizeSqmFunction(
+		return new CollectionSizeSqmExpression(
 				attributeBinding,
 				parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Long.class )
 		);
 	}
 
 	@Override
-	public CollectionIndexSqmFunction visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
+	public CollectionIndexSqmExpression visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
 		final String alias = ctx.identifier().getText();
 		final FromElement fromElement = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 
@@ -2107,11 +2107,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionIndexSqmFunction( fromElement, collectionDescriptor.getIndexType() );
+		return new CollectionIndexSqmExpression( fromElement, collectionDescriptor.getIndexType() );
 	}
 
 	@Override
-	public MaxElementSqmFunction visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
+	public MaxElementSqmExpression visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2127,11 +2127,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
-		return new MaxElementSqmFunction( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
+		return new MaxElementSqmExpression( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
 	}
 
 	@Override
-	public MinElementSqmFunction visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
+	public MinElementSqmExpression visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2146,11 +2146,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
-		return new MinElementSqmFunction( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
+		return new MinElementSqmExpression( pathResolution.getBoundFromElementBinding().getFromElement(), pluralAttribute.getElementType() );
 	}
 
 	@Override
-	public MaxIndexSqmFunction visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
+	public MaxIndexSqmExpression visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2159,13 +2159,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.LIST ) {
-				return new MaxIndexSqmFunction(
+				return new MaxIndexSqmExpression(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Integer.class )
 				);
 			}
 			else if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
-				return new MaxIndexSqmFunction(
+				return new MaxIndexSqmExpression(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						pluralAttribute.getIndexType()
 				);
@@ -2180,7 +2180,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public MinIndexSqmFunction visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
+	public MinIndexSqmExpression visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
@@ -2189,13 +2189,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( PluralAttribute.class.isInstance( pathResolution.getBoundModelType() ) ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) pathResolution.getBoundModelType();
 			if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.LIST ) {
-				return new MinIndexSqmFunction(
+				return new MinIndexSqmExpression(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Integer.class )
 				);
 			}
 			else if ( pluralAttribute.getCollectionClassification() == PluralAttribute.CollectionClassification.MAP ) {
-				return new MinIndexSqmFunction(
+				return new MinIndexSqmExpression(
 						pathResolution.getBoundFromElementBinding().getFromElement(),
 						pluralAttribute.getIndexType()
 				);

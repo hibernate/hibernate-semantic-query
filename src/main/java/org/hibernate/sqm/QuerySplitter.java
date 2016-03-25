@@ -21,14 +21,14 @@ import org.hibernate.sqm.query.SelectStatement;
 import org.hibernate.sqm.query.Statement;
 import org.hibernate.sqm.query.UpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgSqmFunction;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountSqmFunction;
-import org.hibernate.sqm.query.expression.function.CountStarSqmFunction;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
@@ -43,12 +43,12 @@ import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxSqmFunction;
-import org.hibernate.sqm.query.expression.function.MinSqmFunction;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.function.SumSqmFunction;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
 import org.hibernate.sqm.query.from.FromClause;
@@ -534,8 +534,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public AvgSqmFunction visitAvgFunction(AvgSqmFunction expression) {
-			return new AvgSqmFunction(
+		public AvgFunctionSqmExpression visitAvgFunction(AvgFunctionSqmExpression expression) {
+			return new AvgFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
@@ -543,13 +543,13 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public CountStarSqmFunction visitCountStarFunction(CountStarSqmFunction expression) {
-			return new CountStarSqmFunction( expression.isDistinct(), expression.getExpressionType() );
+		public CountStarFunctionSqmExpression visitCountStarFunction(CountStarFunctionSqmExpression expression) {
+			return new CountStarFunctionSqmExpression( expression.isDistinct(), expression.getExpressionType() );
 		}
 
 		@Override
-		public CountSqmFunction visitCountFunction(CountSqmFunction expression) {
-			return new CountSqmFunction(
+		public CountFunctionSqmExpression visitCountFunction(CountFunctionSqmExpression expression) {
+			return new CountFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
@@ -557,8 +557,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public MaxSqmFunction visitMaxFunction(MaxSqmFunction expression) {
-			return new MaxSqmFunction(
+		public MaxFunctionSqmExpression visitMaxFunction(MaxFunctionSqmExpression expression) {
+			return new MaxFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
@@ -566,8 +566,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public MinSqmFunction visitMinFunction(MinSqmFunction expression) {
-			return new MinSqmFunction(
+		public MinFunctionSqmExpression visitMinFunction(MinFunctionSqmExpression expression) {
+			return new MinFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()
@@ -575,8 +575,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public SumSqmFunction visitSumFunction(SumSqmFunction expression) {
-			return new SumSqmFunction(
+		public SumFunctionSqmExpression visitSumFunction(SumFunctionSqmExpression expression) {
+			return new SumFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
 					expression.getExpressionType()

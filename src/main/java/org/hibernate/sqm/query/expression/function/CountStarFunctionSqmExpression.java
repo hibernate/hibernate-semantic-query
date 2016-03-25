@@ -14,14 +14,14 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class CountStarSqmFunction extends AbstractAggregateSqmFunction {
-	public CountStarSqmFunction(boolean distinct, BasicType resultType) {
+public class CountStarFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression {
+	public CountStarFunctionSqmExpression(boolean distinct, BasicType resultType) {
 		super( STAR, distinct, resultType );
 	}
 
 	@Override
 	public String getFunctionName() {
-		return CountSqmFunction.NAME;
+		return CountFunctionSqmExpression.NAME;
 	}
 
 	@Override

@@ -13,10 +13,11 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class MaxSqmFunction extends AbstractAggregateSqmFunction implements AggregateSqmFunction {
-	public static final String NAME = "max";
+public class SumFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression
+		implements AggregateFunctionSqmExpression {
+	public static final String NAME = "sum";
 
-	public MaxSqmFunction(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public SumFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
 		super( argument, distinct, resultType );
 	}
 
@@ -27,6 +28,6 @@ public class MaxSqmFunction extends AbstractAggregateSqmFunction implements Aggr
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitMaxFunction( this );
+		return walker.visitSumFunction( this );
 	}
 }

@@ -13,10 +13,11 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class MinSqmFunction extends AbstractAggregateSqmFunction implements AggregateSqmFunction {
+public class MinFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression
+		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "min";
 
-	public MinSqmFunction(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public MinFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
 		super( argument, distinct, resultType );
 	}
 

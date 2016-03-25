@@ -13,35 +13,35 @@ import org.hibernate.sqm.query.from.FromElement;
 /**
  * @author Steve Ebersole
  */
-public class MaxIndexSqmFunction implements SqmExpression {
+public class MinElementSqmExpression implements SqmExpression {
 	private final String collectionAlias;
-	private final Type indexType;
+	private final Type elementType;
 
-	public MaxIndexSqmFunction(FromElement collectionReference, Type indexType) {
+	public MinElementSqmExpression(FromElement collectionReference, Type elementType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
-		this.indexType = indexType;
+		this.elementType = elementType;
 	}
 
 	public String getCollectionAlias() {
 		return collectionAlias;
 	}
 
-	public Type getIndexType() {
-		return indexType;
+	public Type getElementType() {
+		return elementType;
 	}
 
 	@Override
 	public Type getExpressionType() {
-		return getIndexType();
+		return getElementType();
 	}
 
 	@Override
 	public Type getInferableType() {
-		return getIndexType();
+		return getElementType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitMaxIndexFunction( this );
+		return walker.visitMinElementFunction( this );
 	}
 }

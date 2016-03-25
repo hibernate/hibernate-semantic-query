@@ -6,19 +6,27 @@
  */
 package org.hibernate.sqm.query.expression;
 
+import java.util.Map;
+
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.query.from.FromElement;
 
 /**
+ * Represents the ENTRY() function for obtaining the map entries from a {@code Map}-typed association.
+ *
+ * @author Gunnar Morling
  * @author Steve Ebersole
  */
-public class MaxElementSqmFunction implements SqmExpression {
+public class MapEntrySqmExpression implements SqmExpression {
 	private final String collectionAlias;
+	private final Type indexType;
 	private final Type elementType;
 
-	public MaxElementSqmFunction(FromElement collectionReference, Type elementType) {
+	public MapEntrySqmExpression(FromElement collectionReference, Type indexType, Type elementType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
+		this.indexType = indexType;
 		this.elementType = elementType;
 	}
 
@@ -26,22 +34,38 @@ public class MaxElementSqmFunction implements SqmExpression {
 		return collectionAlias;
 	}
 
-	public Type getElementType() {
+	public Type getMapKeyType() {
+		return indexType;
+	}
+
+	public Type getMapValueType() {
 		return elementType;
 	}
 
 	@Override
 	public Type getExpressionType() {
-		return getElementType();
+		return MAP_ENTRY_TYPE;
 	}
 
 	@Override
 	public Type getInferableType() {
-		return getElementType();
+		return null;
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitMaxElementFunction( this );
+		return walker.visitMapEntryFunction( this );
 	}
+
+	static final BasicType MAP_ENTRY_TYPE = new BasicType() {
+		@Override
+		public String getTypeName() {
+			return Map.Entry.class.getName();
+		}
+
+		@Override
+		public Class getJavaType() {
+			return Map.Entry.class;
+		}
+	};
 }

@@ -82,10 +82,6 @@ TIMESTAMP_ESCAPE_START : '{ts';
 DATE_ESCAPE_START : '{d';
 TIME_ESCAPE_START : '{t';
 
-TRUE : 'true';
-FALSE :	'false';
-NULL : 'null';
-
 EQUAL : '=';
 NOT_EQUAL : '!=' | '^=' | '<>';
 GREATER : '>';
@@ -214,6 +210,11 @@ WHEN				: [wW] [hH] [eE] [nN];
 WHERE				: [wW] [hH] [eE] [rR] [eE];
 WITH				: [wW] [iI] [tT] [hH];
 YEAR				: [yY] [eE] [aA] [rR];
+
+// case-insensitive true, false and null recognition (split vote :)
+TRUE 	: [tT] [rR] [uU] [eE];
+FALSE 	: [fF] [aA] [lL] [sS] [eE];
+NULL 	: [nN] [uU] [lL] [lL];
 
 // Identifiers
 IDENTIFIER

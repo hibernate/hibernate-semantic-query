@@ -10,7 +10,7 @@
  * main entry point into the parsing is {@link org.hibernate.sqm.SemanticQueryInterpreter}.
  * <p/>
  * For HQL/JPQL parsing, pass in the sqm string and a {@link org.hibernate.sqm.ConsumerContext} and get
- * back the semantic sqm tree as a {@link org.hibernate.sqm.query.Statement}.
+ * back the semantic sqm tree as a {@link org.hibernate.sqm.query.SqmStatement}.
  * <p/>
  * For Criteria queries ...
  * <p/>

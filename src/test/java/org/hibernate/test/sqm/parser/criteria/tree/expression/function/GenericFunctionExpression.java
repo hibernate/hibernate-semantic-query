@@ -15,7 +15,7 @@ import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -76,7 +76,7 @@ public class GenericFunctionExpression<X>
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
 		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

@@ -9,8 +9,8 @@ package org.hibernate.test.sqm.parser.hql.dml;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.query.DeleteStatement;
-import org.hibernate.sqm.query.Statement;
+import org.hibernate.sqm.query.SqmStatementDelete;
+import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
@@ -45,10 +45,10 @@ public class BasicDeleteTests {
 	}
 
 	private void basicDeleteAssertions(String query, ConsumerContextImpl consumerContext) {
-		final Statement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
+		final SqmStatement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
 
-		assertThat( statement, instanceOf( DeleteStatement.class ) );
-		DeleteStatement deleteStatement = (DeleteStatement) statement;
+		assertThat( statement, instanceOf( SqmStatementDelete.class ) );
+		SqmStatementDelete deleteStatement = (SqmStatementDelete) statement;
 
 		assertThat( deleteStatement.getEntityFromElement().getEntityName(), equalTo( "com.acme.Entity1" ) );
 

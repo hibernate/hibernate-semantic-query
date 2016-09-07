@@ -6,15 +6,13 @@
  */
 package org.hibernate.test.sqm.parser.criteria.select;
 
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmStatementSelect;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -44,7 +42,7 @@ public class CriteriaTranslationSmokeTests {
 		criteria.select( root );
 
 		// now ask the interpreter to convert the criteria into SQM...
-		final SelectStatement sqm = SemanticQueryInterpreter.interpret( criteria, consumerContext );
+		final SqmStatementSelect sqm = SemanticQueryInterpreter.interpret( criteria, consumerContext );
 		assertThat( sqm.getQuerySpec().getFromClause().getFromElementSpaces().size(), is(1) ) ;
 	}
 

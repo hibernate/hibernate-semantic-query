@@ -18,33 +18,35 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.jboss.logging.Logger;
 
-import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.CLASS;
-import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.LIST;
-import static org.hibernate.sqm.query.select.DynamicInstantiationTarget.Nature.MAP;
+import static org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget.Nature.CLASS;
+import static org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget.Nature.LIST;
+import static org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget.Nature.MAP;
 
 /**
+ * Represents a dynamic instantiation ({@code select new XYZ(...) ...}) as part of the SQM.
+ *
  * @author Steve Ebersole
  */
-public class DynamicInstantiation implements SqmExpression,
-											 AliasedSqmExpressionContainer<DynamicInstantiationArgument> {
-	private static final Logger log = Logger.getLogger( DynamicInstantiation.class );
+public class SqmDynamicInstantiation
+		implements SqmExpression, SqmAliasedExpressionContainer<SqmDynamicInstantiationArgument> {
+	private static final Logger log = Logger.getLogger( SqmDynamicInstantiation.class );
 
-	public static DynamicInstantiation forClassInstantiation(Class targetJavaType) {
-		return new DynamicInstantiation( new DynamicInstantiationTargetImpl( CLASS, targetJavaType ) );
+	public static SqmDynamicInstantiation forClassInstantiation(Class targetJavaType) {
+		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( CLASS, targetJavaType ) );
 	}
 
-	public static DynamicInstantiation forMapInstantiation() {
-		return new DynamicInstantiation( new DynamicInstantiationTargetImpl( MAP, Map.class ) );
+	public static SqmDynamicInstantiation forMapInstantiation() {
+		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( MAP, Map.class ) );
 	}
 
-	public static DynamicInstantiation forListInstantiation() {
-		return new DynamicInstantiation( new DynamicInstantiationTargetImpl( LIST, List.class ) );
+	public static SqmDynamicInstantiation forListInstantiation() {
+		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( LIST, List.class ) );
 	}
 
-	private final DynamicInstantiationTarget instantiationTarget;
-	private List<DynamicInstantiationArgument> arguments;
+	private final SqmDynamicInstantiationTarget instantiationTarget;
+	private List<SqmDynamicInstantiationArgument> arguments;
 
-	private DynamicInstantiation(DynamicInstantiationTarget instantiationTarget) {
+	private SqmDynamicInstantiation(SqmDynamicInstantiationTarget instantiationTarget) {
 		this.instantiationTarget = instantiationTarget;
 	}
 
@@ -68,15 +70,15 @@ public class DynamicInstantiation implements SqmExpression,
 		return null;
 	}
 
-	public DynamicInstantiationTarget getInstantiationTarget() {
+	public SqmDynamicInstantiationTarget getInstantiationTarget() {
 		return instantiationTarget;
 	}
 
-	public List<DynamicInstantiationArgument> getArguments() {
+	public List<SqmDynamicInstantiationArgument> getArguments() {
 		return arguments;
 	}
 
-	public void addArgument(DynamicInstantiationArgument argument) {
+	public void addArgument(SqmDynamicInstantiationArgument argument) {
 		if ( instantiationTarget.getNature() == LIST ) {
 			// really should not have an alias...
 			if ( argument.getAlias() != null ) {
@@ -100,20 +102,20 @@ public class DynamicInstantiation implements SqmExpression,
 		}
 
 		if ( arguments == null ) {
-			arguments = new ArrayList<DynamicInstantiationArgument>();
+			arguments = new ArrayList<SqmDynamicInstantiationArgument>();
 		}
 		arguments.add( argument );
 	}
 
 	@Override
-	public DynamicInstantiationArgument add(SqmExpression expression, String alias) {
-		DynamicInstantiationArgument argument = new DynamicInstantiationArgument( expression, alias );
+	public SqmDynamicInstantiationArgument add(SqmExpression expression, String alias) {
+		SqmDynamicInstantiationArgument argument = new SqmDynamicInstantiationArgument( expression, alias );
 		addArgument( argument );
 		return argument;
 	}
 
 	@Override
-	public void add(DynamicInstantiationArgument aliasExpression) {
+	public void add(SqmDynamicInstantiationArgument aliasExpression) {
 		addArgument( aliasExpression );
 	}
 
@@ -122,11 +124,11 @@ public class DynamicInstantiation implements SqmExpression,
 		return walker.visitDynamicInstantiation( this );
 	}
 
-	public DynamicInstantiation makeShallowCopy() {
-		return new DynamicInstantiation( getInstantiationTarget() );
+	public SqmDynamicInstantiation makeShallowCopy() {
+		return new SqmDynamicInstantiation( getInstantiationTarget() );
 	}
 
-	private static class DynamicInstantiationTargetImpl implements DynamicInstantiationTarget {
+	private static class DynamicInstantiationTargetImpl implements SqmDynamicInstantiationTarget {
 		private final Nature nature;
 		private final Class javaType;
 

@@ -9,13 +9,13 @@ package org.hibernate.sqm.query.predicate;
 /**
  * @author Steve Ebersole
  */
-public class WhereClause {
+public class SqmWhereClause {
 	private SqmPredicate predicate;
 
-	public WhereClause() {
+	public SqmWhereClause() {
 	}
 
-	public WhereClause(SqmPredicate predicate) {
+	public SqmWhereClause(SqmPredicate predicate) {
 		this.predicate = predicate;
 	}
 

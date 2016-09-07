@@ -9,7 +9,7 @@ package org.hibernate.sqm.parser.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.JoinedFromElement;
@@ -29,7 +29,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	private final QuerySpecProcessingState parent;
 
 	private final ParsingContext parsingContext;
-	private final FromClause fromClause;
+	private final SqmFromClause fromClause;
 
 	private final FromElementBuilder fromElementBuilder;
 
@@ -43,7 +43,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 		this.parent = parent;
 
 		this.parsingContext = parsingContext;
-		this.fromClause = new FromClause();
+		this.fromClause = new SqmFromClause();
 
 		if ( parent == null ) {
 			this.fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry() );
@@ -60,7 +60,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 		return parent;
 	}
 
-	public FromClause getFromClause() {
+	public SqmFromClause getFromClause() {
 		return fromClause;
 	}
 
@@ -102,7 +102,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 
 		if ( found == null ) {
 			if ( parent != null ) {
-				log.debugf( "Unable to resolve unqualified attribute [%s] in local FromClause; checking parent" );
+				log.debugf( "Unable to resolve unqualified attribute [%s] in local SqmFromClause; checking parent" );
 				found = parent.findFromElementExposingAttribute( name );
 			}
 		}

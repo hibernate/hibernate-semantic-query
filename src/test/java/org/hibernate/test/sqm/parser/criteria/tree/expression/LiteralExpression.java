@@ -12,7 +12,7 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -60,7 +60,7 @@ public class LiteralExpression<T> extends AbstractCriteriaExpressionImpl<T>
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
 		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

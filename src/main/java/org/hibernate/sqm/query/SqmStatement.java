@@ -4,16 +4,13 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.query.select;
+package org.hibernate.sqm.query;
 
-import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.SemanticQueryWalker;
 
 /**
- * Represents any aliased expression
- *
  * @author Steve Ebersole
  */
-public interface AliasedSqmExpression {
-	SqmExpression getExpression();
-	String getAlias();
+public interface SqmStatement {
+	<T> T accept(SemanticQueryWalker<T> walker);
 }

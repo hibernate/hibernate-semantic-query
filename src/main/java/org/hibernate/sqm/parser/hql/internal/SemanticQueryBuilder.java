@@ -43,13 +43,13 @@ import org.hibernate.sqm.parser.hql.internal.antlr.HqlParserBaseVisitor;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.path.Binding;
-import org.hibernate.sqm.query.DeleteStatement;
-import org.hibernate.sqm.query.InsertSelectStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementDelete;
+import org.hibernate.sqm.query.SqmStatementInsertSelect;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.UpdateStatement;
+import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.sqm.query.SqmStatementUpdate;
 import org.hibernate.sqm.query.expression.function.AggregateFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
@@ -104,7 +104,7 @@ import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.JoinedFromElement;
@@ -128,11 +128,11 @@ import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.DynamicInstantiation;
-import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
-import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiationArgument;
+import org.hibernate.sqm.query.select.SqmSelectClause;
+import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.jboss.logging.Logger;
 
@@ -154,7 +154,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	 * @param parsingContext Access to things needed to perform the analysis
 	 * @return The semantic sqm model
 	 */
-	public static Statement buildSemanticModel(HqlParser.StatementContext statement, ParsingContext parsingContext) {
+	public static SqmStatement buildSemanticModel(HqlParser.StatementContext statement, ParsingContext parsingContext) {
 		return new SemanticQueryBuilder( parsingContext ).visitStatement( statement );
 	}
 
@@ -173,7 +173,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	// Grammar rules
 
 	@Override
-	public Statement visitStatement(HqlParser.StatementContext ctx) {
+	public SqmStatement visitStatement(HqlParser.StatementContext ctx) {
 		if ( ctx.insertStatement() != null ) {
 			return visitInsertStatement( ctx.insertStatement() );
 		}
@@ -191,7 +191,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public SelectStatement visitSelectStatement(HqlParser.SelectStatementContext ctx) {
+	public SqmStatementSelect visitSelectStatement(HqlParser.SelectStatementContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			if ( ctx.querySpec().selectClause() == null ) {
 				throw new StrictJpaComplianceViolation(
@@ -201,7 +201,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		final SelectStatement selectStatement = new SelectStatement();
+		final SqmStatementSelect selectStatement = new SqmStatementSelect();
 		selectStatement.applyQuerySpec( visitQuerySpec( ctx.querySpec() ) );
 		if ( ctx.orderByClause() != null ) {
 			pathResolverStack.push(
@@ -219,14 +219,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public QuerySpec visitQuerySpec(HqlParser.QuerySpecContext ctx) {
+	public SqmQuerySpec visitQuerySpec(HqlParser.QuerySpecContext ctx) {
 		currentQuerySpecProcessingState = new QuerySpecProcessingStateStandardImpl( parsingContext, currentQuerySpecProcessingState );
 		pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
 		try {
 			// visit from-clause first!!!
 			visitFromClause( ctx.fromClause() );
 
-			final SelectClause selectClause;
+			final SqmSelectClause selectClause;
 			if ( ctx.selectClause() != null ) {
 				selectClause = visitSelectClause( ctx.selectClause() );
 			}
@@ -235,14 +235,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				selectClause = buildInferredSelectClause( currentQuerySpecProcessingState.getFromClause() );
 			}
 
-			final WhereClause whereClause;
+			final SqmWhereClause whereClause;
 			if ( ctx.whereClause() != null ) {
 				whereClause = visitWhereClause( ctx.whereClause() );
 			}
 			else {
 				whereClause = null;
 			}
-			return new QuerySpec( currentQuerySpecProcessingState.getFromClause(), selectClause, whereClause );
+			return new SqmQuerySpec( currentQuerySpecProcessingState.getFromClause(), selectClause, whereClause );
 		}
 		finally {
 			pathResolverStack.pop();
@@ -250,19 +250,19 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 	}
 
-	protected SelectClause buildInferredSelectClause(FromClause fromClause) {
+	protected SqmSelectClause buildInferredSelectClause(SqmFromClause fromClause) {
 		// for now, this is slightly different than the legacy behavior where
 		// the root and each non-fetched-join was selected.  For now, here, we simply
 		// select the root
-		final SelectClause selectClause = new SelectClause( true );
+		final SqmSelectClause selectClause = new SqmSelectClause( true );
 		final FromElement root = fromClause.getFromElementSpaces().get( 0 ).getRoot();
-		selectClause.addSelection( new Selection( root ) );
+		selectClause.addSelection( new SqmSelection( root ) );
 		return selectClause;
 	}
 
 	@Override
-	public SelectClause visitSelectClause(HqlParser.SelectClauseContext ctx) {
-		final SelectClause selectClause = new SelectClause( ctx.DISTINCT() != null );
+	public SqmSelectClause visitSelectClause(HqlParser.SelectClauseContext ctx) {
+		final SqmSelectClause selectClause = new SqmSelectClause( ctx.DISTINCT() != null );
 		for ( HqlParser.SelectionContext selectionContext : ctx.selectionList().selection() ) {
 			selectClause.addSelection( visitSelection( selectionContext ) );
 		}
@@ -270,8 +270,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Selection visitSelection(HqlParser.SelectionContext ctx) {
-		final Selection selection = new Selection(
+	public SqmSelection visitSelection(HqlParser.SelectionContext ctx) {
+		final SqmSelection selection = new SqmSelection(
 				visitSelectExpression( ctx.selectExpression() ),
 				interpretResultIdentifier( ctx.resultIdentifier() )
 		);
@@ -345,22 +345,22 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public DynamicInstantiation visitDynamicInstantiation(HqlParser.DynamicInstantiationContext ctx) {
-		final DynamicInstantiation dynamicInstantiation;
+	public SqmDynamicInstantiation visitDynamicInstantiation(HqlParser.DynamicInstantiationContext ctx) {
+		final SqmDynamicInstantiation dynamicInstantiation;
 
 		if ( ctx.dynamicInstantiationTarget().MAP() != null ) {
 			final BasicType<Map> mapType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( Map.class );
-			dynamicInstantiation = DynamicInstantiation.forMapInstantiation();
+			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation();
 		}
 		else if ( ctx.dynamicInstantiationTarget().LIST() != null ) {
 			final BasicType<List> listType = parsingContext.getConsumerContext().getDomainMetamodel().getBasicType( List.class );
-			dynamicInstantiation = DynamicInstantiation.forListInstantiation();
+			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation();
 		}
 		else {
 			final String className = ctx.dynamicInstantiationTarget().dotIdentifierSequence().getText();
 			try {
 				final Class targetJavaType = parsingContext.getConsumerContext().classByName( className );
-				dynamicInstantiation = DynamicInstantiation.forClassInstantiation( targetJavaType );
+				dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( targetJavaType );
 			}
 			catch (ClassNotFoundException e) {
 				throw new SemanticException( "Unable to resolve class named for dynamic instantiation : " + className );
@@ -375,8 +375,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public DynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
-		return new DynamicInstantiationArgument(
+	public SqmDynamicInstantiationArgument visitDynamicInstantiationArg(HqlParser.DynamicInstantiationArgContext ctx) {
+		return new SqmDynamicInstantiationArgument(
 				visitDynamicInstantiationArgExpression( ctx.dynamicInstantiationArgExpression() ),
 				ctx.identifier() == null ? null : ctx.identifier().getText()
 		);
@@ -405,11 +405,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public WhereClause visitWhereClause(HqlParser.WhereClauseContext ctx) {
+	public SqmWhereClause visitWhereClause(HqlParser.WhereClauseContext ctx) {
 		inWhereClause = true;
 
 		try {
-			return new WhereClause( (SqmPredicate) ctx.predicate().accept( this ) );
+			return new SqmWhereClause( (SqmPredicate) ctx.predicate().accept( this ) );
 		}
 		finally {
 			inWhereClause = false;
@@ -433,9 +433,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	private static class OrderByResolutionContext implements ResolutionContext, FromElementLocator {
 		private final ParsingContext parsingContext;
-		private final SelectStatement selectStatement;
+		private final SqmStatementSelect selectStatement;
 
-		public OrderByResolutionContext(ParsingContext parsingContext, SelectStatement selectStatement) {
+		public OrderByResolutionContext(ParsingContext parsingContext, SqmStatementSelect selectStatement) {
 			this.parsingContext = parsingContext;
 			this.selectStatement = selectStatement;
 		}
@@ -544,11 +544,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public DeleteStatement visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
+	public SqmStatementDelete visitDeleteStatement(HqlParser.DeleteStatementContext ctx) {
 		currentQuerySpecProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
 		try {
 			final RootEntityFromElement root = resolveDmlRootEntityReference( ctx.mainEntityPersisterReference() );
-			final DeleteStatement deleteStatement = new DeleteStatement( root );
+			final SqmStatementDelete deleteStatement = new SqmStatementDelete( root );
 
 			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
 			try {
@@ -616,11 +616,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public UpdateStatement visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
+	public SqmStatementUpdate visitUpdateStatement(HqlParser.UpdateStatementContext ctx) {
 		currentQuerySpecProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
 		try {
 			final RootEntityFromElement root = resolveDmlRootEntityReference( ctx.mainEntityPersisterReference() );
-			final UpdateStatement updateStatement = new UpdateStatement( root );
+			final SqmStatementUpdate updateStatement = new SqmStatementUpdate( root );
 
 			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
 			try {
@@ -657,7 +657,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public InsertSelectStatement visitInsertStatement(HqlParser.InsertStatementContext ctx) {
+	public SqmStatementInsertSelect visitInsertStatement(HqlParser.InsertStatementContext ctx) {
 		currentQuerySpecProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
 		try {
 			final EntityType entityType = resolveEntityReference( ctx.insertSpec().intoSpec().dotIdentifierSequence() );
@@ -674,7 +674,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			currentQuerySpecProcessingState.getFromClause().getFromElementSpaces().get( 0 ).setRoot( root );
 
 			// for now we only support the INSERT-SELECT form
-			final InsertSelectStatement insertStatement = new InsertSelectStatement( root );
+			final SqmStatementInsertSelect insertStatement = new SqmStatementInsertSelect( root );
 
 			pathResolverStack.push( new PathResolverBasicImpl( currentQuerySpecProcessingState ) );
 			try {
@@ -2211,16 +2211,16 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public SubQuerySqmExpression visitSubQueryExpression(HqlParser.SubQueryExpressionContext ctx) {
-		final QuerySpec querySpec = visitQuerySpec( ctx.querySpec() );
+		final SqmQuerySpec querySpec = visitQuerySpec( ctx.querySpec() );
 		return new SubQuerySqmExpression( querySpec, determineTypeDescriptor( querySpec.getSelectClause() ) );
 	}
 
-	private static Type determineTypeDescriptor(SelectClause selectClause) {
+	private static Type determineTypeDescriptor(SqmSelectClause selectClause) {
 		if ( selectClause.getSelections().size() != 0 ) {
 			return null;
 		}
 
-		final Selection selection = selectClause.getSelections().get( 0 );
+		final SqmSelection selection = selectClause.getSelections().get( 0 );
 		return selection.getExpression().getExpressionType();
 	}
 }

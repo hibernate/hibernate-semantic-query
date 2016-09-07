@@ -8,10 +8,10 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmStatementSelect;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
-import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -32,9 +32,9 @@ public class NestedFunctionsTest {
 
 	@Test
 	public void testSubstrInsideConcat() {
-		final SelectStatement statement = (SelectStatement) interpret( "select concat('111', substring('222222', 1, 3)) from Entity", consumerContext );
+		final SqmStatementSelect statement = (SqmStatementSelect) interpret( "select concat('111', substring('222222', 1, 3)) from Entity", consumerContext );
 		assertThat( statement.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
-		final Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		final SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( ConcatFunctionSqmExpression.class ) );
 		final ConcatFunctionSqmExpression concatFunction = (ConcatFunctionSqmExpression) selection.getExpression();
 		assertThat( concatFunction.getExpressions().size(), is(2) );

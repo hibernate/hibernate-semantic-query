@@ -22,7 +22,7 @@ import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 
 /**
  * PathResolver implementation for resolving path references as part of a
- * FromClause (join paths mainly).
+ * SqmFromClause (join paths mainly).
  *
  * @author Steve Ebersole
  */

@@ -53,8 +53,8 @@ import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
 import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementSelect;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -87,7 +87,7 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
@@ -108,10 +108,10 @@ import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
-import org.hibernate.sqm.query.select.DynamicInstantiation;
-import org.hibernate.sqm.query.select.SelectClause;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
+import org.hibernate.sqm.query.select.SqmSelectClause;
 
 /**
  * @author Steve Ebersole
@@ -120,10 +120,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// top level statement visitation
 
-	public static SelectStatement interpretSelectCriteria(CriteriaQuery query, ParsingContext parsingContext) {
+	public static SqmStatementSelect interpretSelectCriteria(CriteriaQuery query, ParsingContext parsingContext) {
 		CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
 
-		final SelectStatement selectStatement = new SelectStatement();
+		final SqmStatementSelect selectStatement = new SqmStatementSelect();
 		selectStatement.applyQuerySpec( interpreter.visitQuerySpec( query ) );
 		selectStatement.applyOrderByClause( interpreter.visitOrderBy( query ) );
 
@@ -158,10 +158,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 
-	private QuerySpec visitQuerySpec(AbstractQuery jpaCriteria) {
+	private SqmQuerySpec visitQuerySpec(AbstractQuery jpaCriteria) {
 		currentQuerySpecProcessingState = new QuerySpecProcessingStateStandardImpl( parsingContext, currentQuerySpecProcessingState );
 		try {
-			return new QuerySpec(
+			return new SqmQuerySpec(
 					visitFromClause( jpaCriteria ),
 					visitSelectClause( jpaCriteria ),
 					visitWhereClause( jpaCriteria )
@@ -172,8 +172,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 	}
 
-	private FromClause visitFromClause(AbstractQuery<?> jpaCriteria) {
-		final FromClause fromClause = new FromClause();
+	private SqmFromClause visitFromClause(AbstractQuery<?> jpaCriteria) {
+		final SqmFromClause fromClause = new SqmFromClause();
 		for ( Root<?> jpaRoot : jpaCriteria.getRoots() ) {
 			final RootImplementor root = (RootImplementor) jpaRoot;
 			root.prepareAlias( parsingContext.getImplicitAliasGenerator() );
@@ -252,20 +252,20 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		throw new ParsingException( "Unrecognized JPA JoinType : " + joinType );
 	}
 
-	private SelectClause visitSelectClause(AbstractQuery jpaCriteria) {
-		final SelectClause sqmSelectClause = new SelectClause( jpaCriteria.isDistinct() );
+	private SqmSelectClause visitSelectClause(AbstractQuery jpaCriteria) {
+		final SqmSelectClause sqmSelectClause = new SqmSelectClause( jpaCriteria.isDistinct() );
 
 		applySelection( jpaCriteria.getSelection(), sqmSelectClause );
 
 		return sqmSelectClause;
 	}
 
-	private void applySelection(Selection<?> selection, AliasedSqmExpressionContainer container) {
+	private void applySelection(Selection<?> selection, SqmAliasedExpressionContainer container) {
 		if ( selection instanceof SelectionImplementor ) {
 			( (SelectionImplementor) selection ).visitSelections( this, container );
 		}
 		else if ( selection.isCompoundSelection() ) {
-			final AliasedSqmExpressionContainer containerForSelections;
+			final SqmAliasedExpressionContainer containerForSelections;
 			final Class selectionResultType = selection.getJavaType();
 			if ( Tuple.class.isAssignableFrom( selectionResultType )
 					|| selectionResultType.isArray()
@@ -273,13 +273,13 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 				containerForSelections = container;
 			}
 			else if ( List.class.equals( selectionResultType ) ) {
-				containerForSelections = DynamicInstantiation.forListInstantiation();
+				containerForSelections = SqmDynamicInstantiation.forListInstantiation();
 			}
 			else if ( Map.class.equals( selectionResultType ) ) {
-				containerForSelections = DynamicInstantiation.forMapInstantiation();
+				containerForSelections = SqmDynamicInstantiation.forMapInstantiation();
 			}
 			else {
-				containerForSelections = DynamicInstantiation.forClassInstantiation( selectionResultType );
+				containerForSelections = SqmDynamicInstantiation.forClassInstantiation( selectionResultType );
 			}
 
 			for ( Selection<?> nestedSelection : selection.getCompoundSelectionItems() ) {
@@ -301,9 +301,9 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 				throw new QueryException(
 						String.format(
 								Locale.ROOT,
-								"Unexpected JPA Criteria sqm Selection type [%s] encountered; " +
+								"Unexpected JPA Criteria Selection type [%s] encountered; " +
 										"was expecting Selection with either #isCompoundSelection()==true or " +
-										"ExpressionImplementor implementation",
+										"SelectionImplementor/Expression implementation",
 								selection.getClass().getName()
 						)
 				);
@@ -593,8 +593,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// Predicates
 
 
-	private WhereClause visitWhereClause(AbstractQuery<?> jpaCriteria) {
-		final WhereClause whereClause = new WhereClause();
+	private SqmWhereClause visitWhereClause(AbstractQuery<?> jpaCriteria) {
+		final SqmWhereClause whereClause = new SqmWhereClause();
 		if ( jpaCriteria.getRestriction() != null ) {
 			whereClause.setPredicate( visitPredicate( jpaCriteria.getRestriction() ) );
 		}

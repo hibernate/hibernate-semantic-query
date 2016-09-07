@@ -14,7 +14,7 @@ import javax.persistence.criteria.Selection;
 
 import org.hibernate.sqm.parser.criteria.spi.*;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -50,7 +50,7 @@ public class CompoundSelectionImpl<X>
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
 		for ( Selection<?> selectionItem : selectionItems ) {
 			container.add(
 					( (CriteriaExpression) selectionItem ).visitExpression( visitor ),

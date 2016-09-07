@@ -19,7 +19,7 @@ import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
-import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
@@ -102,7 +102,7 @@ public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Bool
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
 		throw new UnsupportedOperationException( "Predicates cannot be used as select expression" );
 
 	}

@@ -14,7 +14,7 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
 /**
  * @author Steve Ebersole
  */
-public interface InsertStatement extends Statement {
+public interface SqmStatementInsert extends SqmStatement {
 	RootEntityFromElement getInsertTarget();
 	List<AttributeReferenceSqmExpression> getStateFields();
 }

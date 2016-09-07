@@ -16,7 +16,7 @@ import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.JoinedFromElement;
@@ -49,7 +49,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	}
 
 	@Override
-	public FromClause getFromClause() {
+	public SqmFromClause getFromClause() {
 		return fromClause;
 	}
 
@@ -82,7 +82,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		return parsingContext;
 	}
 
-	public static class DmlFromClause extends FromClause {
+	public static class DmlFromClause extends SqmFromClause {
 		private final DmlFromElementSpace fromElementSpace = new DmlFromElementSpace( this );
 
 		@Override

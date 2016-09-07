@@ -11,5 +11,5 @@ package org.hibernate.sqm.query;
  *
  * @author Steve Ebersole
  */
-public interface NonSelectStatement extends Statement {
+public interface SqmStatementNonSelect extends SqmStatement {
 }

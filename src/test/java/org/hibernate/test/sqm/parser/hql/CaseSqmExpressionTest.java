@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmStatementSelect;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
@@ -37,7 +37,7 @@ public class CaseSqmExpressionTest {
 
 	@Test
 	public void testBasicSimpleCaseExpression() {
-		SelectStatement select = (SelectStatement) interpret( "select e from Entity e where e.basic2 = case e.basic when 1 then 'Steve' else 'Jon' end", consumerContext );
+		SqmStatementSelect select = (SqmStatementSelect) interpret( "select e from Entity e where e.basic2 = case e.basic when 1 then 'Steve' else 'Jon' end", consumerContext );
 
 		assertThat( select.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) select.getQuerySpec().getWhereClause().getPredicate();
@@ -54,7 +54,7 @@ public class CaseSqmExpressionTest {
 
 	@Test
 	public void testBasicSearchedCaseExpression() {
-		SelectStatement select = (SelectStatement) interpret( "select e from Entity e where e.basic2 = case when e.basic=1 then 'Steve' else 'Jon' end", consumerContext );
+		SqmStatementSelect select = (SqmStatementSelect) interpret( "select e from Entity e where e.basic2 = case when e.basic=1 then 'Steve' else 'Jon' end", consumerContext );
 
 		assertThat( select.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) select.getQuerySpec().getWhereClause().getPredicate();
@@ -69,7 +69,7 @@ public class CaseSqmExpressionTest {
 
 	@Test
 	public void testBasicCoalesceExpression() {
-		SelectStatement select = (SelectStatement) interpret( "select coalesce(e.basic2, e.basic3, e.basic4) from Entity e", consumerContext );
+		SqmStatementSelect select = (SqmStatementSelect) interpret( "select coalesce(e.basic2, e.basic3, e.basic4) from Entity e", consumerContext );
 
 		assertThat( select.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
 		assertThat(
@@ -85,7 +85,7 @@ public class CaseSqmExpressionTest {
 
 	@Test
 	public void testBasicNullifExpression() {
-		SelectStatement select = (SelectStatement) interpret( "select nullif(e.basic2, e.basic3) from Entity e", consumerContext );
+		SqmStatementSelect select = (SqmStatementSelect) interpret( "select nullif(e.basic2, e.basic3) from Entity e", consumerContext );
 
 		assertThat( select.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
 		assertThat(

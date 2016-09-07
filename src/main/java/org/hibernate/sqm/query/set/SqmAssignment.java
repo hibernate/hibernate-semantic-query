@@ -12,12 +12,11 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class Assignment {
+public class SqmAssignment {
 	private final AttributeReferenceSqmExpression stateField;
 	private final SqmExpression value;
 
-	public Assignment(AttributeReferenceSqmExpression stateField, SqmExpression value) {
-
+	public SqmAssignment(AttributeReferenceSqmExpression stateField, SqmExpression value) {
 		this.stateField = stateField;
 		this.value = value;
 	}

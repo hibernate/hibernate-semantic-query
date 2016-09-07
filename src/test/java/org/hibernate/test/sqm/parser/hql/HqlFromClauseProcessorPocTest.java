@@ -11,8 +11,8 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
@@ -38,9 +38,9 @@ public class HqlFromClauseProcessorPocTest {
 	final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 	@Test
 	public void testSimpleFrom() throws Exception {
-		final SelectStatement selectStatement = interpret( "select a.b from Something a" );
+		final SqmStatementSelect selectStatement = interpret( "select a.b from Something a" );
 
-		final FromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
+		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
 		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
@@ -52,8 +52,8 @@ public class HqlFromClauseProcessorPocTest {
 		assertThat( root.getIdentificationVariable(), is( "a") );
 	}
 
-	private SelectStatement interpret(String query) {
-		return (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmStatementSelect interpret(String query) {
+		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	private DomainMetamodel buildMetamodel() {
@@ -94,9 +94,9 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testMultipleSpaces() throws Exception {
-		final SelectStatement selectStatement = interpret( "select a.b from Something a, SomethingElse b" );
+		final SqmStatementSelect selectStatement = interpret( "select a.b from Something a, SomethingElse b" );
 
-		final FromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
+		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 2, fromClause1.getFromElementSpaces().size() );
@@ -116,9 +116,9 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testImplicitAlias() throws Exception {
-		final SelectStatement selectStatement = interpret( "select b from Something" );
+		final SqmStatementSelect selectStatement = interpret( "select b from Something" );
 
-		final FromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
+		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
@@ -131,9 +131,9 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testCrossJoin() throws Exception {
-		final SelectStatement selectStatement = interpret( "select a.b from Something a cross join SomethingElse b" );
+		final SqmStatementSelect selectStatement = interpret( "select a.b from Something a cross join SomethingElse b" );
 
-		final FromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
+		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
@@ -151,8 +151,8 @@ public class HqlFromClauseProcessorPocTest {
 		);
 	}
 
-	private void simpleJoinAssertions(SelectStatement selectStatement, JoinType joinType) {
-		final FromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
+	private void simpleJoinAssertions(SqmStatementSelect selectStatement, JoinType joinType) {
+		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
@@ -188,9 +188,9 @@ public class HqlFromClauseProcessorPocTest {
 
 	@Test
 	public void testAttributeJoinWithOnClause() throws Exception {
-		SelectStatement selectStatement = interpret( "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20 " );
+		SqmStatementSelect selectStatement = interpret( "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20 " );
 
-		final FromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
+		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );

@@ -4,22 +4,16 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.query;
+package org.hibernate.sqm.query.select;
 
-import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
+ * Represents any aliased expression
+ *
  * @author Steve Ebersole
  */
-public interface Statement {
-	enum Type {
-		SELECT,
-		INSERT,
-		UPDATE,
-		DELETE
-	}
-
-	Type getType();
-
-	<T> T accept(SemanticQueryWalker<T> walker);
+public interface SqmAliasedExpression {
+	SqmExpression getExpression();
+	String getAlias();
 }

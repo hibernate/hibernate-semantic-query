@@ -11,7 +11,7 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public interface AliasedSqmExpressionContainer<T extends AliasedSqmExpression> {
+public interface SqmAliasedExpressionContainer<T extends SqmAliasedExpression> {
 	T add(SqmExpression expression, String alias);
 	void add(T aliasExpression);
 }

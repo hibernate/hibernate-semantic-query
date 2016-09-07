@@ -9,12 +9,12 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementSelect;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
@@ -43,7 +43,7 @@ public class SimpleSemanticQueryBuilderTest {
 
 	@Test
 	public void simpleIntegerLiteralsTest() {
-		SelectStatement selectStatement = interpret( "select a.basic from Something a where 1=2" );
+		SqmStatementSelect selectStatement = interpret( "select a.basic from Something a where 1=2" );
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
@@ -58,13 +58,13 @@ public class SimpleSemanticQueryBuilderTest {
 		assertEquals( 2, ((LiteralIntegerSqmExpression) rhs).getLiteralValue().intValue() );
 	}
 
-	private SelectStatement interpret(String query) {
-		return (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmStatementSelect interpret(String query) {
+		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	@Test
 	public void simpleLongLiteralsTest() {
-		SelectStatement selectStatement = interpret( "select a.basic from Something a where 1L=2L" );
+		SqmStatementSelect selectStatement = interpret( "select a.basic from Something a where 1L=2L" );
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
@@ -83,23 +83,23 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testAttributeJoinWithOnPredicate() throws Exception {
 		final String query = "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
+		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
-		QuerySpec querySpec = selectStatement.getQuerySpec();
+		SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );
 	}
 
 	@Test
 	public void testSimpleUncorrelatedSubQuery() throws Exception {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 = 5 )";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
+		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
 
-		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
+		SqmFromClause fromClause = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause );
 		assertThat( fromClause.getFromElementSpaces().size(), is( 1 ) );
 
@@ -120,7 +120,7 @@ public class SimpleSemanticQueryBuilderTest {
 		InSubQuerySqmPredicate subQueryPredicate = (InSubQuerySqmPredicate) selectStatement.getQuerySpec()
 				.getWhereClause()
 				.getPredicate();
-		FromClause subqueryFromClause = subQueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
+		SqmFromClause subqueryFromClause = subQueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
 		assertNotNull( subqueryFromClause );
 		assertThat( subqueryFromClause.getFromElementSpaces().size(), is( 1 ) );
 
@@ -139,12 +139,12 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testUncorrelatedSubQueries() throws Exception {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 IN(select e from SomethingElse2 b where b.basic2 = 2 ))";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
+		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
 
-		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
+		SqmFromClause fromClause = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause );
 		assertThat( fromClause.getFromElementSpaces().size(), is( 1 ) );
 
@@ -165,7 +165,7 @@ public class SimpleSemanticQueryBuilderTest {
 		InSubQuerySqmPredicate subQueryPredicate = (InSubQuerySqmPredicate) selectStatement.getQuerySpec()
 				.getWhereClause()
 				.getPredicate();
-		FromClause subqueryFromClause = subQueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
+		SqmFromClause subqueryFromClause = subQueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
 		assertNotNull( subqueryFromClause );
 		assertThat( subqueryFromClause.getFromElementSpaces().size(), is( 1 ) );
 
@@ -186,7 +186,7 @@ public class SimpleSemanticQueryBuilderTest {
 				.getWhereClause()
 				.getPredicate();
 
-		FromClause subSubqueryFromClause = subSubqueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
+		SqmFromClause subSubqueryFromClause = subSubqueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
 		assertNotNull( subSubqueryFromClause );
 
 		FromElementSpace subSubqueryFromElementSpace = subSubqueryFromClause.getFromElementSpaces().get( 0 );
@@ -204,12 +204,12 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testUncorrelatedSubQueriesInAndPredicate() throws Exception {
 		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic1 = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
+		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
 
-		FromClause fromClause = selectStatement.getQuerySpec().getFromClause();
+		SqmFromClause fromClause = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause );
 		assertThat( fromClause.getFromElementSpaces().size(), is( 1 ) );
 
@@ -237,7 +237,7 @@ public class SimpleSemanticQueryBuilderTest {
 
 		InSubQuerySqmPredicate leftHandPredicate = (InSubQuerySqmPredicate) andPredicate.getLeftHandPredicate();
 
-		FromClause leftHandPredicateFromClause = leftHandPredicate.getSubQueryExpression()
+		SqmFromClause leftHandPredicateFromClause = leftHandPredicate.getSubQueryExpression()
 				.getQuerySpec()
 				.getFromClause();
 		assertNotNull( leftHandPredicateFromClause );
@@ -256,7 +256,7 @@ public class SimpleSemanticQueryBuilderTest {
 
 		InSubQuerySqmPredicate rightHandPredicate = (InSubQuerySqmPredicate) andPredicate.getRightHandPredicate();
 
-		FromClause rightHandPredicateFromClause = rightHandPredicate.getSubQueryExpression()
+		SqmFromClause rightHandPredicateFromClause = rightHandPredicate.getSubQueryExpression()
 				.getQuerySpec()
 				.getFromClause();
 		assertNotNull( rightHandPredicateFromClause );
@@ -290,11 +290,11 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testSimpleDynamicInstantiation() throws Exception {
 		final String query = "select new org.hibernate.test.sqm.parser.hql.SimpleSemanticQueryBuilderTest$DTO(a.basic1 as id, a.basic2 as name) from Something a";
-		final SelectStatement selectStatement = (SelectStatement) SemanticQueryInterpreter.interpret(
+		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
-		QuerySpec querySpec = selectStatement.getQuerySpec();
+		SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		assertNotNull( querySpec );
 	}
 

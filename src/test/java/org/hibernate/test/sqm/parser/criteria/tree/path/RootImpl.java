@@ -13,7 +13,7 @@ import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.AliasedSqmExpressionContainer;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
@@ -91,7 +91,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, AliasedSqmExpressionContainer container) {
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
 		container.add( visitExpression( visitor ), getAlias() );
 	}
 

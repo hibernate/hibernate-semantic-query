@@ -15,11 +15,11 @@ import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.query.DeleteStatement;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.UpdateStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementDelete;
+import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.sqm.query.SqmStatementUpdate;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -51,7 +51,7 @@ import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
@@ -72,13 +72,13 @@ import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.DynamicInstantiation;
-import org.hibernate.sqm.query.select.DynamicInstantiationArgument;
-import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.Selection;
-import org.hibernate.sqm.query.set.Assignment;
-import org.hibernate.sqm.query.set.SetClause;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiationArgument;
+import org.hibernate.sqm.query.select.SqmSelectClause;
+import org.hibernate.sqm.query.select.SqmSelection;
+import org.hibernate.sqm.query.set.SqmAssignment;
+import org.hibernate.sqm.query.set.SqmSetClause;
 
 /**
  * Handles splitting queries containing unmapped polymorphic references.
@@ -86,7 +86,7 @@ import org.hibernate.sqm.query.set.SetClause;
  * @author Steve Ebersole
  */
 public class QuerySplitter {
-	public static SelectStatement[] split(SelectStatement statement) {
+	public static SqmStatementSelect[] split(SqmStatementSelect statement) {
 		// We only allow unmapped polymorphism in a very restricted way.  Specifically,
 		// the unmapped polymorphic reference can only be a root and can be the only
 		// root.  Use that restriction to locate the unmapped polymorphic reference
@@ -98,11 +98,11 @@ public class QuerySplitter {
 		}
 
 		if ( unmappedPolymorphicReference == null ) {
-			return new SelectStatement[] { statement };
+			return new SqmStatementSelect[] { statement };
 		}
 
 		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBoundModelType();
-		final SelectStatement[] expanded = new SelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
+		final SqmStatementSelect[] expanded = new SqmStatementSelect[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
 		for ( EntityType mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
@@ -125,7 +125,7 @@ public class QuerySplitter {
 		private Map<FromElement,FromElement> fromElementCopyMap = new HashMap<FromElement, FromElement>();
 
 		private UnmappedPolymorphismReplacer(
-				SelectStatement selectStatement,
+				SqmStatementSelect selectStatement,
 				RootEntityFromElement unmappedPolymorphicFromElement,
 				EntityType mappedDescriptor) {
 			this.unmappedPolymorphicFromElement = unmappedPolymorphicFromElement;
@@ -133,58 +133,58 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public Statement visitStatement(Statement statement) {
+		public SqmStatement visitStatement(SqmStatement statement) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
 		@Override
-		public UpdateStatement visitUpdateStatement(UpdateStatement statement) {
+		public SqmStatementUpdate visitUpdateStatement(SqmStatementUpdate statement) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
 		@Override
-		public SetClause visitSetClause(SetClause setClause) {
+		public SqmSetClause visitSetClause(SqmSetClause setClause) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
 		@Override
-		public Assignment visitAssignment(Assignment assignment) {
+		public SqmAssignment visitAssignment(SqmAssignment assignment) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
 		@Override
-		public DeleteStatement visitDeleteStatement(DeleteStatement statement) {
+		public SqmStatementDelete visitDeleteStatement(SqmStatementDelete statement) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
 		@Override
-		public SelectStatement visitSelectStatement(SelectStatement statement) {
-			SelectStatement copy = new SelectStatement();
+		public SqmStatementSelect visitSelectStatement(SqmStatementSelect statement) {
+			SqmStatementSelect copy = new SqmStatementSelect();
 			copy.applyQuerySpec( visitQuerySpec( statement.getQuerySpec() ) );
 			copy.applyOrderByClause( visitOrderByClause( statement.getOrderByClause() ) );
 			return copy;
 		}
 
 		@Override
-		public QuerySpec visitQuerySpec(QuerySpec querySpec) {
-			// NOTE : it is important that we visit the FromClause first so that the
+		public SqmQuerySpec visitQuerySpec(SqmQuerySpec querySpec) {
+			// NOTE : it is important that we visit the SqmFromClause first so that the
 			// 		fromElementCopyMap gets built before other parts of the queryspec
 			// 		are visited
-			return new QuerySpec(
+			return new SqmQuerySpec(
 					visitFromClause( querySpec.getFromClause() ),
 					visitSelectClause( querySpec.getSelectClause() ),
 					visitWhereClause( querySpec.getWhereClause() )
 			);
 		}
 
-		private FromClause currentFromClauseCopy = null;
+		private SqmFromClause currentFromClauseCopy = null;
 
 		@Override
-		public FromClause visitFromClause(FromClause fromClause) {
-			final FromClause previousCurrent = currentFromClauseCopy;
+		public SqmFromClause visitFromClause(SqmFromClause fromClause) {
+			final SqmFromClause previousCurrent = currentFromClauseCopy;
 
 			try {
-				FromClause copy = new FromClause();
+				SqmFromClause copy = new SqmFromClause();
 				currentFromClauseCopy = copy;
 				super.visitFromClause( fromClause );
 //				for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
@@ -202,7 +202,7 @@ public class QuerySplitter {
 		@Override
 		public FromElementSpace visitFromElementSpace(FromElementSpace fromElementSpace) {
 			if ( currentFromClauseCopy == null ) {
-				throw new ParsingException( "Current FromClause copy was null" );
+				throw new ParsingException( "Current SqmFromClause copy was null" );
 			}
 
 			final FromElementSpace previousCurrent = currentFromElementSpaceCopy;
@@ -322,28 +322,28 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public SelectClause visitSelectClause(SelectClause selectClause) {
-			SelectClause copy = new SelectClause( selectClause.isDistinct() );
-			for ( Selection selection : selectClause.getSelections() ) {
+		public SqmSelectClause visitSelectClause(SqmSelectClause selectClause) {
+			SqmSelectClause copy = new SqmSelectClause( selectClause.isDistinct() );
+			for ( SqmSelection selection : selectClause.getSelections() ) {
 				copy.addSelection( visitSelection( selection ) );
 			}
 			return copy;
 		}
 
 		@Override
-		public Selection visitSelection(Selection selection) {
-			return new Selection(
+		public SqmSelection visitSelection(SqmSelection selection) {
+			return new SqmSelection(
 					(SqmExpression) selection.getExpression().accept( this ),
 					selection.getAlias()
 			);
 		}
 
 		@Override
-		public DynamicInstantiation visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation) {
-			DynamicInstantiation copy = dynamicInstantiation.makeShallowCopy();
-			for ( DynamicInstantiationArgument aliasedArgument : dynamicInstantiation.getArguments() ) {
+		public SqmDynamicInstantiation visitDynamicInstantiation(SqmDynamicInstantiation dynamicInstantiation) {
+			SqmDynamicInstantiation copy = dynamicInstantiation.makeShallowCopy();
+			for ( SqmDynamicInstantiationArgument aliasedArgument : dynamicInstantiation.getArguments() ) {
 				copy.addArgument(
-						new DynamicInstantiationArgument(
+						new SqmDynamicInstantiationArgument(
 								(SqmExpression) aliasedArgument.getExpression().accept( this ),
 								aliasedArgument.getAlias()
 						)
@@ -353,11 +353,11 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public WhereClause visitWhereClause(WhereClause whereClause) {
+		public SqmWhereClause visitWhereClause(SqmWhereClause whereClause) {
 			if ( whereClause == null ) {
 				return null;
 			}
-			return new WhereClause( (SqmPredicate) whereClause.getPredicate().accept( this ) );
+			return new SqmWhereClause( (SqmPredicate) whereClause.getPredicate().accept( this ) );
 		}
 
 		@Override

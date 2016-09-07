@@ -15,16 +15,16 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementSelect;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
 import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
-import org.hibernate.sqm.query.select.DynamicInstantiation;
-import org.hibernate.sqm.query.select.DynamicInstantiationTarget;
-import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget;
+import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.BasicTypeImpl;
@@ -115,23 +115,23 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleAliasSelection() {
-		SelectStatement statement = interpret( "select o from Entity o" );
+		SqmStatementSelect statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
-		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
 	}
 
 	@Test
 	public void testSimpleAttributeSelection() {
-		SelectStatement statement = interpret( "select o.basic from Entity o" );
+		SqmStatementSelect statement = interpret( "select o.basic from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
-		Selection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
 	}
 
 	@Test
 	public void testCompoundAttributeSelection() {
-		SelectStatement statement = interpret( "select o.basic1, o.basic2 from Entity o" );
+		SqmStatementSelect statement = interpret( "select o.basic1, o.basic2 from Entity o" );
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -145,7 +145,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMixedAliasAndAttributeSelection() {
-		SelectStatement statement = interpret( "select o, o.basic1 from Entity o" );
+		SqmStatementSelect statement = interpret( "select o, o.basic1 from Entity o" );
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -159,17 +159,17 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicInstantiationSelection() {
-		SelectStatement statement = interpret( "select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) from Entity o" );
+		SqmStatementSelect statement = interpret( "select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
 	}
 
 	@Test
 	public void testMultipleDynamicInstantiationSelection() {
-		SelectStatement statement = interpret(
+		SqmStatementSelect statement = interpret(
 				"select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), " +
 						"new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) " +
 						"from Entity o"
@@ -177,23 +177,23 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
 	}
 
 	@Test
 	public void testMixedAttributeAndDynamicInstantiationSelection() {
-		SelectStatement statement = interpret(
+		SqmStatementSelect statement = interpret(
 				"select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), o.basic3 from Entity o"
 		);
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
@@ -203,7 +203,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testNestedDynamicInstantiationSelection() {
-		SelectStatement statement = interpret(
+		SqmStatementSelect statement = interpret(
 				"select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(" +
 						"    o.basic1, " +
 						"    o.basic2, " +
@@ -214,13 +214,13 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
 
-		DynamicInstantiation dynamicInstantiation = (DynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SqmDynamicInstantiation dynamicInstantiation = (SqmDynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat(
 				dynamicInstantiation.getInstantiationTarget().getNature(),
-				equalTo( DynamicInstantiationTarget.Nature.CLASS )
+				equalTo( SqmDynamicInstantiationTarget.Nature.CLASS )
 		);
 		assertThat(
 				dynamicInstantiation.getInstantiationTarget().getJavaType(),
@@ -238,12 +238,12 @@ public class SelectClauseTests {
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
-		DynamicInstantiation nestedInstantiation = (DynamicInstantiation) dynamicInstantiation.getArguments().get( 2 ).getExpression();
+		SqmDynamicInstantiation nestedInstantiation = (SqmDynamicInstantiation) dynamicInstantiation.getArguments().get( 2 ).getExpression();
 		assertThat(
 				nestedInstantiation.getInstantiationTarget().getNature(),
-				equalTo( DynamicInstantiationTarget.Nature.CLASS )
+				equalTo( SqmDynamicInstantiationTarget.Nature.CLASS )
 		);
 		assertThat(
 				nestedInstantiation.getInstantiationTarget().getJavaType(),
@@ -254,16 +254,16 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicListInstantiation() {
-		SelectStatement statement = interpret( "select new list(o.basic1, o.basic2) from Entity o" );
+		SqmStatementSelect statement = interpret( "select new list(o.basic1, o.basic2) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
-		DynamicInstantiation instantiation = (DynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SqmDynamicInstantiation instantiation = (SqmDynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat(
 				instantiation.getInstantiationTarget().getNature(),
-				equalTo( DynamicInstantiationTarget.Nature.LIST )
+				equalTo( SqmDynamicInstantiationTarget.Nature.LIST )
 		);
 		assertThat(
 				instantiation.getInstantiationTarget().getJavaType(),
@@ -283,16 +283,16 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicMapInstantiation() {
-		SelectStatement statement = interpret( "select new map(o.basic1 as a, o.basic2 as b) from Entity o" );
+		SqmStatementSelect statement = interpret( "select new map(o.basic1 as a, o.basic2 as b) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( DynamicInstantiation.class )
+				instanceOf( SqmDynamicInstantiation.class )
 		);
-		DynamicInstantiation instantiation = (DynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SqmDynamicInstantiation instantiation = (SqmDynamicInstantiation) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat(
 				instantiation.getInstantiationTarget().getNature(),
-				equalTo( DynamicInstantiationTarget.Nature.MAP )
+				equalTo( SqmDynamicInstantiationTarget.Nature.MAP )
 		);
 		assertThat(
 				instantiation.getInstantiationTarget().getJavaType(),
@@ -313,10 +313,10 @@ public class SelectClauseTests {
 	@Test
 	public void testBinaryArithmeticExpression() {
 		final String query = "select o.basic + o.basic1 as b from Entity o";
-		final SelectStatement selectStatement = interpret( query );
+		final SqmStatementSelect selectStatement = interpret( query );
 
-		final QuerySpec querySpec = selectStatement.getQuerySpec();
-		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
+		final SqmQuerySpec querySpec = selectStatement.getQuerySpec();
+		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
 		AttributeReferenceSqmExpression leftHandOperand = (AttributeReferenceSqmExpression) expression.getLeftHandOperand();
 		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
@@ -330,10 +330,10 @@ public class SelectClauseTests {
 	@Test
 	public void testBinaryArithmeticExpressionWithMultipleFromSpaces() {
 		final String query = "select o.basic + a.basic1 as b from Entity o, Entity2 a";
-		final SelectStatement selectStatement = interpret( query );
+		final SqmStatementSelect selectStatement = interpret( query );
 
-		final QuerySpec querySpec = selectStatement.getQuerySpec();
-		final Selection selection = querySpec.getSelectClause().getSelections().get( 0 );
+		final SqmQuerySpec querySpec = selectStatement.getQuerySpec();
+		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
 		AttributeReferenceSqmExpression leftHandOperand = (AttributeReferenceSqmExpression) expression.getLeftHandOperand();
 		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
@@ -346,7 +346,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMapKeyFunction() {
-		SelectStatement statement = interpret( "SELECT KEY( l ) FROM Trip t JOIN t.mapLegs l" );
+		SqmStatementSelect statement = interpret( "SELECT KEY( l ) FROM Trip t JOIN t.mapLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -363,7 +363,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMapValueFunction() {
-		SelectStatement statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.mapLegs l" );
+		SqmStatementSelect statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.mapLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -380,7 +380,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testCollectionValueFunction() {
-		SelectStatement statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
+		SqmStatementSelect statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -406,7 +406,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMapEntryFunction() {
-		SelectStatement statement = interpret( "SELECT ENTRY( l ) FROM Trip t JOIN t.mapLegs l" );
+		SqmStatementSelect statement = interpret( "SELECT ENTRY( l ) FROM Trip t JOIN t.mapLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -427,8 +427,8 @@ public class SelectClauseTests {
 		assertThat( mapEntryFunction.getCollectionAlias(), is( "l" ) );
 	}
 
-	private SelectStatement interpret(String query) {
-		return (SelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmStatementSelect interpret(String query) {
+		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	public static class DTO {

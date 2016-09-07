@@ -7,8 +7,10 @@
 package org.hibernate.sqm.query.predicate;
 
 /**
+ * Unified contract for things that can contain a SqmWhereClause.
+ *
  * @author Steve Ebersole
  */
-public interface WhereClauseContainer {
-	WhereClause getWhereClause();
+public interface SqmWhereClauseContainer {
+	SqmWhereClause getWhereClause();
 }

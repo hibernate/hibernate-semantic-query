@@ -7,15 +7,15 @@
 package org.hibernate.sqm.query.from;
 
 /**
- * Unified contract for things that can contain a FromClause.
+ * Unified contract for things that can contain a SqmFromClause.
  *
  * @author Steve Ebersole
  */
-public interface FromClauseContainer {
+public interface SqmFromClauseContainer {
 	/**
-	 * Obtains this container's FromClause.
+	 * Obtains this container's SqmFromClause.
 	 *
-	 * @return This container's FromClause.
+	 * @return This container's SqmFromClause.
 	 */
-	FromClause getFromClause();
+	SqmFromClause getFromClause();
 }

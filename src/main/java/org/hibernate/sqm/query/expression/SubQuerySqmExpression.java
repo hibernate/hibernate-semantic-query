@@ -8,16 +8,16 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.QuerySpec;
+import org.hibernate.sqm.query.SqmQuerySpec;
 
 /**
  * @author Steve Ebersole
  */
 public class SubQuerySqmExpression implements SqmExpression {
-	private final QuerySpec querySpec;
+	private final SqmQuerySpec querySpec;
 	private final Type type;
 
-	public SubQuerySqmExpression(QuerySpec querySpec, Type type) {
+	public SubQuerySqmExpression(SqmQuerySpec querySpec, Type type) {
 		this.querySpec = querySpec;
 		this.type = type;
 	}
@@ -32,7 +32,7 @@ public class SubQuerySqmExpression implements SqmExpression {
 		return type;
 	}
 
-	public QuerySpec getQuerySpec() {
+	public SqmQuerySpec getQuerySpec() {
 		return querySpec;
 	}
 

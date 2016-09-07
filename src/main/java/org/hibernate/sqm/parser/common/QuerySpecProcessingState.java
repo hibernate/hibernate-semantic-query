@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 
 /**
  * @author Steve Ebersole
  */
 public interface QuerySpecProcessingState extends FromElementLocator, ResolutionContext {
 	QuerySpecProcessingState getParent();
-	FromClause getFromClause();
+	SqmFromClause getFromClause();
 }

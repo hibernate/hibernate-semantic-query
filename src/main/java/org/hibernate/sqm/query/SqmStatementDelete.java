@@ -10,37 +10,26 @@ import java.util.Locale;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.predicate.WhereClauseContainer;
-import org.hibernate.sqm.query.set.SetClause;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.predicate.SqmWhereClauseContainer;
 
 /**
  * @author Steve Ebersole
  */
-public class UpdateStatement implements NonSelectStatement, WhereClauseContainer {
+public class SqmStatementDelete implements SqmStatementNonSelect, SqmWhereClauseContainer {
 	private final RootEntityFromElement entityFromElement;
-	private final SetClause setClause = new SetClause();
-	private final WhereClause whereClause = new WhereClause();
+	private final SqmWhereClause whereClause = new SqmWhereClause();
 
-	public UpdateStatement(RootEntityFromElement entityFromElement) {
+	public SqmStatementDelete(RootEntityFromElement entityFromElement) {
 		this.entityFromElement = entityFromElement;
-	}
-
-	@Override
-	public Type getType() {
-		return Type.UPDATE;
 	}
 
 	public RootEntityFromElement getEntityFromElement() {
 		return entityFromElement;
 	}
 
-	public SetClause getSetClause() {
-		return setClause;
-	}
-
 	@Override
-	public WhereClause getWhereClause() {
+	public SqmWhereClause getWhereClause() {
 		return whereClause;
 	}
 
@@ -48,15 +37,14 @@ public class UpdateStatement implements NonSelectStatement, WhereClauseContainer
 	public String toString() {
 		return String.format(
 				Locale.ROOT,
-				"update %s %s %s",
+				"delete %s %s",
 				entityFromElement,
-				"[no set clause]",
 				whereClause
 		);
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitUpdateStatement( this );
+		return walker.visitDeleteStatement( this );
 	}
 }

@@ -21,16 +21,16 @@ import org.jboss.logging.Logger;
 public class FromElementSpace {
 	private static final Logger log = Logger.getLogger( FromElementSpace.class );
 
-	private final FromClause fromClause;
+	private final SqmFromClause fromClause;
 
 	private RootEntityFromElement root;
 	private List<JoinedFromElement> joins;
 
-	public FromElementSpace(FromClause fromClause) {
+	public FromElementSpace(SqmFromClause fromClause) {
 		this.fromClause = fromClause;
 	}
 
-	public FromClause getFromClause() {
+	public SqmFromClause getFromClause() {
 		return fromClause;
 	}
 
@@ -54,12 +54,12 @@ public class FromElementSpace {
 	}
 
 	public List<JoinedFromElement> getJoins() {
-		return joins == null ? Collections.<JoinedFromElement>emptyList() : joins;
+		return joins == null ? Collections.emptyList() : joins;
 	}
 
 	public void addJoin(JoinedFromElement join) {
 		if ( joins == null ) {
-			joins = new ArrayList<JoinedFromElement>();
+			joins = new ArrayList<>();
 		}
 		joins.add( join );
 	}

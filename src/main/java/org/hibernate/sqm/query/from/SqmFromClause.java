@@ -17,7 +17,7 @@ import java.util.List;
  *
  * @author Steve Ebersole
  */
-public class FromClause {
+public class SqmFromClause {
 	private List<FromElementSpace> fromElementSpaces = new ArrayList<FromElementSpace>();
 
 	public List<FromElementSpace> getFromElementSpaces() {

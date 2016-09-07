@@ -9,8 +9,8 @@ package org.hibernate.test.sqm.parser.hql.dml;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.query.InsertSelectStatement;
-import org.hibernate.sqm.query.Statement;
+import org.hibernate.sqm.query.SqmStatementInsertSelect;
+import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -36,10 +36,10 @@ public class BasicInsertTests {
 	private void basicInsertAssertions(String query) {
 		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
-		final Statement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
+		final SqmStatement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
 
-		assertThat( statement, instanceOf( InsertSelectStatement.class ) );
-		InsertSelectStatement insertStatement = (InsertSelectStatement) statement;
+		assertThat( statement, instanceOf( SqmStatementInsertSelect.class ) );
+		SqmStatementInsertSelect insertStatement = (SqmStatementInsertSelect) statement;
 
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
 

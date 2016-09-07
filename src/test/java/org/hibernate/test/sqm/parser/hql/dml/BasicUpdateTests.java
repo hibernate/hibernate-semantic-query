@@ -9,13 +9,13 @@ package org.hibernate.test.sqm.parser.hql.dml;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.UpdateStatement;
+import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.sqm.query.SqmStatementUpdate;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.set.Assignment;
+import org.hibernate.sqm.query.set.SqmAssignment;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -48,10 +48,10 @@ public class BasicUpdateTests {
 	private void basicUpdateAssertions(String query) {
 		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
-		final Statement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
+		final SqmStatement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
 
-		assertThat( statement, instanceOf( UpdateStatement.class ) );
-		UpdateStatement updateStatement = (UpdateStatement) statement;
+		assertThat( statement, instanceOf( SqmStatementUpdate.class ) );
+		SqmStatementUpdate updateStatement = (SqmStatementUpdate) statement;
 
 		assertThat( updateStatement.getEntityFromElement().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
@@ -66,7 +66,7 @@ public class BasicUpdateTests {
 
 		assertEquals( 1, updateStatement.getSetClause().getAssignments().size() );
 
-		Assignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
+		SqmAssignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
 		assertSame( assignment.getStateField().getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( assignment.getValue(), instanceOf( LiteralCharacterSqmExpression.class ) );

@@ -13,16 +13,16 @@ import org.hibernate.sqm.query.expression.SqmExpression;
  *
  * @author Steve Ebersole
  */
-public class Selection implements AliasedSqmExpression {
+public class SqmSelection implements SqmAliasedExpression {
 	private final SqmExpression selectExpression;
 	private final String alias;
 
-	public Selection(SqmExpression selectExpression, String alias) {
+	public SqmSelection(SqmExpression selectExpression, String alias) {
 		this.selectExpression = selectExpression;
 		this.alias = alias;
 	}
 
-	public Selection(SqmExpression selectExpression) {
+	public SqmSelection(SqmExpression selectExpression) {
 		this( selectExpression, null );
 	}
 

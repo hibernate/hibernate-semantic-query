@@ -18,20 +18,20 @@ import org.hibernate.sqm.query.expression.SqmExpression;
  *
  * @author Steve Ebersole
  */
-public class SelectClause implements AliasedSqmExpressionContainer<Selection> {
+public class SqmSelectClause implements SqmAliasedExpressionContainer<SqmSelection> {
 	private final boolean distinct;
-	private List<Selection> selections;
+	private List<SqmSelection> selections;
 
-	public SelectClause(boolean distinct) {
+	public SqmSelectClause(boolean distinct) {
 		this.distinct = distinct;
 	}
 
-	public SelectClause(boolean distinct, List<Selection> selections) {
+	public SqmSelectClause(boolean distinct, List<SqmSelection> selections) {
 		this.distinct = distinct;
 		this.selections = selections;
 	}
 
-	public SelectClause(boolean distinct, Selection... selections) {
+	public SqmSelectClause(boolean distinct, SqmSelection... selections) {
 		this( distinct, Arrays.asList( selections ) );
 	}
 
@@ -39,7 +39,7 @@ public class SelectClause implements AliasedSqmExpressionContainer<Selection> {
 		return distinct;
 	}
 
-	public List<Selection> getSelections() {
+	public List<SqmSelection> getSelections() {
 		if ( selections == null ) {
 			return Collections.emptyList();
 		}
@@ -48,22 +48,22 @@ public class SelectClause implements AliasedSqmExpressionContainer<Selection> {
 		}
 	}
 
-	public void addSelection(Selection selection) {
+	public void addSelection(SqmSelection selection) {
 		if ( selections == null ) {
-			selections = new ArrayList<Selection>();
+			selections = new ArrayList<>();
 		}
 		selections.add( selection );
 	}
 
 	@Override
-	public Selection add(SqmExpression expression, String alias) {
-		final Selection selection = new Selection( expression,alias );
+	public SqmSelection add(SqmExpression expression, String alias) {
+		final SqmSelection selection = new SqmSelection( expression, alias );
 		addSelection( selection );
 		return selection;
 	}
 
 	@Override
-	public void add(Selection aliasExpression) {
+	public void add(SqmSelection aliasExpression) {
 		addSelection( aliasExpression );
 	}
 }

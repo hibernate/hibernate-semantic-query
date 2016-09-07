@@ -16,18 +16,18 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class SetClause {
-	private List<Assignment> assignments = new ArrayList<Assignment>();
+public class SqmSetClause {
+	private List<SqmAssignment> assignments = new ArrayList<>();
 
-	public List<Assignment> getAssignments() {
+	public List<SqmAssignment> getAssignments() {
 		return Collections.unmodifiableList( assignments );
 	}
 
-	public void addAssignment(Assignment assignment) {
+	public void addAssignment(SqmAssignment assignment) {
 		assignments.add( assignment );
 	}
 
 	public void addAssignment(AttributeReferenceSqmExpression stateField, SqmExpression value) {
-		addAssignment( new Assignment( stateField, value ) );
+		addAssignment( new SqmAssignment( stateField, value ) );
 	}
 }

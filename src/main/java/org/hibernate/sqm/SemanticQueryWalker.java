@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.query.DeleteStatement;
-import org.hibernate.sqm.query.InsertSelectStatement;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.UpdateStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementDelete;
+import org.hibernate.sqm.query.SqmStatementInsertSelect;
+import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.sqm.query.SqmStatementUpdate;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -60,7 +60,7 @@ import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
@@ -80,34 +80,34 @@ import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.DynamicInstantiation;
-import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.Selection;
-import org.hibernate.sqm.query.set.Assignment;
-import org.hibernate.sqm.query.set.SetClause;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
+import org.hibernate.sqm.query.select.SqmSelectClause;
+import org.hibernate.sqm.query.select.SqmSelection;
+import org.hibernate.sqm.query.set.SqmAssignment;
+import org.hibernate.sqm.query.set.SqmSetClause;
 
 /**
  * @author Steve Ebersole
  */
 public interface SemanticQueryWalker<T> {
-	T visitStatement(Statement statement);
+	T visitStatement(SqmStatement statement);
 
-	T visitUpdateStatement(UpdateStatement statement);
+	T visitUpdateStatement(SqmStatementUpdate statement);
 
-	T visitSetClause(SetClause setClause);
+	T visitSetClause(SqmSetClause setClause);
 
-	T visitAssignment(Assignment assignment);
+	T visitAssignment(SqmAssignment assignment);
 
-	T visitInsertSelectStatement(InsertSelectStatement statement);
+	T visitInsertSelectStatement(SqmStatementInsertSelect statement);
 
-	T visitDeleteStatement(DeleteStatement statement);
+	T visitDeleteStatement(SqmStatementDelete statement);
 
-	T visitSelectStatement(SelectStatement statement);
+	T visitSelectStatement(SqmStatementSelect statement);
 
-	T visitQuerySpec(QuerySpec querySpec);
+	T visitQuerySpec(SqmQuerySpec querySpec);
 
-	T visitFromClause(FromClause fromClause);
+	T visitFromClause(SqmFromClause fromClause);
 
 	T visitFromElementSpace(FromElementSpace fromElementSpace);
 
@@ -119,13 +119,13 @@ public interface SemanticQueryWalker<T> {
 
 	T visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement);
 
-	T visitSelectClause(SelectClause selectClause);
+	T visitSelectClause(SqmSelectClause selectClause);
 
-	T visitSelection(Selection selection);
+	T visitSelection(SqmSelection selection);
 
-	T visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation);
+	T visitDynamicInstantiation(SqmDynamicInstantiation dynamicInstantiation);
 
-	T visitWhereClause(WhereClause whereClause);
+	T visitWhereClause(SqmWhereClause whereClause);
 
 	T visitGroupedPredicate(GroupedSqmPredicate predicate);
 

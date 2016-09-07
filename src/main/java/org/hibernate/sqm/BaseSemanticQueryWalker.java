@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.query.DeleteStatement;
-import org.hibernate.sqm.query.InsertSelectStatement;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
-import org.hibernate.sqm.query.Statement;
-import org.hibernate.sqm.query.UpdateStatement;
+import org.hibernate.sqm.query.SqmStatementDelete;
+import org.hibernate.sqm.query.SqmStatementInsertSelect;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.sqm.query.SqmStatementUpdate;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -61,7 +61,7 @@ import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
 import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.JoinedFromElement;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
@@ -82,12 +82,12 @@ import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.DynamicInstantiation;
-import org.hibernate.sqm.query.select.SelectClause;
-import org.hibernate.sqm.query.select.Selection;
-import org.hibernate.sqm.query.set.Assignment;
-import org.hibernate.sqm.query.set.SetClause;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
+import org.hibernate.sqm.query.select.SqmSelectClause;
+import org.hibernate.sqm.query.select.SqmSelection;
+import org.hibernate.sqm.query.set.SqmAssignment;
+import org.hibernate.sqm.query.set.SqmSetClause;
 
 /**
  * @author Steve Ebersole
@@ -95,19 +95,19 @@ import org.hibernate.sqm.query.set.SetClause;
 @SuppressWarnings({"unchecked", "WeakerAccess"})
 public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
-	public T visitStatement(Statement statement) {
+	public T visitStatement(SqmStatement statement) {
 		return statement.accept( this );
 	}
 
 	@Override
-	public T visitSelectStatement(SelectStatement statement) {
+	public T visitSelectStatement(SqmStatementSelect statement) {
 		visitQuerySpec( statement.getQuerySpec() );
 		visitOrderByClause( statement.getOrderByClause() );
 		return (T) statement;
 	}
 
 	@Override
-	public T visitUpdateStatement(UpdateStatement statement) {
+	public T visitUpdateStatement(SqmStatementUpdate statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
 		visitSetClause( statement.getSetClause() );
 		visitWhereClause( statement.getWhereClause() );
@@ -115,22 +115,22 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitSetClause(SetClause setClause) {
-		for ( Assignment assignment : setClause.getAssignments() ) {
+	public T visitSetClause(SqmSetClause setClause) {
+		for ( SqmAssignment assignment : setClause.getAssignments() ) {
 			visitAssignment( assignment );
 		}
 		return (T) setClause;
 	}
 
 	@Override
-	public T visitAssignment(Assignment assignment) {
+	public T visitAssignment(SqmAssignment assignment) {
 		visitAttributeReferenceExpression( assignment.getStateField() );
 		assignment.getStateField().accept( this );
 		return (T) assignment;
 	}
 
 	@Override
-	public T visitInsertSelectStatement(InsertSelectStatement statement) {
+	public T visitInsertSelectStatement(SqmStatementInsertSelect statement) {
 		visitRootEntityFromElement( statement.getInsertTarget() );
 		for ( AttributeReferenceSqmExpression stateField : statement.getStateFields() ) {
 			stateField.accept( this );
@@ -140,14 +140,14 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitDeleteStatement(DeleteStatement statement) {
+	public T visitDeleteStatement(SqmStatementDelete statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
 		visitWhereClause( statement.getWhereClause() );
 		return (T) statement;
 	}
 
 	@Override
-	public T visitQuerySpec(QuerySpec querySpec) {
+	public T visitQuerySpec(SqmQuerySpec querySpec) {
 		visitFromClause( querySpec.getFromClause() );
 		visitSelectClause( querySpec.getSelectClause() );
 		visitWhereClause( querySpec.getWhereClause() );
@@ -155,7 +155,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitFromClause(FromClause fromClause) {
+	public T visitFromClause(SqmFromClause fromClause) {
 		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			visitFromElementSpace( fromElementSpace );
 		}
@@ -192,26 +192,26 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitSelectClause(SelectClause selectClause) {
-		for ( Selection selection : selectClause.getSelections() ) {
+	public T visitSelectClause(SqmSelectClause selectClause) {
+		for ( SqmSelection selection : selectClause.getSelections() ) {
 			visitSelection( selection );
 		}
 		return (T) selectClause;
 	}
 
 	@Override
-	public T visitSelection(Selection selection) {
+	public T visitSelection(SqmSelection selection) {
 		selection.getExpression().accept( this );
 		return (T) selection;
 	}
 
 	@Override
-	public T visitDynamicInstantiation(DynamicInstantiation dynamicInstantiation) {
+	public T visitDynamicInstantiation(SqmDynamicInstantiation dynamicInstantiation) {
 		return (T) dynamicInstantiation;
 	}
 
 	@Override
-	public T visitWhereClause(WhereClause whereClause) {
+	public T visitWhereClause(SqmWhereClause whereClause) {
 		whereClause.getPredicate().accept( this );
 		return (T) whereClause;
 	}

@@ -13,19 +13,19 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.AliasCollisionException;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
-import org.hibernate.sqm.query.QuerySpec;
-import org.hibernate.sqm.query.SelectStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.query.SqmStatementSelect;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.from.FromClause;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.WhereClause;
-import org.hibernate.sqm.query.select.Selection;
+import org.hibernate.sqm.query.predicate.SqmWhereClause;
+import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -60,7 +60,7 @@ public class AliasTest {
 	@Test
 	public void testMixedResultVariableAndAttributeSelection() {
 		final String query = "select o, o.basic1 as o1 from Entity o";
-		final QuerySpec querySpec = interpretQuery( query ).getQuerySpec();
+		final SqmQuerySpec querySpec = interpretQuery( query ).getQuerySpec();
 
 		checkElementSelection( querySpec, 0, "com.acme.Entity", null );
 		checkAttributeReferenceExpression( querySpec, 1, "com.acme.Entity", "basic1", "o1" );
@@ -71,7 +71,7 @@ public class AliasTest {
 	@Test
 	public void testDefiningDifferentResultVAriables() {
 		final String query = "select a.basic as b, a.basic2 as c from Anything a";
-		final QuerySpec querySpec = interpretQuery( query ).getQuerySpec();
+		final SqmQuerySpec querySpec = interpretQuery( query ).getQuerySpec();
 
 		checkAttributeReferenceExpression( querySpec, 0, "com.acme.Anything", "basic", "b" );
 		checkAttributeReferenceExpression( querySpec, 1, "com.acme.Anything", "basic2", "c" );
@@ -82,7 +82,7 @@ public class AliasTest {
 	@Test
 	public void testDefiningAResultVariableEqualsToAnIdentificationVariable() {
 		final String query = "select a as a from Anything as a";
-		final QuerySpec querySpec = interpretQuery( query ).getQuerySpec();
+		final SqmQuerySpec querySpec = interpretQuery( query ).getQuerySpec();
 
 		checkElementSelection( querySpec, 0, "com.acme.Anything", "a" );
 
@@ -92,7 +92,7 @@ public class AliasTest {
 	@Test
 	public void testReusingAnIdentificationVariableInSelectClause() {
 		final String query = "select a.basic from Anything as a";
-		final QuerySpec querySpec = interpretQuery( query ).getQuerySpec();
+		final SqmQuerySpec querySpec = interpretQuery( query ).getQuerySpec();
 
 		checkAttributeReferenceExpression( querySpec, 0, "com.acme.Anything", "basic", null );
 
@@ -108,7 +108,7 @@ public class AliasTest {
 	@Test
 	public void testMultipleFromClauseSpaces() {
 		final String query = "select a as a, b.basic2 from Anything as a, SomethingElse as b where b.basic = 2 ";
-		final QuerySpec querySpec = interpretQuery( query ).getQuerySpec();
+		final SqmQuerySpec querySpec = interpretQuery( query ).getQuerySpec();
 
 		checkElementSelection( querySpec, 0, "com.acme.Anything", "a" );
 		checkAttributeReferenceExpression( querySpec, 1, "com.acme.SomethingElse", "basic2", null );
@@ -128,12 +128,12 @@ public class AliasTest {
 	@Test
 	public void testDifferentIdentificationVariablesInSubquery() {
 		final String query = "select a from Anything a where a.b in ( select b from SomethingElse b where b.basic = 5)";
-		final SelectStatement selectStatement = interpretQuery( query );
+		final SqmStatementSelect selectStatement = interpretQuery( query );
 
 		checkElementSelection( selectStatement.getQuerySpec(), 0, "com.acme.Anything", null );
 		checkFromClause( selectStatement.getQuerySpec(), 0, "com.acme.Anything", "a" );
 
-		final QuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
+		final SqmQuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
 
 		checkElementSelection( subQuerySpec, 0, "com.acme.SomethingElse", null );
 		checkFromClause( subQuerySpec, 0, "com.acme.SomethingElse", "b" );
@@ -143,15 +143,15 @@ public class AliasTest {
 	@Test
 	public void testSameIdentificationVariablesInSubquery() {
 		final String query = "select a from Anything a where a.basic1 in ( select a from SomethingElse a where a.basic = 5)";
-		final SelectStatement selectStatement = interpretQuery( query );
+		final SqmStatementSelect selectStatement = interpretQuery( query );
 
-		QuerySpec querySpec = selectStatement.getQuerySpec();
+		SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		checkElementSelection( querySpec, 0, "com.acme.Anything", null );
 		checkFromClause( querySpec, 0, "com.acme.Anything", "a" );
 
 		checkInSubqueryTestExpression( querySpec, "com.acme.Anything", "basic1", "a" );
 
-		QuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
+		SqmQuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
 
 		checkElementSelection( subQuerySpec, 0, "com.acme.SomethingElse", null );
 
@@ -164,13 +164,13 @@ public class AliasTest {
 	public void testSubqueryUsingIdentificationVariableDefinedInRootQuery() {
 		final String query = "select a from Anything a where a.basic in " +
 				"( select b.basic from SomethingElse b where a.basic = b.basic2 )";
-		final SelectStatement selectStatement = interpretQuery( query );
+		final SqmStatementSelect selectStatement = interpretQuery( query );
 
 		checkElementSelection( selectStatement.getQuerySpec(), 0, "com.acme.Anything", null );
 		checkFromClause( selectStatement.getQuerySpec(), 0, "com.acme.Anything", "a" );
 
 		checkInSubqueryTestExpression( selectStatement.getQuerySpec(), "com.acme.Anything", "basic", "a" );
-		QuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
+		SqmQuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
 		checkAttributeReferenceExpression( subQuerySpec, 0, "com.acme.SomethingElse", "basic", null );
 
 		checkFromClause( subQuerySpec, 0, "com.acme.SomethingElse", "b" );
@@ -184,9 +184,9 @@ public class AliasTest {
 		final String query = "select a.basic from Anything a where a.basic in" +
 				" ( select b.basic2 from SomethingElse b where b.basic2 = a.basic1 ) and a.basic in" +
 				" ( select b.basic1 from Something b where b.basic1 = a.basic )";
-		final SelectStatement selectStatement = interpretQuery( query );
+		final SqmStatementSelect selectStatement = interpretQuery( query );
 
-		QuerySpec subQuerySpec = getLeftAndPredicateSubQueryExpression( selectStatement.getQuerySpec() ).getQuerySpec();
+		SqmQuerySpec subQuerySpec = getLeftAndPredicateSubQueryExpression( selectStatement.getQuerySpec() ).getQuerySpec();
 		checkAttributeReferenceExpression( subQuerySpec, 0, "com.acme.SomethingElse", "basic2", null );
 		checkFromClause( subQuerySpec, 0, "com.acme.SomethingElse", "b" );
 
@@ -206,14 +206,14 @@ public class AliasTest {
 		final String query = "select a from Anything a where a.basic in " +
 				"( select b.basic1 from SomethingElse b where b.basic = " +
 				"( select c.basic3 as d from Something c where c.basic3 = a.basic))";
-		final SelectStatement selectStatement = interpretQuery( query );
+		final SqmStatementSelect selectStatement = interpretQuery( query );
 
-		final QuerySpec querySpec = selectStatement.getQuerySpec();
+		final SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		checkElementSelection( querySpec, 0, "com.acme.Anything", null );
 		checkFromClause( querySpec, 0, "com.acme.Anything", "a" );
 		checkInSubqueryTestExpression( querySpec, "com.acme.Anything", "basic", "a" );
 
-		QuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
+		SqmQuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
 
 		checkAttributeReferenceExpression( subQuerySpec, 0, "com.acme.SomethingElse", "basic1", null );
 		checkFromClause( subQuerySpec, 0, "com.acme.SomethingElse", "b" );
@@ -232,14 +232,14 @@ public class AliasTest {
 		final String query = "select a from Anything a where a.basic in " +
 				"( select b.basic1 from SomethingElse b where b.basic = " +
 				"( select a.basic3 as d from Something a where a.basic3 = a.basic ))";
-		final SelectStatement selectStatement = interpretQuery( query );
+		final SqmStatementSelect selectStatement = interpretQuery( query );
 
-		final QuerySpec querySpec = selectStatement.getQuerySpec();
+		final SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		checkElementSelection( querySpec, 0, "com.acme.Anything", null );
 		checkFromClause( querySpec, 0, "com.acme.Anything", "a" );
 		checkInSubqueryTestExpression( querySpec, "com.acme.Anything", "basic", "a" );
 
-		QuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
+		SqmQuerySpec subQuerySpec = getInSubQueryExpression( selectStatement ).getQuerySpec();
 
 		checkAttributeReferenceExpression( subQuerySpec, 0, "com.acme.SomethingElse", "basic1", null );
 		checkFromClause( subQuerySpec, 0, "com.acme.SomethingElse", "b" );
@@ -273,8 +273,8 @@ public class AliasTest {
 		interpretQuery( query );
 	}
 
-	private void checkFromClause(QuerySpec querySpec, int fromClauseIndex, String typeName, String alias) {
-		FromClause fromClause = querySpec.getFromClause();
+	private void checkFromClause(SqmQuerySpec querySpec, int fromClauseIndex, String typeName, String alias) {
+		SqmFromClause fromClause = querySpec.getFromClause();
 		FromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( fromClauseIndex );
 		RootEntityFromElement root = fromElementSpace.getRoot();
 		assertThat( root.getEntityName(), is( typeName ) );
@@ -287,13 +287,13 @@ public class AliasTest {
 	}
 
 	private void checkAttributeReferenceExpression(
-			QuerySpec querySpect,
+			SqmQuerySpec querySpect,
 			int attributeIndex,
 			String typeName,
 			String attributeName,
 			String alias) {
-		List<Selection> selections = querySpect.getSelectClause().getSelections();
-		Selection selection = selections.get( attributeIndex );
+		List<SqmSelection> selections = querySpect.getSelectClause().getSelections();
+		SqmSelection selection = selections.get( attributeIndex );
 		AttributeReferenceSqmExpression expression = (AttributeReferenceSqmExpression) selection.getExpression();
 		assertThat( expression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 		assertThat( expression.getBoundAttribute().getName(), is( attributeName ) );
@@ -305,9 +305,9 @@ public class AliasTest {
 		}
 	}
 
-	private void checkElementSelection(QuerySpec querySpec, int selectionIndex, String typeName, String alias) {
-		List<Selection> selections = querySpec.getSelectClause().getSelections();
-		Selection selection = selections.get( selectionIndex );
+	private void checkElementSelection(SqmQuerySpec querySpec, int selectionIndex, String typeName, String alias) {
+		List<SqmSelection> selections = querySpec.getSelectClause().getSelections();
+		SqmSelection selection = selections.get( selectionIndex );
 		SqmExpression expression = selection.getExpression();
 		EntityTypeImpl entityType = (EntityTypeImpl) expression.getExpressionType();
 		assertThat( entityType.getTypeName(), is( typeName ) );
@@ -320,12 +320,12 @@ public class AliasTest {
 	}
 
 	private void checkInSubqueryTestExpression(
-			QuerySpec querySpec,
+			SqmQuerySpec querySpec,
 			String typeName,
 			String attributeName,
 			String alias
 	) {
-		WhereClause whereClause = querySpec.getWhereClause();
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		InSubQuerySqmPredicate predicate = (InSubQuerySqmPredicate) whereClause.getPredicate();
 		AttributeReferenceSqmExpression testExpression = (AttributeReferenceSqmExpression) predicate.getTestExpression();
 		assertThat( testExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
@@ -337,11 +337,11 @@ public class AliasTest {
 	}
 
 	private void checkRelationalPredicateLeftHandWhereExpression(
-			QuerySpec querySpec,
+			SqmQuerySpec querySpec,
 			String typeName,
 			String attributeName,
 			String alias) {
-		WhereClause whereClause = querySpec.getWhereClause();
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
 		AttributeReferenceSqmExpression leftHandExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
 		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
@@ -353,11 +353,11 @@ public class AliasTest {
 	}
 
 	private void checkRelationalPredicateRightHandWhereExpression(
-			QuerySpec querySpec,
+			SqmQuerySpec querySpec,
 			String typeName,
 			String attributeName,
 			String alias) {
-		WhereClause whereClause = querySpec.getWhereClause();
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
 		AttributeReferenceSqmExpression leftHandExpression = (AttributeReferenceSqmExpression) predicate.getRightHandExpression();
 		assertThat( leftHandExpression.getBoundAttribute().getName(), is( attributeName ) );
@@ -368,39 +368,39 @@ public class AliasTest {
 		assertThat( leftHandExpression.getAttributeBindingSource().getExpressionType().getTypeName(), is( typeName ) );
 	}
 
-	private SubQuerySqmExpression getInSubQueryExpression(SelectStatement selectStatement) {
+	private SubQuerySqmExpression getInSubQueryExpression(SqmStatementSelect selectStatement) {
 		return getInSubQueryExpression( selectStatement.getQuerySpec() );
 	}
 
-	private SubQuerySqmExpression getInSubQueryExpression(QuerySpec querySpec) {
-		WhereClause whereClause = querySpec.getWhereClause();
+	private SubQuerySqmExpression getInSubQueryExpression(SqmQuerySpec querySpec) {
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		InSubQuerySqmPredicate predicate = (InSubQuerySqmPredicate) whereClause.getPredicate();
 
 		return predicate.getSubQueryExpression();
 	}
 
-	private SubQuerySqmExpression getLeftAndPredicateSubQueryExpression(QuerySpec querySpec) {
-		WhereClause whereClause = querySpec.getWhereClause();
+	private SubQuerySqmExpression getLeftAndPredicateSubQueryExpression(SqmQuerySpec querySpec) {
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		AndSqmPredicate predicate = (AndSqmPredicate) whereClause.getPredicate();
 
 		return ((InSubQuerySqmPredicate) predicate.getLeftHandPredicate()).getSubQueryExpression();
 	}
 
-	private SubQuerySqmExpression getRightAndPredicateSubQueryExpression(QuerySpec querySpec) {
-		WhereClause whereClause = querySpec.getWhereClause();
+	private SubQuerySqmExpression getRightAndPredicateSubQueryExpression(SqmQuerySpec querySpec) {
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		AndSqmPredicate predicate = (AndSqmPredicate) whereClause.getPredicate();
 
 		return ((InSubQuerySqmPredicate) predicate.getRightHandPredicate()).getSubQueryExpression();
 	}
 
-	private SubQuerySqmExpression getRelationaSubQueryExpression(QuerySpec querySpec) {
-		WhereClause whereClause = querySpec.getWhereClause();
+	private SubQuerySqmExpression getRelationaSubQueryExpression(SqmQuerySpec querySpec) {
+		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
 		return (SubQuerySqmExpression) predicate.getRightHandExpression();
 	}
 
-	private SelectStatement interpretQuery(String query) {
-		return (SelectStatement) SemanticQueryInterpreter.interpret(
+	private SqmStatementSelect interpretQuery(String query) {
+		return (SqmStatementSelect) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);

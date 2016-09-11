@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -30,7 +30,7 @@ public class JpaCollectionJoinTest {
 
 	@Test
 	public void basicTest() {
-		SqmStatementSelect statement = interpret( "select t from Trip t, IN( t.mapLegs ) l" );
+		SqmSelectStatement statement = interpret( "select t from Trip t, IN( t.mapLegs ) l" );
 		assertThat( statement.getQuerySpec().getFromClause().getFromElementSpaces().size(), is( 1 ) );
 		FromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 
@@ -38,8 +38,8 @@ public class JpaCollectionJoinTest {
 		assertThat( fromElementSpace.getJoins().size(), is(1) );
 	}
 
-	private SqmStatementSelect interpret(String query) {
-		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmSelectStatement interpret(String query) {
+		return (SqmSelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	private DomainMetamodel buildMetamodel() {

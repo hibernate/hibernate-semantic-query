@@ -14,14 +14,17 @@ import org.hibernate.sqm.domain.Type;
  */
 public class PositionalParameterSqmExpression implements ParameterSqmExpression {
 	private final int position;
+	private final boolean canBeMultiValued;
 	private Type typeDescriptor;
 
-	public PositionalParameterSqmExpression(int position) {
+	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued) {
 		this.position = position;
+		this.canBeMultiValued = canBeMultiValued;
 	}
 
-	public PositionalParameterSqmExpression(int position, Type typeDescriptor) {
+	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued, Type typeDescriptor) {
 		this.position = position;
+		this.canBeMultiValued = canBeMultiValued;
 		this.typeDescriptor = typeDescriptor;
 	}
 
@@ -55,5 +58,15 @@ public class PositionalParameterSqmExpression implements ParameterSqmExpression 
 		if ( type != null ) {
 			this.typeDescriptor = type;
 		}
+	}
+
+	@Override
+	public boolean allowMultiValuedBinding() {
+		return canBeMultiValued;
+	}
+
+	@Override
+	public Type getAnticipatedType() {
+		return getExpressionType();
 	}
 }

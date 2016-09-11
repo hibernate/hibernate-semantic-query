@@ -14,14 +14,17 @@ import org.hibernate.sqm.domain.Type;
  */
 public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	private final String name;
+	private final boolean canBeMultiValued;
 	private Type typeDescriptor;
 
-	public NamedParameterSqmExpression(String name) {
+	public NamedParameterSqmExpression(String name, boolean canBeMultiValued) {
 		this.name = name;
+		this.canBeMultiValued = canBeMultiValued;
 	}
 
-	public NamedParameterSqmExpression(String name, Type typeDescriptor) {
+	public NamedParameterSqmExpression(String name, boolean canBeMultiValued, Type typeDescriptor) {
 		this.name = name;
+		this.canBeMultiValued = canBeMultiValued;
 		this.typeDescriptor = typeDescriptor;
 	}
 
@@ -55,5 +58,15 @@ public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	@Override
 	public Integer getPosition() {
 		return null;
+	}
+
+	@Override
+	public boolean allowMultiValuedBinding() {
+		return canBeMultiValued;
+	}
+
+	@Override
+	public Type getAnticipatedType() {
+		return getExpressionType();
 	}
 }

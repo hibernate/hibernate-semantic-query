@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.query.SqmStatementDelete;
-import org.hibernate.sqm.query.SqmStatementInsertSelect;
+import org.hibernate.sqm.query.SqmDeleteStatement;
+import org.hibernate.sqm.query.SqmInsertSelectStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.SqmStatementUpdate;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -100,14 +100,14 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitSelectStatement(SqmStatementSelect statement) {
+	public T visitSelectStatement(SqmSelectStatement statement) {
 		visitQuerySpec( statement.getQuerySpec() );
 		visitOrderByClause( statement.getOrderByClause() );
 		return (T) statement;
 	}
 
 	@Override
-	public T visitUpdateStatement(SqmStatementUpdate statement) {
+	public T visitUpdateStatement(SqmUpdateStatement statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
 		visitSetClause( statement.getSetClause() );
 		visitWhereClause( statement.getWhereClause() );
@@ -130,7 +130,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitInsertSelectStatement(SqmStatementInsertSelect statement) {
+	public T visitInsertSelectStatement(SqmInsertSelectStatement statement) {
 		visitRootEntityFromElement( statement.getInsertTarget() );
 		for ( AttributeReferenceSqmExpression stateField : statement.getStateFields() ) {
 			stateField.accept( this );
@@ -140,7 +140,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitDeleteStatement(SqmStatementDelete statement) {
+	public T visitDeleteStatement(SqmDeleteStatement statement) {
 		visitRootEntityFromElement( statement.getEntityFromElement() );
 		visitWhereClause( statement.getWhereClause() );
 		return (T) statement;

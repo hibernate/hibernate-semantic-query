@@ -16,7 +16,7 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
@@ -115,7 +115,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleAliasSelection() {
-		SqmStatementSelect statement = interpret( "select o from Entity o" );
+		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
@@ -123,7 +123,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleAttributeSelection() {
-		SqmStatementSelect statement = interpret( "select o.basic from Entity o" );
+		SqmSelectStatement statement = interpret( "select o.basic from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
@@ -131,7 +131,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testCompoundAttributeSelection() {
-		SqmStatementSelect statement = interpret( "select o.basic1, o.basic2 from Entity o" );
+		SqmSelectStatement statement = interpret( "select o.basic1, o.basic2 from Entity o" );
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -145,7 +145,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMixedAliasAndAttributeSelection() {
-		SqmStatementSelect statement = interpret( "select o, o.basic1 from Entity o" );
+		SqmSelectStatement statement = interpret( "select o, o.basic1 from Entity o" );
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -159,7 +159,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicInstantiationSelection() {
-		SqmStatementSelect statement = interpret( "select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) from Entity o" );
+		SqmSelectStatement statement = interpret( "select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -169,7 +169,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMultipleDynamicInstantiationSelection() {
-		SqmStatementSelect statement = interpret(
+		SqmSelectStatement statement = interpret(
 				"select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), " +
 						"new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2) " +
 						"from Entity o"
@@ -187,7 +187,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMixedAttributeAndDynamicInstantiationSelection() {
-		SqmStatementSelect statement = interpret(
+		SqmSelectStatement statement = interpret(
 				"select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(o.basic1, o.basic2), o.basic3 from Entity o"
 		);
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
@@ -203,7 +203,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testNestedDynamicInstantiationSelection() {
-		SqmStatementSelect statement = interpret(
+		SqmSelectStatement statement = interpret(
 				"select new org.hibernate.test.sqm.parser.hql.SelectClauseTests$DTO(" +
 						"    o.basic1, " +
 						"    o.basic2, " +
@@ -254,7 +254,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicListInstantiation() {
-		SqmStatementSelect statement = interpret( "select new list(o.basic1, o.basic2) from Entity o" );
+		SqmSelectStatement statement = interpret( "select new list(o.basic1, o.basic2) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -283,7 +283,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testSimpleDynamicMapInstantiation() {
-		SqmStatementSelect statement = interpret( "select new map(o.basic1 as a, o.basic2 as b) from Entity o" );
+		SqmSelectStatement statement = interpret( "select new map(o.basic1 as a, o.basic2 as b) from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
@@ -313,7 +313,7 @@ public class SelectClauseTests {
 	@Test
 	public void testBinaryArithmeticExpression() {
 		final String query = "select o.basic + o.basic1 as b from Entity o";
-		final SqmStatementSelect selectStatement = interpret( query );
+		final SqmSelectStatement selectStatement = interpret( query );
 
 		final SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
@@ -330,7 +330,7 @@ public class SelectClauseTests {
 	@Test
 	public void testBinaryArithmeticExpressionWithMultipleFromSpaces() {
 		final String query = "select o.basic + a.basic1 as b from Entity o, Entity2 a";
-		final SqmStatementSelect selectStatement = interpret( query );
+		final SqmSelectStatement selectStatement = interpret( query );
 
 		final SqmQuerySpec querySpec = selectStatement.getQuerySpec();
 		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
@@ -346,7 +346,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMapKeyFunction() {
-		SqmStatementSelect statement = interpret( "SELECT KEY( l ) FROM Trip t JOIN t.mapLegs l" );
+		SqmSelectStatement statement = interpret( "SELECT KEY( l ) FROM Trip t JOIN t.mapLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -363,7 +363,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMapValueFunction() {
-		SqmStatementSelect statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.mapLegs l" );
+		SqmSelectStatement statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.mapLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -380,7 +380,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testCollectionValueFunction() {
-		SqmStatementSelect statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
+		SqmSelectStatement statement = interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -406,7 +406,7 @@ public class SelectClauseTests {
 
 	@Test
 	public void testMapEntryFunction() {
-		SqmStatementSelect statement = interpret( "SELECT ENTRY( l ) FROM Trip t JOIN t.mapLegs l" );
+		SqmSelectStatement statement = interpret( "SELECT ENTRY( l ) FROM Trip t JOIN t.mapLegs l" );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
@@ -427,8 +427,8 @@ public class SelectClauseTests {
 		assertThat( mapEntryFunction.getCollectionAlias(), is( "l" ) );
 	}
 
-	private SqmStatementSelect interpret(String query) {
-		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmSelectStatement interpret(String query) {
+		return (SqmSelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	public static class DTO {

@@ -7,11 +7,11 @@
 package org.hibernate.sqm;
 
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmStatementDelete;
-import org.hibernate.sqm.query.SqmStatementInsertSelect;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmDeleteStatement;
+import org.hibernate.sqm.query.SqmInsertSelectStatement;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.SqmStatementUpdate;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -93,17 +93,17 @@ import org.hibernate.sqm.query.set.SqmSetClause;
 public interface SemanticQueryWalker<T> {
 	T visitStatement(SqmStatement statement);
 
-	T visitUpdateStatement(SqmStatementUpdate statement);
+	T visitUpdateStatement(SqmUpdateStatement statement);
 
 	T visitSetClause(SqmSetClause setClause);
 
 	T visitAssignment(SqmAssignment assignment);
 
-	T visitInsertSelectStatement(SqmStatementInsertSelect statement);
+	T visitInsertSelectStatement(SqmInsertSelectStatement statement);
 
-	T visitDeleteStatement(SqmStatementDelete statement);
+	T visitDeleteStatement(SqmDeleteStatement statement);
 
-	T visitSelectStatement(SqmStatementSelect statement);
+	T visitSelectStatement(SqmSelectStatement statement);
 
 	T visitQuerySpec(SqmQuerySpec querySpec);
 

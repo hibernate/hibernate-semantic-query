@@ -7,7 +7,7 @@
 package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -49,11 +49,11 @@ public class EntityIdReferenceTest {
 
 		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( metamodel );
 
-		SqmStatementSelect sqm = (SqmStatementSelect) interpret( "select p.id from Person p", consumerContext );
+		SqmSelectStatement sqm = (SqmSelectStatement) interpret( "select p.id from Person p", consumerContext );
 		AttributeReferenceSqmExpression idReference = (AttributeReferenceSqmExpression) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( idReference.getExpressionType().getTypeName(), is(Integer.class.getName() ) );
 
-		sqm = (SqmStatementSelect) interpret( "select p.pk from Person p", consumerContext );
+		sqm = (SqmSelectStatement) interpret( "select p.pk from Person p", consumerContext );
 		AttributeReferenceSqmExpression pkReference = (AttributeReferenceSqmExpression) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( pkReference.getExpressionType().getTypeName(), is(Integer.class.getName() ) );
 
@@ -87,11 +87,11 @@ public class EntityIdReferenceTest {
 
 		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( metamodel );
 
-		SqmStatementSelect sqm = (SqmStatementSelect) interpret( "select p.id from Person p", consumerContext );
+		SqmSelectStatement sqm = (SqmSelectStatement) interpret( "select p.id from Person p", consumerContext );
 		AttributeReferenceSqmExpression idReference = (AttributeReferenceSqmExpression) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( idReference.getExpressionType().getTypeName(), is( String.class.getName() ) );
 
-		sqm = (SqmStatementSelect) interpret( "select p.pk from Person p", consumerContext );
+		sqm = (SqmSelectStatement) interpret( "select p.pk from Person p", consumerContext );
 		AttributeReferenceSqmExpression pkReference = (AttributeReferenceSqmExpression) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( pkReference.getExpressionType().getTypeName(), is( Integer.class.getName() ) );
 	}
@@ -129,7 +129,7 @@ public class EntityIdReferenceTest {
 
 		final ConsumerContextImpl consumerContext = new ConsumerContextImpl( metamodel );
 
-		SqmStatementSelect sqm = (SqmStatementSelect) interpret( "select p.id from Person p", consumerContext );
+		SqmSelectStatement sqm = (SqmSelectStatement) interpret( "select p.id from Person p", consumerContext );
 		AttributeReferenceSqmExpression idReference = (AttributeReferenceSqmExpression) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( idReference.getExpressionType().getTypeName(), is(String.class.getName() ) );
 	}

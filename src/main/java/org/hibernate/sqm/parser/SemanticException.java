@@ -7,7 +7,8 @@
 package org.hibernate.sqm.parser;
 
 /**
- * Represents an error in the semantics (meaning) of the passed sqm.
+ * Represents an error in the semantics (meaning) of the passed query.  Generally
+ * speaking, this is a "user error".
  *
  * @author Steve Ebersole
  */

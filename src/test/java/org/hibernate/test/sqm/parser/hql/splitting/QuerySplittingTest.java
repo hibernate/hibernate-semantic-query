@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql.splitting;
 
 import org.hibernate.sqm.QuerySplitter;
 import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -30,7 +30,7 @@ public class QuerySplittingTest {
 		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildModelMetadata() );
 
 		// first try directly with the 2 mapped classes
-		SqmStatementSelect statement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		SqmSelectStatement statement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				"from Account",
 				consumerContext
 		);
@@ -38,13 +38,13 @@ public class QuerySplittingTest {
 		assertEquals( 1, split.length );
 		assertSame( statement, split[0] );
 
-		statement = (SqmStatementSelect) SemanticQueryInterpreter.interpret( "from Fund", consumerContext );
+		statement = (SqmSelectStatement) SemanticQueryInterpreter.interpret( "from Fund", consumerContext );
 		split = QuerySplitter.split( statement );
 		assertEquals( 1, split.length );
 		assertSame( statement, split[0] );
 
 		// Now try with an unmapped reference
-		statement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		statement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				// NOTE : we added an import for this too
 				"from Auditable",
 				consumerContext

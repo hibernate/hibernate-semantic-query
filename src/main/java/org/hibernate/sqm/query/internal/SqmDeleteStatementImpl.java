@@ -4,26 +4,27 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.query;
+package org.hibernate.sqm.query.internal;
 
 import java.util.Locale;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
-import org.hibernate.sqm.query.predicate.SqmWhereClauseContainer;
 
 /**
  * @author Steve Ebersole
  */
-public class SqmStatementDelete implements SqmStatementNonSelect, SqmWhereClauseContainer {
+public class SqmDeleteStatementImpl extends AbstractSqmStatement implements SqmDeleteStatement {
 	private final RootEntityFromElement entityFromElement;
 	private final SqmWhereClause whereClause = new SqmWhereClause();
 
-	public SqmStatementDelete(RootEntityFromElement entityFromElement) {
+	public SqmDeleteStatementImpl(RootEntityFromElement entityFromElement) {
 		this.entityFromElement = entityFromElement;
 	}
 
+	@Override
 	public RootEntityFromElement getEntityFromElement() {
 		return entityFromElement;
 	}

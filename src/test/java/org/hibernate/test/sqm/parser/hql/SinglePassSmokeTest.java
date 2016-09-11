@@ -13,7 +13,7 @@ import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
 import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
 import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -99,16 +99,16 @@ public class SinglePassSmokeTest {
 
 	@Test
 	public void testSimpleAliasSelection() {
-		SqmStatementSelect statement = interpret( "select o from Entity o" );
+		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
 	}
 
-	private SqmStatementSelect interpret(String query) {
+	private SqmSelectStatement interpret(String query) {
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( query );
 
 		final ParsingContext parsingContext = new ParsingContext( consumerContext );
-		return (SqmStatementSelect) SemanticQueryBuilder.buildSemanticModel( parser.statement(), parsingContext );
+		return (SqmSelectStatement) SemanticQueryBuilder.buildSemanticModel( parser.statement(), parsingContext );
 	}
 }

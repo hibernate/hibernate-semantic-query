@@ -6,17 +6,12 @@
  */
 package org.hibernate.sqm.query;
 
-import java.util.Set;
-
-import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.query.order.OrderByClause;
 
 /**
- * The basic SQM statement contract.
- *
  * @author Steve Ebersole
  */
-public interface SqmStatement {
-	Set<Parameter> getQueryParameters();
-
-	<T> T accept(SemanticQueryWalker<T> walker);
+public interface SqmSelectStatement extends SqmStatement {
+	SqmQuerySpec getQuerySpec();
+	OrderByClause getOrderByClause();
 }

@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
@@ -37,7 +37,7 @@ public class WhereClauseTests {
 
 	@Test
 	public void testIsNotNullPredicate() {
-		SqmStatementSelect statement = interpret( "select l from Leg l where l.basicName is not null" );
+		SqmSelectStatement statement = interpret( "select l from Leg l where l.basicName is not null" );
 		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessSqmPredicate.class ) );
 		NullnessSqmPredicate predicate = (NullnessSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate.isNegated(), is(true) );
@@ -45,7 +45,7 @@ public class WhereClauseTests {
 
 	@Test
 	public void testNotIsNullPredicate() {
-		SqmStatementSelect statement = interpret( "select l from Leg l where not l.basicName is null" );
+		SqmSelectStatement statement = interpret( "select l from Leg l where not l.basicName is null" );
 		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessSqmPredicate.class ) );
 		NullnessSqmPredicate predicate = (NullnessSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate.isNegated(), is(true) );
@@ -53,7 +53,7 @@ public class WhereClauseTests {
 
 	@Test
 	public void testNotIsNotNullPredicate() {
-		SqmStatementSelect statement = interpret( "select l from Leg l where not l.basicName is not null" );
+		SqmSelectStatement statement = interpret( "select l from Leg l where not l.basicName is not null" );
 		assertThat( statement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( NullnessSqmPredicate.class ) );
 		NullnessSqmPredicate predicate = (NullnessSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate.isNegated(), is(false) );
@@ -61,7 +61,7 @@ public class WhereClauseTests {
 
 	@Test
 	public void testCollectionSizeFunction() {
-		SqmStatementSelect statement = interpret( "SELECT t FROM Trip t WHERE SIZE( t.basicCollection ) = 311" );
+		SqmSelectStatement statement = interpret( "SELECT t FROM Trip t WHERE SIZE( t.basicCollection ) = 311" );
 
 		SqmPredicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
@@ -89,7 +89,7 @@ public class WhereClauseTests {
 
 	@Test
 	public void testCollectionIndexFunction() {
-		SqmStatementSelect statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.indexedCollectionLegs l WHERE INDEX( l ) > 2" );
+		SqmSelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.indexedCollectionLegs l WHERE INDEX( l ) > 2" );
 
 		SqmPredicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
@@ -106,7 +106,7 @@ public class WhereClauseTests {
 
 	@Test
 	public void testMapKeyFunction() {
-		SqmStatementSelect statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.mapLegs l WHERE KEY( l ) = 'foo'" );
+		SqmSelectStatement statement = interpret( "SELECT l.basicName FROM Trip t JOIN t.mapLegs l WHERE KEY( l ) = 'foo'" );
 
 		SqmPredicate predicate = statement.getQuerySpec().getWhereClause().getPredicate();
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
@@ -117,8 +117,8 @@ public class WhereClauseTests {
 		assertThat( ( (MapKeyPathSqmExpression) relationalPredicate.getLeftHandExpression() ).getMapKeyType().getTypeName(), is( "java.lang.String" ) );
 	}
 
-	private SqmStatementSelect interpret(String query) {
-		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmSelectStatement interpret(String query) {
+		return (SqmSelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 

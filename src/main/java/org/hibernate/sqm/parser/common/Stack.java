@@ -4,25 +4,29 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.hql.internal.path;
+package org.hibernate.sqm.parser.common;
 
 import java.util.LinkedList;
 
 /**
+ * A general-purpose stack impl for use in parsing.
+ *
+ * @param <T> The type of things stired in the stack
+ *
  * @author Steve Ebersole
  */
-public class PathResolverStack {
-	private LinkedList<PathResolver> stack = new LinkedList<PathResolver>();
+public class Stack<T> {
+	private LinkedList<T> stack = new LinkedList<>();
 
-	public void push(PathResolver resolver) {
-		stack.addFirst( resolver );
+	public void push(T newCurrent) {
+		stack.addFirst( newCurrent );
 	}
 
-	public PathResolver pop() {
+	public T pop() {
 		return stack.removeFirst();
 	}
 
-	public PathResolver getCurrent() {
+	public T getCurrent() {
 		return stack.getFirst();
 	}
 }

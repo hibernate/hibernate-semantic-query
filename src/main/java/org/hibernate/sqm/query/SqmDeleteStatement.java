@@ -6,15 +6,12 @@
  */
 package org.hibernate.sqm.query;
 
-import java.util.List;
-
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.predicate.SqmWhereClauseContainer;
 
 /**
  * @author Steve Ebersole
  */
-public interface SqmStatementInsert extends SqmStatement {
-	RootEntityFromElement getInsertTarget();
-	List<AttributeReferenceSqmExpression> getStateFields();
+public interface SqmDeleteStatement extends SqmStatementNonSelect, SqmWhereClauseContainer {
+	RootEntityFromElement getEntityFromElement();
 }

@@ -17,10 +17,10 @@ import org.hibernate.sqm.parser.criteria.internal.CriteriaInterpreter;
 import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
 import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
-import org.hibernate.sqm.query.SqmStatementDelete;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmDeleteStatement;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.SqmStatementUpdate;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 
 /**
  * Main entry point into building semantic queries.
@@ -62,7 +62,7 @@ public class SemanticQueryInterpreter {
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	public static SqmStatementSelect interpret(CriteriaQuery query, ConsumerContext consumerContext) {
+	public static SqmSelectStatement interpret(CriteriaQuery query, ConsumerContext consumerContext) {
 		return CriteriaInterpreter.interpretSelectCriteria( query, new ParsingContext( consumerContext ) );
 	}
 
@@ -74,7 +74,7 @@ public class SemanticQueryInterpreter {
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	public static SqmStatementDelete interpret(CriteriaDelete query, ConsumerContext consumerContext) {
+	public static SqmDeleteStatement interpret(CriteriaDelete query, ConsumerContext consumerContext) {
 		throw new NotYetImplementedException();
 	}
 
@@ -86,7 +86,7 @@ public class SemanticQueryInterpreter {
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	public static SqmStatementUpdate interpret(CriteriaUpdate query, ConsumerContext consumerContext) {
+	public static SqmUpdateStatement interpret(CriteriaUpdate query, ConsumerContext consumerContext) {
 		throw new NotYetImplementedException();
 	}
 }

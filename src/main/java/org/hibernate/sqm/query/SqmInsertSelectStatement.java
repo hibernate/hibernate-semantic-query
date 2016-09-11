@@ -6,17 +6,9 @@
  */
 package org.hibernate.sqm.query;
 
-import java.util.Set;
-
-import org.hibernate.sqm.SemanticQueryWalker;
-
 /**
- * The basic SQM statement contract.
- *
  * @author Steve Ebersole
  */
-public interface SqmStatement {
-	Set<Parameter> getQueryParameters();
-
-	<T> T accept(SemanticQueryWalker<T> walker);
+public interface SqmInsertSelectStatement extends SqmInsertStatement {
+	SqmQuerySpec getSelectQuery();
 }

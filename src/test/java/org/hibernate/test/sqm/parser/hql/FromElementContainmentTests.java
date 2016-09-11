@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -34,7 +34,7 @@ public class FromElementContainmentTests {
 	@Test
 	public void testFromElementReferenceInSelect() {
 		final String query = "select o from Entity o";
-		SqmStatementSelect statement = (SqmStatementSelect) interpret( query, consumerContext );
+		SqmSelectStatement statement = (SqmSelectStatement) interpret( query, consumerContext );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
 		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
@@ -43,7 +43,7 @@ public class FromElementContainmentTests {
 	@Test
 	public void testFromElementReferenceInOrderBy() {
 		final String query = "select o from Entity o order by o";
-		SqmStatementSelect statement = (SqmStatementSelect) interpret( query, consumerContext );
+		SqmSelectStatement statement = (SqmSelectStatement) interpret( query, consumerContext );
 		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),

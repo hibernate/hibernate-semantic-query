@@ -10,7 +10,7 @@ import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
@@ -43,7 +43,7 @@ public class SimpleSemanticQueryBuilderTest {
 
 	@Test
 	public void simpleIntegerLiteralsTest() {
-		SqmStatementSelect selectStatement = interpret( "select a.basic from Something a where 1=2" );
+		SqmSelectStatement selectStatement = interpret( "select a.basic from Something a where 1=2" );
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
@@ -58,13 +58,13 @@ public class SimpleSemanticQueryBuilderTest {
 		assertEquals( 2, ((LiteralIntegerSqmExpression) rhs).getLiteralValue().intValue() );
 	}
 
-	private SqmStatementSelect interpret(String query) {
-		return (SqmStatementSelect) SemanticQueryInterpreter.interpret( query, consumerContext );
+	private SqmSelectStatement interpret(String query) {
+		return (SqmSelectStatement) SemanticQueryInterpreter.interpret( query, consumerContext );
 	}
 
 	@Test
 	public void simpleLongLiteralsTest() {
-		SqmStatementSelect selectStatement = interpret( "select a.basic from Something a where 1L=2L" );
+		SqmSelectStatement selectStatement = interpret( "select a.basic from Something a where 1L=2L" );
 		assertThat( selectStatement.getQuerySpec().getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) selectStatement.getQuerySpec().getWhereClause().getPredicate();
 
@@ -83,7 +83,7 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testAttributeJoinWithOnPredicate() throws Exception {
 		final String query = "select a from Something a left outer join a.entity c on c.basic1 > 5 and c.basic2 < 20";
-		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		final SqmSelectStatement selectStatement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
@@ -94,7 +94,7 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testSimpleUncorrelatedSubQuery() throws Exception {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 = 5 )";
-		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		final SqmSelectStatement selectStatement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
@@ -139,7 +139,7 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testUncorrelatedSubQueries() throws Exception {
 		final String query = "select a from Something a where a.entity IN (select e from SomethingElse e where e.basic1 IN(select e from SomethingElse2 b where b.basic2 = 2 ))";
-		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		final SqmSelectStatement selectStatement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
@@ -204,7 +204,7 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testUncorrelatedSubQueriesInAndPredicate() throws Exception {
 		final String query = "Select a from Something a where a.b in ( select b from SomethingElse b where b.basic1 = 5) and a.c in ( select c from SomethingElse2 c where c.basic1 = 6)";
-		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		final SqmSelectStatement selectStatement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);
@@ -290,7 +290,7 @@ public class SimpleSemanticQueryBuilderTest {
 	@Test
 	public void testSimpleDynamicInstantiation() throws Exception {
 		final String query = "select new org.hibernate.test.sqm.parser.hql.SimpleSemanticQueryBuilderTest$DTO(a.basic1 as id, a.basic2 as name) from Something a";
-		final SqmStatementSelect selectStatement = (SqmStatementSelect) SemanticQueryInterpreter.interpret(
+		final SqmSelectStatement selectStatement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
 				query,
 				consumerContext
 		);

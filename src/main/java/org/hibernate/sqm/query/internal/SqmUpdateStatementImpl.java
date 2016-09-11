@@ -4,32 +4,34 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.query;
+package org.hibernate.sqm.query.internal;
 
 import java.util.Locale;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
-import org.hibernate.sqm.query.predicate.SqmWhereClauseContainer;
 import org.hibernate.sqm.query.set.SqmSetClause;
 
 /**
  * @author Steve Ebersole
  */
-public class SqmStatementUpdate implements SqmStatementNonSelect, SqmWhereClauseContainer {
+public class SqmUpdateStatementImpl extends AbstractSqmStatement implements SqmUpdateStatement {
 	private final RootEntityFromElement entityFromElement;
 	private final SqmSetClause setClause = new SqmSetClause();
 	private final SqmWhereClause whereClause = new SqmWhereClause();
 
-	public SqmStatementUpdate(RootEntityFromElement entityFromElement) {
+	public SqmUpdateStatementImpl(RootEntityFromElement entityFromElement) {
 		this.entityFromElement = entityFromElement;
 	}
 
+	@Override
 	public RootEntityFromElement getEntityFromElement() {
 		return entityFromElement;
 	}
 
+	@Override
 	public SqmSetClause getSetClause() {
 		return setClause;
 	}

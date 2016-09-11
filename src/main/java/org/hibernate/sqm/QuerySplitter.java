@@ -16,10 +16,10 @@ import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmStatementDelete;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmDeleteStatement;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.SqmStatementUpdate;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -57,6 +57,7 @@ import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
@@ -86,7 +87,7 @@ import org.hibernate.sqm.query.set.SqmSetClause;
  * @author Steve Ebersole
  */
 public class QuerySplitter {
-	public static SqmStatementSelect[] split(SqmStatementSelect statement) {
+	public static SqmSelectStatement[] split(SqmSelectStatement statement) {
 		// We only allow unmapped polymorphism in a very restricted way.  Specifically,
 		// the unmapped polymorphic reference can only be a root and can be the only
 		// root.  Use that restriction to locate the unmapped polymorphic reference
@@ -98,11 +99,11 @@ public class QuerySplitter {
 		}
 
 		if ( unmappedPolymorphicReference == null ) {
-			return new SqmStatementSelect[] { statement };
+			return new SqmSelectStatement[] { statement };
 		}
 
 		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBoundModelType();
-		final SqmStatementSelect[] expanded = new SqmStatementSelect[ unmappedPolymorphicDescriptor.getImplementors().size() ];
+		final SqmSelectStatement[] expanded = new SqmSelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
 		for ( EntityType mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
@@ -125,7 +126,7 @@ public class QuerySplitter {
 		private Map<FromElement,FromElement> fromElementCopyMap = new HashMap<FromElement, FromElement>();
 
 		private UnmappedPolymorphismReplacer(
-				SqmStatementSelect selectStatement,
+				SqmSelectStatement selectStatement,
 				RootEntityFromElement unmappedPolymorphicFromElement,
 				EntityType mappedDescriptor) {
 			this.unmappedPolymorphicFromElement = unmappedPolymorphicFromElement;
@@ -138,7 +139,7 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public SqmStatementUpdate visitUpdateStatement(SqmStatementUpdate statement) {
+		public SqmUpdateStatement visitUpdateStatement(SqmUpdateStatement statement) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
@@ -153,13 +154,13 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public SqmStatementDelete visitDeleteStatement(SqmStatementDelete statement) {
+		public SqmDeleteStatement visitDeleteStatement(SqmDeleteStatement statement) {
 			throw new UnsupportedOperationException( "Not valid" );
 		}
 
 		@Override
-		public SqmStatementSelect visitSelectStatement(SqmStatementSelect statement) {
-			SqmStatementSelect copy = new SqmStatementSelect();
+		public SqmSelectStatement visitSelectStatement(SqmSelectStatement statement) {
+			final SqmSelectStatementImpl copy = new SqmSelectStatementImpl();
 			copy.applyQuerySpec( visitQuerySpec( statement.getQuerySpec() ) );
 			copy.applyOrderByClause( visitOrderByClause( statement.getOrderByClause() ) );
 			return copy;
@@ -482,12 +483,12 @@ public class QuerySplitter {
 
 		@Override
 		public PositionalParameterSqmExpression visitPositionalParameterExpression(PositionalParameterSqmExpression expression) {
-			return new PositionalParameterSqmExpression( expression.getPosition() );
+			return new PositionalParameterSqmExpression( expression.getPosition(), expression.allowMultiValuedBinding() );
 		}
 
 		@Override
 		public NamedParameterSqmExpression visitNamedParameterExpression(NamedParameterSqmExpression expression) {
-			return new NamedParameterSqmExpression( expression.getName() );
+			return new NamedParameterSqmExpression( expression.getName(), expression.allowMultiValuedBinding() );
 		}
 
 		@Override

@@ -54,7 +54,7 @@ import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
 import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmStatementSelect;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -92,6 +92,7 @@ import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
 import org.hibernate.sqm.query.order.SortSpecification;
@@ -120,10 +121,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// top level statement visitation
 
-	public static SqmStatementSelect interpretSelectCriteria(CriteriaQuery query, ParsingContext parsingContext) {
+	public static SqmSelectStatement interpretSelectCriteria(CriteriaQuery query, ParsingContext parsingContext) {
 		CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
 
-		final SqmStatementSelect selectStatement = new SqmStatementSelect();
+		final SqmSelectStatementImpl selectStatement = new SqmSelectStatementImpl();
 		selectStatement.applyQuerySpec( interpreter.visitQuerySpec( query ) );
 		selectStatement.applyOrderByClause( interpreter.visitOrderBy( query ) );
 
@@ -822,11 +823,14 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	public <T> ParameterSqmExpression visitParameter(ParameterCriteriaExpression<T> expression) {
+		// the `false` literal here indicates whether multi-valued binding is allowed for this parameter
+		// todo : we need to account for this ^^ like in HQL parsing...
+
 		if ( isNotEmpty( expression.getName() ) ) {
-			return new NamedParameterSqmExpression( expression.getName(), expression.getExpressionSqmType() );
+			return new NamedParameterSqmExpression( expression.getName(), false, expression.getExpressionSqmType() );
 		}
 		else if ( expression.getPosition() != null ) {
-			return new PositionalParameterSqmExpression( expression.getPosition(), expression.getExpressionSqmType() );
+			return new PositionalParameterSqmExpression( expression.getPosition(), false, expression.getExpressionSqmType() );
 		}
 
 		throw new QueryException( "ParameterExpression did not define name nor position" );

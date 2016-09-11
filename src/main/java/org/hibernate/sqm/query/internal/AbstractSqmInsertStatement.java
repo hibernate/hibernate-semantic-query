@@ -4,12 +4,13 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.query;
+package org.hibernate.sqm.query.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.sqm.query.SqmInsertStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.RootEntityFromElement;
 
@@ -18,11 +19,11 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
  *
  * @author Steve Ebersole
  */
-public abstract class AbstractSqmStatementInsert implements SqmStatementInsert {
+public abstract class AbstractSqmInsertStatement extends AbstractSqmStatement implements SqmInsertStatement {
 	private final RootEntityFromElement insertTarget;
 	private List<AttributeReferenceSqmExpression> stateFields;
 
-	public AbstractSqmStatementInsert(RootEntityFromElement insertTarget) {
+	public AbstractSqmInsertStatement(RootEntityFromElement insertTarget) {
 		this.insertTarget = insertTarget;
 	}
 
@@ -31,6 +32,7 @@ public abstract class AbstractSqmStatementInsert implements SqmStatementInsert {
 		return insertTarget;
 	}
 
+	@Override
 	public List<AttributeReferenceSqmExpression> getStateFields() {
 		if ( stateFields == null ) {
 			return Collections.emptyList();

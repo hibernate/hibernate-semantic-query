@@ -10,7 +10,7 @@ import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.SqmStatementUpdate;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
@@ -50,8 +50,8 @@ public class BasicUpdateTests {
 
 		final SqmStatement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
 
-		assertThat( statement, instanceOf( SqmStatementUpdate.class ) );
-		SqmStatementUpdate updateStatement = (SqmStatementUpdate) statement;
+		assertThat( statement, instanceOf( SqmUpdateStatement.class ) );
+		SqmUpdateStatement updateStatement = (SqmUpdateStatement) statement;
 
 		assertThat( updateStatement.getEntityFromElement().getEntityName(), equalTo( "com.acme.Entity1" ) );
 

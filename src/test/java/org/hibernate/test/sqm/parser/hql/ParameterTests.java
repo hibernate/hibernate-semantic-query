@@ -9,7 +9,6 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.query.Parameter;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.SqmStatement;
 
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;

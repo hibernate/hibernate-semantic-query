@@ -13,8 +13,8 @@ import org.hibernate.sqm.domain.EntityType;
 /**
  * @author Steve Ebersole
  */
-public class RootEntityFromElement extends AbstractFromElement {
-	public RootEntityFromElement(
+public class SqmRoot extends AbstractFrom {
+	public SqmRoot(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
@@ -23,12 +23,12 @@ public class RootEntityFromElement extends AbstractFromElement {
 	}
 
 	public String getEntityName() {
-		return getBoundModelType().getName();
+		return getBindable().getName();
 	}
 
 	@Override
-	public EntityType getBoundModelType() {
-		return (EntityType) super.getBoundModelType();
+	public EntityType getBindable() {
+		return (EntityType) super.getBindable();
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class RootEntityFromElement extends AbstractFromElement {
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBoundModelType().findAttribute( attributeName );
+		return getBindable().findAttribute( attributeName );
 	}
 
 	@Override

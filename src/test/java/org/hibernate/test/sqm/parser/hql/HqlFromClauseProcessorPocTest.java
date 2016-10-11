@@ -14,7 +14,7 @@ import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmRoot;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -47,7 +47,7 @@ public class HqlFromClauseProcessorPocTest {
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
-		RootEntityFromElement root = space1.getRoot();
+		SqmRoot root = space1.getRoot();
 		assertNotNull( root );
 		assertThat( root.getIdentificationVariable(), is( "a") );
 	}

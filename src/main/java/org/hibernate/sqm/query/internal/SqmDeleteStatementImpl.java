@@ -10,22 +10,22 @@ import java.util.Locale;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.query.SqmDeleteStatement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
 
 /**
  * @author Steve Ebersole
  */
 public class SqmDeleteStatementImpl extends AbstractSqmStatement implements SqmDeleteStatement {
-	private final RootEntityFromElement entityFromElement;
+	private final SqmRoot entityFromElement;
 	private final SqmWhereClause whereClause = new SqmWhereClause();
 
-	public SqmDeleteStatementImpl(RootEntityFromElement entityFromElement) {
+	public SqmDeleteStatementImpl(SqmRoot entityFromElement) {
 		this.entityFromElement = entityFromElement;
 	}
 
 	@Override
-	public RootEntityFromElement getEntityFromElement() {
+	public SqmRoot getEntityFromElement() {
 		return entityFromElement;
 	}
 

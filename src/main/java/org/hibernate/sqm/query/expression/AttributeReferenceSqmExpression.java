@@ -11,23 +11,51 @@ import java.util.Locale;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.path.FromElementBinding;
+import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
+
+import org.jboss.logging.Logger;
 
 /**
  * @author Steve Ebersole
  */
 public class AttributeReferenceSqmExpression implements AttributeBinding, SqmExpression {
-	private final AttributeBindingSource attributeBindingSource;
+	private static final Logger log = Logger.getLogger( AttributeReferenceSqmExpression.class );
+
+	private final Binding source;
 	private final Attribute boundAttribute;
 
+	// this refers to the SqmFrom generated for the attribute reference, not its left hand side
+	private SqmFrom fromElement;
+
 	public AttributeReferenceSqmExpression(
-			AttributeBindingSource attributeBindingSource,
-			Attribute boundAttribute) {
-		this.attributeBindingSource = attributeBindingSource;
+			Binding source,
+			Attribute boundAttribute,
+			SqmFrom fromElement) {
+		this.source = source;
 		this.boundAttribute = boundAttribute;
+	}
+
+	@Override
+	public Binding getLeftHandSide() {
+		return source;
+	}
+
+	@Override
+	public void injectFromElementGeneratedForAttribute(SqmAttributeJoin join) {
+		if ( fromElement != null && fromElement != join ) {
+			log.debugf(
+					"SqmAttributeJoin [%s] passed to AttributeReferenceSqmExpression.injectFromElementGeneratedForAttribute will overwrite previous [%s]",
+					join,
+					fromElement
+			);
+		}
+
+		fromElement = join;
 	}
 
 	@Override
@@ -36,23 +64,28 @@ public class AttributeReferenceSqmExpression implements AttributeBinding, SqmExp
 	}
 
 	@Override
-	public AttributeBindingSource getAttributeBindingSource() {
-		return attributeBindingSource;
-	}
-
-	@Override
-	public Bindable getBoundModelType() {
+	public Bindable getBindable() {
 		return (Bindable) boundAttribute;
 	}
 
 	@Override
+	public ManagedType getSubclassIndicator() {
+		return null;
+	}
+
+	@Override
+	public SqmFrom getFromElement() {
+		return fromElement;
+	}
+
+	@Override
 	public String asLoggableText() {
-		return getAttributeBindingSource().asLoggableText() + '.' + getBoundAttribute().getName();
+		return source.asLoggableText() + '.' + getBoundAttribute().getName();
 	}
 
 	@Override
 	public Type getExpressionType() {
-		return getBoundModelType().getBoundType();
+		return getBindable().getBoundType();
 	}
 
 	@Override
@@ -66,12 +99,10 @@ public class AttributeReferenceSqmExpression implements AttributeBinding, SqmExp
 				Locale.ENGLISH,
 				"AttributeReferenceExpression{" +
 						"path=%s" +
-						", lhs-alias=%s" +
 						", attribute-name=%s" +
 						", attribute-type=%s" +
 						'}',
 				asLoggableText(),
-				getAttributeBindingSource().getFromElement().getIdentificationVariable(),
 				getBoundAttribute().getName(),
 				getExpressionType()
 		);
@@ -82,8 +113,4 @@ public class AttributeReferenceSqmExpression implements AttributeBinding, SqmExp
 		return walker.visitAttributeReferenceExpression( this );
 	}
 
-	@Override
-	public FromElementBinding getBoundFromElementBinding() {
-		return getAttributeBindingSource().getFromElement();
-	}
 }

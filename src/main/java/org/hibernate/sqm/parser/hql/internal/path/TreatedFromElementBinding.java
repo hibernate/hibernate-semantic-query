@@ -13,13 +13,13 @@ import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Models an "incidental downcast", as opposed to an intrinsic downcast.  Stated simply
  * an intrinsic downcast occurs in the from-clause; the downcast target becomes an
- * intrinsic part of the FromElement (see {@link FromElement#getIntrinsicSubclassIndicator()}.
+ * intrinsic part of the FromElement (see {@link SqmFrom#getIntrinsicSubclassIndicator()}.
  * An incidental downcast, on the other hand, occurs outside the from-clause.
  * <p/>
  * For example,
@@ -28,23 +28,13 @@ import org.hibernate.sqm.query.from.FromElement;
  *
  * @author Steve Ebersole
  */
-public class TreatedFromElementBinding implements FromElementBinding {
-	private final FromElement baseReference;
+public class TreatedFromElementBinding implements Binding {
+	private final Binding baseReference;
 	private final EntityType subclassIndicator;
 
-	public TreatedFromElementBinding(FromElement baseReference, EntityType subclassIndicator) {
+	public TreatedFromElementBinding(Binding baseReference, EntityType subclassIndicator) {
 		this.baseReference = baseReference;
 		this.subclassIndicator = subclassIndicator;
-	}
-
-	@Override
-	public FromElement getFromElement() {
-		return baseReference;
-	}
-
-	@Override
-	public ManagedType getAttributeContributingType() {
-		return getSubclassIndicator();
 	}
 
 	@Override
@@ -53,8 +43,13 @@ public class TreatedFromElementBinding implements FromElementBinding {
 	}
 
 	@Override
-	public Bindable getBoundModelType() {
-		return getFromElement().getBoundModelType();
+	public SqmFrom getFromElement() {
+		return baseReference.getFromElement();
+	}
+
+	@Override
+	public Bindable getBindable() {
+		return subclassIndicator;
 	}
 
 	@Override
@@ -62,14 +57,9 @@ public class TreatedFromElementBinding implements FromElementBinding {
 		return String.format(
 				Locale.ROOT,
 				"treat(%s as %s)",
-				getFromElement().asLoggableText(),
+				baseReference.asLoggableText(),
 				getSubclassIndicator().getName()
 		);
-	}
-
-	@Override
-	public FromElementBinding getBoundFromElementBinding() {
-		return this;
 	}
 
 	@Override
@@ -84,6 +74,6 @@ public class TreatedFromElementBinding implements FromElementBinding {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return getFromElement().accept( walker );
+		return baseReference.accept( walker );
 	}
 }

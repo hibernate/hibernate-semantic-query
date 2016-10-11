@@ -19,10 +19,11 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.AttributeBindingSource;
+import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.FromElement;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Template support for PathResolver implementations
@@ -40,8 +41,8 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return context;
 	}
 
-	protected AttributeBindingSource resolveAnyIntermediateAttributePathJoins(
-			AttributeBindingSource lhs,
+	protected Binding resolveAnyIntermediateAttributePathJoins(
+			Binding lhs,
 			String[] pathParts) {
 		// build joins for any intermediate path parts
 		for ( int i = 0, max = pathParts.length-1; i < max; i++ ) {
@@ -50,17 +51,31 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return lhs;
 	}
 
-	protected AttributeBindingSource buildIntermediateAttributeJoin(
-			AttributeBindingSource lhs,
+	protected Binding buildIntermediateAttributeJoin(
+			Binding lhs,
 			String pathPart) {
 		final Attribute joinedAttributeDescriptor = resolveAttributeDescriptor( lhs, pathPart );
 		validateIntermediateAttributeJoin( lhs, joinedAttributeDescriptor );
 
-		return buildAttributeJoin( lhs.getFromElement(), joinedAttributeDescriptor, null );
+		return buildAttributeJoin( resolveLhsFromElement( lhs ), joinedAttributeDescriptor, null );
 	}
 
-	protected QualifiedAttributeJoinFromElement buildAttributeJoin(
-			FromElement lhsFromElement,
+	protected SqmFrom resolveLhsFromElement(Binding lhs) {
+		if ( lhs instanceof SqmFrom ) {
+			return (SqmFrom) lhs;
+		}
+
+		// todo : do we need to build lhs joins here?
+
+		if ( lhs instanceof AttributeBinding ) {
+			return resolveLhsFromElement( ( (AttributeBinding) lhs ).getLeftHandSide() );
+		}
+
+		throw new SemanticException( "Could not resolve Binding [" + lhs + "] to SqmFrom" );
+	}
+
+	protected SqmAttributeJoin buildAttributeJoin(
+			SqmFrom lhsFromElement,
 			Attribute joinedAttributeDescriptor,
 			EntityType subclassIndicator) {
 		return context().getFromElementBuilder().buildAttributeJoin(
@@ -71,11 +86,12 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 				lhsFromElement.asLoggableText() + '.' + joinedAttributeDescriptor.getName(),
 				getIntermediateJoinType(),
 				lhsFromElement,
-				areIntermediateJoinsFetched()
+				areIntermediateJoinsFetched(),
+				canReuseImplicitJoins()
 		);
 	}
 
-	protected void validateIntermediateAttributeJoin(AttributeBindingSource lhs, Attribute joinedAttributeDescriptor) {
+	protected void validateIntermediateAttributeJoin(Binding lhs, Attribute joinedAttributeDescriptor) {
 		if ( !SingularAttribute.class.isInstance( joinedAttributeDescriptor ) ) {
 			throw new SemanticException(
 					String.format(
@@ -110,8 +126,8 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return false;
 	}
 
-	protected Attribute resolveAttributeDescriptor(AttributeBindingSource lhs, String attributeName) {
-		final ManagedType managedType = resolveManagedType( lhs.getBoundModelType(), lhs.asLoggableText() );
+	protected Attribute resolveAttributeDescriptor(Binding lhs, String attributeName) {
+		final ManagedType managedType = resolveManagedType( lhs.getBindable(), lhs.asLoggableText() );
 		final Attribute attributeDescriptor = managedType.findAttribute( attributeName );
 		if ( attributeDescriptor != null ) {
 			return attributeDescriptor;

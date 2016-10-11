@@ -59,12 +59,12 @@ import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
-import org.hibernate.sqm.query.from.CrossJoinedFromElement;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
@@ -111,13 +111,13 @@ public interface SemanticQueryWalker<T> {
 
 	T visitFromElementSpace(FromElementSpace fromElementSpace);
 
-	T visitRootEntityFromElement(RootEntityFromElement rootEntityFromElement);
+	T visitRootEntityFromElement(SqmRoot rootEntityFromElement);
 
-	T visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement);
+	T visitCrossJoinedFromElement(SqmCrossJoin joinedFromElement);
 
-	T visitQualifiedEntityJoinFromElement(QualifiedEntityJoinFromElement joinedFromElement);
+	T visitQualifiedEntityJoinFromElement(SqmEntityJoin joinedFromElement);
 
-	T visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement);
+	T visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement);
 
 	T visitSelectClause(SqmSelectClause selectClause);
 

@@ -8,13 +8,13 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.AttributeBindingSource;
+import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
@@ -25,33 +25,32 @@ import org.jboss.logging.Logger;
  *
  * @author Steve Ebersole
  */
-public class QualifiedAttributeJoinFromElement
-		extends AbstractJoinedFromElement
-		implements QualifiedJoinedFromElement, AttributeBinding {
-	private static final Logger log = Logger.getLogger( QualifiedAttributeJoinFromElement.class );
+public class SqmAttributeJoin
+		extends AbstractJoin
+		implements SqmQualifiedJoin, AttributeBinding {
+	private static final Logger log = Logger.getLogger( SqmAttributeJoin.class );
 
-	private final AttributeBindingSource lhs;
+	private final Binding lhs;
 	private final Attribute joinedAttributeDescriptor;
 	private final EntityType intrinsicSubclassIndicator;
 	private final boolean fetched;
 
 	private SqmPredicate onClausePredicate;
 
-	public QualifiedAttributeJoinFromElement(
-			FromElementSpace fromElementSpace,
+	public SqmAttributeJoin(
+			Binding lhs,
 			String uid,
 			String alias,
 			Attribute joinedAttributeDescriptor,
 			EntityType intrinsicSubclassIndicator,
 			String sourcePath,
 			JoinType joinType,
-			AttributeBindingSource lhs,
 			boolean fetched) {
 		super(
-				fromElementSpace,
+				extractFromElementSpace( lhs ),
 				uid,
 				alias,
-				(Bindable) joinedAttributeDescriptor,
+				joinedAttributeDescriptor,
 				intrinsicSubclassIndicator,
 				sourcePath,
 				joinType
@@ -62,13 +61,11 @@ public class QualifiedAttributeJoinFromElement
 		this.fetched = fetched;
 	}
 
-	/**
-	 * The FromElement alias for the "left hand side" of this join.
-	 *
-	 * @return The LHS FromElement alias.
-	 */
-	public String getLhsAlias() {
-		return lhs.getFromElement().getIdentificationVariable();
+	private static FromElementSpace extractFromElementSpace(Binding lhs) {
+		if ( lhs.getFromElement() == null ) {
+			throw new ParsingException( "left-hand-side Binding#getFromElement canno be null" );
+		}
+		return lhs.getFromElement().getContainingSpace();
 	}
 
 	@Override
@@ -77,8 +74,13 @@ public class QualifiedAttributeJoinFromElement
 	}
 
 	@Override
-	public AttributeBindingSource getAttributeBindingSource() {
+	public Binding getLeftHandSide() {
 		return lhs;
+	}
+
+	@Override
+	public void injectFromElementGeneratedForAttribute(SqmAttributeJoin join) {
+		throw new ParsingException( "Illegal call to SqmAttributeJoin#injectFromElementGeneratedForAttribute" );
 	}
 
 	/**

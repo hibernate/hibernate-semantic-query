@@ -9,7 +9,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * @author Steve Ebersole
@@ -18,7 +18,7 @@ public class CollectionIndexSqmExpression implements SqmExpression {
 	private final String collectionAlias;
 	private final Type indexType;
 
-	public CollectionIndexSqmExpression(FromElement collectionReference, Type indexType) {
+	public CollectionIndexSqmExpression(SqmFrom collectionReference, Type indexType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 	}

@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Context for PathResolver implementations to locate FromElements
@@ -21,7 +21,7 @@ public interface FromElementLocator {
 	 *
 	 * @return matching FromElement, or {@code null}
 	 */
-	FromElement findFromElementByIdentificationVariable(String identificationVariable);
+	SqmFrom findFromElementByIdentificationVariable(String identificationVariable);
 
 	/**
 	 * Find a FromElement which exposes the given attribute.  Will search any parent contexts
@@ -30,5 +30,5 @@ public interface FromElementLocator {
 	 *
 	 * @return matching FromElement, or {@code null}
 	 */
-	FromElement findFromElementExposingAttribute(String attributeName);
+	SqmFrom findFromElementExposingAttribute(String attributeName);
 }

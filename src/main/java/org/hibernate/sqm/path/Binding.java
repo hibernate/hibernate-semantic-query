@@ -7,24 +7,37 @@
 package org.hibernate.sqm.path;
 
 import org.hibernate.sqm.domain.Bindable;
+import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
- * Very similar in concept to Bindable, but here represents a specific binding
- * of a Bindable.  At the highest level might be one of:<ul>
- *     <li>{@link AttributeBinding}</li>
- *     <li>{@link AttributeBindingSource}</li>
- * </ul>
+ * Represents a specific instance/usage of a Bindable.  E.g. consider a query
+ * like {@code ... from Person p, Person p2 ... }.  Here we have the one
+ * Bindable ({@code Person}) but 2 Bindings (identified by {@code p}
+ * and {@code p2}).
+ * <p/>
+ * The JPA corollary to Binding would be {@link javax.persistence.criteria.Path}.
  *
  * @author Steve Ebersole
  */
 public interface Binding extends SqmExpression {
 	/**
-	 * Obtain the Bindable referenced by this FromElement.
+	 * Obtain the Bindable referenced by this Binding.
 	 *
-	 * @return The bound type (Bindable)
+	 * @return The bound Bindable
 	 */
-	Bindable getBoundModelType();
+	Bindable getBindable();
+
+	/**
+	 * For cases where a downcast (TREAT) has been applied, what
+	 * was the specific subclass downcast to?
+	 *
+	 * @return The specific subclass.
+	 */
+	ManagedType getSubclassIndicator();
+
+	SqmFrom getFromElement();
 
 	/**
 	 * Obtain a loggable representation of this path expression, ideally back to
@@ -33,6 +46,4 @@ public interface Binding extends SqmExpression {
 	 * @return
 	 */
 	String asLoggableText();
-
-	FromElementBinding getBoundFromElementBinding();
 }

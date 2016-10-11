@@ -13,10 +13,10 @@ import org.hibernate.sqm.query.JoinType;
 /**
  * @author Steve Ebersole
  */
-public abstract class AbstractJoinedFromElement extends AbstractFromElement implements JoinedFromElement {
+public abstract class AbstractJoin extends AbstractFrom implements SqmJoin {
 	private final JoinType joinType;
 
-	public AbstractJoinedFromElement(
+	public AbstractJoin(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,

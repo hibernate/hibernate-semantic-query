@@ -16,6 +16,9 @@ import org.jboss.logging.Logger;
  * Contract representing a "from element space", which is a particular root FromElement along with a list of
  * its related joins.  A list is used specifically because the order is important (!) in terms of left/right.
  *
+ * SQL calls this a "table reference".  It views all the tables joined together
+ * as a single unit separated by the columns.
+ *
  * @author Steve Ebersole
  */
 public class FromElementSpace {
@@ -23,8 +26,8 @@ public class FromElementSpace {
 
 	private final SqmFromClause fromClause;
 
-	private RootEntityFromElement root;
-	private List<JoinedFromElement> joins;
+	private SqmRoot root;
+	private List<SqmJoin> joins;
 
 	public FromElementSpace(SqmFromClause fromClause) {
 		this.fromClause = fromClause;
@@ -34,11 +37,11 @@ public class FromElementSpace {
 		return fromClause;
 	}
 
-	public RootEntityFromElement getRoot() {
+	public SqmRoot getRoot() {
 		return root;
 	}
 
-	public void setRoot(RootEntityFromElement root) {
+	public void setRoot(SqmRoot root) {
 		if ( this.root != null ) {
 			// we already had a root defined...
 			if ( this.root == root ) {
@@ -53,11 +56,11 @@ public class FromElementSpace {
 		this.root = root;
 	}
 
-	public List<JoinedFromElement> getJoins() {
+	public List<SqmJoin> getJoins() {
 		return joins == null ? Collections.emptyList() : joins;
 	}
 
-	public void addJoin(JoinedFromElement join) {
+	public void addJoin(SqmJoin join) {
 		if ( joins == null ) {
 			joins = new ArrayList<>();
 		}

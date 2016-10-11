@@ -15,15 +15,18 @@ import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.Helper;
+
+import org.jboss.logging.Logger;
 
 /**
  * Convenience base class for FromElement implementations
  *
  * @author Steve Ebersole
  */
-public abstract class AbstractFromElement implements FromElement {
+public abstract class AbstractFrom implements SqmFrom {
+	private static final Logger log = Logger.getLogger( AbstractFrom.class );
+
 	private final FromElementSpace fromElementSpace;
 	private final String uid;
 	private final String alias;
@@ -31,11 +34,11 @@ public abstract class AbstractFromElement implements FromElement {
 	private final EntityType subclassIndicator;
 	private final String sourcePath;
 
-	private final ManagedType attributeContributingType;
+	private final ManagedType expressionType;
 
 	private Map<EntityType,Downcast> downcastMap;
 
-	protected AbstractFromElement(
+	protected AbstractFrom(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
@@ -49,7 +52,7 @@ public abstract class AbstractFromElement implements FromElement {
 		this.subclassIndicator = subclassIndicator;
 		this.sourcePath = sourcePath;
 
-		this.attributeContributingType = Helper.determineManagedType( bindableModelDescriptor );
+		this.expressionType = Helper.determineManagedType( bindableModelDescriptor );
 	}
 
 	@Override
@@ -68,7 +71,7 @@ public abstract class AbstractFromElement implements FromElement {
 	}
 
 	@Override
-	public Bindable getBoundModelType() {
+	public Bindable getBindable() {
 		return bindableModelDescriptor;
 	}
 
@@ -78,13 +81,8 @@ public abstract class AbstractFromElement implements FromElement {
 	}
 
 	@Override
-	public FromElement getFromElement() {
+	public SqmFrom getFromElement() {
 		return this;
-	}
-
-	@Override
-	public ManagedType getAttributeContributingType() {
-		return attributeContributingType;
 	}
 
 	@Override
@@ -99,17 +97,12 @@ public abstract class AbstractFromElement implements FromElement {
 
 	@Override
 	public Type getExpressionType() {
-		return getAttributeContributingType();
+		return expressionType;
 	}
 
 	@Override
 	public Type getInferableType() {
 		return getExpressionType();
-	}
-
-	@Override
-	public FromElementBinding getBoundFromElementBinding() {
-		return this;
 	}
 
 	@Override

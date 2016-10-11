@@ -60,13 +60,13 @@ import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
-import org.hibernate.sqm.query.from.CrossJoinedFromElement;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.JoinedFromElement;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmJoin;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
@@ -165,29 +165,29 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
 	public T visitFromElementSpace(FromElementSpace fromElementSpace) {
 		visitRootEntityFromElement( fromElementSpace.getRoot() );
-		for ( JoinedFromElement joinedFromElement : fromElementSpace.getJoins() ) {
+		for ( SqmJoin joinedFromElement : fromElementSpace.getJoins() ) {
 			joinedFromElement.accept( this );
 		}
 		return (T) fromElementSpace;
 	}
 
 	@Override
-	public T visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement) {
+	public T visitCrossJoinedFromElement(SqmCrossJoin joinedFromElement) {
 		return (T) joinedFromElement;
 	}
 
 	@Override
-	public T visitQualifiedEntityJoinFromElement(QualifiedEntityJoinFromElement joinedFromElement) {
+	public T visitQualifiedEntityJoinFromElement(SqmEntityJoin joinedFromElement) {
 		return (T) joinedFromElement;
 	}
 
 	@Override
-	public T visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement) {
+	public T visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement) {
 		return (T) joinedFromElement;
 	}
 
 	@Override
-	public T visitRootEntityFromElement(RootEntityFromElement rootEntityFromElement) {
+	public T visitRootEntityFromElement(SqmRoot rootEntityFromElement) {
 		return (T) rootEntityFromElement;
 	}
 

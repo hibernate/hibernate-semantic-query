@@ -10,7 +10,7 @@ import java.util.Locale;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.query.SqmUpdateStatement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
 import org.hibernate.sqm.query.set.SqmSetClause;
 
@@ -18,16 +18,16 @@ import org.hibernate.sqm.query.set.SqmSetClause;
  * @author Steve Ebersole
  */
 public class SqmUpdateStatementImpl extends AbstractSqmStatement implements SqmUpdateStatement {
-	private final RootEntityFromElement entityFromElement;
+	private final SqmRoot entityFromElement;
 	private final SqmSetClause setClause = new SqmSetClause();
 	private final SqmWhereClause whereClause = new SqmWhereClause();
 
-	public SqmUpdateStatementImpl(RootEntityFromElement entityFromElement) {
+	public SqmUpdateStatementImpl(SqmRoot entityFromElement) {
 		this.entityFromElement = entityFromElement;
 	}
 
 	@Override
-	public RootEntityFromElement getEntityFromElement() {
+	public SqmRoot getEntityFromElement() {
 		return entityFromElement;
 	}
 

@@ -14,7 +14,6 @@ import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
@@ -22,6 +21,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
 import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
 import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget;
 import org.hibernate.sqm.query.select.SqmSelection;
@@ -118,7 +118,7 @@ public class SelectClauseTests {
 		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmFrom.class ) );
 	}
 
 	@Test
@@ -149,7 +149,7 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( FromElementBinding.class )
+				instanceOf( SqmFrom.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
@@ -319,11 +319,11 @@ public class SelectClauseTests {
 		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
 		AttributeReferenceSqmExpression leftHandOperand = (AttributeReferenceSqmExpression) expression.getLeftHandOperand();
-		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getLeftHandSide().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( leftHandOperand.getBoundAttribute().getName(), is( "basic" ) );
 
 		AttributeReferenceSqmExpression rightHandOperand = (AttributeReferenceSqmExpression) expression.getRightHandOperand();
-		assertThat( rightHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( rightHandOperand.getLeftHandSide().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( rightHandOperand.getBoundAttribute().getName(), is( "basic1" ) );
 	}
 
@@ -336,11 +336,11 @@ public class SelectClauseTests {
 		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
 		AttributeReferenceSqmExpression leftHandOperand = (AttributeReferenceSqmExpression) expression.getLeftHandOperand();
-		assertThat( leftHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
+		assertThat( leftHandOperand.getLeftHandSide().getExpressionType().getTypeName(), is( "com.acme.Entity" ) );
 		assertThat( leftHandOperand.getBoundAttribute().getName(), is( "basic" ) );
 
 		AttributeReferenceSqmExpression rightHandOperand = (AttributeReferenceSqmExpression) expression.getRightHandOperand();
-		assertThat( rightHandOperand.getAttributeBindingSource().getExpressionType().getTypeName(), is( "com.acme.Entity2" ) );
+		assertThat( rightHandOperand.getLeftHandSide().getExpressionType().getTypeName(), is( "com.acme.Entity2" ) );
 		assertThat( rightHandOperand.getBoundAttribute().getName(), is( "basic1" ) );
 	}
 

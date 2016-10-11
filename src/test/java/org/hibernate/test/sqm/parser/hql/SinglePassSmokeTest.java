@@ -12,8 +12,8 @@ import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
 import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
-import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -102,7 +102,7 @@ public class SinglePassSmokeTest {
 		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmFrom.class ) );
 	}
 
 	private SqmSelectStatement interpret(String query) {

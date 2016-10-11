@@ -11,7 +11,7 @@ import java.util.Map;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Represents the ENTRY() function for obtaining the map entries from a {@code Map}-typed association.
@@ -24,7 +24,7 @@ public class MapEntrySqmExpression implements SqmExpression {
 	private final Type indexType;
 	private final Type elementType;
 
-	public MapEntrySqmExpression(FromElement collectionReference, Type indexType, Type elementType) {
+	public MapEntrySqmExpression(SqmFrom collectionReference, Type indexType, Type elementType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.indexType = indexType;
 		this.elementType = elementType;

@@ -60,14 +60,14 @@ public class BasicUpdateTests {
 
 		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
 		AttributeReferenceSqmExpression attributeReferenceExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
-		assertSame( attributeReferenceExpression.getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
+		assertSame( attributeReferenceExpression.getLeftHandSide().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 
 		assertEquals( 1, updateStatement.getSetClause().getAssignments().size() );
 
 		SqmAssignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
-		assertSame( assignment.getStateField().getBoundFromElementBinding().getFromElement(), updateStatement.getEntityFromElement() );
+		assertSame( assignment.getStateField().getLeftHandSide().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( assignment.getValue(), instanceOf( LiteralCharacterSqmExpression.class ) );
 	}

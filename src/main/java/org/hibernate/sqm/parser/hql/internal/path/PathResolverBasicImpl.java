@@ -10,13 +10,11 @@ import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.path.Binding;
-import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.Downcast;
-import org.hibernate.sqm.query.from.FromElement;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 import org.jboss.logging.Logger;
 
@@ -31,12 +29,17 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 	}
 
 	@Override
+	public boolean canReuseImplicitJoins() {
+		return true;
+	}
+
+	@Override
 	public Binding resolvePath(String... pathParts) {
 		return resolvePath( (EntityType) null, pathParts );
 	}
 
 	@Override
-	public Binding resolvePath(AttributeBindingSource lhs, String... pathParts) {
+	public Binding resolvePath(Binding lhs, String... pathParts) {
 		return resolvePath( lhs, null, pathParts );
 	}
 
@@ -64,7 +67,7 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			// we had a dot-identifier sequence...
 
 			// see if the root is an identification variable
-			final FromElement identifiedFromElement = context().getFromElementLocator()
+			final SqmFrom identifiedFromElement = context().getFromElementLocator()
 					.findFromElementByIdentificationVariable( pathParts[0] );
 			if ( identifiedFromElement != null ) {
 				validatePathRoot( identifiedFromElement );
@@ -72,7 +75,7 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			}
 
 			// otherwise see if the root might be the name of an attribute exposed from a FromElement
-			final FromElement root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
+			final SqmFrom root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
 			if ( root != null ) {
 				validatePathRoot( root );
 				return resolvePath( root, subclassIndicator, pathParts );
@@ -82,14 +85,14 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			// we had a single identifier...
 
 			// see if the identifier is an identification variable
-			final FromElement identifiedFromElement = context().getFromElementLocator()
+			final SqmFrom identifiedFromElement = context().getFromElementLocator()
 					.findFromElementByIdentificationVariable( pathParts[0] );
 			if ( identifiedFromElement != null ) {
 				return resolveFromElementAliasAsTerminal( identifiedFromElement );
 			}
 
 			// otherwise see if the identifier might be the name of an attribute exposed from a FromElement
-			final FromElement root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
+			final SqmFrom root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
 			if ( root != null ) {
 				// todo : consider passing along subclassIndicator
 				return resolveTerminalAttributeBinding( root, pathParts[0] );
@@ -99,15 +102,15 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 		return null;
 	}
 
-	protected void validatePathRoot(FromElement root) {
+	protected void validatePathRoot(SqmFrom root) {
 	}
 
 	@Override
 	public Binding resolvePath(
-			AttributeBindingSource lhs,
+			Binding lhs,
 			EntityType subclassIndicator,
 			String... pathParts) {
-		final AttributeBindingSource terminalLhs = resolveAnyIntermediateAttributePathJoins(
+		final Binding terminalLhs = resolveAnyIntermediateAttributePathJoins(
 				lhs,
 				pathParts
 		);
@@ -115,27 +118,30 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 	}
 
 	protected AttributeBinding resolveTerminalAttributeBinding(
-			AttributeBindingSource lhs,
+			Binding lhs,
 			String terminalName) {
 		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
 		log.debugf( "Resolved terminal attribute-binding [%s -> %s] : %s", lhs.asLoggableText(), terminalName, attribute );
-		return new AttributeReferenceSqmExpression( lhs, attribute );
+		return new AttributeReferenceSqmExpression( lhs, attribute, null );
 	}
 
-	protected FromElementBinding resolveFromElementAliasAsTerminal(FromElement aliasedFromElement) {
+	protected Binding resolveFromElementAliasAsTerminal(SqmFrom aliasedFromElement) {
 		log.debugf( "Resolved terminal as from-element alias : %s", aliasedFromElement.getIdentificationVariable() );
 		return aliasedFromElement;
 	}
 
-	protected FromElementBinding resolveTreatedTerminal(
+	protected Binding resolveTreatedTerminal(
 			ResolutionContext context,
-			AttributeBindingSource lhs,
+			Binding lhs,
 			String terminalName,
 			EntityType subclassIndicator) {
 		final Attribute joinedAttribute = resolveAttributeDescriptor( lhs, terminalName );
 		log.debugf( "Resolved terminal treated-path : %s -> %s", joinedAttribute, subclassIndicator );
-		final QualifiedAttributeJoinFromElement join = buildAttributeJoin(
-				lhs.getFromElement(),
+		final SqmAttributeJoin join = buildAttributeJoin(
+				// todo : just do a cast for now, but this needs to be thought out (Binding -> SqmFrom)
+				//		^^ SqmFrom-specifically needed mainly needed for "FromElementSpace"
+				//		but perhaps that resolution coulkd be delayed
+				(SqmFrom) lhs,
 				joinedAttribute,
 				subclassIndicator
 		);

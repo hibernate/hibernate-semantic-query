@@ -11,7 +11,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface Attribute {
+public interface Attribute extends Bindable {
 	/**
 	 * Obtain the type that declares the attribute.
 	 *

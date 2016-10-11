@@ -44,7 +44,7 @@ public class BasicInsertTests {
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
 		for ( AttributeReferenceSqmExpression stateField : insertStatement.getStateFields() ) {
-			assertSame( insertStatement.getInsertTarget(), stateField.getBoundFromElementBinding().getFromElement() );
+			assertSame( insertStatement.getInsertTarget(), stateField.getLeftHandSide().getFromElement() );
 		}
 	}
 

@@ -7,20 +7,32 @@
 package org.hibernate.sqm.domain;
 
 /**
- * Represents something that can be bound into a sqm.  Typically this will be one of:<ul>
+ * Represents something that can be incorporated into a query "path".
+ * <p/>
+ * A Bindable will be one of the following:<ul>
  *     <li>
- *         {@link ManagedType} - The entity/embeddable type itself is the {@link #getBoundType()} and
- *         the {@link #asManagedType()}
+ *         {@link ManagedType} - The entity/embeddable type itself is the
+ *         {@link #getBoundType()} and the {@link #asManagedType()}
  *     </li>
  *     <li>
- *         {@link SingularAttribute} - The referenced attribute value is the {@link #getBoundType()}.
- *         {@link #asManagedType()} is safe to call if the attribute type is a managed type (entity, embeddable)
+ *         {@link SingularAttribute} - The referenced attribute value is the
+ *         {@link #getBoundType()}.  {@link #asManagedType()} is safe to call
+ *         if the attribute type is a managed type (entity, embeddable)
  *     </li>
  *     <li>
- *         {@link PluralAttribute} - The referenced attribute's element value is the {@link #getBoundType()}.
- *         {@link #asManagedType()} is safe to call if the element type is a managed type (entity, embeddable)
+ *         {@link PluralAttribute} - The referenced attribute's element value
+ *         is the {@link #getBoundType()}. {@link #asManagedType()} is safe to
+ *         call if the element type is a managed type (entity, embeddable)
  *     </li>
  * </ul>
+ * <p/>
+ * Very misnamed, but SQM has adopted the general naming convention of
+ * following JPA's naming for the same concepts, and JPA calls this a
+ * Bindable (see {@link javax.persistence.metamodel.Bindable}).  I
+ * personally think "Navigable" or "Path-able" when I see "Bindable".
+ *
+ * @see org.hibernate.sqm.path.Binding
+ *
  * @author Steve Ebersole
  */
 public interface Bindable {

@@ -10,12 +10,12 @@ import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmRoot;
 
 import org.jboss.logging.Logger;
 
@@ -40,7 +40,7 @@ public class FromElementBuilder {
 	/**
 	 * Make the root entity reference for the FromElementSpace
 	 */
-	public RootEntityFromElement makeRootEntityFromElement(
+	public SqmRoot makeRootEntityFromElement(
 			FromElementSpace fromElementSpace,
 			EntityType entityType,
 			String alias) {
@@ -52,7 +52,7 @@ public class FromElementBuilder {
 					entityType.getName()
 			);
 		}
-		final RootEntityFromElement root = new RootEntityFromElement(
+		final SqmRoot root = new SqmRoot(
 				fromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
 				alias,
@@ -68,7 +68,7 @@ public class FromElementBuilder {
 	/**
 	 * Make the root entity reference for the FromElementSpace
 	 */
-	public CrossJoinedFromElement makeCrossJoinedFromElement(
+	public SqmCrossJoin makeCrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
 			String uid,
 			EntityType entityType,
@@ -82,7 +82,7 @@ public class FromElementBuilder {
 			);
 		}
 
-		final CrossJoinedFromElement join = new CrossJoinedFromElement(
+		final SqmCrossJoin join = new SqmCrossJoin(
 				fromElementSpace,
 				uid,
 				alias,
@@ -94,7 +94,7 @@ public class FromElementBuilder {
 		return join;
 	}
 
-	public QualifiedEntityJoinFromElement buildEntityJoin(
+	public SqmEntityJoin buildEntityJoin(
 			FromElementSpace fromElementSpace,
 			String alias,
 			EntityType entityType,
@@ -108,7 +108,7 @@ public class FromElementBuilder {
 			);
 		}
 
-		final QualifiedEntityJoinFromElement join = new QualifiedEntityJoinFromElement(
+		final SqmEntityJoin join = new SqmEntityJoin(
 				fromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
 				alias,
@@ -121,19 +121,30 @@ public class FromElementBuilder {
 		return join;
 	}
 
-	public QualifiedAttributeJoinFromElement buildAttributeJoin(
+	public SqmAttributeJoin buildAttributeJoin(
 			FromElementSpace fromElementSpace,
 			String alias,
 			Attribute attributeDescriptor,
 			EntityType subclassIndicator,
 			String path,
 			JoinType joinType,
-			FromElement lhs,
-			boolean fetched) {
+			SqmFrom lhs,
+			boolean fetched,
+			boolean canReuseImplicitJoins) {
+		if ( fetched && canReuseImplicitJoins ) {
+			throw new ParsingException( "Illegal combination of [fetched=true] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
+		}
+
+		if ( alias != null && canReuseImplicitJoins ) {
+			throw new ParsingException( "Unexpected combination of [non-null alias] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
+		}
+
+		// todo : validate alias & fetched?  JPA at least disallows specifying an alias for fetched associations
+
 		if ( attributeDescriptor == null ) {
 			throw new ParsingException(
 					"AttributeDescriptor was null [name unknown]; cannot build attribute join in relation to from-element [" +
-							lhs.getBoundModelType() + "(" + lhs.getIdentificationVariable() + ")]"
+							lhs.getBindable() + "(" + lhs.getIdentificationVariable() + ")]"
 			);
 		}
 
@@ -147,25 +158,37 @@ public class FromElementBuilder {
 			);
 		}
 
-		final QualifiedAttributeJoinFromElement join = new QualifiedAttributeJoinFromElement(
-				fromElementSpace,
-				parsingContext.makeUniqueIdentifier(),
-				alias,
-				attributeDescriptor,
-				subclassIndicator,
-				path,
-				joinType,
-				lhs,
-				fetched
-		);
-		fromElementSpace.addJoin( join );
-		parsingContext.registerFromElementByUniqueId( join );
-		registerAlias( join );
-		registerPath( join );
+		SqmAttributeJoin join = null;
+		if ( canReuseImplicitJoins ) {
+			join = parsingContext.getCachedAttributeJoin( lhs, attributeDescriptor );
+		}
+
+		if ( join == null ) {
+			join = new SqmAttributeJoin(
+					lhs,
+					parsingContext.makeUniqueIdentifier(),
+					alias,
+					attributeDescriptor,
+					subclassIndicator,
+					path,
+					joinType,
+					fetched
+			);
+
+			if ( canReuseImplicitJoins ) {
+				parsingContext.cacheAttributeJoin( lhs, join );
+			}
+
+			fromElementSpace.addJoin( join );
+			parsingContext.registerFromElementByUniqueId( join );
+			registerAlias( join );
+			registerPath( join );
+		}
+
 		return join;
 	}
 
-	private void registerAlias(FromElement fromElement) {
+	private void registerAlias(SqmFrom fromElement) {
 		final String alias = fromElement.getIdentificationVariable();
 
 		if ( alias == null ) {
@@ -179,7 +202,7 @@ public class FromElementBuilder {
 		aliasRegistry.registerAlias( fromElement );
 	}
 
-	private void registerPath(QualifiedAttributeJoinFromElement join) {
+	private void registerPath(SqmAttributeJoin join) {
 		// todo : come back to this
 		// 		Be sure to disable this while processing from clauses (FromClauseProcessor).  Paths in from clause
 		//		should almost never be reused.  Paths defined in other parts of the sqm are fine...

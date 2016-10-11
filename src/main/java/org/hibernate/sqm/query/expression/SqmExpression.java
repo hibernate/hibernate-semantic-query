@@ -7,9 +7,13 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.Type;
 
 /**
+ * The base contract for any kind of expression node in the SQM tree.
+ * An expression might be a reference to an attribute, a literal, etc.
+ *
  * @author Steve Ebersole
  */
 public interface SqmExpression {

@@ -8,8 +8,10 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
+import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -19,9 +21,11 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hibernate.sqm.SemanticQueryInterpreter.interpret;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -32,23 +36,51 @@ public class FromElementContainmentTests {
 	final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
 
 	@Test
+	public void testPathExpression() {
+		final String query = "select o.other from Entity o";
+		SqmSelectStatement statement = (SqmSelectStatement) interpret( query, consumerContext );
+
+		assertEquals( 1, statement.getQuerySpec().getFromClause().getFromElementSpaces().size() );
+		final FromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		assertThat( fromElementSpace.getJoins().size(), is(1) );
+
+		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
+		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+
+		assertSame( fromElementSpace.getJoins().get( 0 ), selection.getExpression() );
+	}
+
+	@Test
 	public void testFromElementReferenceInSelect() {
 		final String query = "select o from Entity o";
 		SqmSelectStatement statement = (SqmSelectStatement) interpret( query, consumerContext );
+
+		assertEquals( 1, statement.getQuerySpec().getFromClause().getFromElementSpaces().size() );
+		final FromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		final SqmRoot fromElement = fromElementSpace.getRoot();
+
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( FromElementBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmFrom.class ) );
+
+		assertSame( fromElement, selection.getExpression() );
 	}
 
 	@Test
 	public void testFromElementReferenceInOrderBy() {
 		final String query = "select o from Entity o order by o";
 		SqmSelectStatement statement = (SqmSelectStatement) interpret( query, consumerContext );
+
+		assertEquals( 1, statement.getQuerySpec().getFromClause().getFromElementSpaces().size() );
+		SqmRoot fromElement = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 ).getRoot();
+
 		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
-				instanceOf( FromElementBinding.class )
+				instanceOf( SqmFrom.class )
 		);
+
+		assertSame( fromElement, statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() );
 	}
 
 	@Test
@@ -67,6 +99,7 @@ public class FromElementContainmentTests {
 	private DomainMetamodel buildMetamodel() {
 		ExplicitDomainMetamodel metamodel = new ExplicitDomainMetamodel();
 		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity" );
+		entityType.makeSingularAttribute( "other", entityType );
 		return metamodel;
 	}
 }

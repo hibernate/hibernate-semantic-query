@@ -9,10 +9,10 @@ package org.hibernate.sqm.parser.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.JoinedFromElement;
+import org.hibernate.sqm.query.from.SqmJoin;
 
 import org.jboss.logging.Logger;
 
@@ -33,7 +33,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 
 	private final FromElementBuilder fromElementBuilder;
 
-	private Map<String,FromElement> fromElementsByPath = new HashMap<String, FromElement>();
+	private Map<String,SqmFrom> fromElementsByPath = new HashMap<String, SqmFrom>();
 
 	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext) {
 		this( parsingContext, null );
@@ -75,13 +75,13 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	}
 
 	@Override
-	public FromElement findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmFrom findFromElementByIdentificationVariable(String identificationVariable) {
 		return fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 	}
 
 	@Override
-	public FromElement findFromElementExposingAttribute(String name) {
-		FromElement found = null;
+	public SqmFrom findFromElementExposingAttribute(String name) {
+		SqmFrom found = null;
 		for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
 			if ( space.getRoot().resolveAttribute( name ) != null ) {
 				if ( found != null ) {
@@ -90,7 +90,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 				found = space.getRoot();
 			}
 
-			for ( JoinedFromElement join : space.getJoins() ) {
+			for ( SqmJoin join : space.getJoins() ) {
 				if ( join.resolveAttribute( name ) != null ) {
 					if ( found != null ) {
 						throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );

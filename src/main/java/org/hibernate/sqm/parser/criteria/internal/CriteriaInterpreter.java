@@ -40,58 +40,57 @@ import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.spi.SelectionImplementor;
 import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.SelectionImplementor;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.CastFunctionCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
+import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
-import org.hibernate.sqm.path.FromElementBinding;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
-import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralDoubleSqmExpression;
-import org.hibernate.sqm.query.expression.LiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralFalseSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralFloatSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
+import org.hibernate.sqm.query.expression.LiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
@@ -107,8 +106,8 @@ import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
 import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
-import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
@@ -179,7 +178,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			final RootImplementor root = (RootImplementor) jpaRoot;
 			root.prepareAlias( parsingContext.getImplicitAliasGenerator() );
 			final FromElementSpace space = fromClause.makeFromElementSpace();
-			final RootEntityFromElement sqmRoot = currentQuerySpecProcessingState.getFromElementBuilder().makeRootEntityFromElement(
+			final SqmRoot sqmRoot = currentQuerySpecProcessingState.getFromElementBuilder().makeRootEntityFromElement(
 					space,
 					// todo : coordinate with JPA type system
 					root.getEntityType(),
@@ -193,13 +192,13 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return fromClause;
 	}
 
-	private void bindJoins(From<?,?> lhs, FromElement sqmLhs, FromElementSpace space) {
+	private void bindJoins(From<?,?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Join<?, ?> join : lhs.getJoins() ) {
 			final String alias = join.getAlias();
 			// todo : we could theoretically reconstruct the "fetch path" via parent refs if we deem it useful..
 			@SuppressWarnings("UnnecessaryLocalVariable") final String path  = alias;
 
-			final QualifiedAttributeJoinFromElement sqmJoin = currentQuerySpecProcessingState.getFromElementBuilder().buildAttributeJoin(
+			final SqmAttributeJoin sqmJoin = currentQuerySpecProcessingState.getFromElementBuilder().buildAttributeJoin(
 					space,
 					alias,
 					sqmLhs.resolveAttribute( join.getAttribute().getName() ),
@@ -208,6 +207,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					path,
 					convert( join.getJoinType() ),
 					sqmLhs,
+					false,
 					false
 			);
 			space.addJoin( sqmJoin );
@@ -215,13 +215,13 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 	}
 
-	private void bindFetches(FetchParent<?, ?> lhs, FromElement sqmLhs, FromElementSpace space) {
+	private void bindFetches(FetchParent<?, ?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Fetch<?, ?> fetch : lhs.getFetches() ) {
 			final String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			// todo : we could theoretically reconstruct the "fetch path" via parent refs if we deem it useful..
 			@SuppressWarnings("UnnecessaryLocalVariable") final String path  = alias;
 
-			final QualifiedAttributeJoinFromElement sqmFetch = currentQuerySpecProcessingState.getFromElementBuilder().buildAttributeJoin(
+			final SqmAttributeJoin sqmFetch = currentQuerySpecProcessingState.getFromElementBuilder().buildAttributeJoin(
 					space,
 					alias,
 					sqmLhs.resolveAttribute( fetch.getAttribute().getName() ),
@@ -230,7 +230,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					path,
 					convert( fetch.getJoinType() ),
 					sqmLhs,
-					true
+					true,
+					false
 			);
 			space.addJoin( sqmFetch );
 			bindFetches( fetch, sqmFetch, space );
@@ -411,13 +412,13 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public FromElementBinding visitIdentificationVariableReference(From reference) {
+	public SqmFrom visitIdentificationVariableReference(From reference) {
 		return currentQuerySpecProcessingState.findFromElementByIdentificationVariable( reference.getAlias() );
 	}
 
 	@Override
 	public AttributeReferenceSqmExpression visitAttributeReference(From attributeSource, String attributeName) {
-		final FromElement source = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( attributeSource.getAlias() );
+		final SqmFrom source = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( attributeSource.getAlias() );
 		final Attribute attributeDescriptor = source.resolveAttribute( attributeName );
 		final Type type;
 		if ( attributeDescriptor instanceof SingularAttribute ) {
@@ -429,7 +430,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		else {
 			throw new ParsingException( "Resolved attribute was neither javax.persistence.metamodel.SingularAttribute nor javax.persistence.metamodel.PluralAttribute" );
 		}
-		return new AttributeReferenceSqmExpression( source, attributeDescriptor );
+		return new AttributeReferenceSqmExpression( source, attributeDescriptor, null );
 	}
 
 	@Override
@@ -573,13 +574,13 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	public EntityTypeSqmExpression visitEntityType(String identificationVariable) {
-		final FromElement fromElement = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( identificationVariable );
-		return new EntityTypeSqmExpression( (EntityType) fromElement.getBoundModelType() );
+		final SqmFrom fromElement = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( identificationVariable );
+		return new EntityTypeSqmExpression( (EntityType) fromElement.getBindable() );
 	}
 
 	@Override
 	public EntityTypeSqmExpression visitEntityType(String identificationVariable, String attributeName) {
-		final FromElement fromElement = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( identificationVariable );
+		final SqmFrom fromElement = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( identificationVariable );
 		return new EntityTypeSqmExpression( (EntityType) fromElement.resolveAttribute( attributeName ) );
 	}
 
@@ -739,7 +740,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	public SqmExpression visitRoot(RootImplementor root) {
-		final FromElement fromElement = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( root.getAlias() );
+		final SqmFrom fromElement = currentQuerySpecProcessingState.findFromElementByIdentificationVariable( root.getAlias() );
 		assert fromElement != null;
 
 		return fromElement;

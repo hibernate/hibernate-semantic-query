@@ -10,12 +10,14 @@ import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.common.ParsingContext;
-import org.hibernate.sqm.path.FromElementBinding;
+import org.hibernate.sqm.path.Binding;
 
 /**
+ * Models a Bindable's inclusion in the {@code FROM} clause.
+ *
  * @author Steve Ebersole
  */
-public interface FromElement extends FromElementBinding, Downcastable {
+public interface SqmFrom extends Binding, Downcastable {
 	/**
 	 * A unique identifier across all QuerySpecs (all AliasRegistry instances) for a given sqm.
 	 * <p/>
@@ -39,7 +41,7 @@ public interface FromElement extends FromElementBinding, Downcastable {
 	 *
 	 * @return The bound type (Bindable)
 	 */
-	Bindable getBoundModelType();
+	Bindable getBindable();
 
 	/**
 	 * Obtain the downcast target for cases where a downcast (treat) is defined in the
@@ -52,21 +54,21 @@ public interface FromElement extends FromElementBinding, Downcastable {
 	 * will return {@code null} for FromElement declarations that do not directly specify
 	 * a downcast.
 	 *
-	 * @see org.hibernate.sqm.path.AttributeBindingSource#getSubclassIndicator()
+	 * @see org.hibernate.sqm.path.Binding#getSubclassIndicator()
 	 */
 	EntityType getIntrinsicSubclassIndicator();
 
 	/**
 	 * Get the identification variable (alias) assigned to this FromElement.  If an explicit
-	 * identification variable was given in the source sqm that identification variable is
+	 * identification variable was given in the source query that identification variable is
 	 * returned here; otherwise an implicit identification variable is generated and returned
 	 * here.
 	 * <p/>
 	 * Note that the spec also sometimes calls this a "range variable", although it tends to
-	 * limit this usage to just sqm space roots.
+	 * limit this usage to just query space roots.
 	 *
 	 * @return The identification variable (alias) for this FromElement.  Never returns
-	 * {@code null}; if the sqm did not specify an identification variable, one is implicitly
+	 * {@code null}; if the query did not specify an identification variable, one is implicitly
 	 * generated.
 	 */
 	String getIdentificationVariable();

@@ -10,7 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
+
+import org.jboss.logging.Logger;
 
 /**
  * Represents contextual information for each parse
@@ -18,9 +22,13 @@ import org.hibernate.sqm.query.from.FromElement;
  * @author Steve Ebersole
  */
 public class ParsingContext {
+	private static final Logger log = Logger.getLogger( ParsingContext.class );
+
 	private final ConsumerContext consumerContext;
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
-	private final Map<String,FromElement> globalFromElementMap = new HashMap<String, FromElement>();
+	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
+
+	private Map<SqmFrom,Map<Attribute,SqmAttributeJoin>> attributeJoinMapByFromElement;
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -40,12 +48,51 @@ public class ParsingContext {
 		return "<uid:" + ++uidSequence + ">";
 	}
 
-	public void registerFromElementByUniqueId(FromElement fromElement) {
-		final FromElement old = globalFromElementMap.put( fromElement.getUniqueIdentifier(), fromElement );
+	public void registerFromElementByUniqueId(SqmFrom fromElement) {
+		final SqmFrom old = globalFromElementMap.put( fromElement.getUniqueIdentifier(), fromElement );
 		assert old == null;
 	}
 
 	public void findElementByUniqueId(String uid) {
 		globalFromElementMap.get( uid );
 	}
+
+	public void cacheAttributeJoin(SqmFrom lhs, SqmAttributeJoin join) {
+		Map<Attribute,SqmAttributeJoin> attributeJoinMap = null;
+		if ( attributeJoinMapByFromElement == null ) {
+			attributeJoinMapByFromElement = new HashMap<>();
+		}
+		else {
+			attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+		}
+
+		if ( attributeJoinMap == null ) {
+			attributeJoinMap = new HashMap<>();
+			attributeJoinMapByFromElement.put( lhs, attributeJoinMap );
+		}
+
+		final SqmAttributeJoin previous = attributeJoinMap.put( join.getJoinedAttributeDescriptor(), join );
+		if ( previous != null ) {
+			log.debugf(
+					"Caching SqmAttributeJoin [%s] over-wrote previous cache entry [%s]",
+					join,
+					previous
+			);
+		}
+	}
+
+	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, Attribute attribute) {
+		if ( attributeJoinMapByFromElement == null ) {
+			return null;
+		}
+
+		final Map<Attribute,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+
+		if ( attributeJoinMap == null ) {
+			return null;
+		}
+
+		return attributeJoinMap.get( attribute );
+	}
+
 }

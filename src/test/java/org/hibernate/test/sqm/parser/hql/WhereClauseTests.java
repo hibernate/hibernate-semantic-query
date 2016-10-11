@@ -78,7 +78,7 @@ public class WhereClauseTests {
 		);
 		final CollectionSizeSqmExpression func = (CollectionSizeSqmExpression) relationalPredicate.getLeftHandExpression();
 		assertThat(
-				func.getPluralAttributeBinding().getAttributeBindingSource().getFromElement().getIdentificationVariable(),
+				func.getPluralAttributeBinding().getLeftHandSide().getFromElement().getIdentificationVariable(),
 				is( "t" )
 		);
 		assertThat(

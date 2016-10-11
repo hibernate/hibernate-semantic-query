@@ -15,14 +15,14 @@ import org.hibernate.sqm.query.predicate.SqmPredicate;
 /**
  * @author Steve Ebersole
  */
-public class QualifiedEntityJoinFromElement
-		extends AbstractJoinedFromElement
-		implements QualifiedJoinedFromElement {
+public class SqmEntityJoin
+		extends AbstractJoin
+		implements SqmQualifiedJoin {
 	private final String entityName;
 
 	private SqmPredicate onClausePredicate;
 
-	public QualifiedEntityJoinFromElement(
+	public SqmEntityJoin(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
@@ -37,13 +37,13 @@ public class QualifiedEntityJoinFromElement
 	}
 
 	@Override
-	public EntityType getBoundModelType() {
-		return (EntityType) super.getBoundModelType();
+	public EntityType getBindable() {
+		return (EntityType) super.getBindable();
 	}
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBoundModelType().findAttribute( attributeName );
+		return getBindable().findAttribute( attributeName );
 	}
 
 	@Override

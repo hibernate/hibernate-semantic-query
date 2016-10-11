@@ -13,12 +13,11 @@ import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.path.FromElementBinding;
+import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
  * PathResolver implementation for resolving path references as part of a
@@ -46,6 +45,11 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
+	public boolean canReuseImplicitJoins() {
+		return false;
+	}
+
+	@Override
 	protected JoinType getIntermediateJoinType() {
 		return joinType;
 	}
@@ -56,7 +60,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 
 	@Override
 	protected AttributeBinding resolveTerminalAttributeBinding(
-			AttributeBindingSource lhs,
+			Binding lhs,
 			String terminalName) {
 		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
 		final EntityType subclassType = resolveBoundEntityType( attribute );
@@ -80,8 +84,8 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 		return null;
 	}
 
-	private QualifiedAttributeJoinFromElement resolveTerminal(
-			AttributeBindingSource lhs,
+	private SqmAttributeJoin resolveTerminal(
+			Binding lhs,
 			String terminalName,
 			Attribute attribute,
 			EntityType subclassType) {
@@ -93,14 +97,15 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 				lhs.asLoggableText() + '.' + terminalName,
 				joinType,
 				lhs.getFromElement(),
-				fetched
+				fetched,
+				false
 		);
 	}
 
 	@Override
-	protected FromElementBinding resolveTreatedTerminal(
+	protected Binding resolveTreatedTerminal(
 			ResolutionContext context,
-			AttributeBindingSource lhs,
+			Binding lhs,
 			String terminalName,
 			EntityType subclassIndicator) {
 		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
@@ -108,7 +113,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected FromElementBinding resolveFromElementAliasAsTerminal(FromElement aliasedFromElement) {
+	protected Binding resolveFromElementAliasAsTerminal(SqmFrom aliasedFromElement) {
 		// this can never be valid...
 		throw new SemanticException( "Cannot join to aliased FromElement [" + aliasedFromElement.getIdentificationVariable() + "]" );
 	}

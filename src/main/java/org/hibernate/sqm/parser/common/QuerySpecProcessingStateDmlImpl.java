@@ -15,14 +15,14 @@ import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.CrossJoinedFromElement;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.FromElement;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.JoinedFromElement;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmJoin;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmRoot;
 
 /**
  * QuerySpecProcessingState implementation for DML statements
@@ -35,7 +35,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 
 	private final FromElementBuilder fromElementBuilder;
 
-	private Map<String,FromElement> fromElementsByPath = new HashMap<String, FromElement>();
+	private Map<String,SqmFrom> fromElementsByPath = new HashMap<String, SqmFrom>();
 
 	public QuerySpecProcessingStateDmlImpl(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
@@ -54,14 +54,14 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	}
 
 	@Override
-	public FromElement findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmFrom findFromElementByIdentificationVariable(String identificationVariable) {
 		return fromClause.fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable )
 				? fromClause.fromElementSpace.getRoot()
 				: null;
 	}
 
 	@Override
-	public FromElement findFromElementExposingAttribute(String attributeName) {
+	public SqmFrom findFromElementExposingAttribute(String attributeName) {
 		return fromClause.fromElementSpace.getRoot().resolveAttribute(attributeName ) != null
 				? fromClause.fromElementSpace.getRoot()
 				: null;
@@ -107,17 +107,17 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		}
 
 		@Override
-		public void setRoot(RootEntityFromElement root) {
+		public void setRoot(SqmRoot root) {
 			super.setRoot( root );
 		}
 
 		@Override
-		public List<JoinedFromElement> getJoins() {
+		public List<SqmJoin> getJoins() {
 			return Collections.emptyList();
 		}
 
 		@Override
-		public void addJoin(JoinedFromElement join) {
+		public void addJoin(SqmJoin join) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 	}
@@ -128,13 +128,13 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		}
 
 		@Override
-		public CrossJoinedFromElement makeCrossJoinedFromElement(
+		public SqmCrossJoin makeCrossJoinedFromElement(
 				FromElementSpace fromElementSpace, String uid, EntityType entityType, String alias) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
 		@Override
-		public QualifiedEntityJoinFromElement buildEntityJoin(
+		public SqmEntityJoin buildEntityJoin(
 				FromElementSpace fromElementSpace,
 				String alias,
 				EntityType entityType,
@@ -143,15 +143,16 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		}
 
 		@Override
-		public QualifiedAttributeJoinFromElement buildAttributeJoin(
+		public SqmAttributeJoin buildAttributeJoin(
 				FromElementSpace fromElementSpace,
 				String alias,
 				Attribute attributeDescriptor,
 				EntityType subclassIndicator,
 				String path,
 				JoinType joinType,
-				FromElement lhs,
-				boolean fetched) {
+				SqmFrom lhs,
+				boolean fetched,
+				boolean canReuseImplicitJoins) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 	}

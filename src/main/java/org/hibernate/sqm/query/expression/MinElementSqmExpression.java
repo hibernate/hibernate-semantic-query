@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * @author Steve Ebersole
@@ -17,7 +17,7 @@ public class MinElementSqmExpression implements SqmExpression {
 	private final String collectionAlias;
 	private final Type elementType;
 
-	public MinElementSqmExpression(FromElement collectionReference, Type elementType) {
+	public MinElementSqmExpression(SqmFrom collectionReference, Type elementType) {
 		this.collectionAlias = collectionReference.getIdentificationVariable();
 		this.elementType = elementType;
 	}

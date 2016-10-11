@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.hibernate.sqm.query.SqmInsertStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmRoot;
 
 /**
  * Convenience base class for InsertSqmStatement implementations.
@@ -20,15 +20,15 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
  * @author Steve Ebersole
  */
 public abstract class AbstractSqmInsertStatement extends AbstractSqmStatement implements SqmInsertStatement {
-	private final RootEntityFromElement insertTarget;
+	private final SqmRoot insertTarget;
 	private List<AttributeReferenceSqmExpression> stateFields;
 
-	public AbstractSqmInsertStatement(RootEntityFromElement insertTarget) {
+	public AbstractSqmInsertStatement(SqmRoot insertTarget) {
 		this.insertTarget = insertTarget;
 	}
 
 	@Override
-	public RootEntityFromElement getInsertTarget() {
+	public SqmRoot getInsertTarget() {
 		return insertTarget;
 	}
 

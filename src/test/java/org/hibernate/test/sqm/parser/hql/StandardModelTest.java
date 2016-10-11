@@ -11,6 +11,7 @@ import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
 import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
+import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -19,10 +20,16 @@ import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 
 /**
+ * Base class defining a standard domain model
+ *
  * @author Steve Ebersole
  */
-public class StandardModelTest {
+public abstract class StandardModelTest {
 	protected final ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
+
+	protected SqmSelectStatement interpretSelect(String query) {
+		return (SqmSelectStatement) interpret( query );
+	}
 
 	protected SqmStatement interpret(String query) {
 		final HqlParser parser = HqlParseTreeBuilder.INSTANCE.parseHql( query );

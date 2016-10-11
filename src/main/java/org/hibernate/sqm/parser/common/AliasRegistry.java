@@ -11,14 +11,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 /**
  * @author Andrea Boriero
  */
 public class AliasRegistry {
-	private Map<String, FromElement> fromElementsByAlias = new HashMap<String, FromElement>();
+	private Map<String, SqmFrom> fromElementsByAlias = new HashMap<String, SqmFrom>();
 	private Map<String, SqmSelection> selectionsByAlias = new HashMap<String, SqmSelection>();
 
 	private AliasRegistry parent;
@@ -28,7 +28,7 @@ public class AliasRegistry {
 
 	public AliasRegistry(AliasRegistry parent) {
 		this.parent = parent;
-		fromElementsByAlias = new HashMap<String, FromElement>();
+		fromElementsByAlias = new HashMap<String, SqmFrom>();
 	}
 
 	public AliasRegistry getParent() {
@@ -42,8 +42,8 @@ public class AliasRegistry {
 		}
 	}
 
-	public void registerAlias(FromElement fromElement) {
-		final FromElement old = fromElementsByAlias.put( fromElement.getIdentificationVariable(), fromElement );
+	public void registerAlias(SqmFrom fromElement) {
+		final SqmFrom old = fromElementsByAlias.put( fromElement.getIdentificationVariable(), fromElement );
 		if ( old != null ) {
 			throw new AliasCollisionException(
 					String.format(
@@ -61,7 +61,7 @@ public class AliasRegistry {
 		return selectionsByAlias.get( alias );
 	}
 
-	public FromElement findFromElementByAlias(String alias) {
+	public SqmFrom findFromElementByAlias(String alias) {
 		if ( fromElementsByAlias.containsKey( alias ) ) {
 			return fromElementsByAlias.get( alias );
 		}
@@ -82,9 +82,9 @@ public class AliasRegistry {
 					)
 			);
 		}
-		final FromElement fromElement = fromElementsByAlias.get( alias );
+		final SqmFrom fromElement = fromElementsByAlias.get( alias );
 		if ( fromElement != null ) {
-			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBoundModelType() ) ) {
+			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBindable() ) ) {
 				throw new AliasCollisionException(
 						String.format(
 								Locale.ENGLISH,
@@ -92,7 +92,7 @@ public class AliasRegistry {
 								alias,
 								selection.getExpression().getExpressionType(),
 								fromElement,
-								fromElement.getBoundModelType()
+								fromElement.getBindable()
 						)
 				);
 			}

@@ -9,7 +9,7 @@ package org.hibernate.sqm.query;
 import java.util.List;
 
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmRoot;
 
 /**
  * The general contract for INSERT statements.  At the moment only the INSERT-SELECT
@@ -18,6 +18,6 @@ import org.hibernate.sqm.query.from.RootEntityFromElement;
  * @author Steve Ebersole
  */
 public interface SqmInsertStatement extends SqmStatement {
-	RootEntityFromElement getInsertTarget();
+	SqmRoot getInsertTarget();
 	List<AttributeReferenceSqmExpression> getStateFields();
 }

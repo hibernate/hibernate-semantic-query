@@ -11,9 +11,9 @@ import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.query.from.FromElement;
-import org.hibernate.sqm.query.from.QualifiedJoinedFromElement;
+import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.from.SqmQualifiedJoin;
 
 /**
  * PathResolver implementation for paths found in a join predicate.
@@ -21,18 +21,23 @@ import org.hibernate.sqm.query.from.QualifiedJoinedFromElement;
  * @author Steve Ebersole
  */
 public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
-	private final QualifiedJoinedFromElement joinRhs;
+	private final SqmQualifiedJoin joinRhs;
 
 	public PathResolverJoinPredicateImpl(
 			ResolutionContext resolutionContext,
-			QualifiedJoinedFromElement joinRhs) {
+			SqmQualifiedJoin joinRhs) {
 		super( resolutionContext );
 		this.joinRhs = joinRhs;
 	}
 
 	@Override
+	public boolean canReuseImplicitJoins() {
+		return false;
+	}
+
+	@Override
 	@SuppressWarnings("StatementWithEmptyBody")
-	protected void validatePathRoot(FromElement fromElement) {
+	protected void validatePathRoot(SqmFrom fromElement) {
 		// make sure no incoming FromElement comes from a FromElementSpace other
 		// than the FromElementSpace joinRhs comes from
 		if ( joinRhs.getContainingSpace() != fromElement.getContainingSpace() ) {
@@ -45,7 +50,7 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 
 	@Override
 	protected void validateIntermediateAttributeJoin(
-			AttributeBindingSource lhs,
+			Binding lhs,
 			Attribute joinedAttribute) {
 		super.validateIntermediateAttributeJoin( lhs, joinedAttribute );
 

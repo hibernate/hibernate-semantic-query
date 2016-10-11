@@ -7,20 +7,18 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Attribute;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.PluralAttribute;
 import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeIndexedReference implements AttributeBinding, SqmExpression, AttributeBindingSource {
+public class PluralAttributeIndexedReference implements Binding {
 	private final AttributeBinding pluralAttributeBinding;
 	private final SqmExpression indexSelectionExpression;
 
@@ -63,40 +61,13 @@ public class PluralAttributeIndexedReference implements AttributeBinding, SqmExp
 	}
 
 	@Override
-	public Attribute getBoundAttribute() {
-		return getPluralAttribute();
-	}
-
-	@Override
-	public AttributeBindingSource getAttributeBindingSource() {
-		return getPluralAttributeBinding().getAttributeBindingSource();
-	}
-
-	@Override
-	public Bindable getBoundModelType() {
-		return getPluralAttributeBinding().getBoundModelType();
+	public Bindable getBindable() {
+		return getPluralAttributeBinding().getBindable();
 	}
 
 	@Override
 	public String asLoggableText() {
 		return pluralAttributeBinding.asLoggableText();
-	}
-
-	@Override
-	public FromElementBinding getBoundFromElementBinding() {
-		return getAttributeBindingSource().getFromElement();
-	}
-
-	@Override
-	public FromElement getFromElement() {
-		return getBoundFromElementBinding().getFromElement();
-	}
-
-	@Override
-	public ManagedType getAttributeContributingType() {
-		return isBindable()
-				? (ManagedType) type
-				: null;
 	}
 
 	private boolean isBindable() {
@@ -108,5 +79,10 @@ public class PluralAttributeIndexedReference implements AttributeBinding, SqmExp
 		return isBindable()
 				? (ManagedType) type
 				: null;
+	}
+
+	@Override
+	public SqmFrom getFromElement() {
+		return pluralAttributeBinding.getFromElement();
 	}
 }

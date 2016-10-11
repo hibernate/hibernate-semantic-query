@@ -7,7 +7,9 @@
 package org.hibernate.sqm.domain;
 
 /**
- * A type-safe representation of a domain model type.
+ * A type-safe representation of a domain model type.  Generally, this type
+ * describes just the Java model, not an "mapping" of that model to the
+ * database which is more the purpose of a {@link Bindable}
  *
  * @author Steve Ebersole
  */

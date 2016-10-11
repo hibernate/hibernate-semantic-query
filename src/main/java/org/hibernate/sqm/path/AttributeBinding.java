@@ -7,6 +7,7 @@
 package org.hibernate.sqm.path;
 
 import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
  * Represents an Attribute binding (reference) in the sqm.
@@ -21,10 +22,7 @@ public interface AttributeBinding extends Binding {
 	 */
 	Attribute getBoundAttribute();
 
-	/**
-	 * Obtain the source (lhs) of this AttributeBinding
-	 *
-	 * @return The lhs of this AttributeBinding
-	 */
-	AttributeBindingSource getAttributeBindingSource();
+	Binding getLeftHandSide();
+
+	void injectFromElementGeneratedForAttribute(SqmAttributeJoin join);
 }

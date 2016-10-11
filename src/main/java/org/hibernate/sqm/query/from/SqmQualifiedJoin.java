@@ -13,7 +13,7 @@ import org.hibernate.sqm.query.predicate.SqmPredicate;
  *
  * @author Steve Ebersole
  */
-public interface QualifiedJoinedFromElement extends JoinedFromElement {
+public interface SqmQualifiedJoin extends SqmJoin {
 	/**
 	 * Obtain the join predicate
 	 *

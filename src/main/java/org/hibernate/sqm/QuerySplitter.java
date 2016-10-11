@@ -14,24 +14,18 @@ import java.util.Map;
 import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.domain.PolymorphicEntityType;
 import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.query.SqmQuerySpec;
+import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.SqmDeleteStatement;
+import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
@@ -43,20 +37,26 @@ import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.from.CrossJoinedFromElement;
-import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
-import org.hibernate.sqm.query.from.QualifiedEntityJoinFromElement;
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
+import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
@@ -64,15 +64,15 @@ import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
 import org.hibernate.sqm.query.predicate.GroupedSqmPredicate;
-import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
 import org.hibernate.sqm.query.predicate.InListSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
 import org.hibernate.sqm.query.predicate.LikeSqmPredicate;
 import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
 import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
-import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiationArgument;
@@ -91,9 +91,9 @@ public class QuerySplitter {
 		// We only allow unmapped polymorphism in a very restricted way.  Specifically,
 		// the unmapped polymorphic reference can only be a root and can be the only
 		// root.  Use that restriction to locate the unmapped polymorphic reference
-		RootEntityFromElement unmappedPolymorphicReference = null;
+		SqmRoot unmappedPolymorphicReference = null;
 		for ( FromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
-			if ( PolymorphicEntityType.class.isInstance( fromElementSpace.getRoot().getBoundModelType() ) ) {
+			if ( PolymorphicEntityType.class.isInstance( fromElementSpace.getRoot().getBindable() ) ) {
 				unmappedPolymorphicReference = fromElementSpace.getRoot();
 			}
 		}
@@ -102,7 +102,7 @@ public class QuerySplitter {
 			return new SqmSelectStatement[] { statement };
 		}
 
-		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBoundModelType();
+		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBindable();
 		final SqmSelectStatement[] expanded = new SqmSelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
@@ -120,14 +120,14 @@ public class QuerySplitter {
 	}
 
 	private static class UnmappedPolymorphismReplacer extends BaseSemanticQueryWalker {
-		private final RootEntityFromElement unmappedPolymorphicFromElement;
+		private final SqmRoot unmappedPolymorphicFromElement;
 		private final EntityType mappedDescriptor;
 
-		private Map<FromElement,FromElement> fromElementCopyMap = new HashMap<FromElement, FromElement>();
+		private Map<SqmFrom,SqmFrom> fromElementCopyMap = new HashMap<>();
 
 		private UnmappedPolymorphismReplacer(
 				SqmSelectStatement selectStatement,
-				RootEntityFromElement unmappedPolymorphicFromElement,
+				SqmRoot unmappedPolymorphicFromElement,
 				EntityType mappedDescriptor) {
 			this.unmappedPolymorphicFromElement = unmappedPolymorphicFromElement;
 			this.mappedDescriptor = mappedDescriptor;
@@ -219,8 +219,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public RootEntityFromElement visitRootEntityFromElement(RootEntityFromElement rootEntityFromElement) {
-			final RootEntityFromElement existingCopy = (RootEntityFromElement) fromElementCopyMap.get( rootEntityFromElement );
+		public SqmRoot visitRootEntityFromElement(SqmRoot rootEntityFromElement) {
+			final SqmRoot existingCopy = (SqmRoot) fromElementCopyMap.get( rootEntityFromElement );
 			if ( existingCopy != null ) {
 				return existingCopy;
 			}
@@ -232,9 +232,9 @@ public class QuerySplitter {
 				throw new ParsingException( "FromElementSpace copy already contains root." );
 			}
 
-			final RootEntityFromElement copy;
+			final SqmRoot copy;
 			if ( rootEntityFromElement == unmappedPolymorphicFromElement ) {
-				copy = new RootEntityFromElement(
+				copy = new SqmRoot(
 						currentFromElementSpaceCopy,
 						rootEntityFromElement.getUniqueIdentifier(),
 						rootEntityFromElement.getIdentificationVariable(),
@@ -242,11 +242,11 @@ public class QuerySplitter {
 				);
 			}
 			else {
-				copy = new RootEntityFromElement(
+				copy = new SqmRoot(
 						currentFromElementSpaceCopy,
 						rootEntityFromElement.getUniqueIdentifier(),
 						rootEntityFromElement.getIdentificationVariable(),
-						rootEntityFromElement.getBoundModelType()
+						rootEntityFromElement.getBindable()
 				);
 			}
 			fromElementCopyMap.put( rootEntityFromElement, copy );
@@ -254,8 +254,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public Object visitCrossJoinedFromElement(CrossJoinedFromElement joinedFromElement) {
-			final CrossJoinedFromElement existingCopy = (CrossJoinedFromElement) fromElementCopyMap.get( joinedFromElement );
+		public Object visitCrossJoinedFromElement(SqmCrossJoin joinedFromElement) {
+			final SqmCrossJoin existingCopy = (SqmCrossJoin) fromElementCopyMap.get( joinedFromElement );
 			if ( existingCopy != null ) {
 				return existingCopy;
 			}
@@ -264,19 +264,19 @@ public class QuerySplitter {
 				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
-			CrossJoinedFromElement copy = new CrossJoinedFromElement(
+			SqmCrossJoin copy = new SqmCrossJoin(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getBoundModelType()
+					joinedFromElement.getBindable()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
 			return copy;
 		}
 
 		@Override
-		public Object visitQualifiedEntityJoinFromElement(QualifiedEntityJoinFromElement joinedFromElement) {
-			final QualifiedEntityJoinFromElement existingCopy = (QualifiedEntityJoinFromElement) fromElementCopyMap.get( joinedFromElement );
+		public Object visitQualifiedEntityJoinFromElement(SqmEntityJoin joinedFromElement) {
+			final SqmEntityJoin existingCopy = (SqmEntityJoin) fromElementCopyMap.get( joinedFromElement );
 			if ( existingCopy != null ) {
 				return existingCopy;
 			}
@@ -285,11 +285,11 @@ public class QuerySplitter {
 				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
-			QualifiedEntityJoinFromElement copy = new QualifiedEntityJoinFromElement(
+			SqmEntityJoin copy = new SqmEntityJoin(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getBoundModelType(),
+					joinedFromElement.getBindable(),
 					joinedFromElement.getJoinType()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
@@ -297,8 +297,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public Object visitQualifiedAttributeJoinFromElement(QualifiedAttributeJoinFromElement joinedFromElement) {
-			final QualifiedAttributeJoinFromElement existingCopy = (QualifiedAttributeJoinFromElement) fromElementCopyMap.get( joinedFromElement );
+		public Object visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement) {
+			final SqmAttributeJoin existingCopy = (SqmAttributeJoin) fromElementCopyMap.get( joinedFromElement );
 			if ( existingCopy != null ) {
 				return existingCopy;
 			}
@@ -307,15 +307,26 @@ public class QuerySplitter {
 				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
-			QualifiedAttributeJoinFromElement copy = new QualifiedAttributeJoinFromElement(
-					currentFromElementSpaceCopy,
+			if ( joinedFromElement.getLeftHandSide().getFromElement() == null ) {
+				throw new ParsingException( "Could not determine attribute join's LHS for copy" );
+			}
+
+			final SqmFrom lhsCopy = fromElementCopyMap.get( joinedFromElement.getLeftHandSide().getFromElement() );
+
+			if ( lhsCopy == null ) {
+				throw new ParsingException( "Could not determine attribute join's LHS for copy" );
+			}
+
+			assert lhsCopy.getContainingSpace() == currentFromElementSpaceCopy;
+
+			SqmAttributeJoin copy = new SqmAttributeJoin(
+					lhsCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
 					joinedFromElement.getJoinedAttributeDescriptor(),
 					joinedFromElement.getIntrinsicSubclassIndicator(),
 					joinedFromElement.asLoggableText(),
 					joinedFromElement.getJoinType(),
-					joinedFromElement,
 					joinedFromElement.isFetched()
 			);
 			fromElementCopyMap.put( joinedFromElement, copy );
@@ -506,18 +517,19 @@ public class QuerySplitter {
 
 		@Override
 		public AttributeReferenceSqmExpression visitAttributeReferenceExpression(AttributeReferenceSqmExpression expression) {
-			AttributeBindingSource attributeBindingSource = expression.getAttributeBindingSource();
-			if ( attributeBindingSource instanceof FromElement ) {
+			Binding lhs = expression.getLeftHandSide();
+			if ( lhs instanceof SqmFrom ) {
 				// find the FromElement copy
-				final FromElement sourceCopy = fromElementCopyMap.get( attributeBindingSource );
+				final SqmFrom sourceCopy = fromElementCopyMap.get( lhs );
 				if ( sourceCopy == null ) {
 					throw new AssertionError( "FromElement not found in copy map" );
 				}
-				attributeBindingSource = sourceCopy;
+				lhs = sourceCopy;
 			}
 			return new AttributeReferenceSqmExpression(
-					attributeBindingSource,
-					expression.getBoundAttribute()
+					lhs,
+					expression.getBoundAttribute(),
+					expression.getFromElement()
 			);
 		}
 

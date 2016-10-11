@@ -14,9 +14,9 @@ import org.hibernate.sqm.query.JoinType;
 /**
  * @author Steve Ebersole
  */
-public class CrossJoinedFromElement extends AbstractFromElement implements JoinedFromElement {
+public class SqmCrossJoin extends AbstractFrom implements SqmJoin {
 
-	public CrossJoinedFromElement(
+	public SqmCrossJoin(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
@@ -25,12 +25,12 @@ public class CrossJoinedFromElement extends AbstractFromElement implements Joine
 	}
 
 	public String getEntityName() {
-		return getBoundModelType().getName();
+		return getBindable().getName();
 	}
 
 	@Override
-	public EntityType getBoundModelType() {
-		return (EntityType) super.getBoundModelType();
+	public EntityType getBindable() {
+		return (EntityType) super.getBindable();
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class CrossJoinedFromElement extends AbstractFromElement implements Joine
 
 	@Override
 	public Attribute resolveAttribute(String attributeName) {
-		return getBoundModelType().findAttribute( attributeName );
+		return getBindable().findAttribute( attributeName );
 	}
 
 	@Override

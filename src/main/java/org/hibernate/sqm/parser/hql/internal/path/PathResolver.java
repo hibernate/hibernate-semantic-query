@@ -7,9 +7,8 @@
 package org.hibernate.sqm.parser.hql.internal.path;
 
 import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.path.AttributeBindingSource;
 import org.hibernate.sqm.path.Binding;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Strategy for resolving attribute path expressions in a contextually pluggable
@@ -37,7 +36,7 @@ public interface PathResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	Binding resolvePath(AttributeBindingSource lhs, String... pathParts);
+	Binding resolvePath(Binding lhs, String... pathParts);
 
 	/**
 	 * Resolve the given path applying the specified "intrinsic" subclass indicator to the
@@ -45,7 +44,7 @@ public interface PathResolver {
 	 * path is an attribute path.
 	 *
 	 * @param subclassIndicator The "intrinsic" subclass indicator to apply to the path terminal.  See
-	 * {@link FromElement#getIntrinsicSubclassIndicator()}
+	 * {@link SqmFrom#getIntrinsicSubclassIndicator()}
 	 * @param pathParts The path parts to resolve
 	 *
 	 * @return The resolve path, or {@code null}.
@@ -57,11 +56,12 @@ public interface PathResolver {
 	 * "intrinsic" subclass indicator to the path terminal
 	 *
 	 * @param subclassIndicator The "intrinsic" subclass indicator to apply to the path terminal.  See
-	 * {@link FromElement#getIntrinsicSubclassIndicator()}
+	 * {@link SqmFrom#getIntrinsicSubclassIndicator()}
 	 * @param pathParts The path parts to resolve
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	Binding resolvePath(AttributeBindingSource lhs, EntityType subclassIndicator, String... pathParts);
+	Binding resolvePath(Binding lhs, EntityType subclassIndicator, String... pathParts);
 
+	boolean canReuseImplicitJoins();
 }

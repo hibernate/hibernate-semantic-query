@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query;
 
-import org.hibernate.sqm.query.from.RootEntityFromElement;
+import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
 import org.hibernate.sqm.query.predicate.SqmWhereClauseContainer;
 import org.hibernate.sqm.query.set.SqmSetClause;
@@ -15,7 +15,7 @@ import org.hibernate.sqm.query.set.SqmSetClause;
  * @author Steve Ebersole
  */
 public interface SqmUpdateStatement extends SqmStatementNonSelect, SqmWhereClauseContainer {
-	RootEntityFromElement getEntityFromElement();
+	SqmRoot getEntityFromElement();
 	SqmSetClause getSetClause();
 	SqmWhereClause getWhereClause();
 }

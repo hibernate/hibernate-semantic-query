@@ -11,6 +11,6 @@ import org.hibernate.sqm.query.JoinType;
 /**
  * @author Steve Ebersole
  */
-public interface JoinedFromElement extends FromElement {
+public interface SqmJoin extends SqmFrom {
 	JoinType getJoinType();
 }

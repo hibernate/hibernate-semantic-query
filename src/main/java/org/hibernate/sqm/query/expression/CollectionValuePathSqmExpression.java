@@ -10,10 +10,9 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.from.FromElement;
-import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
+import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Models a reference to the value of a Collection or Map as defined by the JPA
@@ -23,16 +22,16 @@ import org.hibernate.sqm.query.from.QualifiedAttributeJoinFromElement;
  *
  * @author Steve Ebersole
  */
-public class CollectionValuePathSqmExpression implements SqmExpression, AttributeBindingSource {
-	private final QualifiedAttributeJoinFromElement pluralAttributeBinding;
+public class CollectionValuePathSqmExpression implements SqmExpression, Binding {
+	private final SqmAttributeJoin pluralAttributeBinding;
 	private final Type elementType;
 
-	public CollectionValuePathSqmExpression(QualifiedAttributeJoinFromElement pluralAttributeBinding, Type elementType) {
+	public CollectionValuePathSqmExpression(SqmAttributeJoin pluralAttributeBinding, Type elementType) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 		this.elementType = elementType;
 	}
 
-	public QualifiedAttributeJoinFromElement getPluralAttributeBinding() {
+	public SqmAttributeJoin getPluralAttributeBinding() {
 		return pluralAttributeBinding;
 	}
 
@@ -60,24 +59,19 @@ public class CollectionValuePathSqmExpression implements SqmExpression, Attribut
 	}
 
 	@Override
-	public FromElement getFromElement() {
+	public SqmFrom getFromElement() {
 		return pluralAttributeBinding;
 	}
 
 	@Override
-	public ManagedType getAttributeContributingType() {
+	public ManagedType getSubclassIndicator() {
 		return (ManagedType) elementType;
 	}
 
 	@Override
-	public ManagedType getSubclassIndicator() {
-		return getAttributeContributingType();
-	}
-
-	@Override
-	public Bindable getBoundModelType() {
+	public Bindable getBindable() {
 		// for now just cast.  
-		return (Bindable) getAttributeContributingType();
+		return (Bindable) elementType;
 	}
 
 	@Override
@@ -85,8 +79,4 @@ public class CollectionValuePathSqmExpression implements SqmExpression, Attribut
 		return "VALUE(" + pluralAttributeBinding.asLoggableText() + ")";
 	}
 
-	@Override
-	public FromElementBinding getBoundFromElementBinding() {
-		return null;
-	}
 }

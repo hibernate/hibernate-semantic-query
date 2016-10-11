@@ -10,18 +10,17 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.Bindable;
 import org.hibernate.sqm.domain.ManagedType;
 import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.AttributeBindingSource;
-import org.hibernate.sqm.path.FromElementBinding;
-import org.hibernate.sqm.query.from.FromElement;
+import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * @author Steve Ebersole
  */
-public class MapKeyPathSqmExpression implements SqmExpression, AttributeBindingSource {
-	private final FromElement collectionReference;
+public class MapKeyPathSqmExpression implements SqmExpression, Binding {
+	private final SqmFrom collectionReference;
 	private final Type indexType;
 
-	public MapKeyPathSqmExpression(FromElement collectionReference, Type indexType) {
+	public MapKeyPathSqmExpression(SqmFrom collectionReference, Type indexType) {
 		this.collectionReference = collectionReference;
 		this.indexType = indexType;
 	}
@@ -50,13 +49,8 @@ public class MapKeyPathSqmExpression implements SqmExpression, AttributeBindingS
 	}
 
 	@Override
-	public FromElement getFromElement() {
+	public SqmFrom getFromElement() {
 		return collectionReference;
-	}
-
-	@Override
-	public ManagedType getAttributeContributingType() {
-		return (ManagedType) getMapKeyType();
 	}
 
 	@Override
@@ -68,7 +62,7 @@ public class MapKeyPathSqmExpression implements SqmExpression, AttributeBindingS
 	}
 
 	@Override
-	public Bindable getBoundModelType() {
+	public Bindable getBindable() {
 		if ( !Bindable.class.isInstance( getMapKeyType() ) ) {
 			return null;
 		}
@@ -78,10 +72,5 @@ public class MapKeyPathSqmExpression implements SqmExpression, AttributeBindingS
 	@Override
 	public String asLoggableText() {
 		return "MapKeyPathExpression(" + getFromElement().asLoggableText() + ")";
-	}
-
-	@Override
-	public FromElementBinding getBoundFromElementBinding() {
-		return null;
 	}
 }

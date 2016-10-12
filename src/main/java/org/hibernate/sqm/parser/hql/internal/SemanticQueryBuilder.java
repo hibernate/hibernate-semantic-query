@@ -1376,6 +1376,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
+		// another option here is to allow temporarily setting PathResolverBasicImpl#shouldRenderTerminalAttributeBindingAsJoin()
+		// as true
+
 		if ( pathResolution.getFromElement() == null ) {
 			// we have a query like:
 			//

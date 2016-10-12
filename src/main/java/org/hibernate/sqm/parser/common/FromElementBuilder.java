@@ -181,8 +181,8 @@ public class FromElementBuilder {
 
 			fromElementSpace.addJoin( join );
 			parsingContext.registerFromElementByUniqueId( join );
+			parsingContext.attributeJoinCreatedNotification( join );
 			registerAlias( join );
-			registerPath( join );
 		}
 
 		return join;
@@ -200,11 +200,5 @@ public class FromElementBuilder {
 		}
 
 		aliasRegistry.registerAlias( fromElement );
-	}
-
-	private void registerPath(SqmAttributeJoin join) {
-		// todo : come back to this
-		// 		Be sure to disable this while processing from clauses (FromClauseProcessor).  Paths in from clause
-		//		should almost never be reused.  Paths defined in other parts of the sqm are fine...
 	}
 }

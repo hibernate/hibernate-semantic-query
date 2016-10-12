@@ -21,6 +21,11 @@ public class PathResolverSelectClauseImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
+	protected boolean shouldRenderTerminalAttributeBindingAsJoin() {
+		return true;
+	}
+
+	@Override
 	protected AttributeBinding resolveTerminalAttributeBinding(Binding lhs, String terminalName) {
 		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
 

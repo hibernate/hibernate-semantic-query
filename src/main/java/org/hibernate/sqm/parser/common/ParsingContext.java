@@ -6,11 +6,16 @@
  */
 package org.hibernate.sqm.parser.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 
@@ -29,6 +34,7 @@ public class ParsingContext {
 	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
 
 	private Map<SqmFrom,Map<Attribute,SqmAttributeJoin>> attributeJoinMapByFromElement;
+	private List<AttributeReferenceSqmExpression> delayedJoinAttributeReferences;
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -95,4 +101,38 @@ public class ParsingContext {
 		return attributeJoinMap.get( attribute );
 	}
 
+	public void registerAttributeReference(AttributeReferenceSqmExpression reference) {
+		if ( reference.getFromElement() != null ) {
+			// we only need to track these if they do not already contain their
+			// linked from-element
+			return;
+		}
+
+		if ( delayedJoinAttributeReferences == null ) {
+			delayedJoinAttributeReferences = new ArrayList<>();
+		}
+		delayedJoinAttributeReferences.add( reference );
+	}
+
+	public void attributeJoinCreatedNotification(SqmAttributeJoin join) {
+		if ( ImplicitAliasGenerator.isImplicitAlias( join.getIdentificationVariable() ) ) {
+			// the join was defined in the FROM-clause, so cannot be the "target" of an implicit join
+			return;
+		}
+
+		if ( delayedJoinAttributeReferences == null ) {
+			return;
+		}
+
+
+		final Iterator<AttributeReferenceSqmExpression> references = delayedJoinAttributeReferences.iterator();
+		while ( references.hasNext() ) {
+			final AttributeBinding reference = references.next();
+			if ( reference.getLeftHandSide() == join.getLeftHandSide()
+					&& reference.getBoundAttribute() == join.getBoundAttribute() ) {
+				reference.injectFromElementGeneratedForAttribute( join );
+				references.remove();
+			}
+		}
+	}
 }

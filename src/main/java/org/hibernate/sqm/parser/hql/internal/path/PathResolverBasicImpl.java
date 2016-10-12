@@ -6,8 +6,15 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
+import org.hibernate.sqm.domain.AnyType;
 import org.hibernate.sqm.domain.Attribute;
+import org.hibernate.sqm.domain.EmbeddableType;
 import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.IdentifiableType;
+import org.hibernate.sqm.domain.ManagedType;
+import org.hibernate.sqm.domain.PluralAttribute;
+import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.path.AttributeBinding;
 import org.hibernate.sqm.path.Binding;
@@ -26,6 +33,10 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 
 	public PathResolverBasicImpl(ResolutionContext context) {
 		super( context );
+	}
+
+	protected boolean shouldRenderTerminalAttributeBindingAsJoin() {
+		return false;
 	}
 
 	@Override
@@ -121,8 +132,42 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			Binding lhs,
 			String terminalName) {
 		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
-		log.debugf( "Resolved terminal attribute-binding [%s -> %s] : %s", lhs.asLoggableText(), terminalName, attribute );
-		return new AttributeReferenceSqmExpression( lhs, attribute, null );
+		if ( shouldRenderTerminalAttributeBindingAsJoin() && isJoinable( attribute ) ) {
+			log.debugf(
+					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-join",
+					lhs.asLoggableText(),
+					terminalName,
+					attribute
+			);
+			return buildAttributeJoin(
+					// see note in #resolveTreatedTerminal regarding cast
+					(SqmFrom) lhs,
+					attribute,
+					null
+			);
+		}
+		else {
+			log.debugf(
+					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-reference",
+					lhs.asLoggableText(),
+					terminalName,
+					attribute
+			);
+			final AttributeReferenceSqmExpression attributeReference = new AttributeReferenceSqmExpression( lhs, attribute, null );
+			context().getParsingContext().registerAttributeReference( attributeReference );
+			return attributeReference;
+		}
+	}
+
+	private boolean isJoinable(Attribute attribute) {
+		if ( attribute instanceof PluralAttribute ) {
+			return true;
+		}
+		else {
+			final Type singularAttributeType = ( (SingularAttribute) attribute ).getType();
+			return singularAttributeType instanceof ManagedType
+					|| singularAttributeType instanceof AnyType;
+		}
 	}
 
 	protected Binding resolveFromElementAliasAsTerminal(SqmFrom aliasedFromElement) {
@@ -139,8 +184,8 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 		log.debugf( "Resolved terminal treated-path : %s -> %s", joinedAttribute, subclassIndicator );
 		final SqmAttributeJoin join = buildAttributeJoin(
 				// todo : just do a cast for now, but this needs to be thought out (Binding -> SqmFrom)
-				//		^^ SqmFrom-specifically needed mainly needed for "FromElementSpace"
-				//		but perhaps that resolution coulkd be delayed
+				//		^^ SqmFrom specifically needed mainly needed for "FromElementSpace"
+				//		but perhaps that resolution could be delayed
 				(SqmFrom) lhs,
 				joinedAttribute,
 				subclassIndicator

@@ -19,6 +19,7 @@ import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.Elemen
 import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.parser.common.MapKeyBinding;
 import org.hibernate.sqm.parser.common.PluralAttributeElementBinding;
 import org.hibernate.sqm.query.SqmQuerySpec;
@@ -127,7 +128,7 @@ public class SelectClauseTests {
 		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmFrom.class ) );
+		assertThat( selection.getExpression(), instanceOf( EntityBinding.class ) );
 	}
 
 	@Test
@@ -158,7 +159,7 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( SqmFrom.class )
+				instanceOf( EntityBinding.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),

@@ -9,6 +9,7 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
@@ -63,9 +64,9 @@ public class FromElementContainmentTests {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmFrom.class ) );
+		assertThat( selection.getExpression(), instanceOf( EntityBinding.class ) );
 
-		assertSame( fromElement, selection.getExpression() );
+		assertSame( fromElement, ( (EntityBinding) selection.getExpression() ).getFromElement() );
 	}
 
 	@Test
@@ -79,10 +80,13 @@ public class FromElementContainmentTests {
 		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
-				instanceOf( SqmFrom.class )
+				instanceOf( EntityBinding.class )
 		);
 
-		assertSame( fromElement, statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() );
+		assertSame(
+				fromElement,
+				( (EntityBinding) statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() ).getFromElement()
+		);
 	}
 
 	@Test

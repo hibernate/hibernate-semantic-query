@@ -7,28 +7,31 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 
 /**
- * Represents an reference to an entity type
- *
  * @author Steve Ebersole
  */
 public class EntityTypeSqmExpression implements SqmExpression {
-	private final EntityReference entityType;
+	private final DomainReferenceBinding binding;
 
-	public EntityTypeSqmExpression(EntityReference entityType) {
-		this.entityType = entityType;
+	public EntityTypeSqmExpression(DomainReferenceBinding binding) {
+		this.binding = binding;
+	}
+
+	public DomainReferenceBinding getBinding() {
+		return binding;
 	}
 
 	@Override
-	public EntityReference getExpressionType() {
-		return entityType;
+	public DomainReference getExpressionType() {
+		return binding.getBoundDomainReference();
 	}
 
 	@Override
-	public EntityReference getInferableType() {
-		return getExpressionType();
+	public DomainReference getInferableType() {
+		return binding.getBoundDomainReference();
 	}
 
 	@Override
@@ -38,6 +41,6 @@ public class EntityTypeSqmExpression implements SqmExpression {
 
 	@Override
 	public String asLoggableText() {
-		return "TYPE(" + entityType.getEntityName() + ")";
+		return "TYPE(" + binding.asLoggableText() + ")";
 	}
 }

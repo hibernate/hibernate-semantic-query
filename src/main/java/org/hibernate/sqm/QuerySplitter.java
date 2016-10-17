@@ -27,7 +27,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
@@ -556,8 +556,8 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public EntityTypeSqmExpression visitEntityTypeExpression(EntityTypeSqmExpression expression) {
-			return new EntityTypeSqmExpression( expression.getExpressionType() );
+		public EntityTypeLiteralSqmExpression visitEntityTypeLiteralExpression(EntityTypeLiteralSqmExpression expression) {
+			return new EntityTypeLiteralSqmExpression( expression.getExpressionType() );
 		}
 
 		@Override

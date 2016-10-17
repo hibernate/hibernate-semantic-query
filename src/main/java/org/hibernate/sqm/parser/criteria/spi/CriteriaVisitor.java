@@ -25,7 +25,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
@@ -115,8 +115,8 @@ public interface CriteriaVisitor {
 			javax.persistence.criteria.Expression expression2,
 			BasicType resultType);
 
-	EntityTypeSqmExpression visitEntityType(String identificationVariable);
-	EntityTypeSqmExpression visitEntityType(String identificationVariable, String attributeName);
+	EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable);
+	EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable, String attributeName);
 
 //	CollectionSizeFunction visitCollectionSizeFunction();
 //

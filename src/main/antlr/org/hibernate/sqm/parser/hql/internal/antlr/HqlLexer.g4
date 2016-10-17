@@ -203,6 +203,7 @@ TIMEZONE_MINUTE		: [tT] [iI] [mM] [eE] [zZ] [oO] [nN] [eE] '_' [mM] [iI] [nN] [u
 TRAILING			: [tT] [rR] [aA] [iI] [lL] [iI] [nN] [gG];
 TREAT				: [tT] [rR] [eE] [aA] [tT];
 TRIM				: [tT] [rR] [iI] [mM];
+TYPE				: [tT] [yY] [pP] [eE];
 UPDATE				: [uU] [pP] [dD] [aA] [tT] [eE];
 UPPER				: [uU] [pP] [pP] [eE] [rR];
 VALUE				: [vV] [aA] [lL] [uU] [eE];

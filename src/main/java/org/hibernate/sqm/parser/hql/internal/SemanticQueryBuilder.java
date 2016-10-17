@@ -22,11 +22,14 @@ import org.hibernate.sqm.domain.PluralAttributeReference;
 import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
 import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
 import org.hibernate.sqm.domain.PolymorphicEntityReference;
+import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.LiteralNumberFormatException;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
 import org.hibernate.sqm.parser.common.MapKeyBinding;
 import org.hibernate.sqm.parser.common.ParameterDeclarationContext;
@@ -62,6 +65,7 @@ import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantSqmExpression;
+import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.ImpliedTypeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
@@ -83,6 +87,8 @@ import org.hibernate.sqm.query.expression.MinElementSqmExpression;
 import org.hibernate.sqm.query.expression.MinIndexSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
+import org.hibernate.sqm.query.expression.ParameterSqmExpression;
+import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
@@ -102,7 +108,6 @@ import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
@@ -828,11 +833,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				resolveAttributeJoinIfNot( binding, identificationVariable );
 				joinedFromElement = binding.getFromElement();
 			}
-			else if ( joinedPath instanceof EntityTypeSqmExpression ) {
+			else if ( joinedPath instanceof EntityTypeLiteralSqmExpression ) {
 				joinedFromElement = currentQuerySpecProcessingState.getFromElementBuilder().buildEntityJoin(
 						currentFromElementSpace,
 						identificationVariable,
-						( (EntityTypeSqmExpression) joinedPath ).getExpressionType(),
+						( (EntityTypeLiteralSqmExpression) joinedPath ).getExpressionType(),
 						joinType
 				);
 			}
@@ -1174,13 +1179,117 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
+	public Object visitEntityTypeExpression(HqlParser.EntityTypeExpressionContext ctx) {
+		// can be one of 2 forms:
+		//		1) TYPE( some.path )
+		//		2) TYPE( :someParam )
+		if ( ctx.entityTypeReference().parameter() != null ) {
+			// we have form (2)
+			return new ParameterizedEntityTypeSqmExpression(
+					(ParameterSqmExpression) ctx.entityTypeReference().parameter().accept( this )
+			);
+		}
+		else if ( ctx.entityTypeReference().path() != null ) {
+			final DomainReferenceBinding binding = (DomainReferenceBinding) ctx.entityTypeReference().path().accept( this );
+			validateBindingAsEntityTypeExpression( binding );
+			return new EntityTypeSqmExpression( binding );
+		}
+
+		throw new ParsingException( "Could not interpret grammar context as 'entity type' expression : " + ctx.getText() );
+	}
+
+	private void validateBindingAsEntityTypeExpression(DomainReferenceBinding binding) {
+		if ( binding instanceof EntityBinding ) {
+			// its ok
+			return;
+		}
+
+		if ( binding instanceof AttributeBinding ) {
+			final AttributeBinding attrBinding = (AttributeBinding) binding;
+
+			if ( attrBinding.getAttribute() instanceof SingularAttributeReference ) {
+				final SingularAttributeReference attrRef = (SingularAttributeReference) attrBinding.getAttribute();
+				if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.BASIC
+						|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.EMBEDDED ) {
+					throw new SemanticException(
+							"Path used in TYPE() resolved to a singular attribute of non-entity type : "
+									+ attrRef.getAttributeTypeClassification().name()
+					);
+				}
+
+				return;
+			}
+		}
+
+		// this ^^ is all JPA allows.  Any of these below should technically validate against strict compliance check
+
+		if ( binding instanceof AttributeBinding ) {
+			final AttributeBinding attrBinding = (AttributeBinding) binding;
+
+			if ( attrBinding.getAttribute() instanceof PluralAttributeReference ) {
+				final PluralAttributeReference attrRef = (PluralAttributeReference) attrBinding.getAttribute();
+				if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
+						|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
+						|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
+					throw new SemanticException(
+							"Path used in TYPE() resolved to a plural attribute of non-entity type elements : "
+									+ attrRef.getElementReference().getClassification().name()
+					);
+				}
+
+				return;
+			}
+		}
+
+		if ( binding instanceof MapKeyBinding ) {
+			final MapKeyBinding mapKeyBinding = (MapKeyBinding) binding;
+			final PluralAttributeReference attrRef = (PluralAttributeReference) mapKeyBinding.getPluralAttributeBinding().getAttribute();
+			if ( attrRef.getIndexReference().getClassification() == IndexClassification.ANY
+					|| attrRef.getIndexReference().getClassification() == IndexClassification.BASIC
+					|| attrRef.getIndexReference().getClassification() == IndexClassification.EMBEDDABLE ) {
+				throw new SemanticException(
+						"Path used in TYPE() [" + mapKeyBinding.asLoggableText() + "] resolved to a Map KEY() expression, but the Map's keys are of non-entity type : "
+								+ attrRef.getIndexReference().getClassification().name()
+				);
+			}
+		}
+
+		if ( binding instanceof PluralAttributeElementBinding ) {
+			final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) binding;
+			final PluralAttributeReference attrRef = (PluralAttributeReference) elementBinding.getPluralAttributeBinding().getAttribute();
+			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
+					|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
+					|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
+				throw new SemanticException(
+						"Path used in TYPE() [" + elementBinding.asLoggableText() + "] resolved to a plural attribute VALUE() expression, but the elements are of non-entity type : "
+								+ attrRef.getElementReference().getClassification().name()
+				);
+			}
+		}
+
+		if ( binding instanceof PluralAttributeIndexedAccessBinding ) {
+			final PluralAttributeIndexedAccessBinding indexedAccessBinding = (PluralAttributeIndexedAccessBinding) binding;
+			final PluralAttributeReference attrRef = (PluralAttributeReference) indexedAccessBinding.getPluralAttributeBinding().getAttribute();
+			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
+					|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
+					|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
+				throw new SemanticException(
+						"Path used in TYPE() [" + indexedAccessBinding.asLoggableText() + "] resolved to an index-access expression, but the elements are of non-entity type : "
+								+ attrRef.getIndexReference().getClassification().name()
+				);
+			}
+		}
+
+	}
+
+	@Override
 	public Object visitJavaClassReference(HqlParser.JavaClassReferenceContext ctx) {
-		final String pathText = ctx.getText();
+		final String name = ctx.getText();
 
 		try {
-			final EntityReference entityType = parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( pathText );
+			final EntityReference entityType = parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( name );
 			if ( entityType != null ) {
-				return new EntityTypeSqmExpression( entityType );
+				return new EntityTypeLiteralSqmExpression( entityType );
 			}
 		}
 		catch (IllegalArgumentException ignore) {
@@ -1209,11 +1318,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		// SimplePath might represent any number of things
 		final DomainReferenceBinding binding = pathResolverStack.getCurrent().resolvePath( splitPathParts( ctx.dotIdentifierSequence() ) );
 		if ( binding != null ) {
-			if ( binding instanceof AttributeBinding ) {
-//				return ( (AttributeBinding) binding ).getExpression();
-				return ( (AttributeBinding) binding );
-			}
-			return binding.getFromElement();
+			return binding;
 		}
 
 		final String pathText = ctx.getText();
@@ -1221,7 +1326,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		try {
 			final EntityReference entityType = parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( pathText );
 			if ( entityType != null ) {
-				return new EntityTypeSqmExpression( entityType );
+				return new EntityTypeLiteralSqmExpression( entityType );
 			}
 		}
 		catch (IllegalArgumentException ignore) {

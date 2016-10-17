@@ -24,6 +24,7 @@ import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
+import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
@@ -43,6 +44,7 @@ import org.hibernate.sqm.query.expression.MinElementSqmExpression;
 import org.hibernate.sqm.query.expression.MinIndexSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
+import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
@@ -161,7 +163,11 @@ public interface SemanticQueryWalker<T> {
 
 	T visitNamedParameterExpression(NamedParameterSqmExpression expression);
 
+	T visitEntityTypeLiteralExpression(EntityTypeLiteralSqmExpression expression);
+
 	T visitEntityTypeExpression(EntityTypeSqmExpression expression);
+
+	T visitParameterizedEntityTypeExpression(ParameterizedEntityTypeSqmExpression expression);
 
 	T visitUnaryOperationExpression(UnaryOperationSqmExpression expression);
 

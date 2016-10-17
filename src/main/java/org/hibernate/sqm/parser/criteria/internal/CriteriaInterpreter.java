@@ -57,7 +57,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
@@ -582,7 +582,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public EntityTypeSqmExpression visitEntityType(String identificationVariable) {
+	public EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable) {
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 
@@ -591,7 +591,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public EntityTypeSqmExpression visitEntityType(String identificationVariable, String attributeName) {
+	public EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable, String attributeName) {
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 

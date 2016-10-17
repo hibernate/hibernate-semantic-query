@@ -8,6 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
 import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
@@ -102,7 +103,7 @@ public class SinglePassSmokeTest {
 		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmFrom.class ) );
+		assertThat( selection.getExpression(), instanceOf( EntityBinding.class ) );
 	}
 
 	private SqmSelectStatement interpret(String query) {

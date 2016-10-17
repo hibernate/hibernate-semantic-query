@@ -325,15 +325,16 @@ expression
 	| nullIf									# NullIfExpression
 	| literal									# LiteralExpression
 	| parameter									# ParameterExpression
-	// todo : we need to split `path` to remove the non-path resolutions:
-	//		* Class reference
-	//		* Field reference
-	//		* enum value reference
+	| entityTypeReference						# EntityTypeExpression
 	| path										# PathExpression
 	| javaClassReference						# TypeExpression
 	| fieldOrEnumReference						# FieldOrEnumExpression
 	| function									# FunctionExpression
 	| LEFT_PAREN querySpec RIGHT_PAREN			# SubQueryExpression
+	;
+
+entityTypeReference
+	: TYPE LEFT_PAREN (path | parameter) RIGHT_PAREN
 	;
 
 javaClassReference

@@ -1283,37 +1283,6 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Object visitJavaClassReference(HqlParser.JavaClassReferenceContext ctx) {
-		final String name = ctx.getText();
-
-		try {
-			final EntityReference entityType = parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( name );
-			if ( entityType != null ) {
-				return new EntityTypeLiteralSqmExpression( entityType );
-			}
-		}
-		catch (IllegalArgumentException ignore) {
-		}
-
-		// todo : try imports?
-		throw new SemanticException( "Not a Java Class reference" );
-	}
-
-	@Override
-	public Object visitFieldOrEnumExpression(HqlParser.FieldOrEnumExpressionContext ctx) {
-		final String pathText = ctx.getText();
-
-		try {
-			return resolveConstantExpression( pathText );
-		}
-		catch (SemanticException e) {
-			log.debug( e.getMessage() );
-		}
-
-		throw new SemanticException( "Could not interpret token : " + pathText );
-	}
-
-	@Override
 	public SqmExpression visitSimplePath(HqlParser.SimplePathContext ctx) {
 		// SimplePath might represent any number of things
 		final DomainReferenceBinding binding = pathResolverStack.getCurrent().resolvePath( splitPathParts( ctx.dotIdentifierSequence() ) );
@@ -1332,7 +1301,6 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		catch (IllegalArgumentException ignore) {
 		}
 
-		// 5th level precedence : constant reference
 		try {
 			return resolveConstantExpression( pathText );
 		}
@@ -1369,6 +1337,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	private void resolveAttributeJoinIfNot(AttributeBinding attributeBinding) {
 		resolveAttributeJoinIfNot( attributeBinding, null );
 	}
+
 	private void resolveAttributeJoinIfNot(AttributeBinding attributeBinding, String alias) {
 		if ( attributeBinding.getFromElement() != null ) {
 			return;

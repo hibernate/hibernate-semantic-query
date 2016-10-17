@@ -12,7 +12,7 @@ import org.hibernate.sqm.domain.DomainReference;
 /**
  * @author Steve Ebersole
  */
-public class ParameterizedEntityTypeSqmExpression implements SqmExpression, ImpliedTypeSqmExpression {
+public class ParameterizedEntityTypeSqmExpression implements SqmExpression {
 	private final ParameterSqmExpression parameterExpression;
 
 	public ParameterizedEntityTypeSqmExpression(ParameterSqmExpression parameterExpression) {
@@ -37,10 +37,5 @@ public class ParameterizedEntityTypeSqmExpression implements SqmExpression, Impl
 	@Override
 	public String asLoggableText() {
 		return "TYPE(" + parameterExpression.asLoggableText() + ")";
-	}
-
-	@Override
-	public void impliedType(DomainReference type) {
-		parameterExpression.impliedType( type );
 	}
 }

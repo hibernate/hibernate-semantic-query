@@ -6,19 +6,29 @@
  */
 package org.hibernate.sqm.domain;
 
-import javax.persistence.TemporalType;
+import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 
 /**
- * Expose access to BasicTypes as well as access to EntityTypes by name
+ * Exposes access back to the consumer to be able to resolve domain model
+ * references encountered in the query.
  *
  * @author Steve Ebersole
  */
 public interface DomainMetamodel {
-	<T> BasicType<T> getBasicType(Class<T> javaType);
-	<T> BasicType<T> getBasicType(Class<T> javaType, TemporalType temporalType);
+	EntityReference resolveEntityReference(String entityName);
+	EntityReference resolveEntityReference(Class javaType);
 
-	EntityType resolveEntityType(Class javaType);
-	EntityType resolveEntityType(String name);
+	AttributeReference resolveAttributeReference(DomainReference sourceBinding, String attributeName);
 
-	BasicType resolveCastTargetType(String name);
+	// - just push the cast target text into the tree.  let the consumer figure out how to interpret it?
+	DomainReference resolveCastTargetType(String name);
+
+	BasicType resolveBasicType(Class javaType);
+
+	BasicType resolveArithmeticType(
+			DomainReference firstType,
+			DomainReference secondType,
+			BinaryArithmeticSqmExpression.Operation operation);
+
+	BasicType resolveSumFunctionType(DomainReference argumentType);
 }

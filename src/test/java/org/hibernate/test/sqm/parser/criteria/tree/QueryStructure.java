@@ -88,25 +88,25 @@ public class QueryStructure<T> implements Serializable {
 	}
 
 	public <X> Root<X> from(Class<X> entityClass) {
-		org.hibernate.sqm.domain.EntityType entityType = criteriaBuilder.consumerContext()
+		org.hibernate.test.sqm.domain.EntityType entityType = (org.hibernate.test.sqm.domain.EntityType) criteriaBuilder.consumerContext()
 				.getDomainMetamodel()
-				.resolveEntityType( entityClass );
+				.resolveEntityReference( entityClass );
 		if ( entityType == null ) {
 			throw new IllegalArgumentException( entityClass + " is not an entity" );
 		}
 		return from( entityType );
 	}
 
-	private <X> Root<X> from(org.hibernate.sqm.domain.EntityType entityType) {
+	private <X> Root<X> from(org.hibernate.test.sqm.domain.EntityType entityType) {
 		RootImpl<X> root = new RootImpl<X>( criteriaBuilder, entityType );
 		roots.add( root );
 		return root;
 	}
 
 	public <X> Root<X> from(String entityName) {
-		org.hibernate.sqm.domain.EntityType entityType = criteriaBuilder.consumerContext()
+		org.hibernate.test.sqm.domain.EntityType entityType = (org.hibernate.test.sqm.domain.EntityType) criteriaBuilder.consumerContext()
 				.getDomainMetamodel()
-				.resolveEntityType( entityName );
+				.resolveEntityReference( entityName );
 		if ( entityType == null ) {
 			throw new IllegalArgumentException( entityName + " is not an entity" );
 		}

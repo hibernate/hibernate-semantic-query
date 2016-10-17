@@ -8,21 +8,16 @@ package org.hibernate.sqm.parser.hql.internal.path;
 
 import java.util.Locale;
 
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.IdentifierDescriptor;
-import org.hibernate.sqm.domain.IdentifierDescriptorSingleAttribute;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.parser.QueryException;
+import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.SemanticException;
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
@@ -41,8 +36,8 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return context;
 	}
 
-	protected Binding resolveAnyIntermediateAttributePathJoins(
-			Binding lhs,
+	protected DomainReferenceBinding resolveAnyIntermediateAttributePathJoins(
+			DomainReferenceBinding lhs,
 			String[] pathParts) {
 		// build joins for any intermediate path parts
 		for ( int i = 0, max = pathParts.length-1; i < max; i++ ) {
@@ -51,71 +46,74 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return lhs;
 	}
 
-	protected Binding buildIntermediateAttributeJoin(
-			Binding lhs,
+	protected AttributeBinding buildIntermediateAttributeJoin(
+			DomainReferenceBinding lhs,
 			String pathPart) {
-		final Attribute joinedAttributeDescriptor = resolveAttributeDescriptor( lhs, pathPart );
-		validateIntermediateAttributeJoin( lhs, joinedAttributeDescriptor );
+		final AttributeReference attrRef = context().getParsingContext()
+				.getConsumerContext()
+				.getDomainMetamodel()
+				.resolveAttributeReference( lhs.getFromElement().getDomainReferenceBinding().getBoundDomainReference(), pathPart );
 
-		return buildAttributeJoin( resolveLhsFromElement( lhs ), joinedAttributeDescriptor, null );
+		validateIntermediateAttributeJoin( lhs, attrRef );
+
+		return buildAttributeJoin( lhs, attrRef, null );
 	}
 
-	protected SqmFrom resolveLhsFromElement(Binding lhs) {
-		if ( lhs instanceof SqmFrom ) {
-			return (SqmFrom) lhs;
+	protected AttributeBinding buildAttributeJoin(
+			DomainReferenceBinding lhs,
+			AttributeReference joinedAttributeDescriptor,
+			EntityReference subclassIndicator) {
+		final AttributeBinding attributeBinding = context().getParsingContext()
+				.findOrCreateAttributeBinding( lhs, joinedAttributeDescriptor );
+
+		if ( attributeBinding.getFromElement() == null ) {
+			attributeBinding.injectAttributeJoin(
+					context().getFromElementBuilder().buildAttributeJoin(
+							attributeBinding,
+							null,
+							subclassIndicator,
+							lhs.getFromElement().asLoggableText() + '.' + joinedAttributeDescriptor.getAttributeName(),
+							getIntermediateJoinType(),
+							areIntermediateJoinsFetched(),
+							canReuseImplicitJoins()
+					)
+			);
 		}
 
-		// todo : do we need to build lhs joins here?
-
-		if ( lhs instanceof AttributeBinding ) {
-			return resolveLhsFromElement( ( (AttributeBinding) lhs ).getLeftHandSide() );
-		}
-
-		throw new SemanticException( "Could not resolve Binding [" + lhs + "] to SqmFrom" );
+		return attributeBinding;
 	}
 
-	protected SqmAttributeJoin buildAttributeJoin(
-			SqmFrom lhsFromElement,
-			Attribute joinedAttributeDescriptor,
-			EntityType subclassIndicator) {
-		return context().getFromElementBuilder().buildAttributeJoin(
-				lhsFromElement.getContainingSpace(),
-				null,
-				joinedAttributeDescriptor,
-				subclassIndicator,
-				lhsFromElement.asLoggableText() + '.' + joinedAttributeDescriptor.getName(),
-				getIntermediateJoinType(),
-				lhsFromElement,
-				areIntermediateJoinsFetched(),
-				canReuseImplicitJoins()
-		);
-	}
-
-	protected void validateIntermediateAttributeJoin(Binding lhs, Attribute joinedAttributeDescriptor) {
-		if ( !SingularAttribute.class.isInstance( joinedAttributeDescriptor ) ) {
+	protected void validateIntermediateAttributeJoin(DomainReferenceBinding lhs, AttributeReference joinedAttributeDescriptor) {
+		if ( !SingularAttributeReference.class.isInstance( joinedAttributeDescriptor ) ) {
 			throw new SemanticException(
 					String.format(
 							Locale.ROOT,
-							"Attribute [%s -> %s] is plural, cannot be used in path expression",
-							lhs.asLoggableText(),
-							joinedAttributeDescriptor.getName()
+							"Attribute [%s -> %s] is plural, cannot be used as non-terminal in path expression",
+							lhs.getFromElement().asLoggableText(),
+							joinedAttributeDescriptor.getAttributeName()
 					)
 			);
 		}
 		else {
 			// make sure it is Bindable
-			final SingularAttribute singularAttribute = (SingularAttribute) joinedAttributeDescriptor;
-			if ( singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.BASIC ) {
+			final SingularAttributeReference singularAttribute = (SingularAttributeReference) joinedAttributeDescriptor;
+			if ( !canBeDereferenced( singularAttribute.getAttributeTypeClassification() ) ) {
 				throw new SemanticException(
 						String.format(
 								Locale.ROOT,
-								"Basic SingularAttribute [%s -> %s] cannot be used in path expression",
-								lhs.asLoggableText(),
-								joinedAttributeDescriptor.getName()
+								"SingularAttribute [%s -> %s] reports is cannot be de-referenced, therefore cannot be used as non-terminal in path expression",
+								lhs.getFromElement().asLoggableText(),
+								joinedAttributeDescriptor.getAttributeName()
 						)
 				);
 			}
 		}
+	}
+
+	private boolean canBeDereferenced(SingularAttributeClassification classification) {
+		return classification == SingularAttributeClassification.EMBEDDED
+				|| classification == SingularAttributeClassification.MANY_TO_ONE
+				|| classification == SingularAttributeClassification.ONE_TO_ONE;
 	}
 
 	protected JoinType getIntermediateJoinType() {
@@ -126,62 +124,51 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return false;
 	}
 
-	protected Attribute resolveAttributeDescriptor(Binding lhs, String attributeName) {
-		final ManagedType managedType = resolveManagedType( lhs.getBindable(), lhs.asLoggableText() );
-		final Attribute attributeDescriptor = managedType.findAttribute( attributeName );
-		if ( attributeDescriptor != null ) {
-			return attributeDescriptor;
+	protected AttributeReference resolveAttributeDescriptor(SqmFrom lhs, String attributeName) {
+		return resolveAttributeDescriptor( lhs.getDomainReferenceBinding(), attributeName );
+
+	}
+
+	protected AttributeReference resolveAttributeDescriptor(DomainReferenceBinding lhs, String attributeName) {
+		return context().getParsingContext()
+				.getConsumerContext()
+				.getDomainMetamodel()
+				.resolveAttributeReference( lhs.getBoundDomainReference(), attributeName );
+	}
+
+	protected void resolveAttributeJoinIfNot(AttributeBinding attributeBinding) {
+		if ( attributeBinding.getFromElement() != null ) {
+			return;
 		}
 
-		if ( managedType instanceof EntityType ) {
-			final EntityType entityType = (EntityType) managedType;
-			final IdentifierDescriptor entityIdDescriptor = entityType.getIdentifierDescriptor();
-			final String referableIdAttributeName = entityIdDescriptor.getReferableAttributeName();
-
-			if ( "id".equals( attributeName )
-					|| ( referableIdAttributeName != null && referableIdAttributeName.equals( attributeName ) ) ) {
-				if ( entityIdDescriptor instanceof IdentifierDescriptorSingleAttribute ) {
-					return ( (IdentifierDescriptorSingleAttribute) entityIdDescriptor ).getIdAttribute();
-				}
-				else {
-					return new PseudoIdAttributeImpl( entityType );
-				}
-			}
+		if ( !joinable( attributeBinding ) ) {
+			return;
 		}
 
-		throw new SemanticException(
-				"Name [" + attributeName + "] is not a valid attribute from type [" +
-						managedType + " (" + lhs.asLoggableText() + ")]"
+		attributeBinding.injectAttributeJoin(
+				context().getFromElementBuilder().buildAttributeJoin(
+						attributeBinding,
+						null,
+						null,
+						attributeBinding.getLhs().getFromElement().asLoggableText() + '.' + attributeBinding.getAttribute().getAttributeName(),
+						JoinType.INNER,
+						false,
+						true
+				)
 		);
 	}
 
-	protected ManagedType resolveManagedType(Bindable bindable, String path) {
-		if ( bindable instanceof ManagedType ) {
-			return (ManagedType) bindable;
-		}
-		else if ( bindable instanceof SingularAttribute ) {
-			final SingularAttribute singularAttribute = (SingularAttribute) bindable;
-			if ( !ManagedType.class.isInstance( singularAttribute.getBoundType() ) ) {
-				throw new SemanticException(
-						"Expecting a ManagedType reference, but referenced SingularAttribute [" + path + "] type was not ManagedType : "
-								+ singularAttribute.getBoundType()
-				);
+	private boolean joinable(AttributeBinding attributeBinding) {
+		if ( attributeBinding.getAttribute() instanceof SingularAttributeReference ) {
+			final SingularAttributeReference attrRef = (SingularAttributeReference) attributeBinding.getAttribute();
+			if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.BASIC
+					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ANY ) {
+				return false;
 			}
-			return (ManagedType) singularAttribute.getBoundType();
-		}
-		else if ( bindable instanceof PluralAttribute ) {
-			final PluralAttribute pluralAttribute = (PluralAttribute) bindable;
-			if ( !ManagedType.class.isInstance( pluralAttribute.getBoundType() ) ) {
-				throw new SemanticException(
-						"Expecting a ManagedType reference, but referenced SingularAttribute type was not ManagedType : "
-								+ pluralAttribute.getBoundType()
-				);
-			}
-			return (ManagedType) pluralAttribute.getBoundType();
-		}
-		else {
-			throw new QueryException( "Could not interpret Bindable; unexpected type : " + bindable );
+			return true;
 		}
 
+		// Plural attributes are always joinable
+		return true;
 	}
 }

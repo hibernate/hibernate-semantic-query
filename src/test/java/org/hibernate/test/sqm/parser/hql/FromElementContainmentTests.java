@@ -8,6 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
@@ -46,8 +47,9 @@ public class FromElementContainmentTests {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		assertThat( selection.getExpression(), instanceOf( AttributeBinding.class ) );
 
-		assertSame( fromElementSpace.getJoins().get( 0 ), selection.getExpression() );
+		assertSame( fromElementSpace.getJoins().get( 0 ), ( (AttributeBinding) selection.getExpression() ).getFromElement() );
 	}
 
 	@Test

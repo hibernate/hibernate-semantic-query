@@ -18,8 +18,8 @@ import org.hibernate.sqm.query.select.SqmSelection;
  * @author Andrea Boriero
  */
 public class AliasRegistry {
-	private Map<String, SqmFrom> fromElementsByAlias = new HashMap<String, SqmFrom>();
-	private Map<String, SqmSelection> selectionsByAlias = new HashMap<String, SqmSelection>();
+	private Map<String, DomainReferenceBinding> fromBindingsByAlias = new HashMap<>();
+	private Map<String, SqmSelection> selectionsByAlias = new HashMap<>();
 
 	private AliasRegistry parent;
 
@@ -28,7 +28,6 @@ public class AliasRegistry {
 
 	public AliasRegistry(AliasRegistry parent) {
 		this.parent = parent;
-		fromElementsByAlias = new HashMap<String, SqmFrom>();
 	}
 
 	public AliasRegistry getParent() {
@@ -42,16 +41,16 @@ public class AliasRegistry {
 		}
 	}
 
-	public void registerAlias(SqmFrom fromElement) {
-		final SqmFrom old = fromElementsByAlias.put( fromElement.getIdentificationVariable(), fromElement );
+	public void registerAlias(DomainReferenceBinding binding) {
+		final DomainReferenceBinding old = fromBindingsByAlias.put( binding.getFromElement().getIdentificationVariable(), binding );
 		if ( old != null ) {
 			throw new AliasCollisionException(
 					String.format(
 							Locale.ENGLISH,
 							"Alias [%s] used for multiple from-clause-elements : %s, %s",
-							fromElement.getIdentificationVariable(),
+							binding.getFromElement().getIdentificationVariable(),
 							old,
-							fromElement
+							binding
 					)
 			);
 		}
@@ -61,9 +60,9 @@ public class AliasRegistry {
 		return selectionsByAlias.get( alias );
 	}
 
-	public SqmFrom findFromElementByAlias(String alias) {
-		if ( fromElementsByAlias.containsKey( alias ) ) {
-			return fromElementsByAlias.get( alias );
+	public DomainReferenceBinding findFromElementByAlias(String alias) {
+		if ( fromBindingsByAlias.containsKey( alias ) ) {
+			return fromBindingsByAlias.get( alias );
 		}
 		else if ( parent != null ) {
 			return parent.findFromElementByAlias( alias );
@@ -82,9 +81,9 @@ public class AliasRegistry {
 					)
 			);
 		}
-		final SqmFrom fromElement = fromElementsByAlias.get( alias );
+		final DomainReferenceBinding fromElement = fromBindingsByAlias.get( alias );
 		if ( fromElement != null ) {
-			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBindable() ) ) {
+			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBoundDomainReference() ) ) {
 				throw new AliasCollisionException(
 						String.format(
 								Locale.ENGLISH,
@@ -92,7 +91,7 @@ public class AliasRegistry {
 								alias,
 								selection.getExpression().getExpressionType(),
 								fromElement,
-								fromElement.getBindable()
+								fromElement.getBoundDomainReference()
 						)
 				);
 			}

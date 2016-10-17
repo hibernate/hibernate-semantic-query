@@ -7,17 +7,20 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
  */
 public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExpression<T> {
 	private final T value;
-	private BasicType<T> typeDescriptor;
+	private DomainReference typeDescriptor;
 
-	public ConstantEnumSqmExpression(T value, BasicType<T> typeDescriptor) {
+	public ConstantEnumSqmExpression(T value) {
+		this( value, null );
+	}
+
+	public ConstantEnumSqmExpression(T value, DomainReference typeDescriptor) {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
@@ -28,32 +31,28 @@ public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExp
 	}
 
 	@Override
-	public BasicType<T> getExpressionType() {
+	public DomainReference getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(Type type) {
-		if ( type != null ) {
-			if ( !BasicType.class.isAssignableFrom( type.getClass() ) ) {
-				throw new TypeInferenceException( "Inferred type descriptor [" + type + "] was not castable to javax.persistence.metamodel.BasicType" );
-			}
-			BasicType basicType = (BasicType) type;
-			if ( !value.getClass().equals( basicType.getJavaType() ) ) {
-				throw new TypeInferenceException( "Inferred type [" + basicType.getJavaType() + "] was not convertible to " + value.getClass().getName() );
-			}
-			this.typeDescriptor = basicType;
-		}
+	public void impliedType(DomainReference type) {
+		this.typeDescriptor = type;
 	}
 
 	@Override
 	public <X> X accept(SemanticQueryWalker<X> walker) {
 		return walker.visitConstantEnumExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "EnumConstant(" + value + ")";
 	}
 }

@@ -13,7 +13,8 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class AvgFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression
+public class AvgFunctionSqmExpression
+		extends AbstractAggregateFunctionSqmExpression
 		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "avg";
 
@@ -29,5 +30,10 @@ public class AvgFunctionSqmExpression extends AbstractAggregateFunctionSqmExpres
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitAvgFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "AVG(" + getArgument().asLoggableText() + ")";
 	}
 }

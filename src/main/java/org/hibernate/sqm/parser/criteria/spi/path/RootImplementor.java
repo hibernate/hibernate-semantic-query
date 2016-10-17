@@ -8,11 +8,11 @@ package org.hibernate.sqm.parser.criteria.spi.path;
 
 import javax.persistence.criteria.Root;
 
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.EntityReference;
 
 /**
  * @author Steve Ebersole
  */
 public interface RootImplementor<X> extends Root<X>, FromImplementor<X,X> {
-	EntityType getEntityType();
+	EntityReference getEntityType();
 }

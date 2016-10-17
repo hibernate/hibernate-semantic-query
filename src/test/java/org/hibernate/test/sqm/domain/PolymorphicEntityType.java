@@ -4,9 +4,9 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.domain;
+package org.hibernate.test.sqm.domain;
 
-import java.util.Collection;
+import org.hibernate.sqm.domain.PolymorphicEntityReference;
 
 /**
  * EntityType extension for representing the "abstract schema type" in polymorphic
@@ -14,6 +14,5 @@ import java.util.Collection;
  *
  * @author Steve Ebersole
  */
-public interface PolymorphicEntityType<T> extends EntityType {
-	Collection<EntityType> getImplementors();
+public interface PolymorphicEntityType<T> extends EntityType, PolymorphicEntityReference {
 }

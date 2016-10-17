@@ -7,10 +7,15 @@
 package org.hibernate.sqm.domain;
 
 /**
- * Base information describing an identifier which can be referenced through a single attribute
+ * Models a reference to an entity.
  *
  * @author Steve Ebersole
  */
-public interface IdentifierDescriptorSingleAttribute extends IdentifierDescriptor {
-	SingularAttribute getIdAttribute();
+public interface EntityReference extends DomainReference {
+	/**
+	 * Obtain the name of the referenced entity
+	 *
+	 * @return The entity name
+	 */
+	String getEntityName();
 }

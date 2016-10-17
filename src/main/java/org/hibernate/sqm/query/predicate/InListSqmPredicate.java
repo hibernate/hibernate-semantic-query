@@ -21,7 +21,7 @@ public class InListSqmPredicate extends AbstractNegatableSqmPredicate implements
 	private final List<SqmExpression> listExpressions;
 
 	public InListSqmPredicate(SqmExpression testExpression) {
-		this( testExpression, new ArrayList<SqmExpression>() );
+		this( testExpression, new ArrayList<>() );
 	}
 
 	public InListSqmPredicate(SqmExpression testExpression, SqmExpression... listExpressions) {

@@ -6,24 +6,34 @@
  */
 package org.hibernate.sqm.query.expression;
 
+import java.lang.reflect.Field;
+
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * Represents a constant that came from a static field reference.
- * <p/>
- * TODO : would love to store a reference to the Field the value came from
  *
  * @author Steve Ebersole
  */
 public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
+	private final Field sourceField;
 	private final T value;
-	private BasicType<T> typeDescriptor;
 
-	public ConstantFieldSqmExpression(T value, BasicType<T> typeDescriptor) {
+	private DomainReference typeDescriptor;
+
+	public ConstantFieldSqmExpression(Field sourceField, T value) {
+		this( sourceField, value, null );
+	}
+
+	public ConstantFieldSqmExpression(Field sourceField, T value, DomainReference typeDescriptor) {
+		this.sourceField = sourceField;
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
+	}
+
+	public Field getSourceField() {
+		return sourceField;
 	}
 
 	@Override
@@ -32,32 +42,30 @@ public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
 	}
 
 	@Override
-	public BasicType<T> getExpressionType() {
+	public DomainReference getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(Type type) {
+	public void impliedType(DomainReference type) {
 		if ( type != null ) {
-			if ( !BasicType.class.isAssignableFrom( type.getClass() ) ) {
-				throw new TypeInferenceException( "Inferred type descriptor [" + type + "] was not castable to javax.persistence.metamodel.BasicType" );
-			}
-			final BasicType basicType = (BasicType) type;
-			if ( !value.getClass().equals( basicType.getJavaType() ) ) {
-				throw new TypeInferenceException( "Inferred type [" + basicType.getJavaType() + "] was not convertible to " + value.getClass().getName() );
-			}
-			this.typeDescriptor = basicType;
+			this.typeDescriptor = type;
 		}
 	}
 
 	@Override
 	public <X> X accept(SemanticQueryWalker<X> walker) {
 		return walker.visitConstantFieldExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "ConstantField(" + value + ")";
 	}
 }

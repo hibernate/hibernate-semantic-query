@@ -36,11 +36,10 @@ import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
+import org.hibernate.test.sqm.domain.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.CompoundSelectionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImplementor;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
@@ -636,13 +635,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 
 	@Override
 	public <T> ParameterExpression<T> parameter(Class<T> paramClass) {
-		final Type sqmType = consumerContext().getDomainMetamodel().getBasicType( paramClass );
+		final BasicTypeImpl sqmType = (BasicTypeImpl) consumerContext().getDomainMetamodel().resolveBasicType( paramClass );
 		return new ParameterExpressionImpl<T>( this, sqmType, paramClass );
 	}
 
 	@Override
 	public <T> ParameterExpression<T> parameter(Class<T> paramClass, String name) {
-		final Type sqmType = consumerContext().getDomainMetamodel().getBasicType( paramClass );
+		final BasicTypeImpl sqmType = (BasicTypeImpl) consumerContext().getDomainMetamodel().resolveBasicType( paramClass );
 		return new ParameterExpressionImpl<T>( this, sqmType, paramClass, name );
 	}
 
@@ -730,7 +729,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 
 	@Override
 	public <T> Expression<T> function(String name, Class<T> returnType, Expression<?>... arguments) {
-		final BasicType<T> returnSqmType = consumerContext().getDomainMetamodel().getBasicType( returnType );
+		final BasicTypeImpl<T> returnSqmType = (BasicTypeImpl<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
 		return new GenericFunctionExpression<T>(
 				name,
 				returnSqmType,
@@ -749,7 +748,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 * @return The function expression
 	 */
 	public <T> Expression<T> function(String name, Class<T> returnType) {
-		final BasicType<T> returnSqmType = consumerContext().getDomainMetamodel().getBasicType( returnType );
+		final BasicTypeImpl<T> returnSqmType = (BasicTypeImpl<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
 		return new GenericFunctionExpression<T>( name, returnSqmType, returnType, this );
 	}
 

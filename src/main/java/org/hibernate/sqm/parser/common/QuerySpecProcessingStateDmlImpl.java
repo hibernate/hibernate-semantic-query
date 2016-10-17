@@ -7,21 +7,18 @@
 package org.hibernate.sqm.parser.common;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.SqmCrossJoin;
-import org.hibernate.sqm.query.from.SqmFrom;
-import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.SqmJoin;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmJoin;
 import org.hibernate.sqm.query.from.SqmRoot;
 
 /**
@@ -34,8 +31,6 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	private final DmlFromClause fromClause;
 
 	private final FromElementBuilder fromElementBuilder;
-
-	private Map<String,SqmFrom> fromElementsByPath = new HashMap<String, SqmFrom>();
 
 	public QuerySpecProcessingStateDmlImpl(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
@@ -54,17 +49,27 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	}
 
 	@Override
-	public SqmFrom findFromElementByIdentificationVariable(String identificationVariable) {
+	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
 		return fromClause.fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable )
-				? fromClause.fromElementSpace.getRoot()
+				? fromClause.fromElementSpace.getRoot().getDomainReferenceBinding()
 				: null;
 	}
 
 	@Override
-	public SqmFrom findFromElementExposingAttribute(String attributeName) {
-		return fromClause.fromElementSpace.getRoot().resolveAttribute(attributeName ) != null
-				? fromClause.fromElementSpace.getRoot()
-				: null;
+	public DomainReferenceBinding findFromElementExposingAttribute(String attributeName) {
+		if ( rootExposesAttribute( attributeName ) ) {
+			return fromClause.fromElementSpace.getRoot().getDomainReferenceBinding();
+		}
+		else {
+			return null;
+		}
+	}
+
+	private boolean rootExposesAttribute(String attributeName) {
+		final AttributeReference attrRef = getParsingContext().getConsumerContext()
+				.getDomainMetamodel()
+				.resolveAttributeReference( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
+		return attrRef != null;
 	}
 
 	@Override
@@ -87,7 +92,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 
 		@Override
 		public List<FromElementSpace> getFromElementSpaces() {
-			return Collections.<FromElementSpace>singletonList( fromElementSpace );
+			return Collections.singletonList( fromElementSpace );
 		}
 
 		@Override
@@ -129,7 +134,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 
 		@Override
 		public SqmCrossJoin makeCrossJoinedFromElement(
-				FromElementSpace fromElementSpace, String uid, EntityType entityType, String alias) {
+				FromElementSpace fromElementSpace, String uid, EntityReference entityType, String alias) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
@@ -137,20 +142,18 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		public SqmEntityJoin buildEntityJoin(
 				FromElementSpace fromElementSpace,
 				String alias,
-				EntityType entityType,
+				EntityReference entityType,
 				JoinType joinType) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
 		@Override
 		public SqmAttributeJoin buildAttributeJoin(
-				FromElementSpace fromElementSpace,
+				AttributeBinding attributeBinding,
 				String alias,
-				Attribute attributeDescriptor,
-				EntityType subclassIndicator,
+				EntityReference subclassIndicator,
 				String path,
 				JoinType joinType,
-				SqmFrom lhs,
 				boolean fetched,
 				boolean canReuseImplicitJoins) {
 			throw new ParsingException( "DML from-clause cannot define joins" );

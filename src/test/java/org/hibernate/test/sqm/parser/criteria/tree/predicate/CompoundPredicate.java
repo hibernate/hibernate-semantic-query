@@ -16,6 +16,7 @@ import javax.persistence.criteria.Predicate;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -38,7 +39,9 @@ public class CompoundPredicate
 	 * as a conjunction or disjunction.
 	 */
 	public CompoundPredicate(CriteriaBuilderImpl criteriaBuilder, BooleanOperator operator) {
-		super( criteriaBuilder, criteriaBuilder.consumerContext().getDomainMetamodel().getBasicType( Boolean.class ) );
+		super( criteriaBuilder,
+			   (BasicType<Boolean>) criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( Boolean.class )
+		);
 		this.operator = operator;
 	}
 

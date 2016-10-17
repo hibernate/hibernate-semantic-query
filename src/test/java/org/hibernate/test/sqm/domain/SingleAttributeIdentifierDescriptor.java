@@ -6,11 +6,7 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.EmbeddableType;
-import org.hibernate.sqm.domain.IdentifiableType;
-import org.hibernate.sqm.domain.IdentifierDescriptorSingleAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 
 /**
  * @author Steve Ebersole
@@ -26,8 +22,8 @@ public class SingleAttributeIdentifierDescriptor implements IdentifierDescriptor
 				entityType,
 				idAttributeName,
 				idType instanceof EmbeddableType
-						? SingularAttribute.Classification.EMBEDDED
-						: SingularAttribute.Classification.BASIC,
+						? SingularAttributeClassification.EMBEDDED
+						: SingularAttributeClassification.BASIC,
 				idType
 		);
 	}
@@ -44,7 +40,7 @@ public class SingleAttributeIdentifierDescriptor implements IdentifierDescriptor
 
 	@Override
 	public String getReferableAttributeName() {
-		return idAttribute.getName();
+		return idAttribute.getAttributeName();
 	}
 
 	@Override

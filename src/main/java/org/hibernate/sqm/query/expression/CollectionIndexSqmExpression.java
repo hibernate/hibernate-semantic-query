@@ -8,41 +8,45 @@ package org.hibernate.sqm.query.expression;
 
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 
 /**
  * @author Steve Ebersole
  */
 public class CollectionIndexSqmExpression implements SqmExpression {
-	private final String collectionAlias;
-	private final Type indexType;
+	private final AttributeBinding attributeBinding;
 
-	public CollectionIndexSqmExpression(SqmFrom collectionReference, Type indexType) {
-		this.collectionAlias = collectionReference.getIdentificationVariable();
-		this.indexType = indexType;
+	public CollectionIndexSqmExpression(AttributeBinding attributeBinding) {
+		this.attributeBinding = attributeBinding;
 	}
 
-	public String getCollectionAlias() {
-		return collectionAlias;
+	public AttributeBinding getAttributeBinding() {
+		return attributeBinding;
 	}
 
-	public Type getIndexType() {
-		return indexType;
-	}
-
-	@Override
-	public Type getExpressionType() {
-		return getIndexType();
+	private PluralAttributeReference pluralAttributeReference() {
+		return (PluralAttributeReference) attributeBinding.getAttribute();
 	}
 
 	@Override
-	public Type getInferableType() {
-		return getIndexType();
+	public DomainReference getExpressionType() {
+		return pluralAttributeReference().getIndexReference();
+	}
+
+	@Override
+	public DomainReference getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitCollectionIndexFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "INDEX(" + attributeBinding.asLoggableText() + ")";
 	}
 }

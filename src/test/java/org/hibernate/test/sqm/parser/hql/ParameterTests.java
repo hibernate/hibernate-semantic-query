@@ -6,6 +6,7 @@
  */
 package org.hibernate.test.sqm.parser.hql;
 
+import org.hibernate.sqm.domain.SingularAttributeReference;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.query.Parameter;
 import org.hibernate.sqm.query.SqmSelectStatement;
@@ -13,6 +14,7 @@ import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -46,7 +48,7 @@ public class ParameterTests extends StandardModelTest {
 	public void testAnticipatedTypeHandling() {
 		final SqmSelectStatement sqm = (SqmSelectStatement) interpret( "select a.basic from Something a where a.b = ?1" );
 		final Parameter parameter = sqm.getQueryParameters().iterator().next();
-		assertThat( parameter.getAnticipatedType(), is( StandardBasicTypeDescriptors.INSTANCE.STRING ) );
+		assertThat( parameter.getAnticipatedType(), is( instanceOf( SingularAttributeReference.class ) ) );
 		assertThat( parameter.allowMultiValuedBinding(), is(false) );
 	}
 }

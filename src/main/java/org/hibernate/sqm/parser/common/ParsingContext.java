@@ -6,16 +6,11 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 
@@ -33,8 +28,7 @@ public class ParsingContext {
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
 	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
 
-	private Map<SqmFrom,Map<Attribute,SqmAttributeJoin>> attributeJoinMapByFromElement;
-	private List<AttributeReferenceSqmExpression> delayedJoinAttributeReferences;
+	private Map<SqmFrom,Map<AttributeReference,SqmAttributeJoin>> attributeJoinMapByFromElement;
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -64,7 +58,7 @@ public class ParsingContext {
 	}
 
 	public void cacheAttributeJoin(SqmFrom lhs, SqmAttributeJoin join) {
-		Map<Attribute,SqmAttributeJoin> attributeJoinMap = null;
+		Map<AttributeReference,SqmAttributeJoin> attributeJoinMap = null;
 		if ( attributeJoinMapByFromElement == null ) {
 			attributeJoinMapByFromElement = new HashMap<>();
 		}
@@ -77,7 +71,7 @@ public class ParsingContext {
 			attributeJoinMapByFromElement.put( lhs, attributeJoinMap );
 		}
 
-		final SqmAttributeJoin previous = attributeJoinMap.put( join.getJoinedAttributeDescriptor(), join );
+		final SqmAttributeJoin previous = attributeJoinMap.put( join.getAttributeBinding().getAttribute(), join );
 		if ( previous != null ) {
 			log.debugf(
 					"Caching SqmAttributeJoin [%s] over-wrote previous cache entry [%s]",
@@ -87,12 +81,12 @@ public class ParsingContext {
 		}
 	}
 
-	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, Attribute attribute) {
+	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, AttributeReference attribute) {
 		if ( attributeJoinMapByFromElement == null ) {
 			return null;
 		}
 
-		final Map<Attribute,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+		final Map<AttributeReference,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
 
 		if ( attributeJoinMap == null ) {
 			return null;
@@ -101,38 +95,40 @@ public class ParsingContext {
 		return attributeJoinMap.get( attribute );
 	}
 
-	public void registerAttributeReference(AttributeReferenceSqmExpression reference) {
-		if ( reference.getFromElement() != null ) {
-			// we only need to track these if they do not already contain their
-			// linked from-element
-			return;
-		}
+	private Map<SqmFrom,Map<AttributeReference,AttributeBinding>> attributeBindingsMap;
 
-		if ( delayedJoinAttributeReferences == null ) {
-			delayedJoinAttributeReferences = new ArrayList<>();
-		}
-		delayedJoinAttributeReferences.add( reference );
+	public AttributeBinding findOrCreateAttributeBinding(
+			DomainReferenceBinding lhs,
+			String attributeName) {
+		return findOrCreateAttributeBinding(
+				lhs,
+				consumerContext.getDomainMetamodel().resolveAttributeReference( lhs.getBoundDomainReference(), attributeName )
+		);
 	}
 
-	public void attributeJoinCreatedNotification(SqmAttributeJoin join) {
-		if ( ImplicitAliasGenerator.isImplicitAlias( join.getIdentificationVariable() ) ) {
-			// the join was defined in the FROM-clause, so cannot be the "target" of an implicit join
-			return;
+	public AttributeBinding findOrCreateAttributeBinding(
+			DomainReferenceBinding lhs,
+			AttributeReference attribute) {
+		Map<AttributeReference,AttributeBinding> bindingsMap = null;
+
+		if ( attributeBindingsMap == null ) {
+			attributeBindingsMap = new HashMap<>();
+		}
+		else {
+			bindingsMap = attributeBindingsMap.get( lhs.getFromElement() );
 		}
 
-		if ( delayedJoinAttributeReferences == null ) {
-			return;
+		if ( bindingsMap == null ) {
+			bindingsMap = new HashMap<>();
+			attributeBindingsMap.put( lhs.getFromElement(), bindingsMap );
 		}
 
-
-		final Iterator<AttributeReferenceSqmExpression> references = delayedJoinAttributeReferences.iterator();
-		while ( references.hasNext() ) {
-			final AttributeBinding reference = references.next();
-			if ( reference.getLeftHandSide() == join.getLeftHandSide()
-					&& reference.getBoundAttribute() == join.getBoundAttribute() ) {
-				reference.injectFromElementGeneratedForAttribute( join );
-				references.remove();
-			}
+		AttributeBinding attributeBinding = bindingsMap.get( attribute );
+		if ( attributeBinding == null ) {
+			attributeBinding = new AttributeBinding( lhs, attribute );
+			bindingsMap.put( attribute, attributeBinding );
 		}
+
+		return attributeBinding;
 	}
 }

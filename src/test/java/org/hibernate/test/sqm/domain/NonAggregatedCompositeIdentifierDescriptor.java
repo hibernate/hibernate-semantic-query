@@ -9,10 +9,6 @@ package org.hibernate.test.sqm.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.sqm.domain.IdentifierDescriptorMultipleAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
-
 /**
  * @author Steve Ebersole
  */
@@ -37,7 +33,7 @@ public class NonAggregatedCompositeIdentifierDescriptor implements IdentifierDes
 
 	static class IdClassDescriptorImpl implements IdClassDescriptor {
 		private final Type idClassType;
-		private final Set<SingularAttribute> idClassAttributes = new HashSet<SingularAttribute>();
+		private final Set<SingularAttribute> idClassAttributes = new HashSet<>();
 
 		public IdClassDescriptorImpl(Type idClassType) {
 			this.idClassType = idClassType;

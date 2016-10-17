@@ -8,10 +8,10 @@ package org.hibernate.test.sqm.parser.hql.dml;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.SqmUpdateStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
@@ -58,16 +58,16 @@ public class BasicUpdateTests {
 		assertThat( updateStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) updateStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
-		AttributeReferenceSqmExpression attributeReferenceExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
-		assertSame( attributeReferenceExpression.getLeftHandSide().getFromElement(), updateStatement.getEntityFromElement() );
+		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeBinding.class ) );
+		AttributeBinding binding = (AttributeBinding) predicate.getLeftHandExpression();
+		assertSame( binding.getLhs().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 
 		assertEquals( 1, updateStatement.getSetClause().getAssignments().size() );
 
 		SqmAssignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
-		assertSame( assignment.getStateField().getLeftHandSide().getFromElement(), updateStatement.getEntityFromElement() );
+		assertSame( assignment.getStateField().getLhs().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( assignment.getValue(), instanceOf( LiteralCharacterSqmExpression.class ) );
 	}
@@ -77,12 +77,12 @@ public class BasicUpdateTests {
 		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity1" );
 		entityType.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		entityType.makeSingularAttribute(
 				"basic2",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		return metamodel;

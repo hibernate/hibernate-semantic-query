@@ -6,12 +6,9 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import java.util.Map;
-
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 
 /**
  * Represents the ENTRY() function for obtaining the map entries from a {@code Map}-typed association.
@@ -20,35 +17,23 @@ import org.hibernate.sqm.query.from.SqmFrom;
  * @author Steve Ebersole
  */
 public class MapEntrySqmExpression implements SqmExpression {
-	private final String collectionAlias;
-	private final Type indexType;
-	private final Type elementType;
+	private final AttributeBinding attributeBinding;
 
-	public MapEntrySqmExpression(SqmFrom collectionReference, Type indexType, Type elementType) {
-		this.collectionAlias = collectionReference.getIdentificationVariable();
-		this.indexType = indexType;
-		this.elementType = elementType;
+	public MapEntrySqmExpression(AttributeBinding attributeBinding) {
+		this.attributeBinding = attributeBinding;
 	}
 
-	public String getCollectionAlias() {
-		return collectionAlias;
-	}
-
-	public Type getMapKeyType() {
-		return indexType;
-	}
-
-	public Type getMapValueType() {
-		return elementType;
+	public AttributeBinding getAttributeBinding() {
+		return attributeBinding;
 	}
 
 	@Override
-	public Type getExpressionType() {
-		return MAP_ENTRY_TYPE;
+	public DomainReference getExpressionType() {
+		return null;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return null;
 	}
 
@@ -57,15 +42,8 @@ public class MapEntrySqmExpression implements SqmExpression {
 		return walker.visitMapEntryFunction( this );
 	}
 
-	static final BasicType MAP_ENTRY_TYPE = new BasicType() {
-		@Override
-		public String getTypeName() {
-			return Map.Entry.class.getName();
-		}
-
-		@Override
-		public Class getJavaType() {
-			return Map.Entry.class;
-		}
-	};
+	@Override
+	public String asLoggableText() {
+		return "ENTRY(" + attributeBinding.asLoggableText() + ")";
+	}
 }

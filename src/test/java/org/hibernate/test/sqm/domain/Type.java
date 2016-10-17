@@ -4,7 +4,9 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.domain;
+package org.hibernate.test.sqm.domain;
+
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * A type-safe representation of a domain model type.  Generally, this type
@@ -13,7 +15,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface Type {
+public interface Type extends DomainReference {
 	/**
 	 * The name of the type.  For a Java type this would be the same as the type's Class name
 	 *

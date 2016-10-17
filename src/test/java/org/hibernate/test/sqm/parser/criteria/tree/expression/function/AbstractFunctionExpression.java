@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
 import java.io.Serializable;
 
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.FunctionCriteriaExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;

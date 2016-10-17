@@ -43,4 +43,9 @@ public class LowerFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLowerFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		return "LOWER(" + getExpression().asLoggableText() + ")";
+	}
 }

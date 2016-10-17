@@ -4,7 +4,9 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.domain;
+package org.hibernate.test.sqm.domain;
+
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * Represents something that can be incorporated into a query "path".
@@ -31,7 +33,7 @@ package org.hibernate.sqm.domain;
  * Bindable (see {@link javax.persistence.metamodel.Bindable}).  I
  * personally think "Navigable" or "Path-able" when I see "Bindable".
  *
- * @see org.hibernate.sqm.path.Binding
+ * @see DomainReference
  *
  * @author Steve Ebersole
  */

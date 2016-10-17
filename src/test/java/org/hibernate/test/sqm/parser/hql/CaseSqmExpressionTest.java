@@ -7,13 +7,13 @@
 package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
+import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
-import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
@@ -23,6 +23,7 @@ import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -44,7 +45,7 @@ public class CaseSqmExpressionTest {
 		assertThat( predicate.getRightHandExpression(), instanceOf( CaseSimpleSqmExpression.class ) );
 		CaseSimpleSqmExpression caseStatement = (CaseSimpleSqmExpression) predicate.getRightHandExpression();
 		assertThat( caseStatement.getFixture(), notNullValue() );
-		assertThat( caseStatement.getFixture(), instanceOf( AttributeReferenceSqmExpression.class ) );
+		assertThat( caseStatement.getFixture(), instanceOf( AttributeBinding.class ) );
 
 		assertThat( caseStatement.getOtherwise(), notNullValue() );
 		assertThat( caseStatement.getOtherwise(), instanceOf( LiteralStringSqmExpression.class ) );
@@ -80,7 +81,7 @@ public class CaseSqmExpressionTest {
 		CoalesceSqmExpression coalesce = (CoalesceSqmExpression) select.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( coalesce.getValues().size(), is(3) );
 
-		assertThat( coalesce.getExpressionType().getTypeName(), is( String.class.getName() ) );
+		assertThat( coalesce.getExpressionType().asLoggableText(), containsString( String.class.getName() ) );
 	}
 
 	@Test
@@ -95,7 +96,7 @@ public class CaseSqmExpressionTest {
 
 		NullifSqmExpression nullif = (NullifSqmExpression) select.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 
-		assertThat( nullif.getExpressionType().getTypeName(), is( String.class.getName() ) );
+		assertThat( nullif.getExpressionType().asLoggableText(), containsString( String.class.getName() ) );
 	}
 
 	private DomainMetamodel buildMetamodel() {
@@ -104,44 +105,44 @@ public class CaseSqmExpressionTest {
 		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity" );
 		entityType.makeSingularAttribute(
 				"basic",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		entityType.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		entityType.makeSingularAttribute(
 				"basic2",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"basic3",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"basic4",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"from",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"select",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 
 		EntityTypeImpl entity2Type = metamodel.makeEntityType( "com.acme.Entity2" );
 		entity2Type.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 

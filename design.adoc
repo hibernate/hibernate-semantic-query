@@ -51,8 +51,8 @@ select p from Person p, Service s join p.address a
 
 == Expressions and Bindings
 
-A Binding is the corollary to `org.hibernate.sqm.domain.Bindable` and represents a specific
-usage of that `org.hibernate.sqm.domain.Bindable`.  E.g.
+A Binding is the corollary to `org.hibernate.test.sqm.domain.Bindable` and represents a specific
+usage of that `org.hibernate.test.sqm.domain.Bindable`.  E.g.
 
 ====
 [source]

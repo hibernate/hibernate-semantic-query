@@ -10,14 +10,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.AnyType;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.EmbeddableType;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 
 /**
  * Base support for all ManagedType implementations.managed types, which is the JPA term for commonality between entity, embeddable and
@@ -36,28 +31,26 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 		super( javaType.getName() );
 	}
 
-	public SingularAttributeImpl makeSingularAttribute(
-			String name,
-			Type type) {
-		final SingularAttribute.Classification classification;
+	public SingularAttributeImpl makeSingularAttribute(String name, Type type) {
+		final SingularAttributeClassification classification;
 		if ( type instanceof BasicType ) {
-			classification = SingularAttribute.Classification.BASIC;
+			classification = SingularAttributeClassification.BASIC;
 		}
 		else if ( type instanceof EmbeddableType ) {
-			classification = SingularAttribute.Classification.EMBEDDED;
+			classification = SingularAttributeClassification.EMBEDDED;
 		}
 		else if ( type instanceof AnyType ) {
-			classification = SingularAttribute.Classification.ANY;
+			classification = SingularAttributeClassification.ANY;
 		}
 		else {
-			classification = SingularAttribute.Classification.MANY_TO_ONE;
+			classification = SingularAttributeClassification.MANY_TO_ONE;
 		}
 		return makeSingularAttribute( name, classification, type );
 	}
 
 	public SingularAttributeImpl makeSingularAttribute(
 			String name,
-			SingularAttribute.Classification classification,
+			SingularAttributeClassification classification,
 			Type type) {
 		final SingularAttributeImpl attr = new SingularAttributeImpl(
 				this,
@@ -81,31 +74,32 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 		);
 	}
 
-	private PluralAttribute.ElementClassification inferElementClassification(Type elementType) {
+	private ElementClassification inferElementClassification(Type elementType) {
 		if ( elementType instanceof BasicType ) {
-			return PluralAttribute.ElementClassification.BASIC;
+			return ElementClassification.BASIC;
 		}
 		else if ( elementType instanceof EmbeddableType ) {
-			return PluralAttribute.ElementClassification.EMBEDDABLE;
+			return ElementClassification.EMBEDDABLE;
 		}
 		else if ( elementType instanceof AnyType ) {
-			return PluralAttribute.ElementClassification.ANY;
+			return ElementClassification.ANY;
 		}
 		else {
-			return PluralAttribute.ElementClassification.ONE_TO_MANY;
+			return ElementClassification.ONE_TO_MANY;
 		}
 	}
 
 	public PluralAttributeImpl makeMapAttribute(
 			String name,
-			PluralAttribute.ElementClassification elementClassification,
+			ElementClassification elementClassification,
 			Type keyType,
 			Type elementType) {
 		final PluralAttributeImpl attr = new PluralAttributeImpl(
-				PluralAttribute.CollectionClassification.MAP,
-				elementClassification,
 				this,
 				name,
+				PluralAttribute.CollectionClassification.MAP,
+				elementClassification,
+				IndexClassification.BASIC,
 				null,
 				keyType,
 				elementType
@@ -128,14 +122,15 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 
 	public PluralAttributeImpl makeListAttribute(
 			String name,
-			PluralAttribute.ElementClassification elementClassification,
+			ElementClassification elementClassification,
 			BasicType indexType,
 			Type elementType) {
 		final PluralAttributeImpl attr = new PluralAttributeImpl(
-				PluralAttribute.CollectionClassification.LIST,
-				elementClassification,
 				this,
 				name,
+				PluralAttribute.CollectionClassification.LIST,
+				elementClassification,
+				null,
 				null,
 				indexType,
 				elementType
@@ -156,13 +151,14 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 
 	public PluralAttributeImpl makeSetAttribute(
 			String name,
-			PluralAttribute.ElementClassification elementClassification,
+			ElementClassification elementClassification,
 			Type elementType) {
 		final PluralAttributeImpl attr = new PluralAttributeImpl(
-				PluralAttribute.CollectionClassification.SET,
-				elementClassification,
 				this,
 				name,
+				PluralAttribute.CollectionClassification.SET,
+				elementClassification,
+				null,
 				null,
 				null,
 				elementType
@@ -175,7 +171,7 @@ public abstract class AbstractManagedType extends AbstractTypeImpl implements Ma
 		if ( attributesByName == null ) {
 			attributesByName = new HashMap<String, Attribute>();
 		}
-		attributesByName.put( attribute.getName(), attribute );
+		attributesByName.put( attribute.getAttributeName(), attribute );
 	}
 
 	@Override

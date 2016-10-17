@@ -7,25 +7,17 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralTrueSqmExpression extends AbstractLiteralSqmExpressionImpl<Boolean> {
-	public LiteralTrueSqmExpression(BasicType<Boolean> booleanTypeDescriptor) {
-		super( Boolean.TRUE, booleanTypeDescriptor );
+	public LiteralTrueSqmExpression() {
+		super( Boolean.TRUE );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralTrueExpression( this );
-	}
-
-	@Override
-	protected void validateInferredType(Class javaType) {
-		if ( !Compatibility.areAssignmentCompatible( javaType, boolean.class ) ) {
-			throw new TypeInferenceException( "Boolean (true) literal is not convertible to inferred type [" + javaType + "]" );
-		}
 	}
 }

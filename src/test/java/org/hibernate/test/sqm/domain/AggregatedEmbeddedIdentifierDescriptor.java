@@ -6,10 +6,6 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.EmbeddableType;
-import org.hibernate.sqm.domain.IdentifierDescriptorSingleAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-
 /**
  * @author Steve Ebersole
  */
@@ -32,7 +28,7 @@ public class AggregatedEmbeddedIdentifierDescriptor implements IdentifierDescrip
 
 	@Override
 	public String getReferableAttributeName() {
-		return embeddedIdAttribute.getName();
+		return embeddedIdAttribute.getAttributeName();
 	}
 
 	@Override

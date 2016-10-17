@@ -7,21 +7,13 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralStringSqmExpression extends AbstractLiteralSqmExpressionImpl<String> {
-	public LiteralStringSqmExpression(String value, BasicType<String> typeDescriptor) {
-		super( value, typeDescriptor );
-	}
-
-	@Override
-	protected void validateInferredType(Class javaType) {
-		if ( !String.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to String" );
-		}
+	public LiteralStringSqmExpression(String value) {
+		super( value );
 	}
 
 	@Override

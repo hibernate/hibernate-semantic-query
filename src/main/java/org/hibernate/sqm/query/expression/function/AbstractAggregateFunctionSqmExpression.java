@@ -6,18 +6,19 @@
  */
 package org.hibernate.sqm.query.expression.function;
 
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
-public abstract class AbstractAggregateFunctionSqmExpression extends AbstractFunctionSqmExpression implements
-																								   AggregateFunctionSqmExpression {
+public abstract class AbstractAggregateFunctionSqmExpression
+		extends AbstractFunctionSqmExpression
+		implements AggregateFunctionSqmExpression {
 	private final SqmExpression argument;
 	private final boolean distinct;
 
-	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, DomainReference resultType) {
 		super( resultType );
 		this.argument = argument;
 		this.distinct = distinct;

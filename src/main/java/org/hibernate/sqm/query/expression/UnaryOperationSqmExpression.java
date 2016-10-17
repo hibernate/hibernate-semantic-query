@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
@@ -20,30 +20,31 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 
 	private final Operation operation;
 	private final SqmExpression operand;
-	private Type typeDescriptor;
+
+	private DomainReference typeDescriptor;
 
 	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand) {
 		this( operation, operand, operand.getExpressionType() );
 	}
 
-	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, Type typeDescriptor) {
+	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, DomainReference typeDescriptor) {
 		this.operation = operation;
 		this.operand = operand;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return operand.getExpressionType();
 	}
 
 	@Override
-	public void impliedType(Type type) {
+	public void impliedType(DomainReference type) {
 		if ( type != null ) {
 			this.typeDescriptor = type;
 			if ( operand instanceof ImpliedTypeSqmExpression ) {
@@ -55,6 +56,11 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitUnaryOperationExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return ( operation == Operation.MINUS ? '-' : '+' ) + operand.asLoggableText();
 	}
 
 	public SqmExpression getOperand() {

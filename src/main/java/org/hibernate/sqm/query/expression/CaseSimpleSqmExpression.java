@@ -10,18 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
  */
 public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExpression {
 	private final SqmExpression fixture;
-	private List<WhenFragment> whenFragments = new ArrayList<WhenFragment>();
+	private List<WhenFragment> whenFragments = new ArrayList<>();
 	private SqmExpression otherwise;
 
-	private Type type;
-	private Type impliedType;
+	private DomainReference type;
+	private DomainReference impliedType;
 
 	public CaseSimpleSqmExpression(SqmExpression fixture) {
 		this.fixture = fixture;
@@ -50,13 +50,13 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	}
 
 	@Override
-	public void impliedType(Type type) {
+	public void impliedType(DomainReference type) {
 		this.impliedType = type;
 		// todo : visit whenFragments and elseExpression
 	}
 
 	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		if ( impliedType != null ) {
 			return impliedType;
 		}
@@ -75,7 +75,7 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		if ( otherwise != null ) {
 			return otherwise.getInferableType();
 		}
@@ -92,6 +92,11 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitSimpleCaseExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "<simple-case>";
 	}
 
 	public static class WhenFragment {

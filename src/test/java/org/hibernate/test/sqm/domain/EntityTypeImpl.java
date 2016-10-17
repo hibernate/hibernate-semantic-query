@@ -6,11 +6,6 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.IdentifiableType;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.Type;
-
 /**
  * @author Steve Ebersole
  */
@@ -28,7 +23,7 @@ public class EntityTypeImpl extends AbstractIdentifiableType implements EntityTy
 	}
 
 	@Override
-	public String getName() {
+	public String getEntityName() {
 		return getTypeName();
 	}
 
@@ -40,5 +35,10 @@ public class EntityTypeImpl extends AbstractIdentifiableType implements EntityTy
 	@Override
 	public ManagedType asManagedType() {
 		return this;
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "Entity(" + getEntityName() + ")";
 	}
 }

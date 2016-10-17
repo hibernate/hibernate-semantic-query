@@ -7,7 +7,7 @@
 package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
@@ -48,32 +48,32 @@ public class NestedFunctionsTest {
 		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity" );
 		entityType.makeSingularAttribute(
 				"basic",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		entityType.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		entityType.makeSingularAttribute(
 				"basic2",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"basic3",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"basic4",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entityType.makeSingularAttribute(
 				"from",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 

@@ -6,18 +6,14 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.SemanticException;
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.Binding;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
  * PathResolver implementation for resolving path references as part of a
@@ -60,61 +56,53 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 
 	@Override
 	protected AttributeBinding resolveTerminalAttributeBinding(
-			Binding lhs,
+			DomainReferenceBinding lhs,
 			String terminalName) {
-		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
-		final EntityType subclassType = resolveBoundEntityType( attribute );
-		return resolveTerminal( lhs, terminalName, attribute, subclassType );
+		final AttributeReference attribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
+		return resolveTerminal( lhs, terminalName, attribute, null );
 	}
 
-	private EntityType resolveBoundEntityType(Attribute attribute) {
-		if ( attribute instanceof PluralAttribute ) {
-			final PluralAttribute pluralAttribute = (PluralAttribute) attribute;
-			if ( pluralAttribute.getElementType() instanceof EntityType ) {
-				return (EntityType) pluralAttribute.getElementType();
-			}
-		}
-		else if ( attribute instanceof SingularAttribute ) {
-			final SingularAttribute singularAttribute = (SingularAttribute) attribute;
-			if ( singularAttribute.getType() instanceof EntityType ) {
-				return (EntityType) singularAttribute.getType();
-			}
-		}
-
-		return null;
-	}
-
-	private SqmAttributeJoin resolveTerminal(
-			Binding lhs,
+	private AttributeBinding resolveTerminal(
+			DomainReferenceBinding lhs,
 			String terminalName,
-			Attribute attribute,
-			EntityType subclassType) {
-		return context().getFromElementBuilder().buildAttributeJoin(
-				fromElementSpace,
-				alias,
-				attribute,
-				subclassType,
-				lhs.asLoggableText() + '.' + terminalName,
-				joinType,
-				lhs.getFromElement(),
-				fetched,
-				false
+			AttributeReference attribute,
+			EntityReference subclassIndicator) {
+		AttributeBinding attributeBinding = context().getParsingContext().findOrCreateAttributeBinding(
+				lhs,
+				resolveAttributeDescriptor( lhs.getFromElement(), terminalName )
 		);
+
+		if ( attributeBinding.getFromElement() == null ) {
+			// create the join and inject it into the binding
+			attributeBinding.injectAttributeJoin(
+					context().getFromElementBuilder().buildAttributeJoin(
+							attributeBinding,
+							alias,
+							subclassIndicator,
+							lhs.getFromElement().asLoggableText() + '.' + attribute.getAttributeName(),
+							getIntermediateJoinType(),
+							areIntermediateJoinsFetched(),
+							canReuseImplicitJoins()
+					)
+			);
+		}
+
+		return attributeBinding;
 	}
 
 	@Override
-	protected Binding resolveTreatedTerminal(
+	protected DomainReferenceBinding resolveTreatedTerminal(
 			ResolutionContext context,
-			Binding lhs,
+			DomainReferenceBinding lhs,
 			String terminalName,
-			EntityType subclassIndicator) {
-		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
+			EntityReference subclassIndicator) {
+		final AttributeReference attribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
 		return resolveTerminal( lhs, terminalName, attribute, subclassIndicator );
 	}
 
 	@Override
-	protected Binding resolveFromElementAliasAsTerminal(SqmFrom aliasedFromElement) {
+	protected DomainReferenceBinding resolveFromElementAliasAsTerminal(DomainReferenceBinding aliasedBinding) {
 		// this can never be valid...
-		throw new SemanticException( "Cannot join to aliased FromElement [" + aliasedFromElement.getIdentificationVariable() + "]" );
+		throw new SemanticException( "Cannot join to aliased FromElement [" + aliasedBinding.getFromElement().getIdentificationVariable() + "]" );
 	}
 }

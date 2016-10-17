@@ -6,22 +6,22 @@
  */
 package org.hibernate.sqm.query.set;
 
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class SqmAssignment {
-	private final AttributeReferenceSqmExpression stateField;
+	private final AttributeBinding stateField;
 	private final SqmExpression value;
 
-	public SqmAssignment(AttributeReferenceSqmExpression stateField, SqmExpression value) {
+	public SqmAssignment(AttributeBinding stateField, SqmExpression value) {
 		this.stateField = stateField;
 		this.value = value;
 	}
 
-	public AttributeReferenceSqmExpression getStateField() {
+	public AttributeBinding getStateField() {
 		return stateField;
 	}
 

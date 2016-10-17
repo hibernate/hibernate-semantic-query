@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.parser.criteria.spi.expression.function;
 
-import org.hibernate.sqm.domain.Type;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 
 /**

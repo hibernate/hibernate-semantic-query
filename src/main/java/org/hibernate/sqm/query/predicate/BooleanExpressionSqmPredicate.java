@@ -20,7 +20,7 @@ public class BooleanExpressionSqmPredicate implements SqmPredicate {
 
 	public BooleanExpressionSqmPredicate(SqmExpression booleanExpression) {
 		assert booleanExpression.getExpressionType() != null;
-		assert booleanExpression.getExpressionType() instanceof BasicType<?>;
+		assert booleanExpression.getExpressionType() instanceof BasicType;
 		final Class expressionJavaType = ( (BasicType) booleanExpression.getExpressionType() ).getJavaType();
 		assert boolean.class.equals( expressionJavaType ) || Boolean.class.equals( expressionJavaType );
 

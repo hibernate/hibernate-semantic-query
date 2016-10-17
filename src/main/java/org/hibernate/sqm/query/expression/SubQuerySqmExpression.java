@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.SqmQuerySpec;
 
 /**
@@ -15,20 +15,20 @@ import org.hibernate.sqm.query.SqmQuerySpec;
  */
 public class SubQuerySqmExpression implements SqmExpression {
 	private final SqmQuerySpec querySpec;
-	private final Type type;
+	private final DomainReference type;
 
-	public SubQuerySqmExpression(SqmQuerySpec querySpec, Type type) {
+	public SubQuerySqmExpression(SqmQuerySpec querySpec, DomainReference type) {
 		this.querySpec = querySpec;
 		this.type = type;
 	}
 
 	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		return type;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return type;
 	}
 
@@ -39,5 +39,10 @@ public class SubQuerySqmExpression implements SqmExpression {
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitSubQueryExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "<subquery>";
 	}
 }

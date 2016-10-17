@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -18,7 +18,7 @@ public class CastFunctionSqmExpression extends AbstractFunctionSqmExpression imp
 
 	private final SqmExpression expressionToCast;
 
-	public CastFunctionSqmExpression(SqmExpression expressionToCast, BasicType castTargetType) {
+	public CastFunctionSqmExpression(SqmExpression expressionToCast, DomainReference castTargetType) {
 		super( castTargetType );
 		this.expressionToCast = expressionToCast;
 	}
@@ -40,5 +40,10 @@ public class CastFunctionSqmExpression extends AbstractFunctionSqmExpression imp
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitCastFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "CAST(" + expressionToCast.asLoggableText() + ")";
 	}
 }

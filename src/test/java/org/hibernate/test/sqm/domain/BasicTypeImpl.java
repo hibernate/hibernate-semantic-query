@@ -6,21 +6,24 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.BasicType;
-
 /**
  * @author Steve Ebersole
  */
-public class BasicTypeImpl extends AbstractTypeImpl implements BasicType {
-	private final Class javaType;
+public class BasicTypeImpl<T> extends AbstractTypeImpl implements BasicType<T> {
+	private final Class<T> javaType;
 
-	public BasicTypeImpl(Class javaType) {
+	public BasicTypeImpl(Class<T> javaType) {
 		super( javaType.getName() );
 		this.javaType = javaType;
 	}
 
 	@Override
-	public Class getJavaType() {
+	public Class<T> getJavaType() {
 		return javaType;
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "BasicType(" + javaType + ")";
 	}
 }

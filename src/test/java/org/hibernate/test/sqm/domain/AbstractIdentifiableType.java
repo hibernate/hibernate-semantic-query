@@ -6,10 +6,6 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.IdentifiableType;
-import org.hibernate.sqm.domain.IdentifierDescriptor;
-import org.hibernate.sqm.domain.SingularAttribute;
-
 /**
  * @author Steve Ebersole
  */
@@ -62,4 +58,23 @@ public abstract class AbstractIdentifiableType extends AbstractManagedType imple
 		this.versionAttribute = versionAttribute;
 	}
 
+	@Override
+	public Attribute findAttribute(String name) {
+		Attribute attr = super.findAttribute( name );
+		if ( "id".equals( name ) ) {
+			if ( identifierDescriptor instanceof IdentifierDescriptorSingleAttribute ) {
+				return ( (IdentifierDescriptorSingleAttribute) identifierDescriptor ).getIdAttribute();
+			}
+			else {
+				return new PseudoIdAttributeImpl( this );
+			}
+		}
+		else if ( identifierDescriptor instanceof IdentifierDescriptorSingleAttribute ) {
+			final IdentifierDescriptorSingleAttribute descrip = (IdentifierDescriptorSingleAttribute) identifierDescriptor;
+			if ( name.equals( descrip.getIdAttribute().getAttributeName() ) ) {
+				return descrip.getIdAttribute();
+			}
+		}
+		return attr;
+	}
 }

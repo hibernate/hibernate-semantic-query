@@ -7,9 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 
 /**
  * Represents the {@code SIZE()} function.
@@ -18,12 +17,10 @@ import org.hibernate.sqm.path.AttributeBinding;
  * @author Gunnar Morling
  */
 public class CollectionSizeSqmExpression implements SqmExpression {
-	AttributeBinding pluralAttributeBinding;
-	private final BasicType resultType;
+	private final AttributeBinding pluralAttributeBinding;
 
-	public CollectionSizeSqmExpression(AttributeBinding pluralAttributeBinding, BasicType resultType) {
+	public CollectionSizeSqmExpression(AttributeBinding pluralAttributeBinding) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
-		this.resultType = resultType;
 	}
 
 	public AttributeBinding getPluralAttributeBinding() {
@@ -31,17 +28,24 @@ public class CollectionSizeSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public BasicType getExpressionType() {
-		return resultType;
+	public DomainReference getExpressionType() {
+		// we'd need some form of "basic type memento" and to be able to ask the
+		// consumer for the "basic type memento" for a Long.class
+		return null;
 	}
 
 	@Override
-	public Type getInferableType() {
-		return null;
+	public DomainReference getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitCollectionSizeFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "SIZE(" + pluralAttributeBinding.asLoggableText() + ")";
 	}
 }

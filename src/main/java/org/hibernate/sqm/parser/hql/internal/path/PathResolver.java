@@ -6,14 +6,15 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * Strategy for resolving attribute path expressions in a contextually pluggable
  * manner.  Pluggable because how we resolve path expressions as part of a selection
- * is very different from how we need to resolve path expressions in predicates
+ * is very different from how we need to resolve path expressions in predicates is
+ * very different from how we need to resolve path expressions in from-clause ...
  *
  * @author Steve Ebersole
  */
@@ -26,7 +27,7 @@ public interface PathResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	Binding resolvePath(String... pathParts);
+	DomainReferenceBinding resolvePath(String... pathParts);
 
 	/**
 	 * Resolve the given path relative to a given left-hand side.
@@ -36,7 +37,7 @@ public interface PathResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	Binding resolvePath(Binding lhs, String... pathParts);
+	DomainReferenceBinding resolvePath(DomainReferenceBinding lhs, String... pathParts);
 
 	/**
 	 * Resolve the given path applying the specified "intrinsic" subclass indicator to the
@@ -49,7 +50,7 @@ public interface PathResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	Binding resolvePath(EntityType subclassIndicator, String... pathParts);
+	DomainReferenceBinding resolveTreatedPath(EntityReference subclassIndicator, String... pathParts);
 
 	/**
 	 * Resolve the given path relative to a given left-hand side applying the specified
@@ -61,7 +62,7 @@ public interface PathResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	Binding resolvePath(Binding lhs, EntityType subclassIndicator, String... pathParts);
+	DomainReferenceBinding resolveTreatedPath(DomainReferenceBinding lhs, EntityReference subclassIndicator, String... pathParts);
 
 	boolean canReuseImplicitJoins();
 }

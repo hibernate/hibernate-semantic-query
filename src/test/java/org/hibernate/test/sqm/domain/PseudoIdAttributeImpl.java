@@ -4,30 +4,24 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.parser.hql.internal.path;
-
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.IdentifierDescriptorMultipleAttribute;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
+package org.hibernate.test.sqm.domain;
 
 /**
  * Used to model an entity's non-aggregated composite identifier as a SingularAttribute for binding
  *
  * @author Steve Ebersole
  */
-class PseudoIdAttributeImpl implements SingularAttribute {
-	private final EntityType entityType;
+public class PseudoIdAttributeImpl implements SingularAttribute {
+	private final IdentifiableType entityType;
 
-	public PseudoIdAttributeImpl(EntityType entityType) {
+	public PseudoIdAttributeImpl(IdentifiableType entityType) {
 		this.entityType = entityType;
 		assert entityType.getIdentifierDescriptor() instanceof IdentifierDescriptorMultipleAttribute;
 	}
 
 	@Override
-	public Classification getAttributeTypeClassification() {
-		return Classification.EMBEDDED;
+	public SingularAttributeClassification getAttributeTypeClassification() {
+		return SingularAttributeClassification.EMBEDDED;
 	}
 
 	@Override
@@ -51,11 +45,6 @@ class PseudoIdAttributeImpl implements SingularAttribute {
 	}
 
 	@Override
-	public String getName() {
-		return "id";
-	}
-
-	@Override
 	public Type getBoundType() {
 		return getType();
 	}
@@ -66,5 +55,15 @@ class PseudoIdAttributeImpl implements SingularAttribute {
 			return (ManagedType) getType();
 		}
 		return null;
+	}
+
+	@Override
+	public String getAttributeName() {
+		return "<id>";
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "ImplicitIdAttributeRef(" + getLeftHandSide().getTypeName() + ".<pk>)";
 	}
 }

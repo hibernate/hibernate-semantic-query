@@ -45,4 +45,9 @@ public class GenericFunctionSqmExpression extends AbstractFunctionSqmExpression 
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitGenericFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		return "function(" + getFunctionName() + " ...)";
+	}
 }

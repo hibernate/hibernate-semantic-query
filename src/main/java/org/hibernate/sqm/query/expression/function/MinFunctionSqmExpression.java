@@ -13,7 +13,8 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class MinFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression
+public class MinFunctionSqmExpression
+		extends AbstractAggregateFunctionSqmExpression
 		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "min";
 
@@ -29,5 +30,10 @@ public class MinFunctionSqmExpression extends AbstractAggregateFunctionSqmExpres
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitMinFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "MIN(" + getArgument().asLoggableText() + ")";
 	}
 }

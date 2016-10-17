@@ -43,4 +43,9 @@ public class UpperFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitUpperFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		return "UPPER(" + getExpression().asLoggableText() + ")";
+	}
 }

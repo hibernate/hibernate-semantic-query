@@ -7,8 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.Helper;
 
 /**
@@ -17,13 +16,14 @@ import org.hibernate.sqm.query.Helper;
 public class ConcatSqmExpression implements SqmExpression {
 	private final SqmExpression lhsOperand;
 	private final SqmExpression rhsOperand;
-	private final BasicType resultType;
+
+	private final DomainReference resultType;
 
 	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand) {
-		this( lhsOperand, rhsOperand, (BasicType) lhsOperand.getExpressionType() );
+		this( lhsOperand, rhsOperand, lhsOperand.getExpressionType() );
 	}
 
-	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand, BasicType resultType) {
+	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand, DomainReference resultType) {
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
 		this.resultType = resultType;
@@ -38,17 +38,22 @@ public class ConcatSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public BasicType getExpressionType() {
+	public DomainReference getExpressionType() {
 		return resultType;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return Helper.firstNonNull( lhsOperand.getInferableType(), rhsOperand.getInferableType() ) ;
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitConcatExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "<concat>";
 	}
 }

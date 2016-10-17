@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query;
 
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * Describes a parameter declared in the query.
@@ -44,7 +44,7 @@ public interface Parameter {
 	boolean allowMultiValuedBinding();
 
 	/**
-	 * Based on the context it is declared, what is the anticipated Type for
+	 * Based on the context it is declared, what is the anticipated type for
 	 * bind values?
 	 * <p/>
 	 * NOTE: If {@link #allowMultiValuedBinding()} is true, this will indicate
@@ -52,5 +52,5 @@ public interface Parameter {
 	 *
 	 * @return The anticipated Type.
 	 */
-	Type getAnticipatedType();
+	DomainReference getAnticipatedType();
 }

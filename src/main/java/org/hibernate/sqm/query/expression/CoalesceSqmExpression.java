@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
  */
 public class CoalesceSqmExpression implements SqmExpression {
-	private List<SqmExpression> values = new ArrayList<SqmExpression>();
+	private List<SqmExpression> values = new ArrayList<>();
 
 	public List<SqmExpression> getValues() {
 		return values;
@@ -27,17 +27,22 @@ public class CoalesceSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		return values.get( 0 ).getExpressionType();
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitCoalesceExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "<coalesce>";
 	}
 }

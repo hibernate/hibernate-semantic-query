@@ -11,11 +11,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.Helper;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 
 import org.jboss.logging.Logger;
 
@@ -30,29 +28,25 @@ public abstract class AbstractFrom implements SqmFrom {
 	private final FromElementSpace fromElementSpace;
 	private final String uid;
 	private final String alias;
-	private final Bindable bindableModelDescriptor;
-	private final EntityType subclassIndicator;
+	private final DomainReferenceBinding binding;
+	private final EntityReference subclassIndicator;
 	private final String sourcePath;
 
-	private final ManagedType expressionType;
-
-	private Map<EntityType,Downcast> downcastMap;
+	private Map<EntityReference,Downcast> downcastMap;
 
 	protected AbstractFrom(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			Bindable bindableModelDescriptor,
-			EntityType subclassIndicator,
+			DomainReferenceBinding binding,
+			EntityReference subclassIndicator,
 			String sourcePath) {
 		this.fromElementSpace = fromElementSpace;
 		this.uid = uid;
 		this.alias = alias;
-		this.bindableModelDescriptor = bindableModelDescriptor;
+		this.binding = binding;
 		this.subclassIndicator = subclassIndicator;
 		this.sourcePath = sourcePath;
-
-		this.expressionType = Helper.determineManagedType( bindableModelDescriptor );
 	}
 
 	@Override
@@ -71,18 +65,23 @@ public abstract class AbstractFrom implements SqmFrom {
 	}
 
 	@Override
-	public Bindable getBindable() {
-		return bindableModelDescriptor;
+	public DomainReferenceBinding getDomainReferenceBinding() {
+		return binding;
 	}
 
 	@Override
-	public EntityType getIntrinsicSubclassIndicator() {
+	public DomainReference getExpressionType() {
+		return binding.getBoundDomainReference();
+	}
+
+	@Override
+	public DomainReference getInferableType() {
+		return getExpressionType();
+	}
+
+	@Override
+	public EntityReference getIntrinsicSubclassIndicator() {
 		return subclassIndicator;
-	}
-
-	@Override
-	public SqmFrom getFromElement() {
-		return this;
 	}
 
 	@Override
@@ -91,25 +90,10 @@ public abstract class AbstractFrom implements SqmFrom {
 	}
 
 	@Override
-	public EntityType getSubclassIndicator() {
-		return subclassIndicator;
-	}
-
-	@Override
-	public Type getExpressionType() {
-		return expressionType;
-	}
-
-	@Override
-	public Type getInferableType() {
-		return getExpressionType();
-	}
-
-	@Override
 	public void addDowncast(Downcast downcast) {
 		Downcast existing = null;
 		if ( downcastMap == null ) {
-			downcastMap = new HashMap<EntityType, Downcast>();
+			downcastMap = new HashMap<>();
 		}
 		else {
 			existing = downcastMap.get( downcast.getTargetType() );

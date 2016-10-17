@@ -6,12 +6,9 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hibernate.sqm.query.from.SqmFrom;
-import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
 
 import org.jboss.logging.Logger;
@@ -32,8 +29,6 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	private final SqmFromClause fromClause;
 
 	private final FromElementBuilder fromElementBuilder;
-
-	private Map<String,SqmFrom> fromElementsByPath = new HashMap<String, SqmFrom>();
 
 	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext) {
 		this( parsingContext, null );
@@ -75,27 +70,27 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	}
 
 	@Override
-	public SqmFrom findFromElementByIdentificationVariable(String identificationVariable) {
+	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
 		return fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 	}
 
 	@Override
-	public SqmFrom findFromElementExposingAttribute(String name) {
-		SqmFrom found = null;
+	public DomainReferenceBinding findFromElementExposingAttribute(String name) {
+		DomainReferenceBinding found = null;
 		for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
-			if ( space.getRoot().resolveAttribute( name ) != null ) {
+			if ( definesAttribute( space.getRoot().getDomainReferenceBinding(), name ) ) {
 				if ( found != null ) {
 					throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );
 				}
-				found = space.getRoot();
+				found = space.getRoot().getDomainReferenceBinding();
 			}
 
 			for ( SqmJoin join : space.getJoins() ) {
-				if ( join.resolveAttribute( name ) != null ) {
+				if ( definesAttribute( join.getDomainReferenceBinding(), name ) ) {
 					if ( found != null ) {
 						throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );
 					}
-					found = join;
+					found = join.getDomainReferenceBinding();
 				}
 			}
 		}
@@ -108,6 +103,13 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 		}
 
 		return found;
+	}
+
+	private boolean definesAttribute(DomainReferenceBinding domainReferenceBinding, String name) {
+		final AttributeReference resolvedAttributeReference = getParsingContext().getConsumerContext()
+				.getDomainMetamodel()
+				.resolveAttributeReference( domainReferenceBinding.getBoundDomainReference(), name );
+		return resolvedAttributeReference != null;
 	}
 
 	@Override

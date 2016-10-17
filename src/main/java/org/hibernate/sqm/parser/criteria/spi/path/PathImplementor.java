@@ -8,8 +8,6 @@ package org.hibernate.sqm.parser.criteria.spi.path;
 
 import javax.persistence.criteria.Path;
 
-import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
-
 /**
  * @author Steve Ebersole
  */

@@ -12,12 +12,12 @@ import org.hibernate.sqm.parser.hql.internal.antlr.HqlParserBaseListener;
 import org.jboss.logging.Logger;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  * @author Steve Ebersole
  */
+@SuppressWarnings("WeakerAccess")
 public class HqlParseTreePrinter extends HqlParserBaseListener {
 	private static final Logger HQL_LOGGER = Logger.getLogger( "org.hibernate.sqm.hql.parseTree" );
 
@@ -39,7 +39,7 @@ public class HqlParseTreePrinter extends HqlParserBaseListener {
 	}
 
 	@Override
-	public void enterEveryRule(@NotNull ParserRuleContext ctx) {
+	public void enterEveryRule(ParserRuleContext ctx) {
 		final String ruleName = parser.getRuleNames()[ctx.getRuleIndex()];
 
 		if ( !ruleName.endsWith( "Keyword" ) ) {
@@ -67,7 +67,7 @@ public class HqlParseTreePrinter extends HqlParserBaseListener {
 	}
 
 	@Override
-	public void exitEveryRule(@NotNull ParserRuleContext ctx) {
+	public void exitEveryRule(ParserRuleContext ctx) {
 		super.exitEveryRule( ctx );
 
 		final String ruleName = parser.getRuleNames()[ctx.getRuleIndex()];

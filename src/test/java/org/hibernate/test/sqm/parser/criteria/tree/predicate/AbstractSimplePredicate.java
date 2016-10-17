@@ -12,7 +12,7 @@ import java.util.List;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.test.sqm.domain.BasicType;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
@@ -28,7 +28,10 @@ public abstract class AbstractSimplePredicate
 	private static final List<Expression<Boolean>> NO_EXPRESSIONS = Collections.emptyList();
 
 	public AbstractSimplePredicate(CriteriaBuilderImpl criteriaBuilder) {
-		this( criteriaBuilder, criteriaBuilder.consumerContext().getDomainMetamodel().getBasicType( Boolean.class ) );
+		this(
+				criteriaBuilder,
+				(BasicType<Boolean>) criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( Boolean.class )
+		);
 	}
 
 	public AbstractSimplePredicate(CriteriaBuilderImpl criteriaBuilder, BasicType<Boolean> sqmType) {

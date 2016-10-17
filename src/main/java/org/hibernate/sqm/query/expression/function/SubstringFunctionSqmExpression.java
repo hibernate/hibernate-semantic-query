@@ -57,4 +57,19 @@ public class SubstringFunctionSqmExpression extends AbstractFunctionSqmExpressio
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitSubstringFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		StringBuilder buff = new StringBuilder( "SUBSTR(" + getSource().asLoggableText() );
+
+		if ( getStartPosition() != null ) {
+			buff.append( ", " ).append( getStartPosition().asLoggableText() );
+		}
+
+		if ( getLength() != null ) {
+			buff.append( ", " ).append( getLength().asLoggableText() );
+		}
+
+		return buff.append( ")" ).toString();
+	}
 }

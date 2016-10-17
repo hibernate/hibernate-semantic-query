@@ -7,25 +7,17 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralCharacterSqmExpression extends AbstractLiteralSqmExpressionImpl<Character> {
-	public LiteralCharacterSqmExpression(Character value, BasicType<Character> typeDescriptor) {
-		super( value, typeDescriptor );
+	public LiteralCharacterSqmExpression(Character value) {
+		super( value );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralCharacterExpression( this );
-	}
-
-	@Override
-	protected void validateInferredType(Class javaType) {
-		if ( !Compatibility.areAssignmentCompatible( javaType, char.class ) ) {
-			throw new TypeInferenceException( "Character literal is not convertible to inferred type [" + javaType + "]" );
-		}
 	}
 }

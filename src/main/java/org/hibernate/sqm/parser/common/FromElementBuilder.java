@@ -6,15 +6,14 @@
  */
 package org.hibernate.sqm.parser.common;
 
+import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EntityType;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.from.SqmCrossJoin;
-import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmRoot;
 
 import org.jboss.logging.Logger;
@@ -42,21 +41,21 @@ public class FromElementBuilder {
 	 */
 	public SqmRoot makeRootEntityFromElement(
 			FromElementSpace fromElementSpace,
-			EntityType entityType,
+			EntityReference entityBinding,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for root entity reference [%s]",
 					alias,
-					entityType.getName()
+					entityBinding.getEntityName()
 			);
 		}
 		final SqmRoot root = new SqmRoot(
 				fromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
 				alias,
-				entityType
+				entityBinding
 		);
 		fromElementSpace.setRoot( root );
 		parsingContext.registerFromElementByUniqueId( root );
@@ -71,14 +70,14 @@ public class FromElementBuilder {
 	public SqmCrossJoin makeCrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
 			String uid,
-			EntityType entityType,
+			EntityReference entityBinding,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for cross joined entity reference [%s]",
 					alias,
-					entityType.getName()
+					entityBinding.getEntityName()
 			);
 		}
 
@@ -86,7 +85,7 @@ public class FromElementBuilder {
 				fromElementSpace,
 				uid,
 				alias,
-				entityType
+				entityBinding
 		);
 		fromElementSpace.addJoin( join );
 		parsingContext.registerFromElementByUniqueId( join );
@@ -97,14 +96,14 @@ public class FromElementBuilder {
 	public SqmEntityJoin buildEntityJoin(
 			FromElementSpace fromElementSpace,
 			String alias,
-			EntityType entityType,
+			EntityReference entityType,
 			JoinType joinType) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for entity join [%s]",
 					alias,
-					entityType.getName()
+					entityType.getEntityName()
 			);
 		}
 
@@ -122,15 +121,16 @@ public class FromElementBuilder {
 	}
 
 	public SqmAttributeJoin buildAttributeJoin(
-			FromElementSpace fromElementSpace,
+			AttributeBinding attributeBinding,
 			String alias,
-			Attribute attributeDescriptor,
-			EntityType subclassIndicator,
+			EntityReference subclassIndicator,
 			String path,
 			JoinType joinType,
-			SqmFrom lhs,
 			boolean fetched,
 			boolean canReuseImplicitJoins) {
+		assert attributeBinding != null;
+		assert joinType != null;
+
 		if ( fetched && canReuseImplicitJoins ) {
 			throw new ParsingException( "Illegal combination of [fetched=true] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
 		}
@@ -141,34 +141,27 @@ public class FromElementBuilder {
 
 		// todo : validate alias & fetched?  JPA at least disallows specifying an alias for fetched associations
 
-		if ( attributeDescriptor == null ) {
-			throw new ParsingException(
-					"AttributeDescriptor was null [name unknown]; cannot build attribute join in relation to from-element [" +
-							lhs.getBindable() + "(" + lhs.getIdentificationVariable() + ")]"
-			);
-		}
-
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for attribute join [%s.%s]",
 					alias,
-					lhs.getIdentificationVariable(),
-					attributeDescriptor.getName()
+					attributeBinding.getLhs().getFromElement().getIdentificationVariable(),
+					attributeBinding.getAttribute().getAttributeName()
 			);
 		}
 
 		SqmAttributeJoin join = null;
 		if ( canReuseImplicitJoins ) {
-			join = parsingContext.getCachedAttributeJoin( lhs, attributeDescriptor );
+			join = parsingContext.getCachedAttributeJoin( attributeBinding.getLhs().getFromElement(), attributeBinding.getAttribute() );
 		}
 
 		if ( join == null ) {
 			join = new SqmAttributeJoin(
-					lhs,
+					attributeBinding.getLhs().getFromElement().getContainingSpace(),
+					attributeBinding,
 					parsingContext.makeUniqueIdentifier(),
 					alias,
-					attributeDescriptor,
 					subclassIndicator,
 					path,
 					joinType,
@@ -176,20 +169,19 @@ public class FromElementBuilder {
 			);
 
 			if ( canReuseImplicitJoins ) {
-				parsingContext.cacheAttributeJoin( lhs, join );
+				parsingContext.cacheAttributeJoin( attributeBinding.getLhs().getFromElement(), join );
 			}
 
-			fromElementSpace.addJoin( join );
+			attributeBinding.getLhs().getFromElement().getContainingSpace().addJoin( join );
 			parsingContext.registerFromElementByUniqueId( join );
-			parsingContext.attributeJoinCreatedNotification( join );
 			registerAlias( join );
 		}
 
 		return join;
 	}
 
-	private void registerAlias(SqmFrom fromElement) {
-		final String alias = fromElement.getIdentificationVariable();
+	private void registerAlias(SqmFrom sqmFrom) {
+		final String alias = sqmFrom.getIdentificationVariable();
 
 		if ( alias == null ) {
 			throw new ParsingException( "FromElement alias was null" );
@@ -199,6 +191,6 @@ public class FromElementBuilder {
 			log.debug( "Alias registration for implicit FromElement alias : " + alias );
 		}
 
-		aliasRegistry.registerAlias( fromElement );
+		aliasRegistry.registerAlias( sqmFrom.getDomainReferenceBinding() );
 	}
 }

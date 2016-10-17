@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;

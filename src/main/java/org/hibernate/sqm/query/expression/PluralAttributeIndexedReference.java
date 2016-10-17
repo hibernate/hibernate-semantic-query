@@ -7,38 +7,28 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeIndexedReference implements Binding {
+public class PluralAttributeIndexedReference implements DomainReferenceBinding {
 	private final AttributeBinding pluralAttributeBinding;
 	private final SqmExpression indexSelectionExpression;
 
-	private final Type type;
-
 	public PluralAttributeIndexedReference(
 			AttributeBinding pluralAttributeBinding,
-			SqmExpression indexSelectionExpression,
-			Type type) {
+			SqmExpression indexSelectionExpression) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 		this.indexSelectionExpression = indexSelectionExpression;
-		this.type = type;
 	}
 
 	public AttributeBinding getPluralAttributeBinding() {
 		return pluralAttributeBinding;
-	}
-
-	public PluralAttribute getPluralAttribute() {
-		return (PluralAttribute) getPluralAttributeBinding().getBoundAttribute();
 	}
 
 	public SqmExpression getIndexSelectionExpression() {
@@ -46,12 +36,17 @@ public class PluralAttributeIndexedReference implements Binding {
 	}
 
 	@Override
-	public Type getExpressionType() {
-		return type;
+	public DomainReference getBoundDomainReference() {
+		return ( ( PluralAttributeReference) pluralAttributeBinding.getAttribute() ).getElementReference();
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getExpressionType() {
+		return getBoundDomainReference();
+	}
+
+	@Override
+	public DomainReference getInferableType() {
 		return getExpressionType();
 	}
 
@@ -61,24 +56,8 @@ public class PluralAttributeIndexedReference implements Binding {
 	}
 
 	@Override
-	public Bindable getBindable() {
-		return getPluralAttributeBinding().getBindable();
-	}
-
-	@Override
 	public String asLoggableText() {
-		return pluralAttributeBinding.asLoggableText();
-	}
-
-	private boolean isBindable() {
-		return type instanceof ManagedType;
-	}
-
-	@Override
-	public ManagedType getSubclassIndicator() {
-		return isBindable()
-				? (ManagedType) type
-				: null;
+		return getFromElement().asLoggableText();
 	}
 
 	@Override

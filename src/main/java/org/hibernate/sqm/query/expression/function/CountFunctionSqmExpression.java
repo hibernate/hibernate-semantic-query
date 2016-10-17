@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -16,7 +16,7 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 public class CountFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression {
 	public static final String NAME = "count";
 
-	public CountFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public CountFunctionSqmExpression(SqmExpression argument, boolean distinct, DomainReference resultType) {
 		super( argument, distinct, resultType );
 	}
 
@@ -28,5 +28,10 @@ public class CountFunctionSqmExpression extends AbstractAggregateFunctionSqmExpr
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitCountFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "COUNT(" + getArgument().asLoggableText() + ")";
 	}
 }

@@ -6,11 +6,9 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.Binding;
 
 /**
  * @author Steve Ebersole
@@ -26,13 +24,9 @@ public class PathResolverSelectClauseImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected AttributeBinding resolveTerminalAttributeBinding(Binding lhs, String terminalName) {
-		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
-
-		if ( attribute.getBoundType() instanceof EntityType ) {
-			return buildAttributeJoin( resolveLhsFromElement( lhs ), attribute, null );
-		}
-
-		return super.resolveTerminalAttributeBinding( lhs, terminalName );
+	protected AttributeBinding resolveTerminalAttributeBinding(DomainReferenceBinding lhs, String terminalName) {
+		AttributeBinding attrBinding = context().getParsingContext().findOrCreateAttributeBinding( lhs, terminalName );
+		resolveAttributeJoinIfNot( attrBinding );
+		return attrBinding;
 	}
 }

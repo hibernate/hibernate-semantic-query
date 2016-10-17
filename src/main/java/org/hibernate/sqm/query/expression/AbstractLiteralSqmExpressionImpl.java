@@ -6,19 +6,22 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
  */
 public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmExpression<T> {
 	private final T value;
-	private BasicType<T> typeDescriptor;
 
-	public AbstractLiteralSqmExpressionImpl(T value, BasicType<T> typeDescriptor) {
+	private DomainReference type;
+
+	public AbstractLiteralSqmExpressionImpl(T value) {
 		this.value = value;
-		this.typeDescriptor = typeDescriptor;
+	}
+
+	public AbstractLiteralSqmExpressionImpl(T value, DomainReference type) {
+		this.value = value;
 	}
 
 	@Override
@@ -27,26 +30,25 @@ public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmE
 	}
 
 	@Override
-	public BasicType<T> getExpressionType() {
-		return typeDescriptor;
+	public DomainReference getExpressionType() {
+		return type;
 	}
 
 	@Override
-	public Type getInferableType() {
-		return null;
+	public DomainReference getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(Type type) {
+	public void impliedType(DomainReference type) {
 		if ( type != null ) {
-			if ( !BasicType.class.isAssignableFrom( type.getClass() ) ) {
-				throw new TypeInferenceException( "Inferred type descriptor [" + type + "] was not castable to javax.persistence.metamodel.BasicType" );
-			}
-			validateInferredType( ( (BasicType) type ).getJavaType() );
-			this.typeDescriptor = (BasicType<T>) type;
+			this.type = type;
 		}
 	}
 
-	protected abstract void validateInferredType(Class javaType);
+	@Override
+	public String asLoggableText() {
+		return "Literal( " + value + ")";
+	}
 }

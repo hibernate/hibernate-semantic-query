@@ -54,4 +54,9 @@ public class ConcatFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitConcatFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		return "CONCAT(...)";
+	}
 }

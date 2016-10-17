@@ -7,15 +7,14 @@
 package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class CountStarFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression {
-	public CountStarFunctionSqmExpression(boolean distinct, BasicType resultType) {
+	public CountStarFunctionSqmExpression(boolean distinct, DomainReference resultType) {
 		super( STAR, distinct, resultType );
 	}
 
@@ -29,20 +28,30 @@ public class CountStarFunctionSqmExpression extends AbstractAggregateFunctionSqm
 		return walker.visitCountStarFunction( this );
 	}
 
+	@Override
+	public String asLoggableText() {
+		return "COUNT(*)";
+	}
+
 	private static SqmExpression STAR = new SqmExpression() {
 		@Override
-		public Type getExpressionType() {
+		public DomainReference getExpressionType() {
 			return null;
 		}
 
 		@Override
-		public Type getInferableType() {
+		public DomainReference getInferableType() {
 			return null;
 		}
 
 		@Override
 		public <T> T accept(SemanticQueryWalker<T> walker) {
 			throw new UnsupportedOperationException( "Illegal attempt to visit * as argument of count(*)" );
+		}
+
+		@Override
+		public String asLoggableText() {
+			return "*";
 		}
 	};
 }

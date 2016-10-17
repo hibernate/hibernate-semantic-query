@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
@@ -30,17 +30,22 @@ public class NullifSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		return first.getExpressionType();
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitNullifExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "NULLIF(" + first.asLoggableText() + ", " + second.asLoggableText() + ")";
 	}
 }

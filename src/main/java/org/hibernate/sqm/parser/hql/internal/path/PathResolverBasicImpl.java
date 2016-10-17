@@ -6,22 +6,14 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.AnyType;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EmbeddableType;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.IdentifiableType;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.Binding;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.Downcast;
-import org.hibernate.sqm.query.from.SqmFrom;
-import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 import org.jboss.logging.Logger;
 
@@ -45,13 +37,13 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 	}
 
 	@Override
-	public Binding resolvePath(String... pathParts) {
-		return resolvePath( (EntityType) null, pathParts );
+	public DomainReferenceBinding resolvePath(String... pathParts) {
+		return resolveTreatedPath( null, pathParts );
 	}
 
 	@Override
-	public Binding resolvePath(Binding lhs, String... pathParts) {
-		return resolvePath( lhs, null, pathParts );
+	public DomainReferenceBinding resolvePath(DomainReferenceBinding lhs, String... pathParts) {
+		return resolveTreatedPath( lhs, null, pathParts );
 	}
 
 	private String[] sansFirstElement(String[] pathParts) {
@@ -63,7 +55,7 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 	}
 
 	@Override
-	public Binding resolvePath(EntityType subclassIndicator, String... pathParts) {
+	public DomainReferenceBinding resolveTreatedPath(EntityReference subclassIndicator, String... pathParts) {
 		assert pathParts.length > 0;
 
 		// The given pathParts indicate either:
@@ -78,32 +70,31 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			// we had a dot-identifier sequence...
 
 			// see if the root is an identification variable
-			final SqmFrom identifiedFromElement = context().getFromElementLocator()
-					.findFromElementByIdentificationVariable( pathParts[0] );
-			if ( identifiedFromElement != null ) {
-				validatePathRoot( identifiedFromElement );
-				return resolvePath( identifiedFromElement, subclassIndicator, sansFirstElement( pathParts ) );
+			final DomainReferenceBinding identifiedBinding = context().getFromElementLocator().findFromElementByIdentificationVariable( pathParts[0] );
+			if ( identifiedBinding != null ) {
+				validatePathRoot( identifiedBinding );
+				return resolveTreatedPath( identifiedBinding, subclassIndicator, sansFirstElement( pathParts ) );
 			}
 
 			// otherwise see if the root might be the name of an attribute exposed from a FromElement
-			final SqmFrom root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
+			final DomainReferenceBinding root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
 			if ( root != null ) {
 				validatePathRoot( root );
-				return resolvePath( root, subclassIndicator, pathParts );
+				return resolveTreatedPath( root, subclassIndicator, pathParts );
 			}
 		}
 		else {
 			// we had a single identifier...
 
 			// see if the identifier is an identification variable
-			final SqmFrom identifiedFromElement = context().getFromElementLocator()
+			final DomainReferenceBinding identifiedFromElement = context().getFromElementLocator()
 					.findFromElementByIdentificationVariable( pathParts[0] );
 			if ( identifiedFromElement != null ) {
 				return resolveFromElementAliasAsTerminal( identifiedFromElement );
 			}
 
 			// otherwise see if the identifier might be the name of an attribute exposed from a FromElement
-			final SqmFrom root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
+			final DomainReferenceBinding root = context().getFromElementLocator().findFromElementExposingAttribute( pathParts[0] );
 			if ( root != null ) {
 				// todo : consider passing along subclassIndicator
 				return resolveTerminalAttributeBinding( root, pathParts[0] );
@@ -113,35 +104,32 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 		return null;
 	}
 
-	protected void validatePathRoot(SqmFrom root) {
+	protected void validatePathRoot(DomainReferenceBinding root) {
 	}
 
 	@Override
-	public Binding resolvePath(
-			Binding lhs,
-			EntityType subclassIndicator,
+	public DomainReferenceBinding resolveTreatedPath(
+			DomainReferenceBinding lhs,
+			EntityReference subclassIndicator,
 			String... pathParts) {
-		final Binding terminalLhs = resolveAnyIntermediateAttributePathJoins(
-				lhs,
-				pathParts
-		);
-		return resolveTerminalAttributeBinding( terminalLhs, pathParts[pathParts.length-1] );
+		final DomainReferenceBinding lhsBinding = resolveAnyIntermediateAttributePathJoins( lhs, pathParts );
+		return resolveTerminalAttributeBinding( lhsBinding, pathParts[pathParts.length-1] );
 	}
 
 	protected AttributeBinding resolveTerminalAttributeBinding(
-			Binding lhs,
+			DomainReferenceBinding lhs,
 			String terminalName) {
-		final Attribute attribute = resolveAttributeDescriptor( lhs, terminalName );
+		final AttributeReference attribute = resolveAttributeDescriptor( lhs, terminalName );
 		if ( shouldRenderTerminalAttributeBindingAsJoin() && isJoinable( attribute ) ) {
 			log.debugf(
 					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-join",
-					lhs.asLoggableText(),
+					lhs.getFromElement().asLoggableText(),
 					terminalName,
 					attribute
 			);
 			return buildAttributeJoin(
 					// see note in #resolveTreatedTerminal regarding cast
-					(SqmFrom) lhs,
+					lhs,
 					attribute,
 					null
 			);
@@ -149,50 +137,53 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 		else {
 			log.debugf(
 					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-reference",
-					lhs.asLoggableText(),
+					lhs.getFromElement().asLoggableText(),
 					terminalName,
 					attribute
 			);
-			final AttributeReferenceSqmExpression attributeReference = new AttributeReferenceSqmExpression( lhs, attribute, null );
-			context().getParsingContext().registerAttributeReference( attributeReference );
-			return attributeReference;
+			return context().getParsingContext().findOrCreateAttributeBinding(
+					lhs,
+					attribute
+			);
 		}
 	}
 
-	private boolean isJoinable(Attribute attribute) {
-		if ( attribute instanceof PluralAttribute ) {
-			return true;
+	private boolean isJoinable(AttributeReference attribute) {
+		if ( SingularAttributeReference.class.isInstance( attribute ) ) {
+			final SingularAttributeReference attrRef = (SingularAttributeReference) attribute;
+			return attrRef.getAttributeTypeClassification() == SingularAttributeClassification.EMBEDDED
+					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.MANY_TO_ONE
+					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ONE_TO_ONE;
 		}
 		else {
-			final Type singularAttributeType = ( (SingularAttribute) attribute ).getType();
-			return singularAttributeType instanceof ManagedType
-					|| singularAttributeType instanceof AnyType;
+			// plural attributes can always be joined.
+			return true;
 		}
 	}
 
-	protected Binding resolveFromElementAliasAsTerminal(SqmFrom aliasedFromElement) {
-		log.debugf( "Resolved terminal as from-element alias : %s", aliasedFromElement.getIdentificationVariable() );
-		return aliasedFromElement;
+	protected DomainReferenceBinding resolveFromElementAliasAsTerminal(DomainReferenceBinding aliasedBinding) {
+		log.debugf( "Resolved terminal as from-element alias : %s", aliasedBinding.getFromElement().getIdentificationVariable() );
+		return aliasedBinding;
 	}
 
-	protected Binding resolveTreatedTerminal(
+	protected DomainReferenceBinding resolveTreatedTerminal(
 			ResolutionContext context,
-			Binding lhs,
+			DomainReferenceBinding lhs,
 			String terminalName,
-			EntityType subclassIndicator) {
-		final Attribute joinedAttribute = resolveAttributeDescriptor( lhs, terminalName );
+			EntityReference subclassIndicator) {
+		final AttributeReference joinedAttribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
 		log.debugf( "Resolved terminal treated-path : %s -> %s", joinedAttribute, subclassIndicator );
-		final SqmAttributeJoin join = buildAttributeJoin(
+		final AttributeBinding joinBinding = buildAttributeJoin(
 				// todo : just do a cast for now, but this needs to be thought out (Binding -> SqmFrom)
 				//		^^ SqmFrom specifically needed mainly needed for "FromElementSpace"
 				//		but perhaps that resolution could be delayed
-				(SqmFrom) lhs,
+				lhs,
 				joinedAttribute,
 				subclassIndicator
 		);
 
-		join.addDowncast( new Downcast( subclassIndicator ) );
+		joinBinding.getFromElement().addDowncast( new Downcast( subclassIndicator ) );
 
-		return new TreatedFromElementBinding( join, subclassIndicator );
+		return new TreatedFromElementBinding( joinBinding, subclassIndicator );
 	}
 }

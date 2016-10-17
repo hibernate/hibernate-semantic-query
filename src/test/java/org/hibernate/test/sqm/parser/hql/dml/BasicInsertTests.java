@@ -8,10 +8,10 @@ package org.hibernate.test.sqm.parser.hql.dml;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.SqmInsertSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -43,8 +43,8 @@ public class BasicInsertTests {
 
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
-		for ( AttributeReferenceSqmExpression stateField : insertStatement.getStateFields() ) {
-			assertSame( insertStatement.getInsertTarget(), stateField.getLeftHandSide().getFromElement() );
+		for ( AttributeBinding stateField : insertStatement.getStateFields() ) {
+			assertSame( insertStatement.getInsertTarget(), stateField.getLhs().getFromElement() );
 		}
 	}
 
@@ -54,19 +54,19 @@ public class BasicInsertTests {
 		EntityTypeImpl entity1Type = metamodel.makeEntityType( "com.acme.Entity1" );
 		entity1Type.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		entity1Type.makeSingularAttribute(
 				"basic2",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 
 		EntityTypeImpl entity2Type = metamodel.makeEntityType( "com.acme.Entity2" );
 		entity2Type.makeSingularAttribute(
 				"basic2",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 

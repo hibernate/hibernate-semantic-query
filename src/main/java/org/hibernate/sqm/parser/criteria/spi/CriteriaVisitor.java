@@ -11,6 +11,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
@@ -20,7 +21,6 @@ import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
 import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -60,7 +60,7 @@ public interface CriteriaVisitor {
 
 	<T extends Enum> ConstantEnumSqmExpression<T> visitEnumConstant(T value);
 	<T> ConstantFieldSqmExpression<T> visitConstant(T value);
-	<T> ConstantFieldSqmExpression<T> visitConstant(T value, BasicType<T> typeDescriptor);
+	<T> ConstantFieldSqmExpression<T> visitConstant(T value, BasicType typeDescriptor);
 
 	UnaryOperationSqmExpression visitUnaryOperation(
 			UnaryOperationSqmExpression.Operation operation,
@@ -83,7 +83,7 @@ public interface CriteriaVisitor {
 			BasicType resultType);
 
 	SqmFrom visitIdentificationVariableReference(From reference);
-	AttributeReferenceSqmExpression visitAttributeReference(From attributeSource, String attributeName);
+	AttributeBinding visitAttributeReference(From attributeSource, String attributeName);
 
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression<?>> expressions);
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, javax.persistence.criteria.Expression<?>... expressions);
@@ -120,8 +120,8 @@ public interface CriteriaVisitor {
 
 //	CollectionSizeFunction visitCollectionSizeFunction();
 //
-//	CollectionValueFunction visitCollectionValueFunction();
-//	MapKeyFunction visitMapKeyFunction();
+//	CollectionValueFunction visitCollectionValueBinding();
+//	MapKeyFunction visitMapKeyBinding();
 //	MapEntryFunction visitMapEntryFunction();
 
 	SubQuerySqmExpression visitSubQuery(Subquery subquery);

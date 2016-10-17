@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
 
 /**
@@ -23,11 +22,13 @@ public interface ConsumerContext {
 	DomainMetamodel getDomainMetamodel();
 
 	/**
-	 * Resolve any (potential) non-entity class reference encountered in the sqm.
+	 * Resolve any non-classified class reference encountered in the query.
+	 * Generally this is used to resolve constant expressions and
+	 * dynamic-instantiation targets.
 	 *
 	 * @param name The name of the class to locate
 	 *
-	 * @return The Class reference
+	 * @return The Class reference.  Should never
 	 *
 	 * @throws ClassNotFoundException
 	 */
@@ -37,7 +38,7 @@ public interface ConsumerContext {
 	 * Should constructs allowed by HQL but not allowed by JPQL result in an exception?
 	 * <p/>
 	 * When this returns {@code true}, detected violations lead to a
-	 * {@link StrictJpaComplianceViolation} being thrown
+	 * {@link org.hibernate.sqm.StrictJpaComplianceViolation} being thrown
 	 *
 	 * @return {@code true} indicates that parsing and validation should strictly adhere to
 	 * the JPQL subset.  {@code false} indicates to allow the full HQL superset.

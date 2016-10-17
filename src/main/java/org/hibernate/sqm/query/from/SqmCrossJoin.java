@@ -7,8 +7,8 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.query.JoinType;
 
 /**
@@ -20,27 +20,30 @@ public class SqmCrossJoin extends AbstractFrom implements SqmJoin {
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			EntityType entityTypeDescriptor) {
-		super( fromElementSpace, uid, alias, entityTypeDescriptor, entityTypeDescriptor, alias );
-	}
-
-	public String getEntityName() {
-		return getBindable().getName();
+			EntityReference entityReference) {
+		super(
+				fromElementSpace,
+				uid,
+				alias,
+				new EntityBinding( entityReference ),
+				entityReference,
+				alias
+		);
+		getDomainReferenceBinding().injectFromElement( this );
 	}
 
 	@Override
-	public EntityType getBindable() {
-		return (EntityType) super.getBindable();
+	public EntityBinding getDomainReferenceBinding() {
+		return (EntityBinding) super.getDomainReferenceBinding();
+	}
+
+	public String getEntityName() {
+		return getDomainReferenceBinding().getBoundDomainReference().getEntityName();
 	}
 
 	@Override
 	public JoinType getJoinType() {
 		return JoinType.CROSS;
-	}
-
-	@Override
-	public Attribute resolveAttribute(String attributeName) {
-		return getBindable().findAttribute( attributeName );
 	}
 
 	@Override

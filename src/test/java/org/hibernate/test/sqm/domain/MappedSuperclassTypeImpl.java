@@ -6,14 +6,16 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.IdentifiableType;
-import org.hibernate.sqm.domain.MappedSuperclassType;
-
 /**
  * @author Steve Ebersole
  */
 public class MappedSuperclassTypeImpl extends AbstractIdentifiableType implements MappedSuperclassType {
 	public MappedSuperclassTypeImpl(Class javaType, IdentifiableType superType) {
 		super( javaType, superType );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "MappedSuperclass(" + getTypeName() + ")";
 	}
 }

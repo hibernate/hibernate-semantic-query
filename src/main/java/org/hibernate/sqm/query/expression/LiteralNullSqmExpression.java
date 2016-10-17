@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
@@ -20,18 +20,18 @@ public class LiteralNullSqmExpression implements LiteralSqmExpression<Void> {
 	}
 
 	@Override
-	public BasicType<Void> getExpressionType() {
+	public BasicType getExpressionType() {
 		return NULL_TYPE;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public BasicType getInferableType() {
 		return null;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(Type type) {
+	public void impliedType(DomainReference type) {
 	}
 
 	@Override
@@ -39,15 +39,20 @@ public class LiteralNullSqmExpression implements LiteralSqmExpression<Void> {
 		return walker.visitLiteralNullExpression( this );
 	}
 
-	private static BasicType<Void> NULL_TYPE = new BasicType<Void>() {
+	@Override
+	public String asLoggableText() {
+		return "<literal-null>";
+	}
+
+	private static BasicType NULL_TYPE = new BasicType() {
 		@Override
-		public String getTypeName() {
-			return void.class.getName();
+		public Class getJavaType() {
+			return void.class;
 		}
 
 		@Override
-		public Class<Void> getJavaType() {
-			return void.class;
+		public String asLoggableText() {
+			return "NULL";
 		}
 	};
 }

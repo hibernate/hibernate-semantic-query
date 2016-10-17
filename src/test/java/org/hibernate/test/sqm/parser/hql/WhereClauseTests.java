@@ -7,16 +7,21 @@
 package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
+import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
+import org.hibernate.sqm.parser.common.MapKeyBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
-import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
-import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.sqm.query.predicate.SqmPredicate;
+
 import org.hibernate.test.sqm.ConsumerContextImpl;
+import org.hibernate.test.sqm.domain.BasicTypeImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
@@ -24,6 +29,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -78,11 +84,11 @@ public class WhereClauseTests {
 		);
 		final CollectionSizeSqmExpression func = (CollectionSizeSqmExpression) relationalPredicate.getLeftHandExpression();
 		assertThat(
-				func.getPluralAttributeBinding().getLeftHandSide().getFromElement().getIdentificationVariable(),
+				func.getPluralAttributeBinding().getLhs().getFromElement().getIdentificationVariable(),
 				is( "t" )
 		);
 		assertThat(
-				func.getPluralAttributeBinding().getBoundAttribute().getName(),
+				func.getPluralAttributeBinding().getAttribute().getAttributeName(),
 				is( "basicCollection" )
 		);
 	}
@@ -101,7 +107,7 @@ public class WhereClauseTests {
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
 
 		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexSqmExpression.class ) );
-		assertThat( ( (CollectionIndexSqmExpression) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
+		assertThat( ( (CollectionIndexSqmExpression) relationalPredicate.getLeftHandExpression() ).getAttributeBinding().getFromElement().getIdentificationVariable(), is( "l" ) );
 	}
 
 	@Test
@@ -112,9 +118,15 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyPathSqmExpression.class ) );
-		assertThat( ( (MapKeyPathSqmExpression) relationalPredicate.getLeftHandExpression() ).getCollectionAlias(), is( "l" ) );
-		assertThat( ( (MapKeyPathSqmExpression) relationalPredicate.getLeftHandExpression() ).getMapKeyType().getTypeName(), is( "java.lang.String" ) );
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyBinding.class ) );
+		final MapKeyBinding mapKeyExpression = (MapKeyBinding) relationalPredicate.getLeftHandExpression();
+		final PluralAttributeReference attributeReference = (PluralAttributeReference) mapKeyExpression.getPluralAttributeBinding().getAttribute();
+
+		assertThat( attributeReference.getIndexReference().getClassification(), is( IndexClassification.BASIC) );
+		assertThat( attributeReference.getIndexReference().getType(), instanceOf( BasicType.class ) );
+		assertEquals( String.class, ( (BasicTypeImpl) attributeReference.getIndexReference().getType() ).getJavaType() );
+
+		assertThat( mapKeyExpression.getPluralAttributeBinding().getFromElement().getIdentificationVariable(), is( "l" ) );
 	}
 
 	private SqmSelectStatement interpret(String query) {

@@ -7,14 +7,9 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.path.AttributeBinding;
-import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
@@ -27,106 +22,56 @@ import org.jboss.logging.Logger;
  */
 public class SqmAttributeJoin
 		extends AbstractJoin
-		implements SqmQualifiedJoin, AttributeBinding {
+		implements SqmQualifiedJoin {
 	private static final Logger log = Logger.getLogger( SqmAttributeJoin.class );
 
-	private final Binding lhs;
-	private final Attribute joinedAttributeDescriptor;
-	private final EntityType intrinsicSubclassIndicator;
+	private final AttributeBinding attributeBinding;
+	private final EntityReference intrinsicSubclassIndicator;
 	private final boolean fetched;
 
 	private SqmPredicate onClausePredicate;
 
 	public SqmAttributeJoin(
-			Binding lhs,
+			FromElementSpace containingSpace,
+			AttributeBinding attributeBinding,
 			String uid,
 			String alias,
-			Attribute joinedAttributeDescriptor,
-			EntityType intrinsicSubclassIndicator,
+			EntityReference intrinsicSubclassIndicator,
 			String sourcePath,
 			JoinType joinType,
 			boolean fetched) {
 		super(
-				extractFromElementSpace( lhs ),
+				containingSpace,
 				uid,
 				alias,
-				joinedAttributeDescriptor,
+				attributeBinding,
 				intrinsicSubclassIndicator,
 				sourcePath,
 				joinType
 		);
-		this.lhs = lhs;
-		this.joinedAttributeDescriptor = joinedAttributeDescriptor;
+		this.attributeBinding = attributeBinding;
 		this.intrinsicSubclassIndicator = intrinsicSubclassIndicator;
 		this.fetched = fetched;
+
+		attributeBinding.injectAttributeJoin( this );
 	}
 
-	private static FromElementSpace extractFromElementSpace(Binding lhs) {
-		if ( lhs.getFromElement() == null ) {
-			throw new ParsingException( "left-hand-side Binding#getFromElement canno be null" );
-		}
-		return lhs.getFromElement().getContainingSpace();
-	}
-
-	@Override
-	public Attribute getBoundAttribute() {
-		return getJoinedAttributeDescriptor();
+	public AttributeBinding getAttributeBinding() {
+		return attributeBinding;
 	}
 
 	@Override
-	public Binding getLeftHandSide() {
-		return lhs;
+	public AttributeBinding getDomainReferenceBinding() {
+		return getAttributeBinding();
 	}
 
 	@Override
-	public void injectFromElementGeneratedForAttribute(SqmAttributeJoin join) {
-		throw new ParsingException( "Illegal call to SqmAttributeJoin#injectFromElementGeneratedForAttribute" );
-	}
-
-	/**
-	 * Obtain the descriptor for the attribute defining the join.
-	 *
-	 * @return The attribute descriptor
-	 */
-	public Attribute getJoinedAttributeDescriptor() {
-		return joinedAttributeDescriptor;
-	}
-
-	@Override
-	public EntityType getIntrinsicSubclassIndicator() {
+	public EntityReference getIntrinsicSubclassIndicator() {
 		return intrinsicSubclassIndicator;
 	}
 
 	public boolean isFetched() {
 		return fetched;
-	}
-
-	@Override
-	public Attribute resolveAttribute(String attributeName) {
-		if ( getJoinedAttributeDescriptor() instanceof SingularAttribute ) {
-			final SingularAttribute singularAttribute = (SingularAttribute) getJoinedAttributeDescriptor();
-			if ( !ManagedType.class.isInstance( singularAttribute.getBoundType() ) ) {
-				throw new AttributeResolutionException(
-						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + singularAttribute.getBoundType() + "]"
-				);
-			}
-			return ( (ManagedType) singularAttribute.getBoundType() ).findAttribute( attributeName );
-		}
-		else if ( getJoinedAttributeDescriptor() instanceof PluralAttribute ) {
-			// Use the element type...
-			final PluralAttribute pluralAttribute = (PluralAttribute) getJoinedAttributeDescriptor();
-			if ( !ManagedType.class.isInstance( pluralAttribute.getElementType() ) ) {
-				throw new AttributeResolutionException(
-						"Cannot resolve Attribute [" + attributeName + "] from non-ManagedType [" + pluralAttribute.getElementType() + "]"
-				);
-			}
-			return ( (ManagedType) pluralAttribute.getElementType() ).findAttribute( attributeName );
-		}
-
-		throw new AttributeResolutionException(
-				"Unexpected Attribute Type [" + getJoinedAttributeDescriptor() + "] as left-hand side for attribute reference [" +
-						attributeName + "]"
-		);
 	}
 
 	@Override
@@ -142,6 +87,16 @@ public class SqmAttributeJoin
 		);
 
 		this.onClausePredicate = predicate;
+	}
+
+	@Override
+	public DomainReference getExpressionType() {
+		return attributeBinding.getAttribute();
+	}
+
+	@Override
+	public DomainReference getInferableType() {
+		return attributeBinding.getAttribute();
 	}
 
 	@Override

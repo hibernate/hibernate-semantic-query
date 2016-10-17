@@ -8,12 +8,12 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
 
-import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
+import org.hibernate.test.sqm.domain.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -35,13 +35,18 @@ public class LiteralExpression<T> extends AbstractCriteriaExpressionImpl<T>
 	}
 
 	public LiteralExpression(CriteriaBuilderImpl criteriaBuilder, Class<T> javaType, T literal) {
-		this( criteriaBuilder, criteriaBuilder.consumerContext().getDomainMetamodel().getBasicType( javaType ), javaType, literal );
+		this(
+				criteriaBuilder,
+				(BasicTypeImpl) criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( javaType ),
+				javaType,
+				literal
+		);
 		this.literal = literal;
 	}
 
 	public LiteralExpression(
 			CriteriaBuilderImpl criteriaBuilder,
-			BasicType<T> sqmType,
+			BasicTypeImpl sqmType,
 			Class<T> javaType,
 			T literal) {
 		super( criteriaBuilder, sqmType, javaType );

@@ -4,32 +4,16 @@
  * License: Apache License, Version 2.0
  * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
  */
-package org.hibernate.sqm.domain;
+package org.hibernate.test.sqm.domain;
+
+import org.hibernate.sqm.domain.SingularAttributeReference;
 
 /**
  * Specialization of Attribute for non-collection (in the persistent sense) values
  *
  * @author Steve Ebersole
  */
-public interface SingularAttribute extends Attribute, Bindable {
-	/**
-	 * Classifications of the singularity
-	 */
-	enum Classification {
-		BASIC,
-		EMBEDDED,
-		ANY,
-		ONE_TO_ONE,
-		MANY_TO_ONE
-	}
-
-	/**
-	 * Obtain the classification enum for the attribute.
-	 *
-	 * @return The classification
-	 */
-	Classification getAttributeTypeClassification();
-
+public interface SingularAttribute extends Attribute, Bindable, SingularAttributeReference {
 	/**
 	 * Obtain the attribute's type.
 	 *

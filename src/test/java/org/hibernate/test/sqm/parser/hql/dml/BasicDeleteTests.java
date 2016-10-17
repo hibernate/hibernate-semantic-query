@@ -8,10 +8,10 @@ package org.hibernate.test.sqm.parser.hql.dml;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 
@@ -55,9 +55,9 @@ public class BasicDeleteTests {
 		assertThat( deleteStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) deleteStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeReferenceSqmExpression.class ) );
-		AttributeReferenceSqmExpression attributeReferenceExpression = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
-		assertSame( attributeReferenceExpression.getLeftHandSide().getFromElement(), deleteStatement.getEntityFromElement() );
+		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeBinding.class ) );
+		AttributeBinding binding = (AttributeBinding) predicate.getLeftHandExpression();
+		assertSame( binding.getLhs().getFromElement(), deleteStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 	}
@@ -67,7 +67,7 @@ public class BasicDeleteTests {
 		EntityTypeImpl entityType = metamodel.makeEntityType( "com.acme.Entity1" );
 		entityType.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		return metamodel;

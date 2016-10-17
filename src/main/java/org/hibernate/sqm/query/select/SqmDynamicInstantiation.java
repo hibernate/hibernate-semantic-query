@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.BasicType;
-
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.jboss.logging.Logger;
@@ -51,22 +49,17 @@ public class SqmDynamicInstantiation
 	}
 
 	@Override
-	public BasicType getExpressionType() {
-		return new BasicType() {
-			@Override
-			public Class getJavaType() {
-				return instantiationTarget.getJavaType();
-			}
-
-			@Override
-			public String getTypeName() {
-				return instantiationTarget.getJavaType().getName();
-			}
-		};
+	public String asLoggableText() {
+		return "<new " + instantiationTarget.getJavaType().getName() + ">";
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getExpressionType() {
+		return null;
+	}
+
+	@Override
+	public DomainReference getInferableType() {
 		return null;
 	}
 
@@ -102,7 +95,7 @@ public class SqmDynamicInstantiation
 		}
 
 		if ( arguments == null ) {
-			arguments = new ArrayList<SqmDynamicInstantiationArgument>();
+			arguments = new ArrayList<>();
 		}
 		arguments.add( argument );
 	}

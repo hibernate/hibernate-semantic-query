@@ -6,9 +6,6 @@
  */
 package org.hibernate.sqm.query;
 
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.ManagedType;
-
 /**
  * @author Steve Ebersole
  */
@@ -17,6 +14,7 @@ public class Helper {
 		return v1 != null ? v1 : v2;
 	}
 
+	@SafeVarargs
 	public static <T> T firstNonNull(T... values) {
 		if ( values != null ) {
 			for ( T value : values ) {
@@ -30,13 +28,5 @@ public class Helper {
 	}
 
 	private Helper() {
-	}
-
-	public static ManagedType determineManagedType(Bindable bindableModelDescriptor) {
-		if ( bindableModelDescriptor.getBoundType() instanceof ManagedType ) {
-			return (ManagedType) bindableModelDescriptor.getBoundType();
-		}
-
-		return null;
 	}
 }

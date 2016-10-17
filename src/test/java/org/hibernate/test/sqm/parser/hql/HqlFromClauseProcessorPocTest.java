@@ -6,14 +6,14 @@
  */
 package org.hibernate.test.sqm.parser.hql;
 
-import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttribute;
 import org.hibernate.sqm.SemanticQueryInterpreter;
+import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -64,28 +64,28 @@ public class HqlFromClauseProcessorPocTest {
 
 		somethingEntityType.makeSingularAttribute(
 				"b",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.STRING
 		);
 		somethingEntityType.makeSingularAttribute(
 				"basic",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		somethingEntityType.makeSingularAttribute(
 				"entity",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				associatedEntityType
 		);
 
 		associatedEntityType.makeSingularAttribute(
 				"basic1",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 		associatedEntityType.makeSingularAttribute(
 				"basic2",
-				SingularAttribute.Classification.BASIC,
+				SingularAttributeClassification.BASIC,
 				StandardBasicTypeDescriptors.INSTANCE.LONG
 		);
 

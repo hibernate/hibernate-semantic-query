@@ -6,31 +6,25 @@
  */
 package org.hibernate.sqm;
 
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.MapKeyBinding;
+import org.hibernate.sqm.parser.common.PluralAttributeElementBinding;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmInsertSelectStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.SqmUpdateStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
-import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
-import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
-import org.hibernate.sqm.query.expression.CollectionValuePathSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
-import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
@@ -43,29 +37,35 @@ import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
 import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
-import org.hibernate.sqm.query.expression.MapKeyPathSqmExpression;
 import org.hibernate.sqm.query.expression.MaxElementSqmExpression;
-import org.hibernate.sqm.query.expression.function.LowerFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.MaxIndexSqmExpression;
 import org.hibernate.sqm.query.expression.MinElementSqmExpression;
-import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.MinIndexSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
+import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
+import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.CountStarFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.LowerFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
+import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
-import org.hibernate.sqm.query.from.SqmCrossJoin;
-import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.SqmJoin;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
+import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmJoin;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
@@ -74,8 +74,8 @@ import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
 import org.hibernate.sqm.query.predicate.GroupedSqmPredicate;
-import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
 import org.hibernate.sqm.query.predicate.InListSqmPredicate;
+import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
 import org.hibernate.sqm.query.predicate.LikeSqmPredicate;
 import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
 import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
@@ -132,7 +132,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
 	public T visitInsertSelectStatement(SqmInsertSelectStatement statement) {
 		visitRootEntityFromElement( statement.getInsertTarget() );
-		for ( AttributeReferenceSqmExpression stateField : statement.getStateFields() ) {
+		for ( AttributeBinding stateField : statement.getStateFields() ) {
 			stateField.accept( this );
 		}
 		visitQuerySpec( statement.getSelectQuery() );
@@ -273,7 +273,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 
 	@Override
 	public T visitMemberOfPredicate(MemberOfSqmPredicate predicate) {
-		predicate.getAttributeReferenceExpression().accept( this );
+		predicate.getAttributeBinding().accept( this );
 		return (T) predicate;
 	}
 
@@ -343,7 +343,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitAttributeReferenceExpression(AttributeReferenceSqmExpression expression) {
+	public T visitAttributeReferenceExpression(AttributeBinding expression) {
 		return (T) expression;
 	}
 
@@ -393,8 +393,8 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitCollectionValueFunction(CollectionValuePathSqmExpression function) {
-		return (T) function;
+	public T visitCollectionValueBinding(PluralAttributeElementBinding binding) {
+		return (T) binding;
 	}
 
 	@Override
@@ -403,8 +403,8 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitMapKeyFunction(MapKeyPathSqmExpression function) {
-		return (T) function;
+	public T visitMapKeyBinding(MapKeyBinding binding) {
+		return (T) binding;
 	}
 
 	@Override

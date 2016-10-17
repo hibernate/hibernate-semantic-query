@@ -26,7 +26,6 @@ import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
 
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
@@ -51,11 +50,11 @@ public abstract class AbstractFromImpl<Z, X>
 
 	public AbstractFromImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			org.hibernate.sqm.domain.Type sqmType, Class<X> javaType) {
+			org.hibernate.test.sqm.domain.Type sqmType, Class<X> javaType) {
 		this( criteriaBuilder, sqmType, javaType, null );
 	}
 
-	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, org.hibernate.sqm.domain.Type sqmType, Class<X> javaType, PathSource pathSource) {
+	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, org.hibernate.test.sqm.domain.Type sqmType, Class<X> javaType, PathSource pathSource) {
 		super( criteriaBuilder, sqmType, javaType, pathSource );
 	}
 

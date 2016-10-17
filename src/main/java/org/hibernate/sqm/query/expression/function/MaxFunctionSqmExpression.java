@@ -13,7 +13,8 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 /**
  * @author Steve Ebersole
  */
-public class MaxFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression
+public class MaxFunctionSqmExpression
+		extends AbstractAggregateFunctionSqmExpression
 		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "max";
 
@@ -29,5 +30,10 @@ public class MaxFunctionSqmExpression extends AbstractAggregateFunctionSqmExpres
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitMaxFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "MAX(" + getArgument().asLoggableText() + ")";
 	}
 }

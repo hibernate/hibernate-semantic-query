@@ -7,25 +7,17 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralIntegerSqmExpression extends AbstractLiteralSqmExpressionImpl<Integer> {
-	public LiteralIntegerSqmExpression(Integer value, BasicType<Integer> typeDescriptor) {
-		super( value, typeDescriptor );
+	public LiteralIntegerSqmExpression(Integer value) {
+		super( value );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralIntegerExpression( this );
-	}
-
-	@Override
-	protected void validateInferredType(Class javaType) {
-		if ( !Compatibility.areAssignmentCompatible( javaType, Integer.class ) ) {
-			throw new TypeInferenceException( "Integer literal is not convertible to inferred type [" + javaType + "]" );
-		}
 	}
 }

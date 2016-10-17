@@ -325,9 +325,23 @@ expression
 	| nullIf									# NullIfExpression
 	| literal									# LiteralExpression
 	| parameter									# ParameterExpression
+	// todo : we need to split `path` to remove the non-path resolutions:
+	//		* Class reference
+	//		* Field reference
+	//		* enum value reference
 	| path										# PathExpression
+	| javaClassReference						# TypeExpression
+	| fieldOrEnumReference						# FieldOrEnumExpression
 	| function									# FunctionExpression
 	| LEFT_PAREN querySpec RIGHT_PAREN			# SubQueryExpression
+	;
+
+javaClassReference
+	: dotIdentifierSequence
+	;
+
+fieldOrEnumReference
+	: dotIdentifierSequence
 	;
 
 caseStatement

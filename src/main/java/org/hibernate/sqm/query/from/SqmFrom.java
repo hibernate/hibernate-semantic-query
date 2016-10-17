@@ -6,18 +6,32 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
-import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * Models a Bindable's inclusion in the {@code FROM} clause.
  *
  * @author Steve Ebersole
  */
-public interface SqmFrom extends Binding, Downcastable {
+public interface SqmFrom extends SqmExpression, Downcastable {
+	/**
+	 * Obtain reference to the FromElementSpace that this FromElement belongs to.
+	 *
+	 * @return The FromElementSpace containing this FromElement
+	 */
+	FromElementSpace getContainingSpace();
+
+	/**
+	 * Obtain the DomainReferenceBinding represented by this from-element.
+	 *
+	 * @return The bound type (Bindable)
+	 */
+	DomainReferenceBinding getDomainReferenceBinding();
+
 	/**
 	 * A unique identifier across all QuerySpecs (all AliasRegistry instances) for a given sqm.
 	 * <p/>
@@ -28,35 +42,6 @@ public interface SqmFrom extends Binding, Downcastable {
 	 * @see ParsingContext#globalFromElementMap
 	 */
 	String getUniqueIdentifier();
-
-	/**
-	 * Obtain reference to the FromElementSpace that this FromElement belongs to.
-	 *
-	 * @return The FromElementSpace containing this FromElement
-	 */
-	FromElementSpace getContainingSpace();
-
-	/**
-	 * Obtain the Bindable referenced by this FromElement.
-	 *
-	 * @return The bound type (Bindable)
-	 */
-	Bindable getBindable();
-
-	/**
-	 * Obtain the downcast target for cases where a downcast (treat) is defined in the
-	 * directly in the from-clause where this FromElement is declared.  E.g
-	 * <code>select b.isbn from Order o join treat(o.product as Book b)</code>; here
-	 * the FromElement indicated by {@code join treat(o.product as Book b)} would have
-	 * Book as an intrinsic subclass indicator.
-	 *
-	 * @return The subclass indicated directly as part of the FromElement's declaration;
-	 * will return {@code null} for FromElement declarations that do not directly specify
-	 * a downcast.
-	 *
-	 * @see org.hibernate.sqm.path.Binding#getSubclassIndicator()
-	 */
-	EntityType getIntrinsicSubclassIndicator();
 
 	/**
 	 * Get the identification variable (alias) assigned to this FromElement.  If an explicit
@@ -74,10 +59,20 @@ public interface SqmFrom extends Binding, Downcastable {
 	String getIdentificationVariable();
 
 	/**
-	 * TODO : Remove this?
+	 * Obtain the downcast target for cases where a downcast (treat) is defined in the
+	 * directly in the from-clause where this FromElement is declared.  E.g
+	 * <code>select b.isbn from Order o join treat(o.product as Book b)</code>; here
+	 * the FromElement indicated by {@code join treat(o.product as Book b)} would have
+	 * Book as an intrinsic subclass indicator.
 	 *
-	 * @param attributeName
-	 * @return
+	 * @return The subclass indicated directly as part of the FromElement's declaration;
+	 * will return {@code null} for FromElement declarations that do not directly specify
+	 * a downcast.
+	 *
+	 * @todo - will need a wrapper approach to handle non-intrinsic attribute references
+	 * 		^^ assuming attribute references expect SqmFrom objects as their "lhs"
+	 *
+	 * @see DomainReference#getSubclassIndicator()
 	 */
-	Attribute resolveAttribute(String attributeName);
+	EntityReference getIntrinsicSubclassIndicator();
 }

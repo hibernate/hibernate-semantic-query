@@ -6,13 +6,14 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.Attribute;
-import org.hibernate.sqm.domain.PluralAttribute;
-import org.hibernate.sqm.domain.SingularAttribute;
+import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
+import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.SemanticException;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.path.Binding;
-import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmQualifiedJoin;
 
 /**
@@ -37,42 +38,42 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 
 	@Override
 	@SuppressWarnings("StatementWithEmptyBody")
-	protected void validatePathRoot(SqmFrom fromElement) {
+	protected void validatePathRoot(DomainReferenceBinding binding) {
 		// make sure no incoming FromElement comes from a FromElementSpace other
 		// than the FromElementSpace joinRhs comes from
-		if ( joinRhs.getContainingSpace() != fromElement.getContainingSpace() ) {
+		if ( joinRhs.getContainingSpace() != binding.getFromElement().getContainingSpace() ) {
 			throw new SemanticException(
 					"Qualified join predicate referred to FromElement [" +
-							fromElement.asLoggableText() + "] outside the FromElementSpace containing the join"
+							binding.asLoggableText() + "] outside the FromElementSpace containing the join"
 			);
 		}
 	}
 
 	@Override
 	protected void validateIntermediateAttributeJoin(
-			Binding lhs,
-			Attribute joinedAttribute) {
+			DomainReferenceBinding lhs,
+			AttributeReference joinedAttribute) {
 		super.validateIntermediateAttributeJoin( lhs, joinedAttribute );
 
-		if ( joinedAttribute instanceof SingularAttribute ) {
-			final SingularAttribute singularAttribute = (SingularAttribute) joinedAttribute;
-			if ( singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.ANY
-					|| singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.MANY_TO_ONE
-					| singularAttribute.getAttributeTypeClassification() == SingularAttribute.Classification.ONE_TO_ONE ) {
+		if ( SingularAttributeReference.class.isInstance( joinedAttribute ) ) {
+			final SingularAttributeReference attrRef = (SingularAttributeReference) joinedAttribute;
+			if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ANY
+					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.MANY_TO_ONE
+					| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ONE_TO_ONE ) {
 				throw new SemanticException(
 						"On-clause predicate of a qualified join cannot contain implicit entity joins : " +
-								joinedAttribute.getName()
+								joinedAttribute.getAttributeName()
 				);
 			}
 		}
 		else {
-			final PluralAttribute pluralAttribute = (PluralAttribute) joinedAttribute;
-			if ( pluralAttribute.getElementClassification() == PluralAttribute.ElementClassification.ANY
-					|| pluralAttribute.getElementClassification() == PluralAttribute.ElementClassification.ONE_TO_MANY
-					|| pluralAttribute.getElementClassification() == PluralAttribute.ElementClassification.MANY_TO_MANY ) {
+			final PluralAttributeReference attrRef = (PluralAttributeReference) joinedAttribute;
+			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
+					|| attrRef.getElementReference().getClassification() == ElementClassification.ONE_TO_MANY
+					|| attrRef.getElementReference().getClassification() == ElementClassification.MANY_TO_MANY ) {
 				throw new SemanticException(
 						"On-clause predicate of a qualified join cannot contain implicit collection joins : " +
-								joinedAttribute.getName()
+								joinedAttribute.getAttributeName()
 				);
 			}
 		}

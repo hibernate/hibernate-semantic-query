@@ -9,26 +9,17 @@ package org.hibernate.sqm.query.expression;
 import java.math.BigInteger;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralBigIntegerSqmExpression extends AbstractLiteralSqmExpressionImpl<BigInteger> {
-	public LiteralBigIntegerSqmExpression(BigInteger value, BasicType<BigInteger> typeDescriptor) {
-		super( value, typeDescriptor );
+	public LiteralBigIntegerSqmExpression(BigInteger value) {
+		super( value );
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitLiteralBigIntegerExpression( this );
-	}
-
-	@Override
-	protected void validateInferredType(Class javaType) {
-		// Consider BigDecimal/BigInteger for Compatibility
-		if ( !BigInteger.class.equals( javaType ) ) {
-			throw new TypeInferenceException( "Inferred type [" + javaType + "] was not convertible to BigInteger" );
-		}
 	}
 }

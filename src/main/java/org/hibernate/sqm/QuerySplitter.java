@@ -11,16 +11,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.PolymorphicEntityType;
+import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.PolymorphicEntityReference;
 import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.SqmUpdateStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -54,7 +56,6 @@ import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
-import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
@@ -93,7 +94,7 @@ public class QuerySplitter {
 		// root.  Use that restriction to locate the unmapped polymorphic reference
 		SqmRoot unmappedPolymorphicReference = null;
 		for ( FromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
-			if ( PolymorphicEntityType.class.isInstance( fromElementSpace.getRoot().getBindable() ) ) {
+			if ( PolymorphicEntityReference.class.isInstance( fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference() ) ) {
 				unmappedPolymorphicReference = fromElementSpace.getRoot();
 			}
 		}
@@ -102,11 +103,11 @@ public class QuerySplitter {
 			return new SqmSelectStatement[] { statement };
 		}
 
-		final PolymorphicEntityType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityType) unmappedPolymorphicReference.getBindable();
+		final PolymorphicEntityReference unmappedPolymorphicDescriptor = (PolymorphicEntityReference) unmappedPolymorphicReference.getDomainReferenceBinding().getBoundDomainReference();
 		final SqmSelectStatement[] expanded = new SqmSelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
-		for ( EntityType mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
+		for ( EntityReference mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
 			i++;
 			final UnmappedPolymorphismReplacer replacer = new UnmappedPolymorphismReplacer(
 					statement,
@@ -121,14 +122,14 @@ public class QuerySplitter {
 
 	private static class UnmappedPolymorphismReplacer extends BaseSemanticQueryWalker {
 		private final SqmRoot unmappedPolymorphicFromElement;
-		private final EntityType mappedDescriptor;
+		private final EntityReference mappedDescriptor;
 
-		private Map<SqmFrom,SqmFrom> fromElementCopyMap = new HashMap<>();
+		private Map<DomainReferenceBinding, DomainReferenceBinding> domainBindingCopyMap = new HashMap<>();
 
 		private UnmappedPolymorphismReplacer(
 				SqmSelectStatement selectStatement,
 				SqmRoot unmappedPolymorphicFromElement,
-				EntityType mappedDescriptor) {
+				EntityReference mappedDescriptor) {
 			this.unmappedPolymorphicFromElement = unmappedPolymorphicFromElement;
 			this.mappedDescriptor = mappedDescriptor;
 		}
@@ -188,9 +189,6 @@ public class QuerySplitter {
 				SqmFromClause copy = new SqmFromClause();
 				currentFromClauseCopy = copy;
 				super.visitFromClause( fromClause );
-//				for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
-//					visitFromElementSpace( space );
-//				}
 				return copy;
 			}
 			finally {
@@ -218,11 +216,13 @@ public class QuerySplitter {
 			}
 		}
 
+		// todo : it is really the bindings we want to keep track of..
+
 		@Override
 		public SqmRoot visitRootEntityFromElement(SqmRoot rootEntityFromElement) {
-			final SqmRoot existingCopy = (SqmRoot) fromElementCopyMap.get( rootEntityFromElement );
+			final EntityBinding existingCopy = (EntityBinding) domainBindingCopyMap.get( rootEntityFromElement.getDomainReferenceBinding() );
 			if ( existingCopy != null ) {
-				return existingCopy;
+				return (SqmRoot) existingCopy.getFromElement();
 			}
 
 			if ( currentFromElementSpaceCopy == null ) {
@@ -246,90 +246,102 @@ public class QuerySplitter {
 						currentFromElementSpaceCopy,
 						rootEntityFromElement.getUniqueIdentifier(),
 						rootEntityFromElement.getIdentificationVariable(),
-						rootEntityFromElement.getBindable()
+						rootEntityFromElement.getDomainReferenceBinding().getBoundDomainReference()
 				);
 			}
-			fromElementCopyMap.put( rootEntityFromElement, copy );
+			domainBindingCopyMap.put( rootEntityFromElement.getDomainReferenceBinding(), copy.getDomainReferenceBinding() );
 			return copy;
 		}
 
 		@Override
-		public Object visitCrossJoinedFromElement(SqmCrossJoin joinedFromElement) {
-			final SqmCrossJoin existingCopy = (SqmCrossJoin) fromElementCopyMap.get( joinedFromElement );
+		public SqmCrossJoin visitCrossJoinedFromElement(SqmCrossJoin joinedFromElement) {
+			final EntityBinding existingCopy = (EntityBinding) domainBindingCopyMap.get( joinedFromElement.getDomainReferenceBinding() );
 			if ( existingCopy != null ) {
-				return existingCopy;
+				return (SqmCrossJoin) existingCopy.getFromElement();
 			}
 
 			if ( currentFromElementSpaceCopy == null ) {
 				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
-			SqmCrossJoin copy = new SqmCrossJoin(
+			final SqmCrossJoin copy = new SqmCrossJoin(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getBindable()
+					joinedFromElement.getDomainReferenceBinding().getBoundDomainReference()
 			);
-			fromElementCopyMap.put( joinedFromElement, copy );
+			domainBindingCopyMap.put( joinedFromElement.getDomainReferenceBinding(), copy.getDomainReferenceBinding() );
 			return copy;
 		}
 
 		@Override
-		public Object visitQualifiedEntityJoinFromElement(SqmEntityJoin joinedFromElement) {
-			final SqmEntityJoin existingCopy = (SqmEntityJoin) fromElementCopyMap.get( joinedFromElement );
+		public SqmEntityJoin visitQualifiedEntityJoinFromElement(SqmEntityJoin joinedFromElement) {
+			final EntityBinding existingCopy = (EntityBinding) domainBindingCopyMap.get( joinedFromElement.getDomainReferenceBinding() );
 			if ( existingCopy != null ) {
-				return existingCopy;
+				return (SqmEntityJoin) existingCopy.getFromElement();
 			}
 
 			if ( currentFromElementSpaceCopy == null ) {
 				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
-			SqmEntityJoin copy = new SqmEntityJoin(
+			final SqmEntityJoin copy = new SqmEntityJoin(
 					currentFromElementSpaceCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getBindable(),
+					joinedFromElement.getDomainReferenceBinding().getBoundDomainReference(),
 					joinedFromElement.getJoinType()
 			);
-			fromElementCopyMap.put( joinedFromElement, copy );
+			domainBindingCopyMap.put( joinedFromElement.getDomainReferenceBinding(), copy.getDomainReferenceBinding() );
 			return copy;
 		}
 
 		@Override
-		public Object visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement) {
-			final SqmAttributeJoin existingCopy = (SqmAttributeJoin) fromElementCopyMap.get( joinedFromElement );
+		public SqmAttributeJoin visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement) {
+			final AttributeBinding existingCopy = (AttributeBinding) domainBindingCopyMap.get( joinedFromElement.getDomainReferenceBinding() );
 			if ( existingCopy != null ) {
-				return existingCopy;
+				return existingCopy.getFromElement();
 			}
 
 			if ( currentFromElementSpaceCopy == null ) {
 				throw new ParsingException( "Current FromElementSpace copy was null" );
 			}
 
-			if ( joinedFromElement.getLeftHandSide().getFromElement() == null ) {
+			if ( joinedFromElement.getAttributeBinding().getLhs().getFromElement() == null ) {
 				throw new ParsingException( "Could not determine attribute join's LHS for copy" );
 			}
 
-			final SqmFrom lhsCopy = fromElementCopyMap.get( joinedFromElement.getLeftHandSide().getFromElement() );
+			return makeCopy( joinedFromElement );
+		}
 
-			if ( lhsCopy == null ) {
+		private SqmAttributeJoin makeCopy(SqmAttributeJoin fromElement) {
+			if ( fromElement == null ) {
+				return null;
+			}
+
+			final DomainReferenceBinding lhsBindingCopy = domainBindingCopyMap.get( fromElement.getAttributeBinding().getLhs() );
+
+			if ( lhsBindingCopy == null ) {
 				throw new ParsingException( "Could not determine attribute join's LHS for copy" );
 			}
 
-			assert lhsCopy.getContainingSpace() == currentFromElementSpaceCopy;
+			assert lhsBindingCopy.getFromElement().getContainingSpace() == currentFromElementSpaceCopy;
 
-			SqmAttributeJoin copy = new SqmAttributeJoin(
-					lhsCopy,
-					joinedFromElement.getUniqueIdentifier(),
-					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getJoinedAttributeDescriptor(),
-					joinedFromElement.getIntrinsicSubclassIndicator(),
-					joinedFromElement.asLoggableText(),
-					joinedFromElement.getJoinType(),
-					joinedFromElement.isFetched()
+			final AttributeBinding attributeBindingCopy = new AttributeBinding(
+					lhsBindingCopy,
+					fromElement.getAttributeBinding().getAttribute()
 			);
-			fromElementCopyMap.put( joinedFromElement, copy );
+			final SqmAttributeJoin copy = new SqmAttributeJoin(
+					lhsBindingCopy.getFromElement().getContainingSpace(),
+					attributeBindingCopy,
+					fromElement.getUniqueIdentifier(),
+					fromElement.getIdentificationVariable(),
+					fromElement.getIntrinsicSubclassIndicator(),
+					fromElement.asLoggableText(),
+					fromElement.getJoinType(),
+					fromElement.isFetched()
+			);
+			domainBindingCopyMap.put( fromElement.getAttributeBinding(), copy.getDomainReferenceBinding() );
 			return copy;
 		}
 
@@ -439,9 +451,50 @@ public class QuerySplitter {
 
 		@Override
 		public MemberOfSqmPredicate visitMemberOfPredicate(MemberOfSqmPredicate predicate) {
-			return new MemberOfSqmPredicate(
-					visitAttributeReferenceExpression( predicate.getAttributeReferenceExpression() )
+			final AttributeBinding attributeBindingCopy = resolveAttributeBinding( predicate.getAttributeBinding() );
+
+			return new MemberOfSqmPredicate( attributeBindingCopy );
+		}
+
+//		private DomainReferenceBinding resolveDomainReferenceBinding(DomainReferenceBinding binding) {
+//			DomainReferenceBinding copy = domainBindingCopyMap.get( binding );
+//			if ( copy == null ) {
+//				copy = makeDomainReferenceBindingCopy( binding );
+//				domainBindingCopyMap.put( binding, copy );
+//			}
+//			return copy;
+//		}
+
+//		private DomainReferenceBinding makeDomainReferenceBindingCopy(DomainReferenceBinding binding) {
+//			if ( binding instanceof AttributeBinding ) {
+//				final AttributeBinding attributeBinding = (AttributeBinding) binding;
+//				return new AttributeBinding(
+//						resolveDomainReferenceBinding( attributeBinding.getLhs() ),
+//						attributeBinding.getBoundDomainReference(),
+//						attributeBinding.getFromElement()
+//				);
+//			}
+//			else if ( binding instanceof )
+//		}
+
+		private AttributeBinding resolveAttributeBinding(AttributeBinding attributeBinding) {
+			AttributeBinding attributeBindingCopy = (AttributeBinding) domainBindingCopyMap.get( attributeBinding );
+			if ( attributeBindingCopy == null ) {
+				attributeBindingCopy = makeCopy( attributeBinding );
+			}
+
+			return attributeBindingCopy;
+		}
+
+		private AttributeBinding makeCopy(AttributeBinding binding) {
+			assert !domainBindingCopyMap.containsKey( binding );
+
+			final AttributeBinding attributeBindingCopy = new AttributeBinding(
+					domainBindingCopyMap.get( binding.getLhs() ),
+					binding.getAttribute()
 			);
+			domainBindingCopyMap.put( binding, attributeBindingCopy );
+			return attributeBindingCopy;
 		}
 
 		@Override
@@ -516,32 +569,29 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public AttributeReferenceSqmExpression visitAttributeReferenceExpression(AttributeReferenceSqmExpression expression) {
-			Binding lhs = expression.getLeftHandSide();
-			if ( lhs instanceof SqmFrom ) {
-				// find the FromElement copy
-				final SqmFrom sourceCopy = fromElementCopyMap.get( lhs );
-				if ( sourceCopy == null ) {
-					throw new AssertionError( "FromElement not found in copy map" );
-				}
-				lhs = sourceCopy;
+		public Object visitAttributeReferenceExpression(AttributeBinding expression) {
+			AttributeBinding attributeBindingCopy = (AttributeBinding) domainBindingCopyMap.get( expression );
+			if ( attributeBindingCopy == null ) {
+				attributeBindingCopy = new AttributeBinding(
+						expression.getLhs(),
+						expression.getBoundDomainReference(),
+						expression.getFromElement()
+				);
+
+				domainBindingCopyMap.put( expression, attributeBindingCopy );
 			}
-			return new AttributeReferenceSqmExpression(
-					lhs,
-					expression.getBoundAttribute(),
-					expression.getFromElement()
-			);
+			return attributeBindingCopy;
 		}
 
 		@Override
 		public GenericFunctionSqmExpression visitGenericFunction(GenericFunctionSqmExpression expression) {
-			List<SqmExpression> argumentsCopy = new ArrayList<SqmExpression>();
+			List<SqmExpression> argumentsCopy = new ArrayList<>();
 			for ( SqmExpression argument : expression.getArguments() ) {
 				argumentsCopy.add( (SqmExpression) argument.accept( this ) );
 			}
 			return new GenericFunctionSqmExpression(
 					expression.getFunctionName(),
-					expression.getExpressionType(),
+					(BasicType) expression.getExpressionType(),
 					argumentsCopy
 			);
 		}
@@ -551,7 +601,7 @@ public class QuerySplitter {
 			return new AvgFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					expression.getExpressionType()
+					(BasicType) expression.getExpressionType()
 			);
 		}
 
@@ -574,7 +624,7 @@ public class QuerySplitter {
 			return new MaxFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					expression.getExpressionType()
+					(BasicType) expression.getExpressionType()
 			);
 		}
 
@@ -583,7 +633,7 @@ public class QuerySplitter {
 			return new MinFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					expression.getExpressionType()
+					(BasicType) expression.getExpressionType()
 			);
 		}
 
@@ -592,82 +642,58 @@ public class QuerySplitter {
 			return new SumFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					expression.getExpressionType()
+					(BasicType) expression.getExpressionType()
 			);
 		}
 
 		@Override
 		public LiteralStringSqmExpression visitLiteralStringExpression(LiteralStringSqmExpression expression) {
-			return new LiteralStringSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralStringSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralCharacterSqmExpression visitLiteralCharacterExpression(LiteralCharacterSqmExpression expression) {
-			return new LiteralCharacterSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralCharacterSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralDoubleSqmExpression visitLiteralDoubleExpression(LiteralDoubleSqmExpression expression) {
-			return new LiteralDoubleSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralDoubleSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralIntegerSqmExpression visitLiteralIntegerExpression(LiteralIntegerSqmExpression expression) {
-			return new LiteralIntegerSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralIntegerSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralBigIntegerSqmExpression visitLiteralBigIntegerExpression(LiteralBigIntegerSqmExpression expression) {
-			return new LiteralBigIntegerSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralBigIntegerSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralBigDecimalSqmExpression visitLiteralBigDecimalExpression(LiteralBigDecimalSqmExpression expression) {
-			return new LiteralBigDecimalSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralBigDecimalSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralFloatSqmExpression visitLiteralFloatExpression(LiteralFloatSqmExpression expression) {
-			return new LiteralFloatSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralFloatSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralLongSqmExpression visitLiteralLongExpression(LiteralLongSqmExpression expression) {
-			return new LiteralLongSqmExpression(
-					expression.getLiteralValue(),
-					expression.getExpressionType()
-			);
+			return new LiteralLongSqmExpression( expression.getLiteralValue() );
 		}
 
 		@Override
 		public LiteralTrueSqmExpression visitLiteralTrueExpression(LiteralTrueSqmExpression expression) {
-			return new LiteralTrueSqmExpression( expression.getExpressionType() );
+			return new LiteralTrueSqmExpression();
 		}
 
 		@Override
 		public LiteralFalseSqmExpression visitLiteralFalseExpression(LiteralFalseSqmExpression expression) {
-			return new LiteralFalseSqmExpression( expression.getExpressionType() );
+			return new LiteralFalseSqmExpression();
 		}
 
 		@Override
@@ -685,12 +711,12 @@ public class QuerySplitter {
 
 		@Override
 		public ConcatFunctionSqmExpression visitConcatFunction(ConcatFunctionSqmExpression expression) {
-			final List<SqmExpression> arguments = new ArrayList<SqmExpression>();
+			final List<SqmExpression> arguments = new ArrayList<>();
 			for ( SqmExpression argument : expression.getExpressions() ) {
 				arguments.add( (SqmExpression) argument.accept( this ) );
 			}
 
-			return new ConcatFunctionSqmExpression( expression.getFunctionResultType(), arguments );
+			return new ConcatFunctionSqmExpression( (BasicType) expression.getFunctionResultType(), arguments );
 		}
 
 		@Override
@@ -702,7 +728,7 @@ public class QuerySplitter {
 		@Override
 		@SuppressWarnings("unchecked")
 		public ConstantFieldSqmExpression visitConstantFieldExpression(ConstantFieldSqmExpression expression) {
-			return new ConstantFieldSqmExpression( expression.getValue(), expression.getExpressionType() );
+			return new ConstantFieldSqmExpression( expression.getSourceField(), expression.getValue(), expression.getExpressionType() );
 		}
 
 		@Override

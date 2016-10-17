@@ -11,7 +11,7 @@ import java.util.List;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Selection;
 
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;

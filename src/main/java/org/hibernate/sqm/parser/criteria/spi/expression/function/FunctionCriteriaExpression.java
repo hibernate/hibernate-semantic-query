@@ -25,9 +25,9 @@ public interface FunctionCriteriaExpression<T> extends CriteriaExpression<T> {
 	String getFunctionName();
 
 	@Override
-	BasicType<T> getExpressionSqmType();
+	BasicType getExpressionSqmType();
 
-	BasicType<T> getFunctionResultType();
+	BasicType getFunctionResultType();
 
 	/**
 	 * Is this function a value aggregator (like a <tt>COUNT</tt> or <tt>MAX</tt> function e.g.)?

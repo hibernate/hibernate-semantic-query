@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 import java.io.Serializable;
 import javax.persistence.criteria.Expression;
 
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;

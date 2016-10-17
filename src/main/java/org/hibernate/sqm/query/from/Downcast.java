@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.EntityReference;
 
 /**
  * Models information about a downcast (TREAT AS).
@@ -14,13 +14,13 @@ import org.hibernate.sqm.domain.EntityType;
  * @author Steve Ebersole
  */
 public class Downcast {
-	private final EntityType downcastTarget;
+	private final EntityReference downcastTarget;
 
-	public Downcast(EntityType downcastTarget) {
+	public Downcast(EntityReference downcastTarget) {
 		this.downcastTarget = downcastTarget;
 	}
 
-	public EntityType getTargetType() {
+	public EntityReference getTargetType() {
 		return downcastTarget;
 	}
 }

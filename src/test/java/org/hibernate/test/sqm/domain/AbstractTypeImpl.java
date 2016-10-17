@@ -6,8 +6,6 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.Type;
-
 /**
  * Abstract support for all Type implementations.  Mainly adds "type name" handling.
  *

@@ -30,4 +30,9 @@ public class SumFunctionSqmExpression extends AbstractAggregateFunctionSqmExpres
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitSumFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		return "SUM(" + getArgument().asLoggableText() + ")";
+	}
 }

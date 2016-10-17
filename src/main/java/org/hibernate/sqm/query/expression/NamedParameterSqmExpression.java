@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
+import org.hibernate.sqm.domain.DomainReference;
 
 /**
  * @author Steve Ebersole
@@ -15,31 +15,31 @@ import org.hibernate.sqm.domain.Type;
 public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	private final String name;
 	private final boolean canBeMultiValued;
-	private Type typeDescriptor;
+	private DomainReference typeDescriptor;
 
 	public NamedParameterSqmExpression(String name, boolean canBeMultiValued) {
 		this.name = name;
 		this.canBeMultiValued = canBeMultiValued;
 	}
 
-	public NamedParameterSqmExpression(String name, boolean canBeMultiValued, Type typeDescriptor) {
+	public NamedParameterSqmExpression(String name, boolean canBeMultiValued, DomainReference typeDescriptor) {
 		this.name = name;
 		this.canBeMultiValued = canBeMultiValued;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public Type getInferableType() {
+	public DomainReference getInferableType() {
 		return null;
 	}
 
 	@Override
-	public void impliedType(Type type) {
+	public void impliedType(DomainReference type) {
 		if ( type != null ) {
 			this.typeDescriptor = type;
 		}
@@ -48,6 +48,11 @@ public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitNamedParameterExpression( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return ":" + getName();
 	}
 
 	@Override
@@ -66,7 +71,7 @@ public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	}
 
 	@Override
-	public Type getAnticipatedType() {
+	public DomainReference getAnticipatedType() {
 		return getExpressionType();
 	}
 }

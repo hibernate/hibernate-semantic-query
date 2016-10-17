@@ -7,25 +7,25 @@
 package org.hibernate.sqm.query.predicate;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 
 /**
  * @author Steve Ebersole
  */
 public class MemberOfSqmPredicate extends AbstractNegatableSqmPredicate {
-	private final AttributeReferenceSqmExpression attributeReferenceExpression;
+	private final AttributeBinding attributeBinding;
 
-	public MemberOfSqmPredicate(AttributeReferenceSqmExpression attributeReferenceExpression) {
-		this( attributeReferenceExpression, false );
+	public MemberOfSqmPredicate(AttributeBinding attributeBinding) {
+		this( attributeBinding, false );
 	}
 
-	public MemberOfSqmPredicate(AttributeReferenceSqmExpression attributeReferenceExpression, boolean negated) {
+	public MemberOfSqmPredicate(AttributeBinding attributeBinding, boolean negated) {
 		super( negated );
-		this.attributeReferenceExpression = attributeReferenceExpression;
+		this.attributeBinding = attributeBinding;
 	}
 
-	public AttributeReferenceSqmExpression getAttributeReferenceExpression() {
-		return attributeReferenceExpression;
+	public AttributeBinding getAttributeBinding() {
+		return attributeBinding;
 	}
 
 	@Override

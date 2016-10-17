@@ -6,9 +6,9 @@
  */
 package org.hibernate.test.sqm.parser.hql;
 
-import org.hibernate.sqm.path.AttributeBinding;
+import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.AttributeReferenceSqmExpression;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.select.SqmSelection;
@@ -50,9 +50,9 @@ public class AttributePathTests extends StandardModelTest {
 		assertThat( selectExpression.getFromElement(), notNullValue() );
 
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
-		final AttributeReferenceSqmExpression predicateLhs = (AttributeReferenceSqmExpression) predicate.getLeftHandExpression();
-		assertThat( predicateLhs.getLeftHandSide().getFromElement(), notNullValue() );
+		final AttributeBinding predicateLhs = (AttributeBinding) predicate.getLeftHandExpression();
+		assertThat( predicateLhs.getLhs().getFromElement(), notNullValue() );
 
-		assertThat( predicateLhs.getLeftHandSide().getFromElement(), sameInstance( selectExpression.getFromElement() ) );
+		assertThat( predicateLhs.getLhs().getFromElement(), sameInstance( selectExpression.getFromElement() ) );
 	}
 }

@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.path;
 import java.io.Serializable;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.test.sqm.domain.EntityType;
 import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
 import org.hibernate.sqm.query.expression.SqmExpression;
@@ -102,7 +102,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 		public TreatedRoot(RootImpl<? super T> original, Class<T> treatAsType) {
 			super(
 					original.criteriaBuilder(),
-					original.criteriaBuilder().consumerContext().getDomainMetamodel().resolveEntityType( treatAsType )
+					(EntityType) original.criteriaBuilder().consumerContext().getDomainMetamodel().resolveEntityReference( treatAsType )
 			);
 			this.original = original;
 			this.treatAsType = treatAsType;

@@ -55,4 +55,11 @@ public class TrimFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitTrimFunction( this );
 	}
+
+	@Override
+	public String asLoggableText() {
+		return "TRIM(" + specification.name() +
+				" '" + trimCharacter.asLoggableText() +
+				"' FROM " + source.asLoggableText() + ")";
+	}
 }

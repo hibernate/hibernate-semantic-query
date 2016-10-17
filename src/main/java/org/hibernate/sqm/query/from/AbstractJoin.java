@@ -6,8 +6,8 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.EntityType;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.query.JoinType;
 
 /**
@@ -20,8 +20,8 @@ public abstract class AbstractJoin extends AbstractFrom implements SqmJoin {
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			Bindable bindableModelDescriptor,
-			EntityType intrinsicSubclassIndicator,
+			DomainReferenceBinding bindableModelDescriptor,
+			EntityReference intrinsicSubclassIndicator,
 			String sourcePath,
 			JoinType joinType) {
 		super( fromElementSpace, uid, alias, bindableModelDescriptor, intrinsicSubclassIndicator, sourcePath );

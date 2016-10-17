@@ -13,9 +13,8 @@ import java.util.Collection;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.Type;
-
+import org.hibernate.test.sqm.domain.BasicType;
+import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.CastFunction;
 
@@ -48,8 +47,12 @@ public abstract class AbstractCriteriaExpressionImpl<T>
 			return (Expression<X>) this;
 		}
 		else {
-			final BasicType targetSqmType = criteriaBuilder().consumerContext().getDomainMetamodel().getBasicType( type );
-			return new CastFunction<X, T>( this, targetSqmType, type, criteriaBuilder() );
+			return new CastFunction<>(
+					this,
+					(BasicType<X>) criteriaBuilder().consumerContext().getDomainMetamodel().resolveBasicType( type ),
+					type,
+					criteriaBuilder()
+			);
 		}
 	}
 

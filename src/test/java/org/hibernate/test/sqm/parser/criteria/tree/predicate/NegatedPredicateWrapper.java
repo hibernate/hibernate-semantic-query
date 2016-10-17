@@ -21,6 +21,7 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
+import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 
@@ -37,7 +38,7 @@ public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Bool
 	public NegatedPredicateWrapper(PredicateImplementor predicate) {
 		super(
 				predicate.criteriaBuilder(),
-				( (CriteriaExpression) predicate ).getExpressionSqmType(),
+				(Type) ( (CriteriaExpression) predicate ).getExpressionSqmType(),
 				Boolean.class
 		);
 		this.predicate = predicate;

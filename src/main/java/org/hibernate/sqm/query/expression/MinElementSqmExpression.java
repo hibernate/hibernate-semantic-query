@@ -7,41 +7,41 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.parser.common.AttributeBinding;
 
 /**
  * @author Steve Ebersole
  */
 public class MinElementSqmExpression implements SqmExpression {
-	private final String collectionAlias;
-	private final Type elementType;
+	private final AttributeBinding attributeBinding;
 
-	public MinElementSqmExpression(SqmFrom collectionReference, Type elementType) {
-		this.collectionAlias = collectionReference.getIdentificationVariable();
-		this.elementType = elementType;
+	public MinElementSqmExpression(AttributeBinding attributeBinding) {
+		this.attributeBinding = attributeBinding;
 	}
 
-	public String getCollectionAlias() {
-		return collectionAlias;
-	}
-
-	public Type getElementType() {
-		return elementType;
+	public AttributeBinding getAttributeBinding() {
+		return attributeBinding;
 	}
 
 	@Override
-	public Type getExpressionType() {
-		return getElementType();
+	public DomainReference getExpressionType() {
+		return ( ( PluralAttributeReference) attributeBinding.getAttribute() ).getElementReference();
 	}
 
 	@Override
-	public Type getInferableType() {
-		return getElementType();
+	public DomainReference getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitMinElementFunction( this );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "MINELEMENT(" + attributeBinding.asLoggableText() + ")";
 	}
 }

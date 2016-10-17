@@ -6,15 +6,11 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.SingularAttribute;
-import org.hibernate.sqm.domain.Type;
-
 /**
  * @author Steve Ebersole
  */
 public class SingularAttributeImpl implements SingularAttribute {
-	private final Classification classification;
+	private final SingularAttributeClassification classification;
 	private final ManagedType declaringType;
 	private final String name;
 	private final Type type;
@@ -25,7 +21,7 @@ public class SingularAttributeImpl implements SingularAttribute {
 	public SingularAttributeImpl(
 			ManagedType declaringType,
 			String name,
-			Classification classification,
+			SingularAttributeClassification classification,
 			Type type) {
 		this.declaringType = declaringType;
 		this.name = name;
@@ -39,7 +35,7 @@ public class SingularAttributeImpl implements SingularAttribute {
 	}
 
 	@Override
-	public String getName() {
+	public String getAttributeName() {
 		return name;
 	}
 
@@ -60,7 +56,7 @@ public class SingularAttributeImpl implements SingularAttribute {
 	}
 
 	@Override
-	public Classification getAttributeTypeClassification() {
+	public SingularAttributeClassification getAttributeTypeClassification() {
 		return classification;
 	}
 
@@ -72,5 +68,10 @@ public class SingularAttributeImpl implements SingularAttribute {
 	@Override
 	public boolean isVersion() {
 		return isVersion;
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "SingularAttribute(" + declaringType.getTypeName() + "." + name + " : " + type.getTypeName() + ")";
 	}
 }

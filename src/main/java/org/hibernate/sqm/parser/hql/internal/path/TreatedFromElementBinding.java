@@ -6,14 +6,10 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import java.util.Locale;
-
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.Bindable;
-import org.hibernate.sqm.domain.EntityType;
-import org.hibernate.sqm.domain.ManagedType;
-import org.hibernate.sqm.domain.Type;
-import org.hibernate.sqm.path.Binding;
+import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
@@ -28,52 +24,46 @@ import org.hibernate.sqm.query.from.SqmFrom;
  *
  * @author Steve Ebersole
  */
-public class TreatedFromElementBinding implements Binding {
-	private final Binding baseReference;
-	private final EntityType subclassIndicator;
+public class TreatedFromElementBinding implements DomainReferenceBinding {
+	private final DomainReferenceBinding baseBinding;
+	private final EntityReference subclassIndicator;
 
-	public TreatedFromElementBinding(Binding baseReference, EntityType subclassIndicator) {
-		this.baseReference = baseReference;
+	public TreatedFromElementBinding(DomainReferenceBinding baseBinding, EntityReference subclassIndicator) {
+		this.baseBinding = baseBinding;
 		this.subclassIndicator = subclassIndicator;
 	}
 
-	@Override
-	public EntityType getSubclassIndicator() {
+	public EntityReference getSubclassIndicator() {
 		return subclassIndicator;
 	}
 
 	@Override
 	public SqmFrom getFromElement() {
-		return baseReference.getFromElement();
+		return baseBinding.getFromElement();
 	}
 
 	@Override
-	public Bindable getBindable() {
-		return subclassIndicator;
+	public DomainReference getBoundDomainReference() {
+		return baseBinding.getBoundDomainReference();
 	}
 
 	@Override
-	public String asLoggableText() {
-		return String.format(
-				Locale.ROOT,
-				"treat(%s as %s)",
-				baseReference.asLoggableText(),
-				getSubclassIndicator().getName()
-		);
-	}
-
-	@Override
-	public Type getExpressionType() {
+	public DomainReference getExpressionType() {
 		return getSubclassIndicator();
 	}
 
 	@Override
-	public Type getInferableType() {
-		return getExpressionType();
+	public DomainReference getInferableType() {
+		return getSubclassIndicator();
 	}
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return baseReference.accept( walker );
+		return baseBinding.accept( walker );
+	}
+
+	@Override
+	public String asLoggableText() {
+		return "TREAT( " + baseBinding.asLoggableText() + " AS " + subclassIndicator.asLoggableText() + " )";
 	}
 }

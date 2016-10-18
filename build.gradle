@@ -22,7 +22,7 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'antlr'
+apply plugin: Antlr4Plugin
 
 apply plugin: 'org.hibernate.build.gradle.animalSniffer'
 
@@ -79,16 +79,16 @@ tasks.withType( JavaCompile ).each {
 	]
 }
 
-tasks.generateGrammarSource {
-	outputDirectory = file( "${outputDirectory}/org/hibernate/sqm/parser/hql/internal/antlr" )
-	// ugh!  https://discuss.gradle.org/t/antlr-v4-visitor-generation/10017/1
-	if ( arguments == null ) {
-		arguments = ['-visitor']
-	}
-	else {
-		arguments += ['-visitor']
-	}
-}
+//tasks.generateGrammarSource {
+//	outputDirectory = file( "${outputDirectory}/org/hibernate/sqm/parser/hql/internal/antlr" )
+//	// ugh!  https://discuss.gradle.org/t/antlr-v4-visitor-generation/10017/1
+//	if ( arguments == null ) {
+//		arguments = ['-visitor']
+//	}
+//	else {
+//		arguments += ['-visitor']
+//	}
+//}
 
 task antlr(dependsOn: generateGrammarSource)
 
@@ -153,4 +153,75 @@ buildScan {
 	// in helping the Gradle team track down build problems.
 	licenseAgreementUrl = 'https://gradle.com/terms-of-service'
 	licenseAgree = 'yes'
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Custom Antlr v4 Plugin (to work with Gradle 3)
+
+class Antlr4Plugin implements Plugin<Project> {
+	void apply(Project project) {
+		project.with {
+			apply plugin : 'java'
+
+			configurations.maybeCreate 'antlr'
+
+			Antlr4GenerationTask genTask = tasks.create 'generateGrammarSource', Antlr4GenerationTask
+			genTask.group = 'Build'
+			genTask.description = 'Generate source code from ANTLR grammar'
+
+			tasks.getByName('compileJava').dependsOn genTask
+
+			SourceSet mainSourceSet = project.convention.getPlugin( JavaPluginConvention ).sourceSets.getByName( SourceSet.MAIN_SOURCE_SET_NAME );
+			mainSourceSet.compileClasspath += configurations.antlr
+
+			SourceSet testSourceSet = project.convention.getPlugin( JavaPluginConvention ).sourceSets.getByName( SourceSet.TEST_SOURCE_SET_NAME );
+			testSourceSet.compileClasspath += configurations.antlr
+
+			project.afterEvaluate({
+				mainSourceSet.java.srcDir( genTask.outputDirectory )
+			})
+
+		}
+	}
+}
+
+class Antlr4GenerationTask extends DefaultTask {
+	def String baseInputDirectory = 'src/main/antlr'
+	def String packageName = 'org.hibernate.sqm.parser.hql.internal.antlr'
+	def List<String> grammarNames = ['HqlLexer.g4', 'HqlParser.g4']
+
+	def String outputDirectoryPath = "generated-src/antlr/main"
+
+	@InputFiles
+	@SkipWhenEmpty
+	public FileCollection getSource() {
+		return this.getProject().files(
+				grammarNames.collect( {name-> baseInputDirectory + '/' + packageName.replace( '.', '/' ) + '/' + name } )
+		);
+	}
+
+	@OutputDirectory
+	File getOutputDirectory() {
+		return project.file( "${project.buildDir}/${outputDirectoryPath}" )
+	}
+
+	@TaskAction
+	void antlrGeneration() {
+		File packagedOutputDirectory = new File( outputDirectory, packageName.replace( '.', '/' ) )
+		packagedOutputDirectory.mkdirs()
+
+		source.forEach({File grammarFile->
+			project.javaexec {
+				main 'org.antlr.v4.Tool'
+				classpath project.configurations.antlr
+				args '-o', packagedOutputDirectory.absolutePath
+				args '-lib', grammarFile.parentFile.absolutePath
+				args '-long-messages'
+				args '-listener'
+				args '-visitor'
+				args grammarFile.absolutePath
+			}
+		})
+	}
 }

@@ -357,7 +357,6 @@ nullIf
 	;
 
 literal
-// todo : date/time literals (following JDBC escape syntax)
 	: STRING_LITERAL
 	| CHARACTER_LITERAL
 	| INTEGER_LITERAL

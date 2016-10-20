@@ -2024,7 +2024,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new AvgFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				(BasicType) expr.getExpressionType()
+				expr.getExpressionType()
 		);
 	}
 
@@ -2038,12 +2038,12 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public ConcatFunctionSqmExpression visitConcatFunction(HqlParser.ConcatFunctionContext ctx) {
-		final List<SqmExpression> arguments = new ArrayList<SqmExpression>();
+		final List<SqmExpression> arguments = new ArrayList<>();
 		for ( HqlParser.ExpressionContext argument : ctx.expression() ) {
 			arguments.add( (SqmExpression) argument.accept( this ) );
 		}
 
-		return new ConcatFunctionSqmExpression( (BasicType) arguments.get( 0 ).getExpressionType(), arguments );
+		return new ConcatFunctionSqmExpression( arguments.get( 0 ).getExpressionType(), arguments );
 	}
 
 	@Override
@@ -2067,7 +2067,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new MaxFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				(BasicType) expr.getExpressionType()
+				expr.getExpressionType()
 		);
 	}
 
@@ -2077,7 +2077,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new MinFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				(BasicType) expr.getExpressionType()
+				expr.getExpressionType()
 		);
 	}
 
@@ -2088,7 +2088,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final SqmExpression length = ctx.substringFunctionLengthArgument() == null
 				? null
 				: (SqmExpression) ctx.substringFunctionLengthArgument().accept( this );
-		return new SubstringFunctionSqmExpression( (BasicType) source.getExpressionType(), source, start, length );
+		return new SubstringFunctionSqmExpression( source.getExpressionType(), source, start, length );
 	}
 
 	@Override
@@ -2105,7 +2105,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public TrimFunctionSqmExpression visitTrimFunction(HqlParser.TrimFunctionContext ctx) {
 		final SqmExpression source = (SqmExpression) ctx.expression().accept( this );
 		return new TrimFunctionSqmExpression(
-				(BasicType) source.getExpressionType(),
+				source.getExpressionType(),
 				visitTrimSpecification( ctx.trimSpecification() ),
 				visitTrimCharacter( ctx.trimCharacter() ),
 				source
@@ -2150,7 +2150,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public UpperFunctionSqmExpression visitUpperFunction(HqlParser.UpperFunctionContext ctx) {
 		final SqmExpression expression = (SqmExpression) ctx.expression().accept( this );
 		return new UpperFunctionSqmExpression(
-				(BasicType) expression.getExpressionType(),
+				expression.getExpressionType(),
 				expression
 		);
 	}
@@ -2159,7 +2159,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public LowerFunctionSqmExpression visitLowerFunction(HqlParser.LowerFunctionContext ctx) {
 		final SqmExpression expression = (SqmExpression) ctx.expression().accept( this );
 		return new LowerFunctionSqmExpression(
-				(BasicType) expression.getExpressionType(),
+				expression.getExpressionType(),
 				expression
 		);
 	}

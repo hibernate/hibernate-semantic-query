@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -27,7 +27,7 @@ public class TrimFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	private final SqmExpression source;
 
 	public TrimFunctionSqmExpression(
-			BasicType resultType,
+			DomainReference resultType,
 			Specification specification,
 			SqmExpression trimCharacter,
 			SqmExpression source) {

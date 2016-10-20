@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
@@ -27,7 +28,7 @@ public class ConcatFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	private final List<SqmExpression> expressions;
 
 	public ConcatFunctionSqmExpression(
-			BasicType resultType,
+			DomainReference resultType,
 			List<SqmExpression> expressions) {
 		super( resultType );
 		this.expressions = expressions;

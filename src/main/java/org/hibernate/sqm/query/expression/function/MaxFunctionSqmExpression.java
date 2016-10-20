@@ -8,6 +8,7 @@ package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -18,7 +19,7 @@ public class MaxFunctionSqmExpression
 		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "max";
 
-	public MaxFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicType resultType) {
+	public MaxFunctionSqmExpression(SqmExpression argument, boolean distinct, DomainReference resultType) {
 		super( argument, distinct, resultType );
 	}
 

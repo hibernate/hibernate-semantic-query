@@ -108,7 +108,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	private boolean definesAttribute(DomainReferenceBinding domainReferenceBinding, String name) {
 		final AttributeReference resolvedAttributeReference = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.resolveAttributeReference( domainReferenceBinding.getBoundDomainReference(), name );
+				.locateAttributeReference( domainReferenceBinding.getBoundDomainReference(), name );
 		return resolvedAttributeReference != null;
 	}
 

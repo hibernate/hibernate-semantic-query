@@ -22,6 +22,12 @@ public class AttributeBinding implements DomainReferenceBinding {
 	public AttributeBinding(
 			DomainReferenceBinding lhs,
 			AttributeReference attribute) {
+		if ( lhs == null ) {
+			throw new IllegalArgumentException( "Source for AttributeBinding cannot be null" );
+		}
+		if ( attribute == null ) {
+			throw new IllegalArgumentException( "Attribute for AttributeBinding cannot be null" );
+		}
 		this.lhs = lhs;
 		this.attribute = attribute;
 	}

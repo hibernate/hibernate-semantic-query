@@ -68,7 +68,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	private boolean rootExposesAttribute(String attributeName) {
 		final AttributeReference attrRef = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.resolveAttributeReference( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
+				.locateAttributeReference( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
 		return attrRef != null;
 	}
 

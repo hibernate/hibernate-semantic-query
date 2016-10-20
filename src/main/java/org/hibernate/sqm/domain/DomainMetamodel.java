@@ -18,7 +18,8 @@ public interface DomainMetamodel {
 	EntityReference resolveEntityReference(String entityName);
 	EntityReference resolveEntityReference(Class javaType);
 
-	AttributeReference resolveAttributeReference(DomainReference sourceBinding, String attributeName);
+	AttributeReference locateAttributeReference(DomainReference sourceBinding, String attributeName);
+	AttributeReference resolveAttributeReference(DomainReference sourceBinding, String attributeName) throws NoSuchAttributeException;
 
 	// - just push the cast target text into the tree.  let the consumer figure out how to interpret it?
 	DomainReference resolveCastTargetType(String name);

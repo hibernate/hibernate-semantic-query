@@ -16,6 +16,7 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.NoSuchAttributeException;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 
 import org.jboss.logging.Logger;
@@ -72,6 +73,15 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 
 	@Override
 	public AttributeReference resolveAttributeReference(DomainReference source, String attributeName) {
+		final AttributeReference attrRef = locateAttributeReference( source, attributeName );
+		if ( attrRef == null ) {
+			throw new NoSuchAttributeException( "Could not locate attribute named [" + attributeName + " relative to [" + source.asLoggableText() + "]" );
+		}
+		return attrRef;
+	}
+
+	@Override
+	public AttributeReference locateAttributeReference(DomainReference source, String attributeName) {
 		final Type type = extractType( source, Type.class );
 		if ( !ManagedType.class.isInstance( type ) ) {
 			throw new IllegalArgumentException( "Passed DomainReference [" + source + "] not known to expose attributes" );

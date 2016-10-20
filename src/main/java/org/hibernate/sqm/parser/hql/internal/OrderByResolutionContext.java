@@ -70,7 +70,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	private boolean exposesAttribute(SqmFrom sqmFrom, String attributeName) {
-		return parsingContext.getConsumerContext().getDomainMetamodel().resolveAttributeReference( sqmFrom.getDomainReferenceBinding().getBoundDomainReference(), attributeName ) != null;
+		return parsingContext.getConsumerContext().getDomainMetamodel().locateAttributeReference( sqmFrom.getDomainReferenceBinding().getBoundDomainReference(), attributeName ) != null;
 	}
 
 	@Override

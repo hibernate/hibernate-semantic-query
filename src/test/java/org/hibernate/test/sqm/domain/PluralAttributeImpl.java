@@ -7,7 +7,9 @@
 package org.hibernate.test.sqm.domain;
 
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeElementReference;
+import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeIndexReference;
 
 /**
  * @author Steve Ebersole
@@ -25,7 +27,7 @@ public class PluralAttributeImpl implements PluralAttribute {
 			String name,
 			CollectionClassification collectionClassification,
 			ElementClassification elementClassification,
-			IndexReference.IndexClassification indexClassification,
+			PluralAttributeIndexReference.IndexClassification indexClassification,
 			BasicType collectionIdType,
 			Type collectionIndexType,
 			Type collectionElementType) {
@@ -63,7 +65,7 @@ public class PluralAttributeImpl implements PluralAttribute {
 	}
 
 	@Override
-	public ElementReference getElementReference() {
+	public PluralAttributeElementReference getElementReference() {
 		return elementDescriptor;
 	}
 
@@ -73,7 +75,7 @@ public class PluralAttributeImpl implements PluralAttribute {
 	}
 
 	@Override
-	public IndexReference getIndexReference() {
+	public PluralAttributeIndexReference getIndexReference() {
 		return indexDescriptor;
 	}
 

@@ -6,12 +6,14 @@
  */
 package org.hibernate.sqm.domain;
 
+import java.util.Optional;
+
 /**
  * Models references to plural attributes (persistent collections)
  *
  * @author Steve Ebersole
  */
-public interface PluralAttributeReference extends AttributeReference {
+public interface PluralAttributeReference extends AttributeReference, PotentialEntityReferenceExporter {
 	/**
 	 * Classifications of the plurality
 	 */
@@ -24,41 +26,12 @@ public interface PluralAttributeReference extends AttributeReference {
 
 	CollectionClassification getCollectionClassification();
 
-	/**
-	 * Models a reference to the collection's element(s)
-	 */
-	interface ElementReference extends DomainReference {
-		enum ElementClassification {
-			BASIC,
-			EMBEDDABLE,
-			ANY,
-			ONE_TO_MANY,
-			MANY_TO_MANY
-		}
+	PluralAttributeElementReference getElementReference();
 
-		ElementClassification getClassification();
+	PluralAttributeIndexReference getIndexReference();
 
-		DomainReference getType();
+	@Override
+	default Optional<EntityReference> toEntityReference() {
+		return getElementReference().toEntityReference();
 	}
-
-	ElementReference getElementReference();
-
-	/**
-	 * Models a reference to the collection's index (list-index / map-key)
-	 */
-	interface IndexReference extends DomainReference {
-		enum IndexClassification {
-			BASIC,
-			EMBEDDABLE,
-			ANY,
-			ONE_TO_MANY,
-			MANY_TO_MANY
-		}
-
-		IndexClassification getClassification();
-
-		DomainReference getType();
-	}
-
-	IndexReference getIndexReference();
 }

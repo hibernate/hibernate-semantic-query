@@ -6,13 +6,16 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import java.util.Optional;
+
 import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.PluralAttributeIndexReference;
 
 /**
  * @author Steve Ebersole
  */
-class PluralAttributeIndexImpl implements PluralAttributeReference.IndexReference {
+class PluralAttributeIndexImpl implements PluralAttributeIndexReference {
 	private final PluralAttributeImpl pluralAttribute;
 	private final IndexClassification classification;
 	private final Type indexType;
@@ -40,5 +43,15 @@ class PluralAttributeIndexImpl implements PluralAttributeReference.IndexReferenc
 	@Override
 	public DomainReference getType() {
 		return getIndexType();
+	}
+
+	@Override
+	public Optional<EntityReference> toEntityReference() {
+		if ( classification == IndexClassification.MANY_TO_MANY
+				|| classification == IndexClassification.ONE_TO_MANY ) {
+			return Optional.of( (EntityReference) indexType );
+		}
+
+		return Optional.empty();
 	}
 }

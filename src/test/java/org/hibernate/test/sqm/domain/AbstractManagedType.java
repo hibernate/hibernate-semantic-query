@@ -10,8 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
-import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
+import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 
 /**

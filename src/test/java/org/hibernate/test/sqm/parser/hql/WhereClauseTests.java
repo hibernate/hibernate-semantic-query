@@ -10,7 +10,7 @@ import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
+import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
 import org.hibernate.sqm.parser.common.MapKeyBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;

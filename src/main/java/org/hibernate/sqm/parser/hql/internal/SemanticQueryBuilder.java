@@ -15,12 +15,11 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.sqm.StrictJpaComplianceViolation;
-import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
-import org.hibernate.sqm.domain.PluralAttributeReference.IndexReference.IndexClassification;
+import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
 import org.hibernate.sqm.domain.PolymorphicEntityReference;
 import org.hibernate.sqm.domain.SingularAttributeReference;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;

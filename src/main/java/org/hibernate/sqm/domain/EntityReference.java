@@ -11,7 +11,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface EntityReference extends DomainReference {
+public interface EntityReference extends DomainReference, PotentialEntityReferenceExporter {
 	/**
 	 * Obtain the name of the referenced entity
 	 *

@@ -7,6 +7,7 @@
 package org.hibernate.test.sqm.domain;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,5 +53,10 @@ public class PolymorphicEntityTypeImpl extends EntityTypeImpl implements Polymor
 
 			super.addAttribute( attribute );
 		}
+	}
+
+	@Override
+	public Optional<EntityReference> toEntityReference() {
+		return Optional.empty();
 	}
 }

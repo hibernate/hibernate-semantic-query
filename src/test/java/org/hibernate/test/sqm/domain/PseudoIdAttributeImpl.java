@@ -6,6 +6,10 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import java.util.Optional;
+
+import org.hibernate.sqm.domain.EntityReference;
+
 /**
  * Used to model an entity's non-aggregated composite identifier as a SingularAttribute for binding
  *
@@ -65,5 +69,10 @@ public class PseudoIdAttributeImpl implements SingularAttribute {
 	@Override
 	public String asLoggableText() {
 		return "ImplicitIdAttributeRef(" + getLeftHandSide().getTypeName() + ".<pk>)";
+	}
+
+	@Override
+	public Optional<EntityReference> toEntityReference() {
+		return Optional.empty();
 	}
 }

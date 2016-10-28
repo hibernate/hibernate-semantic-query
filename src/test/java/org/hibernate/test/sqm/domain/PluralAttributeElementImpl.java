@@ -6,20 +6,23 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import java.util.Optional;
+
 import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.PluralAttributeElementReference;
 
 /**
  * @author Steve Ebersole
  */
-class PluralAttributeElementImpl implements PluralAttributeReference.ElementReference {
+class PluralAttributeElementImpl implements PluralAttributeElementReference {
 	private final PluralAttributeImpl pluralAttribute;
-	private final ElementClassification elementClassification;
+	private final ElementClassification classification;
 	private final Type elementType;
 
-	public PluralAttributeElementImpl(PluralAttributeImpl pluralAttribute, ElementClassification elementClassification, Type elementType) {
+	public PluralAttributeElementImpl(PluralAttributeImpl pluralAttribute, ElementClassification classification, Type elementType) {
 		this.pluralAttribute = pluralAttribute;
-		this.elementClassification = elementClassification;
+		this.classification = classification;
 		this.elementType = elementType;
 	}
 
@@ -34,11 +37,21 @@ class PluralAttributeElementImpl implements PluralAttributeReference.ElementRefe
 
 	@Override
 	public ElementClassification getClassification() {
-		return elementClassification;
+		return classification;
 	}
 
 	@Override
 	public DomainReference getType() {
 		return getElementType();
+	}
+
+	@Override
+	public Optional<EntityReference> toEntityReference() {
+		if ( classification == ElementClassification.MANY_TO_MANY
+				|| classification == ElementClassification.ONE_TO_MANY ) {
+			return Optional.of( (EntityReference) elementType );
+		}
+
+		return Optional.empty();
 	}
 }

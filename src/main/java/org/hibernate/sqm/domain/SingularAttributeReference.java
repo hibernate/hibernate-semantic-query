@@ -11,7 +11,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface SingularAttributeReference extends AttributeReference {
+public interface SingularAttributeReference extends AttributeReference, PotentialEntityReferenceExporter {
 	/**
 	 * Classifications of the singularity
 	 */

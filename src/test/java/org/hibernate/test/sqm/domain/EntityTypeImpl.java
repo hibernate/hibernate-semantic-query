@@ -6,6 +6,10 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import java.util.Optional;
+
+import org.hibernate.sqm.domain.EntityReference;
+
 /**
  * @author Steve Ebersole
  */
@@ -40,5 +44,10 @@ public class EntityTypeImpl extends AbstractIdentifiableType implements EntityTy
 	@Override
 	public String asLoggableText() {
 		return "Entity(" + getEntityName() + ")";
+	}
+
+	@Override
+	public Optional<EntityReference> toEntityReference() {
+		return Optional.of( this );
 	}
 }

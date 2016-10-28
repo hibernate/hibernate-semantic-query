@@ -8,7 +8,7 @@ package org.hibernate.sqm.parser.hql.internal.path;
 
 import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference.ElementReference.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
 import org.hibernate.sqm.domain.SingularAttributeReference;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.SemanticException;

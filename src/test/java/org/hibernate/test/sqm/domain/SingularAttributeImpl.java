@@ -6,6 +6,10 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import java.util.Optional;
+
+import org.hibernate.sqm.domain.EntityReference;
+
 /**
  * @author Steve Ebersole
  */
@@ -73,5 +77,15 @@ public class SingularAttributeImpl implements SingularAttribute {
 	@Override
 	public String asLoggableText() {
 		return "SingularAttribute(" + declaringType.getTypeName() + "." + name + " : " + type.getTypeName() + ")";
+	}
+
+	@Override
+	public Optional<EntityReference> toEntityReference() {
+		if ( classification == SingularAttributeClassification.MANY_TO_ONE
+				|| classification == SingularAttributeClassification.ONE_TO_ONE ) {
+			return Optional.of( (EntityReference) getType() );
+		}
+
+		return Optional.empty();
 	}
 }

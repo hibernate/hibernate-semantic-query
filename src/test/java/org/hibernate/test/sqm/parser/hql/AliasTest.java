@@ -12,7 +12,7 @@ import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
@@ -294,7 +294,7 @@ public class AliasTest {
 			String alias) {
 		List<SqmSelection> selections = querySpect.getSelectClause().getSelections();
 		SqmSelection selection = selections.get( attributeIndex );
-		AttributeBinding expression = (AttributeBinding) selection.getExpression();
+		SingularAttributeBinding expression = (SingularAttributeBinding) selection.getExpression();
 		assertThat( expression.getAttribute().getAttributeName(), is( attributeName ) );
 		if ( alias == null ) {
 			assertTrue( ImplicitAliasGenerator.isImplicitAlias( selection.getAlias() ) );
@@ -326,7 +326,7 @@ public class AliasTest {
 	) {
 		SqmWhereClause whereClause = querySpec.getWhereClause();
 		InSubQuerySqmPredicate predicate = (InSubQuerySqmPredicate) whereClause.getPredicate();
-		AttributeBinding testExpression = (AttributeBinding) predicate.getTestExpression();
+		SingularAttributeBinding testExpression = (SingularAttributeBinding) predicate.getTestExpression();
 		assertThat( testExpression.getAttribute().getAttributeName(), is( attributeName ) );
 		assertThat(
 				testExpression.getLhs().getFromElement().getIdentificationVariable(),
@@ -341,7 +341,7 @@ public class AliasTest {
 			String alias) {
 		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
-		AttributeBinding leftHandExpression = (AttributeBinding) predicate.getLeftHandExpression();
+		SingularAttributeBinding leftHandExpression = (SingularAttributeBinding) predicate.getLeftHandExpression();
 		assertThat( leftHandExpression.getAttribute().getAttributeName(), is( attributeName ) );
 		assertThat(
 				leftHandExpression.getLhs().getFromElement().getIdentificationVariable(),
@@ -356,7 +356,7 @@ public class AliasTest {
 			String alias) {
 		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
-		AttributeBinding leftHandExpression = (AttributeBinding) predicate.getRightHandExpression();
+		SingularAttributeBinding leftHandExpression = (SingularAttributeBinding) predicate.getRightHandExpression();
 		assertThat( leftHandExpression.getAttribute().getAttributeName(), is( attributeName ) );
 		assertThat(
 				leftHandExpression.getLhs().getFromElement().getIdentificationVariable(),

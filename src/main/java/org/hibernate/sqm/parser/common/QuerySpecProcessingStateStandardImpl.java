@@ -7,6 +7,7 @@
 package org.hibernate.sqm.parser.common;
 
 import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;

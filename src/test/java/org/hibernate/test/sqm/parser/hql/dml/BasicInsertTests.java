@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.hql.dml;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.SqmInsertSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;
 
@@ -43,7 +43,7 @@ public class BasicInsertTests {
 
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
-		for ( AttributeBinding stateField : insertStatement.getStateFields() ) {
+		for ( SingularAttributeBinding stateField : insertStatement.getStateFields() ) {
 			assertSame( insertStatement.getInsertTarget(), stateField.getLhs().getFromElement() );
 		}
 	}

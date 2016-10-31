@@ -11,7 +11,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
 import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
 import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
@@ -83,7 +83,7 @@ public interface CriteriaVisitor {
 			BasicType resultType);
 
 	SqmFrom visitIdentificationVariableReference(From reference);
-	AttributeBinding visitAttributeReference(From attributeSource, String attributeName);
+	SingularAttributeBinding visitAttributeReference(From attributeSource, String attributeName);
 
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, List<javax.persistence.criteria.Expression<?>> expressions);
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, javax.persistence.criteria.Expression<?>... expressions);

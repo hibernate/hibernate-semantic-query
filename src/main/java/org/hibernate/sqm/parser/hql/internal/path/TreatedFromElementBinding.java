@@ -9,13 +9,13 @@ package org.hibernate.sqm.parser.hql.internal.path;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
- * Models an "incidental downcast", as opposed to an intrinsic downcast.  Stated simply
- * an intrinsic downcast occurs in the from-clause; the downcast target becomes an
- * intrinsic part of the FromElement (see {@link SqmFrom#getIntrinsicSubclassIndicator()}.
+ * Models an "incidental downcast", as opposed to an intrinsic downcast.  An
+ * intrinsic downcast occurs in the from-clause - the downcast target becomes
+ * an intrinsic part of the FromElement (see {@link SqmFrom#getIntrinsicSubclassIndicator()}.
  * An incidental downcast, on the other hand, occurs outside the from-clause.
  * <p/>
  * For example,

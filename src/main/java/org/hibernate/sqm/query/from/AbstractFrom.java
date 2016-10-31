@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 
 import org.jboss.logging.Logger;
 

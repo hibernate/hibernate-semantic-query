@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.hql.dml;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
@@ -58,8 +58,8 @@ public class BasicUpdateTests {
 		assertThat( updateStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) updateStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( AttributeBinding.class ) );
-		AttributeBinding binding = (AttributeBinding) predicate.getLeftHandExpression();
+		assertThat( predicate.getLeftHandExpression(), instanceOf( SingularAttributeBinding.class ) );
+		SingularAttributeBinding binding = (SingularAttributeBinding) predicate.getLeftHandExpression();
 		assertSame( binding.getLhs().getFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );

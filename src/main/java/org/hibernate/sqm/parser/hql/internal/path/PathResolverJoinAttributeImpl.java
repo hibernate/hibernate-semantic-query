@@ -9,10 +9,10 @@ package org.hibernate.sqm.parser.hql.internal.path;
 import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.parser.common.AttributeBinding;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 
 /**

@@ -1,10 +1,10 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * License: Apache License, Version 2.0
- * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
+ * License: GNU Lesser General Public License (LGPL), version 2.1 or later
+ * See the lgpl.txt file in the root directory or http://www.gnu.org/licenses/lgpl-2.1.html
  */
-package org.hibernate.sqm.parser.common;
+package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
@@ -17,16 +17,16 @@ import org.hibernate.sqm.query.from.SqmFrom;
  * @author Steve Ebersole
  */
 public class PluralAttributeElementBinding implements DomainReferenceBinding {
-	private final AttributeBinding pluralAttributeBinding;
+	private final PluralAttributeBinding attributeBinding;
 	private final PluralAttributeReference pluralAttributeReference;
 
-	public PluralAttributeElementBinding(AttributeBinding pluralAttributeBinding) {
-		this.pluralAttributeBinding = pluralAttributeBinding;
-		this.pluralAttributeReference = (PluralAttributeReference) pluralAttributeBinding.getAttribute();
+	public PluralAttributeElementBinding(PluralAttributeBinding pluralAttributeBinding) {
+		this.attributeBinding = pluralAttributeBinding;
+		this.pluralAttributeReference = pluralAttributeBinding.getAttribute();
 	}
 
-	public AttributeBinding getPluralAttributeBinding() {
-		return pluralAttributeBinding;
+	public PluralAttributeBinding getPluralAttributeBinding() {
+		return attributeBinding;
 	}
 
 	public PluralAttributeReference getPluralAttributeReference() {
@@ -35,7 +35,7 @@ public class PluralAttributeElementBinding implements DomainReferenceBinding {
 
 	@Override
 	public SqmFrom getFromElement() {
-		return pluralAttributeBinding.getFromElement();
+		return attributeBinding.getFromElement();
 	}
 
 	@Override
@@ -60,6 +60,6 @@ public class PluralAttributeElementBinding implements DomainReferenceBinding {
 
 	@Override
 	public String asLoggableText() {
-		return "VALUE(" + pluralAttributeBinding.asLoggableText() + ")";
+		return "VALUE(" + attributeBinding.asLoggableText() + ")";
 	}
 }

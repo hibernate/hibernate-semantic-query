@@ -8,11 +8,10 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.parser.common.AttributeBinding;
-import org.hibernate.sqm.parser.common.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.EntityBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.select.SqmSelection;
 
@@ -48,9 +47,9 @@ public class FromElementContainmentTests {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( AttributeBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SingularAttributeBinding.class ) );
 
-		assertSame( fromElementSpace.getJoins().get( 0 ), ( (AttributeBinding) selection.getExpression() ).getFromElement() );
+		assertSame( fromElementSpace.getJoins().get( 0 ), ( (SingularAttributeBinding) selection.getExpression() ).getFromElement() );
 	}
 
 	@Test

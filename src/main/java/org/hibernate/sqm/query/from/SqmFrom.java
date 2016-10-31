@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.query.expression.SqmExpression;
 

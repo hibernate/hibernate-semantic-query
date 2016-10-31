@@ -1,34 +1,33 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * License: Apache License, Version 2.0
- * See the LICENSE file in the root directory or visit http://www.apache.org/licenses/LICENSE-2.0
+ * License: GNU Lesser General Public License (LGPL), version 2.1 or later
+ * See the lgpl.txt file in the root directory or http://www.gnu.org/licenses/lgpl-2.1.html
  */
-package org.hibernate.sqm.query.expression;
+package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.parser.common.AttributeBinding;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeIndexedReference implements DomainReferenceBinding {
-	private final AttributeBinding pluralAttributeBinding;
+public class PluralAttributeIndexedAccessBinding implements DomainReferenceBinding {
+	private final PluralAttributeBinding attributeBinding;
 	private final SqmExpression indexSelectionExpression;
 
-	public PluralAttributeIndexedReference(
-			AttributeBinding pluralAttributeBinding,
+	public PluralAttributeIndexedAccessBinding(
+			PluralAttributeBinding pluralAttributeBinding,
 			SqmExpression indexSelectionExpression) {
-		this.pluralAttributeBinding = pluralAttributeBinding;
+		this.attributeBinding = pluralAttributeBinding;
 		this.indexSelectionExpression = indexSelectionExpression;
 	}
 
-	public AttributeBinding getPluralAttributeBinding() {
-		return pluralAttributeBinding;
+	public PluralAttributeBinding getPluralAttributeBinding() {
+		return attributeBinding;
 	}
 
 	public SqmExpression getIndexSelectionExpression() {
@@ -37,7 +36,7 @@ public class PluralAttributeIndexedReference implements DomainReferenceBinding {
 
 	@Override
 	public DomainReference getBoundDomainReference() {
-		return ( ( PluralAttributeReference) pluralAttributeBinding.getAttribute() ).getElementReference();
+		return attributeBinding.getAttribute().getElementReference();
 	}
 
 	@Override
@@ -62,6 +61,6 @@ public class PluralAttributeIndexedReference implements DomainReferenceBinding {
 
 	@Override
 	public SqmFrom getFromElement() {
-		return pluralAttributeBinding.getFromElement();
+		return attributeBinding.getFromElement();
 	}
 }

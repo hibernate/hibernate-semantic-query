@@ -6,8 +6,7 @@
  */
 package org.hibernate.test.sqm.parser.hql;
 
-import org.hibernate.sqm.domain.AttributeReference;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
@@ -45,12 +44,12 @@ public class AttributePathTests extends StandardModelTest {
 		assertThat( space.getJoins().size(), is(1) );
 
 		final SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( AttributeBinding.class ) );
-		final AttributeBinding selectExpression = (AttributeBinding) selection.getExpression();
+		assertThat( selection.getExpression(), instanceOf( SingularAttributeBinding.class ) );
+		final SingularAttributeBinding selectExpression = (SingularAttributeBinding) selection.getExpression();
 		assertThat( selectExpression.getFromElement(), notNullValue() );
 
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
-		final AttributeBinding predicateLhs = (AttributeBinding) predicate.getLeftHandExpression();
+		final SingularAttributeBinding predicateLhs = (SingularAttributeBinding) predicate.getLeftHandExpression();
 		assertThat( predicateLhs.getLhs().getFromElement(), notNullValue() );
 
 		assertThat( predicateLhs.getLhs().getFromElement(), sameInstance( selectExpression.getFromElement() ) );

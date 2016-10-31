@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
-import org.hibernate.sqm.query.expression.EntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.domain.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 

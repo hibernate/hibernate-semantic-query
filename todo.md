@@ -4,7 +4,8 @@
 * strict jpql compliance -> TREAT context (iirc spec allows in FROM and WHERE only)
 * from-element hoisting - this comes into play when we have an implicit join path used in both a subquery and the query.
     how that is render in current Hibernate depends on which is seen first.  The proper solution is to always render these 
-    into the outer query, but if we saw the subquery reference first we need to "hoist" the generated from-element(s).
+    into the outer query, but if we saw the subquery reference first we need to "hoist"/"promote" the generated from-element(s).
+    See `org.hibernate.hql.internal.ast.tree.FromClause#promoteJoin` in existing Antlr2-based parser
 
 not supported
 --------------

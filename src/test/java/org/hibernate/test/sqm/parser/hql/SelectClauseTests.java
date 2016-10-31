@@ -18,14 +18,14 @@ import org.hibernate.sqm.domain.PluralAttributeReference.CollectionClassificatio
 import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
 import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
-import org.hibernate.sqm.parser.common.AttributeBinding;
-import org.hibernate.sqm.parser.common.EntityBinding;
-import org.hibernate.sqm.parser.common.MapKeyBinding;
-import org.hibernate.sqm.parser.common.PluralAttributeElementBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
-import org.hibernate.sqm.query.expression.MapEntrySqmExpression;
+import org.hibernate.sqm.query.expression.domain.MapEntrySqmExpression;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
@@ -135,7 +135,7 @@ public class SelectClauseTests {
 		SqmSelectStatement statement = interpret( "select o.basic from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( AttributeBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SingularAttributeBinding.class ) );
 	}
 
 	@Test
@@ -144,11 +144,11 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 	}
 
@@ -162,7 +162,7 @@ public class SelectClauseTests {
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 	}
 
@@ -206,7 +206,7 @@ public class SelectClauseTests {
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 	}
 
@@ -239,11 +239,11 @@ public class SelectClauseTests {
 		assertEquals( 3, dynamicInstantiation.getArguments().size() );
 		assertThat(
 				dynamicInstantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
@@ -282,11 +282,11 @@ public class SelectClauseTests {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 	}
 
@@ -311,11 +311,11 @@ public class SelectClauseTests {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( AttributeBinding.class )
+				instanceOf( SingularAttributeBinding.class )
 		);
 	}
 
@@ -334,12 +334,12 @@ public class SelectClauseTests {
 		assertThat( fromElementSpace.getJoins().size(), is(0) );
 
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
-		AttributeBinding leftHandOperand = (AttributeBinding) expression.getLeftHandOperand();
+		SingularAttributeBinding leftHandOperand = (SingularAttributeBinding) expression.getLeftHandOperand();
 		assertThat( leftHandOperand.getLhs().getFromElement(), sameInstance( root ) );
 		assertThat( leftHandOperand.getAttribute().getAttributeName(), is( "basic" ) );
 		assertThat( leftHandOperand.getFromElement(), nullValue() );
 
-		AttributeBinding rightHandOperand = (AttributeBinding) expression.getRightHandOperand();
+		SingularAttributeBinding rightHandOperand = (SingularAttributeBinding) expression.getRightHandOperand();
 		assertThat( rightHandOperand.getLhs().getFromElement(), sameInstance( root ) );
 		assertThat( rightHandOperand.getAttribute().getAttributeName(), is( "basic1" ) );
 		assertThat( leftHandOperand.getFromElement(), nullValue() );
@@ -363,12 +363,12 @@ public class SelectClauseTests {
 
 		BinaryArithmeticSqmExpression addExpression = (BinaryArithmeticSqmExpression) selection.getExpression();
 
-		AttributeBinding leftHandOperand = (AttributeBinding) addExpression.getLeftHandOperand();
+		SingularAttributeBinding leftHandOperand = (SingularAttributeBinding) addExpression.getLeftHandOperand();
 		assertThat( leftHandOperand.getLhs().getFromElement(), sameInstance( entityRoot ) );
 		assertThat( leftHandOperand.getAttribute().getAttributeName(), is( "basic" ) );
 		assertThat( leftHandOperand.getFromElement(), nullValue() );
 
-		AttributeBinding rightHandOperand = (AttributeBinding) addExpression.getRightHandOperand();
+		SingularAttributeBinding rightHandOperand = (SingularAttributeBinding) addExpression.getRightHandOperand();
 		assertThat( rightHandOperand.getLhs().getFromElement(), sameInstance( entity2Root ) );
 		assertThat( rightHandOperand.getAttribute().getAttributeName(), is( "basic1" ) );
 		assertThat( rightHandOperand.getFromElement(), nullValue() );

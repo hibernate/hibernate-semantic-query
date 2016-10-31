@@ -8,7 +8,8 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 
 /**
  * Represents the {@code SIZE()} function.
@@ -17,13 +18,13 @@ import org.hibernate.sqm.parser.common.AttributeBinding;
  * @author Gunnar Morling
  */
 public class CollectionSizeSqmExpression implements SqmExpression {
-	private final AttributeBinding pluralAttributeBinding;
+	private final PluralAttributeBinding pluralAttributeBinding;
 
-	public CollectionSizeSqmExpression(AttributeBinding pluralAttributeBinding) {
+	public CollectionSizeSqmExpression(PluralAttributeBinding pluralAttributeBinding) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 	}
 
-	public AttributeBinding getPluralAttributeBinding() {
+	public PluralAttributeBinding getPluralAttributeBinding() {
 		return pluralAttributeBinding;
 	}
 

@@ -10,24 +10,24 @@ package org.hibernate.sqm.query.expression;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
 
 /**
  * @author Steve Ebersole
  */
 public class CollectionIndexSqmExpression implements SqmExpression {
-	private final AttributeBinding attributeBinding;
+	private final PluralAttributeBinding attributeBinding;
 
-	public CollectionIndexSqmExpression(AttributeBinding attributeBinding) {
+	public CollectionIndexSqmExpression(PluralAttributeBinding attributeBinding) {
 		this.attributeBinding = attributeBinding;
 	}
 
-	public AttributeBinding getAttributeBinding() {
+	public PluralAttributeBinding getAttributeBinding() {
 		return attributeBinding;
 	}
 
 	private PluralAttributeReference pluralAttributeReference() {
-		return (PluralAttributeReference) attributeBinding.getAttribute();
+		return attributeBinding.getAttribute();
 	}
 
 	@Override

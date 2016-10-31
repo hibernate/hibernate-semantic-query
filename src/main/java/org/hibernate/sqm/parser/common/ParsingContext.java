@@ -11,6 +11,12 @@ import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 
@@ -125,7 +131,12 @@ public class ParsingContext {
 
 		AttributeBinding attributeBinding = bindingsMap.get( attribute );
 		if ( attributeBinding == null ) {
-			attributeBinding = new AttributeBinding( lhs, attribute );
+			if ( attribute instanceof PluralAttributeReference ) {
+				attributeBinding = new PluralAttributeBinding( lhs, (PluralAttributeReference) attribute );
+			}
+			else {
+				attributeBinding = new SingularAttributeBinding( lhs, (SingularAttributeReference) attribute );
+			}
 			bindingsMap.put( attribute, attributeBinding );
 		}
 

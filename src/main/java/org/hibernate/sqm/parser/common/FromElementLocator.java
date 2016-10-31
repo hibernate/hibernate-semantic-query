@@ -6,6 +6,8 @@
  */
 package org.hibernate.sqm.parser.common;
 
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+
 /**
  * Context for PathResolver implementations to locate FromElements
  *

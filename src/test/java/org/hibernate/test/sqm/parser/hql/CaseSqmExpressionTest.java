@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
@@ -45,7 +45,7 @@ public class CaseSqmExpressionTest {
 		assertThat( predicate.getRightHandExpression(), instanceOf( CaseSimpleSqmExpression.class ) );
 		CaseSimpleSqmExpression caseStatement = (CaseSimpleSqmExpression) predicate.getRightHandExpression();
 		assertThat( caseStatement.getFixture(), notNullValue() );
-		assertThat( caseStatement.getFixture(), instanceOf( AttributeBinding.class ) );
+		assertThat( caseStatement.getFixture(), instanceOf( SingularAttributeBinding.class ) );
 
 		assertThat( caseStatement.getOtherwise(), notNullValue() );
 		assertThat( caseStatement.getOtherwise(), instanceOf( LiteralStringSqmExpression.class ) );

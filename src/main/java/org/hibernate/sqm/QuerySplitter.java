@@ -13,11 +13,10 @@ import java.util.Map;
 
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.PluralAttributeReference;
 import org.hibernate.sqm.domain.PolymorphicEntityReference;
+import org.hibernate.sqm.domain.SingularAttributeReference;
 import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.parser.common.AttributeBinding;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
-import org.hibernate.sqm.parser.common.EntityBinding;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
@@ -44,6 +43,11 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
+import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
@@ -298,7 +302,7 @@ public class QuerySplitter {
 
 		@Override
 		public SqmAttributeJoin visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement) {
-			final AttributeBinding existingCopy = (AttributeBinding) domainBindingCopyMap.get( joinedFromElement.getDomainReferenceBinding() );
+			final SingularAttributeBinding existingCopy = (SingularAttributeBinding) domainBindingCopyMap.get( joinedFromElement.getDomainReferenceBinding() );
 			if ( existingCopy != null ) {
 				return existingCopy.getFromElement();
 			}
@@ -327,10 +331,20 @@ public class QuerySplitter {
 
 			assert lhsBindingCopy.getFromElement().getContainingSpace() == currentFromElementSpaceCopy;
 
-			final AttributeBinding attributeBindingCopy = new AttributeBinding(
-					lhsBindingCopy,
-					fromElement.getAttributeBinding().getAttribute()
-			);
+			final AttributeBinding attributeBindingCopy;
+			if ( fromElement.getAttributeBinding() instanceof PluralAttributeBinding ) {
+				attributeBindingCopy = new PluralAttributeBinding(
+						lhsBindingCopy,
+						(PluralAttributeReference) fromElement.getAttributeBinding().getAttribute()
+				);
+			}
+			else {
+				attributeBindingCopy = new SingularAttributeBinding(
+						lhsBindingCopy,
+						(SingularAttributeReference) fromElement.getAttributeBinding().getAttribute()
+				);
+			}
+
 			final SqmAttributeJoin copy = new SqmAttributeJoin(
 					lhsBindingCopy.getFromElement().getContainingSpace(),
 					attributeBindingCopy,
@@ -451,7 +465,7 @@ public class QuerySplitter {
 
 		@Override
 		public MemberOfSqmPredicate visitMemberOfPredicate(MemberOfSqmPredicate predicate) {
-			final AttributeBinding attributeBindingCopy = resolveAttributeBinding( predicate.getAttributeBinding() );
+			final SingularAttributeBinding attributeBindingCopy = resolveAttributeBinding( predicate.getAttributeBinding() );
 
 			return new MemberOfSqmPredicate( attributeBindingCopy );
 		}
@@ -477,8 +491,8 @@ public class QuerySplitter {
 //			else if ( binding instanceof )
 //		}
 
-		private AttributeBinding resolveAttributeBinding(AttributeBinding attributeBinding) {
-			AttributeBinding attributeBindingCopy = (AttributeBinding) domainBindingCopyMap.get( attributeBinding );
+		private SingularAttributeBinding resolveAttributeBinding(SingularAttributeBinding attributeBinding) {
+			SingularAttributeBinding attributeBindingCopy = (SingularAttributeBinding) domainBindingCopyMap.get( attributeBinding );
 			if ( attributeBindingCopy == null ) {
 				attributeBindingCopy = makeCopy( attributeBinding );
 			}
@@ -486,10 +500,10 @@ public class QuerySplitter {
 			return attributeBindingCopy;
 		}
 
-		private AttributeBinding makeCopy(AttributeBinding binding) {
+		private SingularAttributeBinding makeCopy(SingularAttributeBinding binding) {
 			assert !domainBindingCopyMap.containsKey( binding );
 
-			final AttributeBinding attributeBindingCopy = new AttributeBinding(
+			final SingularAttributeBinding attributeBindingCopy = new SingularAttributeBinding(
 					domainBindingCopyMap.get( binding.getLhs() ),
 					binding.getAttribute()
 			);
@@ -572,11 +586,20 @@ public class QuerySplitter {
 		public Object visitAttributeReferenceExpression(AttributeBinding expression) {
 			AttributeBinding attributeBindingCopy = (AttributeBinding) domainBindingCopyMap.get( expression );
 			if ( attributeBindingCopy == null ) {
-				attributeBindingCopy = new AttributeBinding(
-						expression.getLhs(),
-						expression.getBoundDomainReference(),
-						expression.getFromElement()
-				);
+				if ( expression instanceof PluralAttributeBinding ) {
+					attributeBindingCopy = new PluralAttributeBinding(
+							expression.getLhs(),
+							(PluralAttributeReference) expression.getAttribute(),
+							expression.getFromElement()
+					);
+				}
+				else {
+					attributeBindingCopy = new SingularAttributeBinding(
+							expression.getLhs(),
+							(SingularAttributeReference) expression.getBoundDomainReference(),
+							expression.getFromElement()
+					);
+				}
 
 				domainBindingCopyMap.put( expression, attributeBindingCopy );
 			}

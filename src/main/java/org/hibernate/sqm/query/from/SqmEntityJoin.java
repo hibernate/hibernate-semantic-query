@@ -8,8 +8,7 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
-import org.hibernate.sqm.parser.common.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.EntityBinding;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 

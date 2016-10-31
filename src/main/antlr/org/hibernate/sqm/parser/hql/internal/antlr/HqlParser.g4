@@ -145,7 +145,7 @@ path
 	// :(
 	: dotIdentifierSequence												# SimplePath
 	// a Map.Entry cannot be further dereferenced
-	| ENTRY LEFT_PAREN mapReference RIGHT_PAREN							# MapEntryPath
+	| ENTRY LEFT_PAREN pathAsMap RIGHT_PAREN							# MapEntryPath
 	// only one index-access is allowed per path
 	| path LEFT_BRACKET expression RIGHT_BRACKET (pathTerminal)?		# IndexedPath
 	| pathRoot (pathTerminal)?											# CompoundPath
@@ -154,7 +154,7 @@ path
 pathRoot
 	: identifier																			# SimplePathRoot
 	| TREAT LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN			# TreatedPathRoot
-	| KEY LEFT_PAREN mapReference RIGHT_PAREN												# MapKeyPathRoot
+	| KEY LEFT_PAREN pathAsMap RIGHT_PAREN												# MapKeyPathRoot
 	| VALUE LEFT_PAREN collectionReference RIGHT_PAREN				   						# CollectionValuePathRoot
 	;
 
@@ -167,7 +167,7 @@ collectionReference
 	: path
 	;
 
-mapReference
+pathAsMap
 // having as a separate rule allows us to validate that the path indeed resolves to a Map attribute
 	: path
 	;

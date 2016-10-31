@@ -6,22 +6,22 @@
  */
 package org.hibernate.sqm.query.set;
 
-import org.hibernate.sqm.parser.common.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class SqmAssignment {
-	private final AttributeBinding stateField;
+	private final SingularAttributeBinding stateField;
 	private final SqmExpression value;
 
-	public SqmAssignment(AttributeBinding stateField, SqmExpression value) {
+	public SqmAssignment(SingularAttributeBinding stateField, SqmExpression value) {
 		this.stateField = stateField;
 		this.value = value;
 	}
 
-	public AttributeBinding getStateField() {
+	public SingularAttributeBinding getStateField() {
 		return stateField;
 	}
 

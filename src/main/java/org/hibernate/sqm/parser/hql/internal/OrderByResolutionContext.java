@@ -7,7 +7,7 @@
 package org.hibernate.sqm.parser.hql.internal;
 
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.FromElementBuilder;
 import org.hibernate.sqm.parser.common.FromElementLocator;
 import org.hibernate.sqm.parser.common.ParsingContext;

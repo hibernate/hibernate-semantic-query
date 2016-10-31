@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 /**

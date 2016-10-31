@@ -33,8 +33,9 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
-import org.hibernate.sqm.parser.common.AttributeBinding;
-import org.hibernate.sqm.parser.common.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
@@ -426,7 +427,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public AttributeBinding visitAttributeReference(From attributeSource, String attributeName) {
+	public SingularAttributeBinding visitAttributeReference(From attributeSource, String attributeName) {
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 
@@ -692,7 +693,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	public EmptinessSqmPredicate visitEmptinessPredicate(From attributeSource, String attributeName, boolean negated) {
-		final AttributeBinding attributeReference = visitAttributeReference( attributeSource, attributeName );
+		final SingularAttributeBinding attributeReference = visitAttributeReference( attributeSource, attributeName );
 		return new EmptinessSqmPredicate( attributeReference, negated );
 	}
 

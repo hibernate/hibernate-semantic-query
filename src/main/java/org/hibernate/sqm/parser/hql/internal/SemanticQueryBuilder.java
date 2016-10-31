@@ -308,8 +308,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public SqmSelection visitSelection(HqlParser.SelectionContext ctx) {
+		SqmExpression selectExpression = visitSelectExpression( ctx.selectExpression() );
+		if ( selectExpression instanceof PluralAttributeBinding ) {
+			selectExpression = new PluralAttributeElementBinding( (PluralAttributeBinding) selectExpression );
+		}
+
 		final SqmSelection selection = new SqmSelection(
-				visitSelectExpression( ctx.selectExpression() ),
+				selectExpression,
 				interpretResultIdentifier( ctx.resultIdentifier() )
 		);
 		currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().registerAlias( selection );

@@ -7,6 +7,9 @@
 package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.query.SqmSelectStatement;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
+import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EmbeddableTypeImpl;
@@ -15,6 +18,9 @@ import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hibernate.sqm.SemanticQueryInterpreter.interpret;
 
 /**
@@ -26,6 +32,18 @@ public class CollectionPathExpressionsTest {
 	@Test
 	public void testMapKeyPath() {
 		interpret( "select p from Phrase p where key( p.translations ).language = 'en'", consumerContext );
+	}
+
+	@Test
+	public void testCollectionReferenceAsSelection() {
+		// essentially, assert that a raw reference to a plural attribute is
+		//		implicitly handled as a reference to the elements, in the
+		// 		select clause anyway
+		final SqmSelectStatement statement = (SqmSelectStatement) interpret( "select t from Phrase p join p.translations t", consumerContext );
+		assertThat( statement.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
+
+		final SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
+		assertThat( selection.getExpression(), instanceOf( PluralAttributeElementBinding.class ) );
 	}
 
 	@Test

@@ -9,7 +9,6 @@ package org.hibernate.sqm.query.expression;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 
 /**
  * Represents the {@code SIZE()} function.
@@ -42,7 +41,7 @@ public class CollectionSizeSqmExpression implements SqmExpression {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitCollectionSizeFunction( this );
+		return walker.visitPluralAttributeSizeFunction( this );
 	}
 
 	@Override

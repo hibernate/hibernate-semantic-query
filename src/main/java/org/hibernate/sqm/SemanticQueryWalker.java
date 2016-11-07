@@ -16,7 +16,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -189,11 +189,11 @@ public interface SemanticQueryWalker<T> {
 
 	T visitSumFunction(SumFunctionSqmExpression expression);
 
-	T visitCollectionSizeFunction(CollectionSizeSqmExpression function);
+	T visitPluralAttributeSizeFunction(CollectionSizeSqmExpression function);
 
-	T visitCollectionValueBinding(PluralAttributeElementBinding binding);
+	T visitPluralAttributeElementBinding(PluralAttributeElementBinding binding);
 
-	T visitCollectionIndexFunction(CollectionIndexSqmExpression function);
+	T visitPluralAttributeIndexFunction(PluralAttributeIndexSqmExpression function);
 
 	T visitMapKeyBinding(MapKeyBinding binding);
 

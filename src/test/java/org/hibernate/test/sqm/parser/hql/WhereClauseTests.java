@@ -13,7 +13,7 @@ import org.hibernate.sqm.domain.PluralAttributeReference;
 import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
 import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
@@ -106,8 +106,8 @@ public class WhereClauseTests {
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexSqmExpression.class ) );
-		assertThat( ( (CollectionIndexSqmExpression) relationalPredicate.getLeftHandExpression() ).getAttributeBinding().getFromElement().getIdentificationVariable(), is( "l" ) );
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( PluralAttributeIndexSqmExpression.class ) );
+		assertThat( ( (PluralAttributeIndexSqmExpression) relationalPredicate.getLeftHandExpression() ).getAttributeBinding().getFromElement().getIdentificationVariable(), is( "l" ) );
 	}
 
 	@Test

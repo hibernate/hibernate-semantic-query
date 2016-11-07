@@ -15,10 +15,10 @@ import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
 /**
  * @author Steve Ebersole
  */
-public class CollectionIndexSqmExpression implements SqmExpression {
+public class PluralAttributeIndexSqmExpression implements SqmExpression {
 	private final PluralAttributeBinding attributeBinding;
 
-	public CollectionIndexSqmExpression(PluralAttributeBinding attributeBinding) {
+	public PluralAttributeIndexSqmExpression(PluralAttributeBinding attributeBinding) {
 		this.attributeBinding = attributeBinding;
 	}
 
@@ -42,7 +42,7 @@ public class CollectionIndexSqmExpression implements SqmExpression {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitCollectionIndexFunction( this );
+		return walker.visitPluralAttributeIndexFunction( this );
 	}
 
 	@Override

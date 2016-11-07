@@ -55,7 +55,7 @@ public class PluralAttributeElementBinding implements DomainReferenceBinding {
 
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
-		return walker.visitCollectionValueBinding( this );
+		return walker.visitPluralAttributeElementBinding( this );
 	}
 
 	@Override

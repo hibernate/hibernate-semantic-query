@@ -16,7 +16,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -401,17 +401,17 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitCollectionSizeFunction(CollectionSizeSqmExpression function) {
+	public T visitPluralAttributeSizeFunction(CollectionSizeSqmExpression function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitCollectionValueBinding(PluralAttributeElementBinding binding) {
+	public T visitPluralAttributeElementBinding(PluralAttributeElementBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitCollectionIndexFunction(CollectionIndexSqmExpression function) {
+	public T visitPluralAttributeIndexFunction(PluralAttributeIndexSqmExpression function) {
 		return (T) function;
 	}
 

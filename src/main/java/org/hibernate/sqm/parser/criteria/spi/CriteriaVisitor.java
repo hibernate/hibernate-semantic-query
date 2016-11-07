@@ -118,9 +118,9 @@ public interface CriteriaVisitor {
 	EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable);
 	EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable, String attributeName);
 
-//	CollectionSizeFunction visitCollectionSizeFunction();
+//	CollectionSizeFunction visitPluralAttributeSizeFunction();
 //
-//	CollectionValueFunction visitCollectionValueBinding();
+//	CollectionValueFunction visitPluralAttributeElementBinding();
 //	MapKeyFunction visitMapKeyBinding();
 //	MapEntryFunction visitMapEntryFunction();
 

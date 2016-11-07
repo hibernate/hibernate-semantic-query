@@ -53,7 +53,7 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
-import org.hibernate.sqm.query.expression.CollectionIndexSqmExpression;
+import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -284,7 +284,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		// for now, this is slightly different than the legacy behavior where
 		// the root and each non-fetched-join was selected.  For now, here, we simply
 		// select the root
-		final SqmSelectClause selectClause = new SqmSelectClause( true );
+		final SqmSelectClause selectClause = new SqmSelectClause( false );
 		final SqmFrom root = fromClause.getFromElementSpaces().get( 0 ).getRoot();
 		selectClause.addSelection( new SqmSelection( root ) );
 		return selectClause;
@@ -2140,7 +2140,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public CollectionIndexSqmExpression visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
+	public PluralAttributeIndexSqmExpression visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
 		final String alias = ctx.identifier().getText();
 
 		final DomainReferenceBinding binding = currentQuerySpecProcessingState.getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
@@ -2170,7 +2170,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new CollectionIndexSqmExpression( attributeBinding );
+		return new PluralAttributeIndexSqmExpression( attributeBinding );
 	}
 
 	private boolean isIndexedPluralAttribute(PluralAttributeBinding attributeBinding) {

@@ -62,3 +62,36 @@ add a TREAT reference to the FromElement.
 
 Another option is to just keep a list of the referenced attributes for each FromElement.  On the "back end" we can 
 work out the subclass table inclusion based on that info.
+
+
+
+ColumnBinding resolution
+------------------------
+
+Resolving a "domain reference" to `ColumnBinding` instances involves multiple actors:
+
+* The "domain reference" expression (and the encapsulated `org.hibernate.persister.common.spi.DomainReferenceImplementor`)
+* The source (lhs, table-group, etc) of the "domain reference" expression
+* The context in which the "domain reference" expression occurs
+* The proper TableGroup(s) are integral as well, as they are needed to convert `Column` -> `ColumnBinding`.  Likely this just gets passed in to the ColumnBinding creation more than being a active actor in the process
+
+
+At the moment this is designed as follows:
+
+* The `DomainReferenceExpression` impls receive a `ColumnBindingSource` reference which is used to convert `Column`s into `ColumnBinding`s
+* `ColumnBindingSource` is generally a `TableGroup`, but in some cases it can be a "composition" of multiple `TableGroup`s.  Can also be a "virtual" source (for `CompositeType`s)
+* `DomainReferenceRenderer` handles the "contextual" aspect of rendering `DomainReferenceExpression`s into `ColumnBinding`s
+
+The general flow is
+
+```
+DomainReferenceRenderer -> DomainReferenceExpression -> ColumnBindingSource
+```
+
+This is a preliminary design.  I am in no way tied to it if anyone sees something better.
+
+
+Return/ReturnReader design
+--------------------------
+
+`ReturnReader` is handed the `ColumnBinding`s it should read

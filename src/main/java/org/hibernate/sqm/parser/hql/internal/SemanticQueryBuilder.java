@@ -149,6 +149,8 @@ import org.jboss.logging.Logger;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import static org.hibernate.sqm.Helper.isNotEmpty;
+
 /**
  * @author Steve Ebersole
  */
@@ -853,7 +855,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 				if ( !ImplicitAliasGenerator.isImplicitAlias( joinedFromElement.getIdentificationVariable() ) ) {
 					if ( SingularAttributeBinding.class.isInstance( joinedPath ) ) {
-						if ( SingularAttributeBinding.class.cast( joinedPath ).getFromElement().isFetched() ) {
+						final String fetchParentAlias = SingularAttributeBinding.class.cast( joinedPath )
+								.getFromElement()
+								.getFetchParentAlias();
+						if ( isNotEmpty( fetchParentAlias ) ) {
 							throw new StrictJpaComplianceViolation(
 									"Encountered aliased fetch join, but strict JPQL compliance was requested",
 									StrictJpaComplianceViolation.Type.ALIASED_FETCH_JOIN
@@ -1347,7 +1352,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						null,
 						attributeBinding.getLhs().getFromElement().asLoggableText() + '.' + attributeBinding.getAttribute().getAttributeName(),
 						JoinType.INNER,
-						false,
+						null,
 						true
 				)
 		);

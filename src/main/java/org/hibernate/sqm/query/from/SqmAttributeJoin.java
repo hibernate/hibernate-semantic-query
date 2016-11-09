@@ -27,7 +27,7 @@ public class SqmAttributeJoin
 
 	private final AttributeBinding attributeBinding;
 	private final EntityReference intrinsicSubclassIndicator;
-	private final boolean fetched;
+	private final String fetchParentAlias;
 
 	private SqmPredicate onClausePredicate;
 
@@ -39,7 +39,7 @@ public class SqmAttributeJoin
 			EntityReference intrinsicSubclassIndicator,
 			String sourcePath,
 			JoinType joinType,
-			boolean fetched) {
+			String fetchParentAlias) {
 		super(
 				containingSpace,
 				uid,
@@ -51,7 +51,7 @@ public class SqmAttributeJoin
 		);
 		this.attributeBinding = attributeBinding;
 		this.intrinsicSubclassIndicator = intrinsicSubclassIndicator;
-		this.fetched = fetched;
+		this.fetchParentAlias = fetchParentAlias;
 
 		attributeBinding.injectAttributeJoin( this );
 	}
@@ -70,8 +70,8 @@ public class SqmAttributeJoin
 		return intrinsicSubclassIndicator;
 	}
 
-	public boolean isFetched() {
-		return fetched;
+	public String getFetchParentAlias() {
+		return fetchParentAlias;
 	}
 
 	@Override

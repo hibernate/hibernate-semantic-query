@@ -211,7 +211,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( join.getAttribute().getJavaType() ),
 					path,
 					convert( join.getJoinType() ),
-					false,
+					null,
 					false
 			);
 			space.addJoin( sqmJoin );
@@ -235,7 +235,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( fetch.getAttribute().getJavaType() ),
 					path,
 					convert( fetch.getJoinType() ),
-					true,
+					sqmLhs.getIdentificationVariable(),
 					false
 			);
 			space.addJoin( sqmFetch );

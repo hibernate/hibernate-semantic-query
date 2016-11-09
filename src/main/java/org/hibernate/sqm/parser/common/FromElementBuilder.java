@@ -10,7 +10,6 @@ import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
@@ -19,6 +18,8 @@ import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmRoot;
 
 import org.jboss.logging.Logger;
+
+import static org.hibernate.sqm.Helper.isNotEmpty;
 
 /**
  * @author Steve Ebersole
@@ -128,13 +129,13 @@ public class FromElementBuilder {
 			EntityReference subclassIndicator,
 			String path,
 			JoinType joinType,
-			boolean fetched,
+			String fetchParentAlias,
 			boolean canReuseImplicitJoins) {
 		assert attributeBinding != null;
 		assert joinType != null;
 
-		if ( fetched && canReuseImplicitJoins ) {
-			throw new ParsingException( "Illegal combination of [fetched=true] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
+		if ( isNotEmpty(fetchParentAlias) && canReuseImplicitJoins ) {
+			throw new ParsingException( "Illegal combination of [non-null fetch parent] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
 		}
 
 		if ( alias != null && canReuseImplicitJoins ) {
@@ -167,7 +168,7 @@ public class FromElementBuilder {
 					subclassIndicator,
 					path,
 					joinType,
-					fetched
+					fetchParentAlias
 			);
 
 			if ( canReuseImplicitJoins ) {

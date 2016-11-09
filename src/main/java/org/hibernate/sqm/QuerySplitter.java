@@ -353,7 +353,7 @@ public class QuerySplitter {
 					fromElement.getIntrinsicSubclassIndicator(),
 					fromElement.asLoggableText(),
 					fromElement.getJoinType(),
-					fromElement.isFetched()
+					fromElement.getFetchParentAlias()
 			);
 			domainBindingCopyMap.put( fromElement.getAttributeBinding(), copy.getDomainReferenceBinding() );
 			return copy;

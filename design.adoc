@@ -1,15 +1,17 @@
-Discuss design of SQM model.
+SQM Design Guide
+================
+:toc:
 
 At a high level, SQM defines:
-. a domain model metamodel (org.hibernate.sqm.domain) which represents access to information about
-the application's domain model
+
+. access to information about the application's domain model.  SQM needs this knowledge of the domain
+	model being queried in order to properly interpret the meaning (semantic) of a query
 . a semantic query model that represents a query against that domain model.
 
 
-The first thing SQM needs to interpret the meaning of a query is some knowledge of the domain
-model being queried.  This is the purpose of the `org.hibernate.sqm.domain` package
+== The SQM Model
 
-== FromClause
+=== FromClause
 
 The FromClause defines the parts of the domain model available to the query.  A FromClause
 is made up of one or more FromElementSpaces.  A FromElementSpace is defined by a "query root"
@@ -37,7 +39,7 @@ select p from Person p, Service s
 
 It is important to note that a FromElementSpace defines a scope for the *use* of identification variables within the
 FromClause (these identification variables must still be unique across the whole FromClause).  E.g., the following
-query is not legal because the join to `p.address` occurs is defined in the second FromElementSpace but
+query is not legal because the join to `p.address` is defined in the second FromElementSpace but
 refers back to the first.
 
 .Illegal cross-space reference
@@ -49,7 +51,7 @@ select p from Person p, Service s join p.address a
 ====
 
 
-== Expressions and Bindings
+=== Expressions and Bindings
 
 A Binding is the corollary to `org.hibernate.test.sqm.domain.Bindable` and represents a specific
 usage of that `org.hibernate.test.sqm.domain.Bindable`.  E.g.
@@ -74,7 +76,7 @@ select p, pm from Person p, Person pm
 Now we have 2 Bindings declared (`Person p` and `Person pm`) for the same Bindable (`Person`).
 
 
-== Downcasts
+=== Downcasts
 
 FromElements (others) act as a source of attribute bindings/references.  For example, given a query defining `Person` as a
 root we can now refer to any of the attributes defined on `Person` and its superclasses in the query.
@@ -85,7 +87,7 @@ form.
 
 [NOTE]
 ====
-We may decided to remove support for implicit downcasts
+Consider removing support for implicit downcasts?
 ====
 
 Regardless of whether the downcast was implicit or explicit, the AttributeBindingSource needs to understand the set of

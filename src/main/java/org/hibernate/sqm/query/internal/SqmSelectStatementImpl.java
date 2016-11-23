@@ -16,7 +16,6 @@ import org.hibernate.sqm.query.order.OrderByClause;
  */
 public class SqmSelectStatementImpl extends AbstractSqmStatement implements SqmSelectStatement {
 	private SqmQuerySpec querySpec;
-	private OrderByClause orderByClause;
 
 	public SqmSelectStatementImpl() {
 	}
@@ -26,23 +25,11 @@ public class SqmSelectStatementImpl extends AbstractSqmStatement implements SqmS
 		return querySpec;
 	}
 
-	@Override
-	public OrderByClause getOrderByClause() {
-		return orderByClause;
-	}
-
 	public void applyQuerySpec(SqmQuerySpec querySpec) {
 		if ( this.querySpec != null ) {
 			throw new IllegalStateException( "SqmQuerySpec was already defined for select-statement" );
 		}
 		this.querySpec = querySpec;
-	}
-
-	public void applyOrderByClause(OrderByClause orderByClause) {
-		if ( this.orderByClause != null ) {
-			throw new IllegalStateException( "OrderByClause was already defined for select-statement" );
-		}
-		this.orderByClause = orderByClause;
 	}
 
 	@Override

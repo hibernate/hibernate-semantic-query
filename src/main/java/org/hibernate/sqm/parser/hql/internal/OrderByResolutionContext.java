@@ -7,33 +7,35 @@
 package org.hibernate.sqm.parser.hql.internal;
 
 import org.hibernate.sqm.parser.SemanticException;
+import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.FromElementBuilder;
 import org.hibernate.sqm.parser.common.FromElementLocator;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
+import org.hibernate.sqm.query.select.SqmSelectClause;
 
 /**
  * @author Steve Ebersole
  */
 public class OrderByResolutionContext implements ResolutionContext, FromElementLocator {
 	private final ParsingContext parsingContext;
-	private final SqmSelectStatement selectStatement;
+	private final SqmFromClause fromClause;
+	private final SqmSelectClause selectClause;
 
-	public OrderByResolutionContext(ParsingContext parsingContext, SqmSelectStatement selectStatement) {
+	public OrderByResolutionContext(ParsingContext parsingContext, SqmFromClause fromClause, SqmSelectClause selectClause) {
 		this.parsingContext = parsingContext;
-		this.selectStatement = selectStatement;
+		this.fromClause = fromClause;
+		this.selectClause = selectClause;
 	}
 
 	@Override
 	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
-		for ( FromElementSpace fromElementSpace : selectStatement.getQuerySpec()
-				.getFromClause()
-				.getFromElementSpaces() ) {
+		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable ) ) {
 				return fromElementSpace.getRoot().getDomainReferenceBinding();
 			}
@@ -51,9 +53,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 
 	@Override
 	public DomainReferenceBinding findFromElementExposingAttribute(String attributeName) {
-		for ( FromElementSpace fromElementSpace : selectStatement.getQuerySpec()
-				.getFromClause()
-				.getFromElementSpaces() ) {
+		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( exposesAttribute( fromElementSpace.getRoot(), attributeName ) ) {
 				return fromElementSpace.getRoot().getDomainReferenceBinding();
 			}

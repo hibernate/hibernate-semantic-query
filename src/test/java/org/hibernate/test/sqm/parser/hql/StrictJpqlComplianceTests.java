@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
  * Testing strict JPQL compliance checking
  *
  * @author Steve Ebersole
+ * @author Christian Beikov
  */
 public class StrictJpqlComplianceTests {
 	@Test
@@ -98,6 +99,44 @@ public class StrictJpqlComplianceTests {
 		}
 		catch (StrictJpaComplianceViolation v) {
 			assertEquals( StrictJpaComplianceViolation.Type.FUNCTION_CALL , v.getType() );
+		}
+	}
+
+	@Test
+	public void testLimitOffset() {
+		final String query = "select o from Entity o limit 1 offset 1";
+		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
+
+		// first test HQL superset is allowed...
+		SemanticQueryInterpreter.interpret( query, consumerContext );
+
+		// now enable strict compliance and try again, should lead to error
+		consumerContext.enableStrictJpaCompliance();
+		try {
+			SemanticQueryInterpreter.interpret( query, consumerContext );
+			fail( "expected violation" );
+		}
+		catch (StrictJpaComplianceViolation v) {
+			assertEquals( StrictJpaComplianceViolation.Type.LIMIT_OFFSET_CLAUSE , v.getType() );
+		}
+	}
+
+	@Test
+	public void testSubqueryOrderBy() {
+		final String query = "select o from Entity o where o.basic = ( select oSub from Entity oSub order by oSub.basic limit 1 )";
+		ConsumerContextImpl consumerContext = new ConsumerContextImpl( buildMetamodel() );
+
+		// first test HQL superset is allowed...
+		SemanticQueryInterpreter.interpret( query, consumerContext );
+
+		// now enable strict compliance and try again, should lead to error
+		consumerContext.enableStrictJpaCompliance();
+		try {
+			SemanticQueryInterpreter.interpret( query, consumerContext );
+			fail( "expected violation" );
+		}
+		catch (StrictJpaComplianceViolation v) {
+			assertEquals( StrictJpaComplianceViolation.Type.SUBQUERY_ORDER_BY , v.getType() );
 		}
 	}
 

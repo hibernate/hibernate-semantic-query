@@ -65,6 +65,7 @@ import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
+import org.hibernate.sqm.query.paging.LimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
@@ -167,7 +168,6 @@ public class QuerySplitter {
 		public SqmSelectStatement visitSelectStatement(SqmSelectStatement statement) {
 			final SqmSelectStatementImpl copy = new SqmSelectStatementImpl();
 			copy.applyQuerySpec( visitQuerySpec( statement.getQuerySpec() ) );
-			copy.applyOrderByClause( visitOrderByClause( statement.getOrderByClause() ) );
 			return copy;
 		}
 
@@ -179,7 +179,9 @@ public class QuerySplitter {
 			return new SqmQuerySpec(
 					visitFromClause( querySpec.getFromClause() ),
 					visitSelectClause( querySpec.getSelectClause() ),
-					visitWhereClause( querySpec.getWhereClause() )
+					visitWhereClause( querySpec.getWhereClause() ),
+					visitOrderByClause( querySpec.getOrderByClause() ),
+					visitLimitOffsetClause( querySpec.getLimitOffsetClause() )
 			);
 		}
 
@@ -557,6 +559,18 @@ public class QuerySplitter {
 					(SqmExpression) sortSpecification.getSortExpression().accept( this ),
 					sortSpecification.getCollation(),
 					sortSpecification.getSortOrder()
+			);
+		}
+
+		@Override
+		public LimitOffsetClause visitLimitOffsetClause(LimitOffsetClause limitOffsetClause) {
+			if ( limitOffsetClause == null ) {
+				return null;
+			}
+
+			return new LimitOffsetClause(
+					(SqmExpression) limitOffsetClause.getLimitExpression().accept( this ),
+					(SqmExpression) limitOffsetClause.getOffsetExpression().accept( this )
 			);
 		}
 

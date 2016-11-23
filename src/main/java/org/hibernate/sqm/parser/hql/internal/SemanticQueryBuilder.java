@@ -53,7 +53,6 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSearchedSqmExpression;
 import org.hibernate.sqm.query.expression.CaseSimpleSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
-import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
@@ -77,6 +76,7 @@ import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
@@ -124,6 +124,7 @@ import org.hibernate.sqm.query.internal.SqmUpdateStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
 import org.hibernate.sqm.query.order.SortSpecification;
+import org.hibernate.sqm.query.paging.LimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
@@ -148,8 +149,6 @@ import org.jboss.logging.Logger;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
-import static org.hibernate.sqm.Helper.isNotEmpty;
 
 /**
  * @author Steve Ebersole
@@ -230,18 +229,6 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 		try {
 			selectStatement.applyQuerySpec( visitQuerySpec( ctx.querySpec() ) );
-
-			if ( ctx.orderByClause() != null ) {
-				pathResolverStack.push(
-						new PathResolverBasicImpl( new OrderByResolutionContext( parsingContext, selectStatement ) )
-				);
-				try {
-					selectStatement.applyOrderByClause( visitOrderByClause( ctx.orderByClause() ) );
-				}
-				finally {
-					pathResolverStack.pop();
-				}
-			}
 		}
 		finally {
 			selectStatement.wrapUp();
@@ -279,7 +266,70 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			else {
 				whereClause = null;
 			}
-			return new SqmQuerySpec( querySpecProcessingStateStack.getCurrent().getFromClause(), selectClause, whereClause );
+
+			final OrderByClause orderByClause;
+			if ( ctx.orderByClause() != null ) {
+				if ( parsingContext.getConsumerContext().useStrictJpaCompliance()
+						&& querySpecProcessingStateStack.getCurrent().getContainingQueryState() != null ) {
+					throw new StrictJpaComplianceViolation(
+							StrictJpaComplianceViolation.Type.SUBQUERY_ORDER_BY
+					);
+				}
+
+				pathResolverStack.push(
+						new PathResolverBasicImpl(
+								new OrderByResolutionContext(
+										parsingContext,
+										querySpecProcessingStateStack.getCurrent().getFromClause(),
+										selectClause
+								)
+						)
+				);
+				try {
+					orderByClause = visitOrderByClause( ctx.orderByClause() );
+				}
+				finally {
+					pathResolverStack.pop();
+				}
+			}
+			else {
+				orderByClause = null;
+			}
+
+			final LimitOffsetClause limitOffsetClause;
+			if ( ctx.limitClause() != null || ctx.offsetClause() != null ) {
+				if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+					throw new StrictJpaComplianceViolation(
+							StrictJpaComplianceViolation.Type.LIMIT_OFFSET_CLAUSE
+					);
+				}
+
+				if ( querySpecProcessingStateStack.getCurrent().getContainingQueryState() != null
+						&& orderByClause == null ) {
+					throw new SemanticException( "limit and offset clause require an order-by clause" );
+				}
+
+				final SqmExpression limitExpression;
+				if ( ctx.limitClause() != null ) {
+					limitExpression = visitLimitClause( ctx.limitClause() );
+				} else {
+					limitExpression = null;
+				}
+
+				final SqmExpression offsetExpression;
+				if ( ctx.offsetClause() != null ) {
+					offsetExpression = visitOffsetClause( ctx.offsetClause() );
+				} else {
+					offsetExpression = null;
+				}
+
+				limitOffsetClause = new LimitOffsetClause( limitExpression, offsetExpression );
+			}
+			else {
+				limitOffsetClause = null;
+			}
+
+			return new SqmQuerySpec( querySpecProcessingStateStack.getCurrent().getFromClause(), selectClause, whereClause, orderByClause, limitOffsetClause );
 		}
 		finally {
 			pathResolverStack.pop();
@@ -511,6 +561,28 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			sortOrder = null;
 		}
 		return new SortSpecification( sortExpression, collation, sortOrder );
+	}
+
+	@Override
+	public SqmExpression visitLimitClause(HqlParser.LimitClauseContext ctx) {
+		return (SqmExpression) ctx.parameterOrNumberLiteral().accept( this );
+	}
+
+	@Override
+	public SqmExpression visitOffsetClause(HqlParser.OffsetClauseContext ctx) {
+		return (SqmExpression) ctx.parameterOrNumberLiteral().accept( this );
+	}
+
+	@Override
+	public SqmExpression visitParameterOrNumberLiteral(HqlParser.ParameterOrNumberLiteralContext ctx) {
+		if ( ctx.INTEGER_LITERAL() != null ) {
+			return integerLiteral( ctx.INTEGER_LITERAL().getText() );
+		}
+		if ( ctx.parameter() != null ) {
+			return (SqmExpression) ctx.parameter().accept( this );
+		}
+
+		return null;
 	}
 
 	private SortOrder interpretSortOrder(String value) {

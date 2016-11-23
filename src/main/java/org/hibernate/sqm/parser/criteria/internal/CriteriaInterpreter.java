@@ -125,7 +125,6 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 		final SqmSelectStatementImpl selectStatement = new SqmSelectStatementImpl();
 		selectStatement.applyQuerySpec( interpreter.visitQuerySpec( query ) );
-		selectStatement.applyOrderByClause( interpreter.visitOrderBy( query ) );
 
 		return selectStatement;
 	}
@@ -145,7 +144,11 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		this.parsingContext = parsingContext;
 	}
 
-	private OrderByClause visitOrderBy(CriteriaQuery<?> jpaCriteria) {
+	private OrderByClause visitOrderBy(AbstractQuery abstractQuery) {
+		if ( !( abstractQuery instanceof CriteriaQuery<?> ) ) {
+			return null;
+		}
+		final CriteriaQuery<?> jpaCriteria = (CriteriaQuery<?>) abstractQuery;
 		final OrderByClause sqmOrderByClause = new OrderByClause();
 		if ( !jpaCriteria.getOrderList().isEmpty() ) {
 			for ( Order orderItem : jpaCriteria.getOrderList() ) {
@@ -167,7 +170,9 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			return new SqmQuerySpec(
 					visitFromClause( jpaCriteria ),
 					visitSelectClause( jpaCriteria ),
-					visitWhereClause( jpaCriteria )
+					visitWhereClause( jpaCriteria ),
+					visitOrderBy( jpaCriteria ),
+					/* LimitOffsetClause */ null
 			);
 		}
 		finally {

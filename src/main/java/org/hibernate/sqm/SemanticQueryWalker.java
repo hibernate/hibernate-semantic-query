@@ -69,6 +69,7 @@ import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
+import org.hibernate.sqm.query.paging.LimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
@@ -158,6 +159,8 @@ public interface SemanticQueryWalker<T> {
 	T visitOrderByClause(OrderByClause orderByClause);
 
 	T visitSortSpecification(SortSpecification sortSpecification);
+
+	T visitLimitOffsetClause(LimitOffsetClause limitOffsetClause);
 
 	T visitPositionalParameterExpression(PositionalParameterSqmExpression expression);
 

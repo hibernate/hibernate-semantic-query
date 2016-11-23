@@ -24,7 +24,7 @@ statement
 	;
 
 selectStatement
-	: querySpec orderByClause?
+	: querySpec
 	;
 
 updateStatement
@@ -66,6 +66,7 @@ targetFieldsSpec
 // ORDER BY clause
 
 orderByClause
+// todo : null precedence
 	: ORDER BY sortSpecification (COMMA sortSpecification)*
 	;
 
@@ -87,10 +88,26 @@ orderingSpecification
 	;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// LIMIT/OFFSET clause
+
+limitClause
+	: LIMIT parameterOrNumberLiteral
+	;
+
+offsetClause
+	: OFFSET parameterOrNumberLiteral
+	;
+
+parameterOrNumberLiteral
+	: parameter
+	| INTEGER_LITERAL
+	;
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // QUERY SPEC - general structure of root sqm or sub sqm
 
 querySpec
-	:	selectClause? fromClause whereClause? ( groupByClause havingClause? )?
+	:	selectClause? fromClause whereClause? ( groupByClause havingClause? )? orderByClause? limitClause? offsetClause?
 	;
 
 
@@ -316,7 +333,7 @@ expression
 	| entityTypeReference						# EntityTypeExpression
 	| path										# PathExpression
 	| function									# FunctionExpression
-	| LEFT_PAREN querySpec RIGHT_PAREN			# SubQueryExpression
+	| LEFT_PAREN querySpec RIGHT_PAREN		    # SubQueryExpression
 	;
 
 entityTypeReference

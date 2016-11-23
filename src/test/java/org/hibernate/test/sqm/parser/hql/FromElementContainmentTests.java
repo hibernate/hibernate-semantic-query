@@ -76,15 +76,15 @@ public class FromElementContainmentTests {
 		assertEquals( 1, statement.getQuerySpec().getFromClause().getFromElementSpaces().size() );
 		SqmRoot fromElement = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 ).getRoot();
 
-		assertEquals( 1, statement.getOrderByClause().getSortSpecifications().size() );
+		assertEquals( 1, statement.getQuerySpec().getOrderByClause().getSortSpecifications().size() );
 		assertThat(
-				statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
+				statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
 				instanceOf( EntityBinding.class )
 		);
 
 		assertSame(
 				fromElement,
-				( (EntityBinding) statement.getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() ).getFromElement()
+				( (EntityBinding) statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() ).getFromElement()
 		);
 	}
 

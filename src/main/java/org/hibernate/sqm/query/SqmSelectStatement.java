@@ -6,12 +6,9 @@
  */
 package org.hibernate.sqm.query;
 
-import org.hibernate.sqm.query.order.OrderByClause;
-
 /**
  * @author Steve Ebersole
  */
 public interface SqmSelectStatement extends SqmStatement {
 	SqmQuerySpec getQuerySpec();
-	OrderByClause getOrderByClause();
 }

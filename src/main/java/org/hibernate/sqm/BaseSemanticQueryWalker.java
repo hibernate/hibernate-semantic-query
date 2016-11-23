@@ -72,6 +72,7 @@ import org.hibernate.sqm.query.from.SqmJoin;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
+import org.hibernate.sqm.query.paging.LimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
@@ -105,7 +106,6 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
 	public T visitSelectStatement(SqmSelectStatement statement) {
 		visitQuerySpec( statement.getQuerySpec() );
-		visitOrderByClause( statement.getOrderByClause() );
 		return (T) statement;
 	}
 
@@ -154,6 +154,8 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 		visitFromClause( querySpec.getFromClause() );
 		visitSelectClause( querySpec.getSelectClause() );
 		visitWhereClause( querySpec.getWhereClause() );
+		visitOrderByClause( querySpec.getOrderByClause() );
+		visitLimitOffsetClause( querySpec.getLimitOffsetClause() );
 		return (T) querySpec;
 	}
 
@@ -322,6 +324,19 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	public T visitSortSpecification(SortSpecification sortSpecification) {
 		sortSpecification.getSortExpression().accept( this );
 		return (T) sortSpecification;
+	}
+
+	@Override
+	public T visitLimitOffsetClause(LimitOffsetClause limitOffsetClause) {
+		if ( limitOffsetClause != null ) {
+			if ( limitOffsetClause.getLimitExpression() != null ) {
+				limitOffsetClause.getLimitExpression().accept( this );
+			}
+			if ( limitOffsetClause.getOffsetExpression() != null ) {
+				limitOffsetClause.getOffsetExpression().accept( this );
+			}
+		}
+		return (T) limitOffsetClause;
 	}
 
 	@Override

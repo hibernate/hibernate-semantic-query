@@ -8,6 +8,8 @@ package org.hibernate.sqm.query;
 
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmFromClauseContainer;
+import org.hibernate.sqm.query.order.OrderByClause;
+import org.hibernate.sqm.query.paging.LimitOffsetClause;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
 import org.hibernate.sqm.query.predicate.SqmWhereClauseContainer;
 import org.hibernate.sqm.query.select.SqmSelectClause;
@@ -21,16 +23,22 @@ public class SqmQuerySpec implements SqmFromClauseContainer, SqmWhereClauseConta
 	private final SqmFromClause fromClause;
 	private final SqmSelectClause selectClause;
 	private final SqmWhereClause whereClause;
+	private final OrderByClause orderByClause;
+	private final LimitOffsetClause limitOffsetClause;
 
 	// todo : group-by + having
 
 	public SqmQuerySpec(
 			SqmFromClause fromClause,
 			SqmSelectClause selectClause,
-			SqmWhereClause whereClause) {
+			SqmWhereClause whereClause,
+			OrderByClause orderByClause,
+			LimitOffsetClause limitOffsetClause) {
 		this.fromClause = fromClause;
 		this.selectClause = selectClause;
 		this.whereClause = whereClause;
+		this.orderByClause = orderByClause;
+		this.limitOffsetClause = limitOffsetClause;
 	}
 
 	public SqmSelectClause getSelectClause() {
@@ -45,5 +53,13 @@ public class SqmQuerySpec implements SqmFromClauseContainer, SqmWhereClauseConta
 	@Override
 	public SqmWhereClause getWhereClause() {
 		return whereClause;
+	}
+
+	public OrderByClause getOrderByClause() {
+		return orderByClause;
+	}
+
+	public LimitOffsetClause getLimitOffsetClause() {
+		return limitOffsetClause;
 	}
 }

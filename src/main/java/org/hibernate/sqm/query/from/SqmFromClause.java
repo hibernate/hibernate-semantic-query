@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.query.from;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,19 +16,12 @@ import java.util.List;
  *
  * @author Steve Ebersole
  */
-public class SqmFromClause {
-	private List<FromElementSpace> fromElementSpaces = new ArrayList<FromElementSpace>();
+public interface SqmFromClause {
+	SqmFromClauseContainer getContainer();
 
-	public List<FromElementSpace> getFromElementSpaces() {
-		return fromElementSpaces;
-	}
+	List<FromElementSpace> getFromElementSpaces();
 
-	public void addFromElementSpace(FromElementSpace space) {
+	void addFromElementSpace(FromElementSpace space);
 
-	}
-	public FromElementSpace makeFromElementSpace() {
-		final FromElementSpace space = new FromElementSpace( this );
-		fromElementSpaces.add( space );
-		return space;
-	}
+	FromElementSpace makeFromElementSpace();
 }

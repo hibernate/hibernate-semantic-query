@@ -10,26 +10,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.SqmInsertStatement;
-import org.hibernate.sqm.query.from.SqmRoot;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 
 /**
  * Convenience base class for InsertSqmStatement implementations.
  *
  * @author Steve Ebersole
  */
-public abstract class AbstractSqmInsertStatement extends AbstractSqmStatement implements SqmInsertStatement {
-	private final SqmRoot insertTarget;
+public abstract class AbstractSqmInsertStatement extends AbstractSqmDmlStatement implements SqmInsertStatement {
 	private List<SingularAttributeBinding> stateFields;
 
-	public AbstractSqmInsertStatement(SqmRoot insertTarget) {
-		this.insertTarget = insertTarget;
-	}
-
-	@Override
-	public SqmRoot getInsertTarget() {
-		return insertTarget;
+	public AbstractSqmInsertStatement() {
 	}
 
 	@Override

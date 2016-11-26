@@ -7,11 +7,17 @@
 package org.hibernate.sqm.parser.common;
 
 import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmFromClauseContainer;
+import org.hibernate.sqm.query.internal.InFlightSqmSubQueryContainer;
 
 /**
  * @author Steve Ebersole
  */
 public interface QuerySpecProcessingState extends FromElementLocator, ResolutionContext {
 	QuerySpecProcessingState getParent();
-	SqmFromClause getFromClause();
+	SqmFromClauseContainer getFromClauseContainer();
+	InFlightSqmSubQueryContainer getSubQueryContainer();
+	default SqmFromClause getFromClause() {
+		return getFromClauseContainer().getFromClause();
+	}
 }

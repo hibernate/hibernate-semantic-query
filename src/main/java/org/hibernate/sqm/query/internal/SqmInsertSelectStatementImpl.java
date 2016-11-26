@@ -9,7 +9,6 @@ package org.hibernate.sqm.query.internal;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.query.SqmInsertSelectStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.from.SqmRoot;
 
 /**
  * @author Steve Ebersole
@@ -17,8 +16,7 @@ import org.hibernate.sqm.query.from.SqmRoot;
 public class SqmInsertSelectStatementImpl extends AbstractSqmInsertStatement implements SqmInsertSelectStatement {
 	private SqmQuerySpec selectQuery;
 
-	public SqmInsertSelectStatementImpl(SqmRoot insertTarget) {
-		super( insertTarget );
+	public SqmInsertSelectStatementImpl() {
 	}
 
 	@Override

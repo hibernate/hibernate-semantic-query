@@ -41,10 +41,10 @@ public class BasicInsertTests {
 		assertThat( statement, instanceOf( SqmInsertSelectStatement.class ) );
 		SqmInsertSelectStatement insertStatement = (SqmInsertSelectStatement) statement;
 
-		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( "com.acme.Entity1" ) );
+		assertThat( insertStatement.getEntityFromElement().getEntityName(), equalTo( "com.acme.Entity1" ) );
 
 		for ( SingularAttributeBinding stateField : insertStatement.getStateFields() ) {
-			assertSame( insertStatement.getInsertTarget(), stateField.getLhs().getFromElement() );
+			assertSame( insertStatement.getEntityFromElement(), stateField.getLhs().getFromElement() );
 		}
 	}
 

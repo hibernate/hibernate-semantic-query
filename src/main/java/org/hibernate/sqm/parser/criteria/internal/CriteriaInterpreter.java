@@ -33,9 +33,6 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
@@ -77,6 +74,9 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
+import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
@@ -90,6 +90,7 @@ import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
+import org.hibernate.sqm.query.internal.SqmQuerySpecImpl;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
@@ -164,11 +165,11 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	private SqmQuerySpec visitQuerySpec(AbstractQuery jpaCriteria) {
 		currentQuerySpecProcessingState = new QuerySpecProcessingStateStandardImpl( parsingContext, currentQuerySpecProcessingState );
 		try {
-			return new SqmQuerySpec(
-					visitFromClause( jpaCriteria ),
-					visitSelectClause( jpaCriteria ),
-					visitWhereClause( jpaCriteria )
-			);
+			visitFromClause( jpaCriteria );
+			visitSelectClause( jpaCriteria );
+			visitWhereClause( jpaCriteria );
+
+			return (SqmQuerySpec) currentQuerySpecProcessingState.getSubQueryContainer();
 		}
 		finally {
 			currentQuerySpecProcessingState = currentQuerySpecProcessingState.getParent();
@@ -176,7 +177,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	private SqmFromClause visitFromClause(AbstractQuery<?> jpaCriteria) {
-		final SqmFromClause fromClause = new SqmFromClause();
+		final SqmFromClause fromClause = currentQuerySpecProcessingState.getFromClause();
 		for ( Root<?> jpaRoot : jpaCriteria.getRoots() ) {
 			final RootImplementor root = (RootImplementor) jpaRoot;
 			root.prepareAlias( parsingContext.getImplicitAliasGenerator() );
@@ -261,8 +262,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	private SqmSelectClause visitSelectClause(AbstractQuery jpaCriteria) {
 		final SqmSelectClause sqmSelectClause = new SqmSelectClause( jpaCriteria.isDistinct() );
-
 		applySelection( jpaCriteria.getSelection(), sqmSelectClause );
+
+		final SqmQuerySpecImpl querySpec = (SqmQuerySpecImpl) currentQuerySpecProcessingState.getFromClauseContainer();
+		querySpec.setSelectClause( sqmSelectClause );
 
 		return sqmSelectClause;
 	}
@@ -626,6 +629,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		if ( jpaCriteria.getRestriction() != null ) {
 			whereClause.setPredicate( visitPredicate( jpaCriteria.getRestriction() ) );
 		}
+
+		final SqmQuerySpecImpl querySpec = (SqmQuerySpecImpl) currentQuerySpecProcessingState.getFromClauseContainer();
+		querySpec.setWhereClause( whereClause );
+
 		return whereClause;
 	}
 

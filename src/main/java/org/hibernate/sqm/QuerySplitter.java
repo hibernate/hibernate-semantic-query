@@ -17,6 +17,7 @@ import org.hibernate.sqm.domain.PluralAttributeReference;
 import org.hibernate.sqm.domain.PolymorphicEntityReference;
 import org.hibernate.sqm.domain.SingularAttributeReference;
 import org.hibernate.sqm.parser.ParsingException;
+import org.hibernate.sqm.parser.common.Stack;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
@@ -62,6 +63,7 @@ import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
+import org.hibernate.sqm.query.internal.SqmQuerySpecImpl;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortSpecification;
@@ -130,6 +132,8 @@ public class QuerySplitter {
 
 		private Map<DomainReferenceBinding, DomainReferenceBinding> domainBindingCopyMap = new HashMap<>();
 
+		private final Stack<SqmQuerySpecImpl> querySpecStack = new Stack<>();
+
 		private UnmappedPolymorphismReplacer(
 				SqmSelectStatement selectStatement,
 				SqmRoot unmappedPolymorphicFromElement,
@@ -173,14 +177,22 @@ public class QuerySplitter {
 
 		@Override
 		public SqmQuerySpec visitQuerySpec(SqmQuerySpec querySpec) {
-			// NOTE : it is important that we visit the SqmFromClause first so that the
-			// 		fromElementCopyMap gets built before other parts of the queryspec
-			// 		are visited
-			return new SqmQuerySpec(
-					visitFromClause( querySpec.getFromClause() ),
-					visitSelectClause( querySpec.getSelectClause() ),
-					visitWhereClause( querySpec.getWhereClause() )
-			);
+			final SqmQuerySpecImpl copy = new SqmQuerySpecImpl( querySpecStack.getCurrent() );
+			querySpecStack.push( copy );
+			try {
+
+				// NOTE : it is important that we visit the SqmFromClause first so that the
+				// 		fromElementCopyMap gets built before other parts of the queryspec
+				// 		are visited.
+				visitFromClause( querySpec.getFromClause() );
+				visitSelectClause( querySpec.getSelectClause() );
+				visitWhereClause( querySpec.getWhereClause() );
+
+				return copy;
+			}
+			finally {
+				querySpecStack.pop();
+			}
 		}
 
 		private SqmFromClause currentFromClauseCopy = null;
@@ -190,7 +202,7 @@ public class QuerySplitter {
 			final SqmFromClause previousCurrent = currentFromClauseCopy;
 
 			try {
-				SqmFromClause copy = new SqmFromClause();
+				SqmFromClause copy = querySpecStack.getCurrent().getFromClause();
 				currentFromClauseCopy = copy;
 				super.visitFromClause( fromClause );
 				return copy;
@@ -362,9 +374,13 @@ public class QuerySplitter {
 		@Override
 		public SqmSelectClause visitSelectClause(SqmSelectClause selectClause) {
 			SqmSelectClause copy = new SqmSelectClause( selectClause.isDistinct() );
+
+			querySpecStack.getCurrent().setSelectClause( copy );
+
 			for ( SqmSelection selection : selectClause.getSelections() ) {
 				copy.addSelection( visitSelection( selection ) );
 			}
+
 			return copy;
 		}
 
@@ -395,7 +411,12 @@ public class QuerySplitter {
 			if ( whereClause == null ) {
 				return null;
 			}
-			return new SqmWhereClause( (SqmPredicate) whereClause.getPredicate().accept( this ) );
+
+			final SqmWhereClause copy = new SqmWhereClause( (SqmPredicate) whereClause.getPredicate().accept( this ) );
+
+			querySpecStack.getCurrent().setWhereClause( copy );
+
+			return copy;
 		}
 
 		@Override

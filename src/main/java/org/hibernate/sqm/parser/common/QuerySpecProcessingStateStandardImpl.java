@@ -9,8 +9,10 @@ package org.hibernate.sqm.parser.common;
 import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
-import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmFromClauseContainer;
 import org.hibernate.sqm.query.from.SqmJoin;
+import org.hibernate.sqm.query.internal.InFlightSqmSubQueryContainer;
+import org.hibernate.sqm.query.internal.SqmQuerySpecImpl;
 
 import org.jboss.logging.Logger;
 
@@ -25,21 +27,22 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	private static final Logger log = Logger.getLogger( QuerySpecProcessingStateStandardImpl.class );
 
 	private final QuerySpecProcessingState parent;
-
 	private final ParsingContext parsingContext;
-	private final SqmFromClause fromClause;
+
+	private final SqmQuerySpecImpl querySpec;
 
 	private final FromElementBuilder fromElementBuilder;
 
-	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext) {
-		this( parsingContext, null );
-	}
-
 	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext, QuerySpecProcessingState parent) {
 		this.parent = parent;
-
 		this.parsingContext = parsingContext;
-		this.fromClause = new SqmFromClause();
+
+		if ( parent == null ) {
+			this.querySpec = new SqmQuerySpecImpl( null );
+		}
+		else {
+			this.querySpec = new SqmQuerySpecImpl( parent.getSubQueryContainer() );
+		}
 
 		if ( parent == null ) {
 			this.fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry() );
@@ -52,17 +55,24 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 		}
 	}
 
+	@Override
 	public QuerySpecProcessingState getParent() {
 		return parent;
-	}
-
-	public SqmFromClause getFromClause() {
-		return fromClause;
 	}
 
 	@Override
 	public ParsingContext getParsingContext() {
 		return parsingContext;
+	}
+
+	@Override
+	public SqmFromClauseContainer getFromClauseContainer() {
+		return querySpec;
+	}
+
+	@Override
+	public InFlightSqmSubQueryContainer getSubQueryContainer() {
+		return querySpec;
 	}
 
 	@Override
@@ -78,7 +88,7 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 	@Override
 	public DomainReferenceBinding findFromElementExposingAttribute(String name) {
 		DomainReferenceBinding found = null;
-		for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
+		for ( FromElementSpace space : querySpec.getFromClause().getFromElementSpaces() ) {
 			if ( definesAttribute( space.getRoot().getDomainReferenceBinding(), name ) ) {
 				if ( found != null ) {
 					throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );

@@ -11,7 +11,7 @@ import java.util.LinkedList;
 /**
  * A general-purpose stack impl for use in parsing.
  *
- * @param <T> The type of things stired in the stack
+ * @param <T> The type of things stored in the stack
  *
  * @author Steve Ebersole
  */
@@ -27,6 +27,6 @@ public class Stack<T> {
 	}
 
 	public T getCurrent() {
-		return stack.getFirst();
+		return stack.peek();
 	}
 }

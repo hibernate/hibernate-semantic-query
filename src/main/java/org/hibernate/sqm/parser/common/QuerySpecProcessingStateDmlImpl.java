@@ -6,9 +6,6 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.ParsingException;
@@ -20,23 +17,26 @@ import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.SqmJoin;
-import org.hibernate.sqm.query.from.SqmRoot;
+import org.hibernate.sqm.query.from.SqmFromClauseContainer;
+import org.hibernate.sqm.query.from.internal.DmlFromClause;
+import org.hibernate.sqm.query.internal.AbstractSqmDmlStatement;
+import org.hibernate.sqm.query.internal.InFlightSqmSubQueryContainer;
 
 /**
  * QuerySpecProcessingState implementation for DML statements
  *
  * @author Steve Ebersole
  */
-public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState {
+public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState, SqmFromClauseContainer {
 	private final ParsingContext parsingContext;
 	private final DmlFromClause fromClause;
 
 	private final FromElementBuilder fromElementBuilder;
 
-	public QuerySpecProcessingStateDmlImpl(ParsingContext parsingContext) {
+	public QuerySpecProcessingStateDmlImpl(ParsingContext parsingContext, AbstractSqmDmlStatement dmlStatement) {
 		this.parsingContext = parsingContext;
-		this.fromClause = new DmlFromClause();
+
+		this.fromClause = new DmlFromClause( dmlStatement, this );
 		this.fromElementBuilder = new DmlFromElementBuilder( parsingContext, new AliasRegistry() );
 	}
 
@@ -46,21 +46,31 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	}
 
 	@Override
+	public SqmFromClauseContainer getFromClauseContainer() {
+		return this;
+	}
+
+	@Override
+	public InFlightSqmSubQueryContainer getSubQueryContainer() {
+		return fromClause.getDmlStatement();
+	}
+
+	@Override
 	public SqmFromClause getFromClause() {
 		return fromClause;
 	}
 
 	@Override
 	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
-		return fromClause.fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable )
-				? fromClause.fromElementSpace.getRoot().getDomainReferenceBinding()
+		return fromClause.getFromElementSpace().getRoot().getIdentificationVariable().equals( identificationVariable )
+				? fromClause.getFromElementSpace().getRoot().getDomainReferenceBinding()
 				: null;
 	}
 
 	@Override
 	public DomainReferenceBinding findFromElementExposingAttribute(String attributeName) {
 		if ( rootExposesAttribute( attributeName ) ) {
-			return fromClause.fromElementSpace.getRoot().getDomainReferenceBinding();
+			return fromClause.getFromElementSpace().getRoot().getDomainReferenceBinding();
 		}
 		else {
 			return null;
@@ -70,7 +80,7 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	private boolean rootExposesAttribute(String attributeName) {
 		final AttributeReference attrRef = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.locateAttributeReference( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
+				.locateAttributeReference( fromClause.getFromElementSpace().getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
 		return attrRef != null;
 	}
 
@@ -89,46 +99,11 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 		return parsingContext;
 	}
 
-	public static class DmlFromClause extends SqmFromClause {
-		private final DmlFromElementSpace fromElementSpace = new DmlFromElementSpace( this );
 
-		@Override
-		public List<FromElementSpace> getFromElementSpaces() {
-			return Collections.singletonList( fromElementSpace );
-		}
-
-		@Override
-		public void addFromElementSpace(FromElementSpace space) {
-			throw new ParsingException( "DML from-clause cannot have additional FromElementSpaces" );
-		}
-
-		@Override
-		public FromElementSpace makeFromElementSpace() {
-			throw new ParsingException( "DML from-clause cannot have additional FromElementSpaces" );
-		}
-	}
-
-	public static class DmlFromElementSpace extends FromElementSpace {
-		private DmlFromElementSpace(DmlFromClause fromClause) {
-			super( fromClause );
-		}
-
-		@Override
-		public void setRoot(SqmRoot root) {
-			super.setRoot( root );
-		}
-
-		@Override
-		public List<SqmJoin> getJoins() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public void addJoin(SqmJoin join) {
-			throw new ParsingException( "DML from-clause cannot define joins" );
-		}
-	}
-
+	/**
+	 * A FromElementBuilder specific for DML statements.  Basically throws exceptions
+	 * on any calls to create any FromElements other than the root.
+	 */
 	public static class DmlFromElementBuilder extends FromElementBuilder {
 		public DmlFromElementBuilder(ParsingContext parsingContext, AliasRegistry aliasRegistry) {
 			super( parsingContext, aliasRegistry );

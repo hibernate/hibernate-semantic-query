@@ -16,17 +16,14 @@ import org.hibernate.sqm.query.predicate.SqmWhereClause;
 /**
  * @author Steve Ebersole
  */
-public class SqmDeleteStatementImpl extends AbstractSqmStatement implements SqmDeleteStatement {
-	private final SqmRoot entityFromElement;
-	private final SqmWhereClause whereClause = new SqmWhereClause();
+public class SqmDeleteStatementImpl extends AbstractSqmDmlStatement implements SqmDeleteStatement {
+	private SqmWhereClause whereClause;
 
-	public SqmDeleteStatementImpl(SqmRoot entityFromElement) {
-		this.entityFromElement = entityFromElement;
+	public SqmDeleteStatementImpl() {
 	}
 
-	@Override
-	public SqmRoot getEntityFromElement() {
-		return entityFromElement;
+	public void setWhereClause(SqmWhereClause whereClause) {
+		this.whereClause = whereClause;
 	}
 
 	@Override
@@ -39,7 +36,7 @@ public class SqmDeleteStatementImpl extends AbstractSqmStatement implements SqmD
 		return String.format(
 				Locale.ROOT,
 				"delete %s %s",
-				entityFromElement,
+				getEntityFromElement(),
 				whereClause
 		);
 	}

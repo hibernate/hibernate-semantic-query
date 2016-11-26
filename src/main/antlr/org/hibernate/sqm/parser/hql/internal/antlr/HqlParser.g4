@@ -118,6 +118,7 @@ resultIdentifier
 	;
 
 selectExpression
+	// todo : limit the viability of dynamicInstantiation and jpaSelectObjectSyntax to only the root query for select-statements
 	:	dynamicInstantiation
 	|	jpaSelectObjectSyntax
 	|	expression

@@ -17,18 +17,19 @@ import org.hibernate.sqm.query.set.SqmSetClause;
 /**
  * @author Steve Ebersole
  */
-public class SqmUpdateStatementImpl extends AbstractSqmStatement implements SqmUpdateStatement {
-	private final SqmRoot entityFromElement;
-	private final SqmSetClause setClause = new SqmSetClause();
-	private final SqmWhereClause whereClause = new SqmWhereClause();
+public class SqmUpdateStatementImpl extends AbstractSqmDmlStatement implements SqmUpdateStatement {
+	private SqmSetClause setClause;
+	private SqmWhereClause whereClause;
 
-	public SqmUpdateStatementImpl(SqmRoot entityFromElement) {
-		this.entityFromElement = entityFromElement;
+	public SqmUpdateStatementImpl() {
 	}
 
-	@Override
-	public SqmRoot getEntityFromElement() {
-		return entityFromElement;
+	public void setSetClause(SqmSetClause setClause) {
+		this.setClause = setClause;
+	}
+
+	public void setWhereClause(SqmWhereClause whereClause) {
+		this.whereClause = whereClause;
 	}
 
 	@Override
@@ -46,7 +47,7 @@ public class SqmUpdateStatementImpl extends AbstractSqmStatement implements SqmU
 		return String.format(
 				Locale.ROOT,
 				"update %s %s %s",
-				entityFromElement,
+				getEntityFromElement(),
 				"[no set clause]",
 				whereClause
 		);

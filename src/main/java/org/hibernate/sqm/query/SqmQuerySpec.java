@@ -6,6 +6,8 @@
  */
 package org.hibernate.sqm.query;
 
+import java.util.List;
+
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmFromClauseContainer;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
@@ -17,33 +19,6 @@ import org.hibernate.sqm.query.select.SqmSelectClause;
  *
  * @author Steve Ebersole
  */
-public class SqmQuerySpec implements SqmFromClauseContainer, SqmWhereClauseContainer {
-	private final SqmFromClause fromClause;
-	private final SqmSelectClause selectClause;
-	private final SqmWhereClause whereClause;
-
-	// todo : group-by + having
-
-	public SqmQuerySpec(
-			SqmFromClause fromClause,
-			SqmSelectClause selectClause,
-			SqmWhereClause whereClause) {
-		this.fromClause = fromClause;
-		this.selectClause = selectClause;
-		this.whereClause = whereClause;
-	}
-
-	public SqmSelectClause getSelectClause() {
-		return selectClause;
-	}
-
-	@Override
-	public SqmFromClause getFromClause() {
-		return fromClause;
-	}
-
-	@Override
-	public SqmWhereClause getWhereClause() {
-		return whereClause;
-	}
+public interface SqmQuerySpec extends SqmFromClauseContainer, SqmWhereClauseContainer {
+	SqmSelectClause getSelectClause();
 }

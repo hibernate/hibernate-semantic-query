@@ -9,7 +9,6 @@ package org.hibernate.sqm.query;
 import java.util.List;
 
 import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
-import org.hibernate.sqm.query.from.SqmRoot;
 
 /**
  * The general contract for INSERT statements.  At the moment only the INSERT-SELECT
@@ -17,7 +16,6 @@ import org.hibernate.sqm.query.from.SqmRoot;
  *
  * @author Steve Ebersole
  */
-public interface SqmInsertStatement extends SqmStatement {
-	SqmRoot getInsertTarget();
+public interface SqmInsertStatement extends SqmStatementNonSelect {
 	List<SingularAttributeBinding> getStateFields();
 }

@@ -134,7 +134,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 
 	@Override
 	public T visitInsertSelectStatement(SqmInsertSelectStatement statement) {
-		visitRootEntityFromElement( statement.getInsertTarget() );
+		visitRootEntityFromElement( statement.getEntityFromElement() );
 		for ( SingularAttributeBinding stateField : statement.getStateFields() ) {
 			stateField.accept( this );
 		}

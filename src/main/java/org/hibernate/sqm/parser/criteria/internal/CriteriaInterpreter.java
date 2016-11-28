@@ -235,7 +235,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( fetch.getAttribute().getJavaType() ),
 					path,
 					convert( fetch.getJoinType() ),
-					sqmLhs.getIdentificationVariable(),
+					sqmLhs.getUniqueIdentifier(),
 					false
 			);
 			space.addJoin( sqmFetch );

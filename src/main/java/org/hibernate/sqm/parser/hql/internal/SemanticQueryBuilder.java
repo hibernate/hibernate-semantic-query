@@ -862,7 +862,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 					if ( SingularAttributeBinding.class.isInstance( joinedPath ) ) {
 						final String fetchParentAlias = SingularAttributeBinding.class.cast( joinedPath )
 								.getFromElement()
-								.getFetchParentAlias();
+								.getFetchParentUniqueIdentifier();
 						if ( isNotEmpty( fetchParentAlias ) ) {
 							throw new StrictJpaComplianceViolation(
 									"Encountered aliased fetch join, but strict JPQL compliance was requested",

@@ -25,6 +25,11 @@ import static org.hibernate.sqm.Helper.isNotEmpty;
  * @author Steve Ebersole
  */
 public class FromElementBuilder {
+	// todo : I am pretty sure the uses of `{LHS-from-element}.getContainingSpace()` is incorrect when building SqmFrom elements below
+	//		instead we should be passing along the FromElementSpace to use.  the big scenario I can
+	//		think of is correlated sub-queries where the "LHS" is actually part of the outer query - aside
+	// 		from hoisting that is not the FromElementSpace we should be using.
+
 	private static final Logger log = Logger.getLogger( FromElementBuilder.class );
 
 	private final ParsingContext parsingContext;
@@ -129,12 +134,12 @@ public class FromElementBuilder {
 			EntityReference subclassIndicator,
 			String path,
 			JoinType joinType,
-			String fetchParentAlias,
+			String fetchParentUniqueIdentifier,
 			boolean canReuseImplicitJoins) {
 		assert attributeBinding != null;
 		assert joinType != null;
 
-		if ( isNotEmpty(fetchParentAlias) && canReuseImplicitJoins ) {
+		if ( isNotEmpty(fetchParentUniqueIdentifier) && canReuseImplicitJoins ) {
 			throw new ParsingException( "Illegal combination of [non-null fetch parent] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
 		}
 
@@ -168,7 +173,7 @@ public class FromElementBuilder {
 					subclassIndicator,
 					path,
 					joinType,
-					fetchParentAlias
+					fetchParentUniqueIdentifier
 			);
 
 			if ( canReuseImplicitJoins ) {

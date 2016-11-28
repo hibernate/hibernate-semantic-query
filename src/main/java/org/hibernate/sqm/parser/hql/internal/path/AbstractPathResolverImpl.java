@@ -73,7 +73,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 							subclassIndicator,
 							lhs.getFromElement().asLoggableText() + '.' + joinedAttributeDescriptor.getAttributeName(),
 							getIntermediateJoinType(),
-							areIntermediateJoinsFetched() ? lhs.getFromElement().getIdentificationVariable() : null,
+							areIntermediateJoinsFetched() ? lhs.getFromElement().getUniqueIdentifier() : null,
 							canReuseImplicitJoins()
 					)
 			);

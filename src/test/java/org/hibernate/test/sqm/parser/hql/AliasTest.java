@@ -273,6 +273,12 @@ public class AliasTest {
 		interpretQuery( query );
 	}
 
+	@Test
+	public void testIdentificationVariableReferencedInWhewClause() {
+		final String query = "select a.address as c from Anything a where c = '2'";
+		interpretQuery( query );
+	}
+
 	private void checkFromClause(SqmQuerySpec querySpec, int fromClauseIndex, String typeName, String alias) {
 		SqmFromClause fromClause = querySpec.getFromClause();
 		FromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( fromClauseIndex );

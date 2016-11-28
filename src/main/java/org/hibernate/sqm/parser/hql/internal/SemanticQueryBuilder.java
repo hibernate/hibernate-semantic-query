@@ -1310,6 +1310,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		catch (IllegalArgumentException ignore) {
 		}
 
+		final SqmExpression selectionExpression = resolveSelectionExpression( pathText );
+		if ( selectionExpression != null ) {
+			return selectionExpression;
+		}
+
 		try {
 			return resolveConstantExpression( pathText );
 		}
@@ -1525,13 +1530,25 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		);
 	}
 
+	protected SqmExpression resolveSelectionExpression(String path) {
+		if(path.contains( "." )){
+			return null;
+		}
+		final SqmSelection selectionByAlias = querySpecProcessingStateStack.getCurrent().getFromElementBuilder()
+				.getAliasRegistry()
+				.findSelectionByAlias( path );
+		if ( selectionByAlias != null ) {
+			return selectionByAlias.getExpression();
+		}
+		return null;
+	}
+
 	@SuppressWarnings("unchecked")
-	protected ConstantSqmExpression resolveConstantExpression(String reference) {
+	protected SqmExpression resolveConstantExpression(String reference) {
 		// todo : hook in "import" resolution using the ParsingContext
 		final int dotPosition = reference.lastIndexOf( '.' );
 		final String className = reference.substring( 0, dotPosition - 1 );
 		final String fieldName = reference.substring( dotPosition+1, reference.length() );
-
 		try {
 			final Class clazz = parsingContext.getConsumerContext().classByName( className );
 			if ( clazz.isEnum() ) {

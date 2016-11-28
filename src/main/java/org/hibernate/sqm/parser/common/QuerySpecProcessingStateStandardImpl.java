@@ -21,48 +21,31 @@ import org.jboss.logging.Logger;
  * @author Steve Ebersole
  * @author Andrea Boriero
  */
-public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessingState {
+public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProcessingState {
 	private static final Logger log = Logger.getLogger( QuerySpecProcessingStateStandardImpl.class );
 
-	private final QuerySpecProcessingState parent;
-
-	private final ParsingContext parsingContext;
 	private final SqmFromClause fromClause;
 
 	private final FromElementBuilder fromElementBuilder;
 
-	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext) {
-		this( parsingContext, null );
-	}
+	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext, QuerySpecProcessingState containingQueryState) {
+		super( parsingContext, containingQueryState );
 
-	public QuerySpecProcessingStateStandardImpl(ParsingContext parsingContext, QuerySpecProcessingState parent) {
-		this.parent = parent;
-
-		this.parsingContext = parsingContext;
 		this.fromClause = new SqmFromClause();
 
-		if ( parent == null ) {
+		if ( containingQueryState == null ) {
 			this.fromElementBuilder = new FromElementBuilder( parsingContext, new AliasRegistry() );
 		}
 		else {
 			this.fromElementBuilder = new FromElementBuilder(
 					parsingContext,
-					new AliasRegistry( parent.getFromElementBuilder().getAliasRegistry() )
+					new AliasRegistry( containingQueryState.getFromElementBuilder().getAliasRegistry() )
 			);
 		}
 	}
 
-	public QuerySpecProcessingState getParent() {
-		return parent;
-	}
-
 	public SqmFromClause getFromClause() {
 		return fromClause;
-	}
-
-	@Override
-	public ParsingContext getParsingContext() {
-		return parsingContext;
 	}
 
 	@Override
@@ -97,9 +80,9 @@ public class QuerySpecProcessingStateStandardImpl implements QuerySpecProcessing
 		}
 
 		if ( found == null ) {
-			if ( parent != null ) {
-				log.debugf( "Unable to resolve unqualified attribute [%s] in local SqmFromClause; checking parent" );
-				found = parent.findFromElementExposingAttribute( name );
+			if ( getContainingQueryState() != null ) {
+				log.debugf( "Unable to resolve unqualified attribute [%s] in local SqmFromClause; checking containingQueryState" );
+				found = getContainingQueryState().findFromElementExposingAttribute( name );
 			}
 		}
 

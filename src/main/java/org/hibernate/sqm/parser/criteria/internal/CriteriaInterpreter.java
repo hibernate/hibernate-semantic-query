@@ -171,7 +171,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			);
 		}
 		finally {
-			currentQuerySpecProcessingState = currentQuerySpecProcessingState.getParent();
+			currentQuerySpecProcessingState = currentQuerySpecProcessingState.getContainingQueryState();
 		}
 	}
 

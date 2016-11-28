@@ -28,21 +28,16 @@ import org.hibernate.sqm.query.from.SqmRoot;
  *
  * @author Steve Ebersole
  */
-public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState {
-	private final ParsingContext parsingContext;
+public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessingState {
 	private final DmlFromClause fromClause;
 
 	private final FromElementBuilder fromElementBuilder;
 
 	public QuerySpecProcessingStateDmlImpl(ParsingContext parsingContext) {
-		this.parsingContext = parsingContext;
+		// implicitly no outer query, so pass null
+		super( parsingContext, null );
 		this.fromClause = new DmlFromClause();
 		this.fromElementBuilder = new DmlFromElementBuilder( parsingContext, new AliasRegistry() );
-	}
-
-	@Override
-	public QuerySpecProcessingState getParent() {
-		return null;
 	}
 
 	@Override
@@ -82,11 +77,6 @@ public class QuerySpecProcessingStateDmlImpl implements QuerySpecProcessingState
 	@Override
 	public FromElementBuilder getFromElementBuilder() {
 		return fromElementBuilder;
-	}
-
-	@Override
-	public ParsingContext getParsingContext() {
-		return parsingContext;
 	}
 
 	public static class DmlFromClause extends SqmFromClause {

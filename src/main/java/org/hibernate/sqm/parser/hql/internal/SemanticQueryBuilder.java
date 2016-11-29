@@ -1538,6 +1538,17 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				.getAliasRegistry()
 				.findSelectionByAlias( path );
 		if ( selectionByAlias != null ) {
+			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
+				throw new StrictJpaComplianceViolation(
+						String.format(
+								Locale.ROOT,
+								"Strict JPQL compliance was violated : %s [%s]",
+								StrictJpaComplianceViolation.Type.IDENTIFICATION_VARIABLE_NOT_DECLARED_IN_FROM_CLAUSE.description(),
+								path
+						),
+						StrictJpaComplianceViolation.Type.IDENTIFICATION_VARIABLE_NOT_DECLARED_IN_FROM_CLAUSE
+				);
+			}
 			return selectionByAlias.getExpression();
 		}
 		return null;

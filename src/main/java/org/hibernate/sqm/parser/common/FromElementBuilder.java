@@ -30,6 +30,10 @@ public class FromElementBuilder {
 	//		think of is correlated sub-queries where the "LHS" is actually part of the outer query - aside
 	// 		from hoisting that is not the FromElementSpace we should be using.
 
+	// todo : make AliasRegistry part of QuerySpecProcessingState - pass that reference in here too
+	//		but its odd to externally get the AliasRegistry from the FromElementBuilder when
+	//		we are dealing with result-variables (selection aliases)
+
 	private static final Logger log = Logger.getLogger( FromElementBuilder.class );
 
 	private final ParsingContext parsingContext;

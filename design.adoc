@@ -17,41 +17,46 @@ The FromClause defines the parts of the domain model available to the query.  A 
 is made up of one or more FromElementSpaces.  A FromElementSpace is defined by a "query root"
 and zero-or-more "joins".
 
-For example, the following query defines a single FromElementSpace:
+Here follows examples of the from-clause created for various queries:
 
-.Single root example
+.select p from Person p
 ====
 [source]
 ----
-select p from Person p
+SqmFromClause
+	FromElementSpace
+		root=SqmRoot(Person, p)
 ----
 ====
 
-A query may also define more than one FromElementSpace:
-
-.Multiple root example
+.select p from Person p, Service s
 ====
 [source]
 ----
-select p from Person p, Service s
+SqmFromClause
+	FromElementSpace
+		root=SqmRoot(Person, p)
+	FromElementSpace
+		root=SqmRoot(Service, s)
 ----
 ====
 
+[NOTE]
+====
 It is important to note that a FromElementSpace defines a scope for the *use* of identification variables within the
-FromClause (these identification variables must still be unique across the whole FromClause).  E.g., the following
-query is not legal because the join to `p.address` is defined in the second FromElementSpace but
-refers back to the first.
-
-.Illegal cross-space reference
-====
-[source]
-----
-select p from Person p, Service s join p.address a
-----
+FromClause (these identification variables must still be unique across the whole FromClause).  E.g., the
+query `select p from Person p, Service s join p.address a` is not legal because the join to `p.address`
+is defined in the second FromElementSpace but refers back to the first which is considered an illegal cross-space
+reference.  This follows the SQL rule for easier understanding
 ====
 
 
 === Expressions and Bindings
+
+[NOTE]
+====
+This section is completely out-of-date
+====
 
 A Binding is the corollary to `org.hibernate.test.sqm.domain.Bindable` and represents a specific
 usage of that `org.hibernate.test.sqm.domain.Bindable`.  E.g.
@@ -104,3 +109,37 @@ Additionally an explicit downcast can be defined in one of two ways:
 
 All downcasts for a given FromElement are represented by the `org.hibernate.sqm.query.from.Downcastable` contract it
 implements.  `Downcastable#getDowncasts` returns information about all the downcast targets for a FromElement.
+
+[NOTE]
+.copied from todo.md (to be integrated)
+====
+(TREAT)
+
+Have SqmFrom maintain a List of down-cast targets.  Ultimately we need to know whether to render these
+as INNER or OUTER joins.  JPA only allows TREAT in FROM and WHERE, so SQM should consider uses in other context a
+"strict JPQL violation".
+
+An alternative to the INNER/OUTER decision is to always render an outer join here (to the subtype tables) and generate a
+predicate where ever the TREAT occurs.   In the FROM clause it would become part of the join predicate.  In there WHERE
+clause we'd generate a grouped predicate.  In SELECT (?) I guess just render a predicate into the WHERE.
+
+(implicit downcasts)
+
+Another piece to determine whether we need to include subclass tables is whether the query referenced any of the
+subclass attributes.  JPQL disallows this (strict JPQL violation), but HQL allows it.
+
+One option would be to simply handle this via the mechanism for treat.  When a subclass attribute is referenced, implicitly
+add a TREAT reference to the FromElement.
+
+Another option is to just keep a list of the referenced attributes for each FromElement.  On the "back end" we can
+work out the subclass table inclusion based on that info.
+====
+
+== not supported
+
+* keywords used as alias.  Using `where` and `join` and `order` are especially problematic for identification variables
+ 	as `from` is especially problematic for result variables.  `AS` can be used to force allowance.  For example:
+ 	`select a.from from from Appointment a` is illegal because of the attempt to use `from` as result variable.  However,
+ 	`select a.from as from from Appointment a` is but legal, albeit silly. Additionally, we always check JPA strict
+ 	compliance and throw an exception if any reserved word is used as an identifier per spec
+ 	(4.4.2 Identification Variables and 4.4.1 Identifiers).  See `org.hibernate.test.sqm.parser.hql.KeywordAsIdentifierTest`

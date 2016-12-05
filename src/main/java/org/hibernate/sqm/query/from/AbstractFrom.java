@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 
 import org.jboss.logging.Logger;
@@ -30,7 +31,7 @@ public abstract class AbstractFrom implements SqmFrom {
 	private final String alias;
 	private final DomainReferenceBinding binding;
 	private final EntityReference subclassIndicator;
-	private final String sourcePath;
+	private final PropertyPath sourcePath;
 
 	private Map<EntityReference,Downcast> downcastMap;
 
@@ -40,7 +41,7 @@ public abstract class AbstractFrom implements SqmFrom {
 			String alias,
 			DomainReferenceBinding binding,
 			EntityReference subclassIndicator,
-			String sourcePath) {
+			PropertyPath sourcePath) {
 		this.fromElementSpace = fromElementSpace;
 		this.uid = uid;
 		this.alias = alias;
@@ -85,8 +86,13 @@ public abstract class AbstractFrom implements SqmFrom {
 	}
 
 	@Override
-	public String asLoggableText() {
+	public PropertyPath getPropertyPath() {
 		return sourcePath;
+	}
+
+	@Override
+	public String asLoggableText() {
+		return sourcePath.getFullPath();
 	}
 
 	@Override

@@ -8,6 +8,7 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.EntityBinding;
 
 /**
@@ -25,7 +26,7 @@ public class SqmRoot extends AbstractFrom {
 				alias,
 				new EntityBinding( entityReference ),
 				entityReference,
-				alias
+				new PropertyPath( null, entityReference.getEntityName() + "(" + alias + ")" )
 		);
 
 		getDomainReferenceBinding().injectFromElement( this );

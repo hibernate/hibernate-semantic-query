@@ -71,7 +71,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 							attributeBinding,
 							null,
 							subclassIndicator,
-							lhs.getFromElement().asLoggableText() + '.' + joinedAttributeDescriptor.getAttributeName(),
+							lhs.getFromElement().getPropertyPath().append( joinedAttributeDescriptor.getAttributeName() ),
 							getIntermediateJoinType(),
 							areIntermediateJoinsFetched() ? lhs.getFromElement().getUniqueIdentifier() : null,
 							canReuseImplicitJoins()
@@ -149,7 +149,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 						attributeBinding,
 						null,
 						null,
-						attributeBinding.getLhs().getFromElement().asLoggableText() + '.' + attributeBinding.getAttribute().getAttributeName(),
+						attributeBinding.getLhs().getFromElement().getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
 						JoinType.INNER,
 						null,
 						true

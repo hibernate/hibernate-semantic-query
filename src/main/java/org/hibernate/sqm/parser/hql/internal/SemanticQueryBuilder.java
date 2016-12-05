@@ -1355,7 +1355,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						attributeBinding,
 						alias,
 						null,
-						attributeBinding.getLhs().getFromElement().asLoggableText() + '.' + attributeBinding.getAttribute().getAttributeName(),
+						attributeBinding.getLhs().getFromElement().getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
 						JoinType.INNER,
 						null,
 						true

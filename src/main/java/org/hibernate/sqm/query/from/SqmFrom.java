@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 
 /**
  * Models a Bindable's inclusion in the {@code FROM} clause.
@@ -20,24 +20,24 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 public interface SqmFrom extends SqmExpression, Downcastable {
 	/**
 	 * Obtain reference to the FromElementSpace that this FromElement belongs to.
-	 *
-	 * @return The FromElementSpace containing this FromElement
 	 */
 	FromElementSpace getContainingSpace();
 
 	/**
 	 * Obtain the DomainReferenceBinding represented by this from-element.
-	 *
-	 * @return The bound type (Bindable)
 	 */
 	DomainReferenceBinding getDomainReferenceBinding();
 
 	/**
-	 * A unique identifier across all QuerySpecs (all AliasRegistry instances) for a given sqm.
+	 * Obtains the property path that led to the creation of this SqmFrom element.
+	 */
+	PropertyPath getPropertyPath();
+
+	/**
+	 * A unique identifier for this SqmFrom element  across all QuerySpecs (all
+	 * AliasRegistry instances) for a given query.
 	 * <p/>
 	 * Can be used to locate a FromElement outside the context of a particular AliasRegistry.
-	 *
-	 * @return This FromElement's unique identifier
 	 *
 	 * @see ParsingContext#globalFromElementMap
 	 */
@@ -51,10 +51,9 @@ public interface SqmFrom extends SqmExpression, Downcastable {
 	 * <p/>
 	 * Note that the spec also sometimes calls this a "range variable", although it tends to
 	 * limit this usage to just query space roots.
-	 *
-	 * @return The identification variable (alias) for this FromElement.  Never returns
-	 * {@code null}; if the query did not specify an identification variable, one is implicitly
-	 * generated.
+	 * <p/>
+	 * Note2 : Never returns {@code null}; if the query did not specify an identification
+	 * variable, one is implicitly generated.
 	 */
 	String getIdentificationVariable();
 
@@ -65,14 +64,8 @@ public interface SqmFrom extends SqmExpression, Downcastable {
 	 * the FromElement indicated by {@code join treat(o.product as Book b)} would have
 	 * Book as an intrinsic subclass indicator.
 	 *
-	 * @return The subclass indicated directly as part of the FromElement's declaration;
-	 * will return {@code null} for FromElement declarations that do not directly specify
-	 * a downcast.
-	 *
 	 * @todo - will need a wrapper approach to handle non-intrinsic attribute references
 	 * 		^^ assuming attribute references expect SqmFrom objects as their "lhs"
-	 *
-	 * @see DomainReference#getSubclassIndicator()
 	 */
 	EntityReference getIntrinsicSubclassIndicator();
 }

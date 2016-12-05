@@ -13,6 +13,7 @@ import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
@@ -144,7 +145,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 				AttributeBinding attributeBinding,
 				String alias,
 				EntityReference subclassIndicator,
-				String path,
+				PropertyPath path,
 				JoinType joinType,
 				String fetchParentAlias,
 				boolean canReuseImplicitJoins) {

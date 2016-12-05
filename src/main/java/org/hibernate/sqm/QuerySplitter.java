@@ -351,7 +351,7 @@ public class QuerySplitter {
 					fromElement.getUniqueIdentifier(),
 					fromElement.getIdentificationVariable(),
 					fromElement.getIntrinsicSubclassIndicator(),
-					fromElement.asLoggableText(),
+					fromElement.getPropertyPath(),
 					fromElement.getJoinType(),
 					fromElement.getFetchParentUniqueIdentifier()
 			);

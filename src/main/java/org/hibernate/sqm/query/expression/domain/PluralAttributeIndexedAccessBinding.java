@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.from.SqmFrom;
 
@@ -18,12 +18,14 @@ import org.hibernate.sqm.query.from.SqmFrom;
 public class PluralAttributeIndexedAccessBinding implements DomainReferenceBinding {
 	private final PluralAttributeBinding attributeBinding;
 	private final SqmExpression indexSelectionExpression;
+	private final PropertyPath propertyPath;
 
 	public PluralAttributeIndexedAccessBinding(
 			PluralAttributeBinding pluralAttributeBinding,
 			SqmExpression indexSelectionExpression) {
 		this.attributeBinding = pluralAttributeBinding;
 		this.indexSelectionExpression = indexSelectionExpression;
+		this.propertyPath = pluralAttributeBinding.getPropertyPath().append( "{indexes}" );
 	}
 
 	public PluralAttributeBinding getPluralAttributeBinding() {
@@ -37,6 +39,11 @@ public class PluralAttributeIndexedAccessBinding implements DomainReferenceBindi
 	@Override
 	public DomainReference getBoundDomainReference() {
 		return attributeBinding.getAttribute().getElementReference();
+	}
+
+	@Override
+	public PropertyPath getPropertyPath() {
+		return propertyPath;
 	}
 
 	@Override

@@ -8,6 +8,7 @@ package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
@@ -17,6 +18,8 @@ public abstract class AbstractAttributeBinding<A extends AttributeReference> imp
 	private final DomainReferenceBinding lhs;
 	private final A attribute;
 	private SqmAttributeJoin join;
+
+	private final PropertyPath propertyPath;
 
 	public AbstractAttributeBinding(DomainReferenceBinding lhs, A attribute) {
 		if ( lhs == null ) {
@@ -28,6 +31,8 @@ public abstract class AbstractAttributeBinding<A extends AttributeReference> imp
 
 		this.lhs = lhs;
 		this.attribute = attribute;
+
+		this.propertyPath = lhs.getFromElement().getPropertyPath().append( attribute.getAttributeName() );
 	}
 
 	public AbstractAttributeBinding(
@@ -79,6 +84,11 @@ public abstract class AbstractAttributeBinding<A extends AttributeReference> imp
 	@Override
 	public <T> T accept(SemanticQueryWalker<T> walker) {
 		return walker.visitAttributeReferenceExpression( this );
+	}
+
+	@Override
+	public PropertyPath getPropertyPath() {
+		return propertyPath;
 	}
 
 	@Override

@@ -7,6 +7,7 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.JoinType;
 
@@ -22,7 +23,7 @@ public abstract class AbstractJoin extends AbstractFrom implements SqmJoin {
 			String alias,
 			DomainReferenceBinding bindableModelDescriptor,
 			EntityReference intrinsicSubclassIndicator,
-			String sourcePath,
+			PropertyPath sourcePath,
 			JoinType joinType) {
 		super( fromElementSpace, uid, alias, bindableModelDescriptor, intrinsicSubclassIndicator, sourcePath );
 		this.joinType = joinType;

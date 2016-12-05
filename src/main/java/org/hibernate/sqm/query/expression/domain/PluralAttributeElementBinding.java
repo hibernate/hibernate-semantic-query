@@ -9,6 +9,7 @@ package org.hibernate.sqm.query.expression.domain;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
@@ -19,10 +20,12 @@ import org.hibernate.sqm.query.from.SqmFrom;
 public class PluralAttributeElementBinding implements DomainReferenceBinding {
 	private final PluralAttributeBinding attributeBinding;
 	private final PluralAttributeReference pluralAttributeReference;
+	private final PropertyPath propertyPath;
 
 	public PluralAttributeElementBinding(PluralAttributeBinding pluralAttributeBinding) {
 		this.attributeBinding = pluralAttributeBinding;
 		this.pluralAttributeReference = pluralAttributeBinding.getAttribute();
+		this.propertyPath = pluralAttributeBinding.getPropertyPath().append( "{elements}" );
 	}
 
 	public PluralAttributeBinding getPluralAttributeBinding() {
@@ -41,6 +44,11 @@ public class PluralAttributeElementBinding implements DomainReferenceBinding {
 	@Override
 	public DomainReference getBoundDomainReference() {
 		return pluralAttributeReference.getElementReference();
+	}
+
+	@Override
+	public PropertyPath getPropertyPath() {
+		return propertyPath;
 	}
 
 	@Override

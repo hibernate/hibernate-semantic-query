@@ -10,6 +10,7 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
@@ -37,7 +38,7 @@ public class SqmAttributeJoin
 			String uid,
 			String alias,
 			EntityReference intrinsicSubclassIndicator,
-			String sourcePath,
+			PropertyPath sourcePath,
 			JoinType joinType,
 			String fetchParentUniqueIdentifier) {
 		super(

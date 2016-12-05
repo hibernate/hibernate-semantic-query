@@ -8,6 +8,7 @@ package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
@@ -15,10 +16,13 @@ import org.hibernate.sqm.query.from.SqmFrom;
  */
 public class EntityBinding implements DomainReferenceBinding {
 	private final EntityReference entityReference;
+	private final PropertyPath propertyPath;
+
 	private SqmFrom fromElement;
 
 	public EntityBinding(EntityReference entityReference) {
 		this.entityReference = entityReference;
+		this.propertyPath = new PropertyPath( null, entityReference.getEntityName() );
 	}
 
 	public void injectFromElement(SqmFrom fromElement) {
@@ -34,6 +38,11 @@ public class EntityBinding implements DomainReferenceBinding {
 	@Override
 	public EntityReference getBoundDomainReference() {
 		return entityReference;
+	}
+
+	@Override
+	public PropertyPath getPropertyPath() {
+		return propertyPath;
 	}
 
 	@Override

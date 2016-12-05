@@ -9,6 +9,7 @@ package org.hibernate.sqm.query.expression.domain;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 /**
@@ -17,12 +18,15 @@ import org.hibernate.sqm.query.from.SqmFrom;
 public class MapKeyBinding implements DomainReferenceBinding {
 	private final PluralAttributeBinding attributeBinding;
 	private final PluralAttributeReference pluralAttributeReference;
+	private final PropertyPath propertyPath;
 
 	public MapKeyBinding(PluralAttributeBinding pluralAttributeBinding) {
 		this.attributeBinding = pluralAttributeBinding;
 		this.pluralAttributeReference = pluralAttributeBinding.getAttribute();
 
 		assert pluralAttributeReference.getCollectionClassification() == PluralAttributeReference.CollectionClassification.MAP;
+
+		this.propertyPath = pluralAttributeBinding.getPropertyPath().append( "{keys}" );
 	}
 
 	public PluralAttributeBinding getPluralAttributeBinding() {
@@ -37,6 +41,11 @@ public class MapKeyBinding implements DomainReferenceBinding {
 	@Override
 	public DomainReference getBoundDomainReference() {
 		return pluralAttributeReference.getIndexReference().getType();
+	}
+
+	@Override
+	public PropertyPath getPropertyPath() {
+		return propertyPath;
 	}
 
 	@Override

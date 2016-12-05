@@ -8,6 +8,7 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.EntityBinding;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
@@ -32,7 +33,7 @@ public class SqmEntityJoin
 				alias,
 				new EntityBinding( joinedEntityDescriptor ),
 				joinedEntityDescriptor,
-				alias,
+				new PropertyPath( null, joinedEntityDescriptor.getEntityName() + "(" + alias + ")" ),
 				joinType
 		);
 		getDomainReferenceBinding().injectFromElement( this );

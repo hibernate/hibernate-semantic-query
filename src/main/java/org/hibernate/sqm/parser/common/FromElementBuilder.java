@@ -9,6 +9,7 @@ package org.hibernate.sqm.parser.common;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
@@ -136,7 +137,7 @@ public class FromElementBuilder {
 			AttributeBinding attributeBinding,
 			String alias,
 			EntityReference subclassIndicator,
-			String path,
+			PropertyPath sourcePath,
 			JoinType joinType,
 			String fetchParentUniqueIdentifier,
 			boolean canReuseImplicitJoins) {
@@ -175,7 +176,7 @@ public class FromElementBuilder {
 					parsingContext.makeUniqueIdentifier(),
 					alias,
 					subclassIndicator,
-					path,
+					sourcePath,
 					joinType,
 					fetchParentUniqueIdentifier
 			);

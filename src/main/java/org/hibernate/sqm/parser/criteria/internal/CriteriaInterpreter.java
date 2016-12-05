@@ -33,9 +33,6 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
@@ -77,6 +74,9 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
+import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
@@ -197,8 +197,6 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	private void bindJoins(From<?,?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Join<?, ?> join : lhs.getJoins() ) {
 			final String alias = join.getAlias();
-			// todo : we could theoretically reconstruct the "fetch path" via parent refs if we deem it useful..
-			@SuppressWarnings("UnnecessaryLocalVariable") final String path  = alias;
 
 			final AttributeBinding attrBinding = parsingContext.findOrCreateAttributeBinding(
 					sqmLhs.getDomainReferenceBinding(),
@@ -209,7 +207,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					attrBinding,
 					alias,
 					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( join.getAttribute().getJavaType() ),
-					path,
+					sqmLhs.getPropertyPath().append( attrBinding.getAttribute().getAttributeName() ),
 					convert( join.getJoinType() ),
 					null,
 					false
@@ -222,8 +220,6 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	private void bindFetches(FetchParent<?, ?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Fetch<?, ?> fetch : lhs.getFetches() ) {
 			final String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
-			// todo : we could theoretically reconstruct the "fetch path" via parent refs if we deem it useful..
-			@SuppressWarnings("UnnecessaryLocalVariable") final String path  = alias;
 
 			final AttributeBinding attrBinding = parsingContext.findOrCreateAttributeBinding(
 					sqmLhs.getDomainReferenceBinding(),
@@ -233,7 +229,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 					attrBinding,
 					alias,
 					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( fetch.getAttribute().getJavaType() ),
-					path,
+					sqmLhs.getPropertyPath().append( attrBinding.getAttribute().getAttributeName() ),
 					convert( fetch.getJoinType() ),
 					sqmLhs.getUniqueIdentifier(),
 					false

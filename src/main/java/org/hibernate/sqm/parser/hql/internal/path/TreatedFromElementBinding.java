@@ -9,6 +9,7 @@ package org.hibernate.sqm.parser.hql.internal.path;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.SqmFrom;
 
@@ -45,6 +46,11 @@ public class TreatedFromElementBinding implements DomainReferenceBinding {
 	@Override
 	public DomainReference getBoundDomainReference() {
 		return baseBinding.getBoundDomainReference();
+	}
+
+	@Override
+	public PropertyPath getPropertyPath() {
+		return baseBinding.getPropertyPath();
 	}
 
 	@Override

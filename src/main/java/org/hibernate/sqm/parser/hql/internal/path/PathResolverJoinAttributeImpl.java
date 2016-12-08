@@ -67,7 +67,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 			String terminalName,
 			AttributeReference attribute,
 			EntityReference subclassIndicator) {
-		AttributeBinding attributeBinding = context().getParsingContext().findOrCreateAttributeBinding(
+		final AttributeBinding attributeBinding = context().getParsingContext().findOrCreateAttributeBinding(
 				lhs,
 				resolveAttributeDescriptor( lhs.getFromElement(), terminalName )
 		);

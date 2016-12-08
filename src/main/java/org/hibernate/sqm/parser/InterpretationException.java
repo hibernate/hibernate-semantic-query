@@ -15,7 +15,7 @@ package org.hibernate.sqm.parser;
 public class InterpretationException extends RuntimeException {
 	public InterpretationException(String query, Throwable cause) {
 		super(
-				"Error interpreting sqm [" + query + "]; this may indicate a semantic (user sqm) problem or a bug in the parser",
+				"Error interpreting query [" + query + "]; this may indicate a semantic (user query) problem or a bug in the parser",
 				cause
 		);
 	}

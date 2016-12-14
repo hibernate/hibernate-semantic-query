@@ -110,6 +110,7 @@ idea {
 		excludeDirs += file( "$buildDir/tmp" )
 
 		downloadSources = true
+		scopes.PROVIDED.plus += [configurations.provided]
 	}
 }
 

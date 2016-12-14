@@ -860,10 +860,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 				if ( !ImplicitAliasGenerator.isImplicitAlias( joinedFromElement.getIdentificationVariable() ) ) {
 					if ( SingularAttributeBinding.class.isInstance( joinedPath ) ) {
-						final String fetchParentAlias = SingularAttributeBinding.class.cast( joinedPath )
-								.getFromElement()
-								.getFetchParentUniqueIdentifier();
-						if ( isNotEmpty( fetchParentAlias ) ) {
+						if ( SingularAttributeBinding.class.cast( joinedPath ).getFromElement().isFetched() ) {
 							throw new StrictJpaComplianceViolation(
 									"Encountered aliased fetch join, but strict JPQL compliance was requested",
 									StrictJpaComplianceViolation.Type.ALIASED_FETCH_JOIN
@@ -1357,7 +1354,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 						null,
 						attributeBinding.getLhs().getFromElement().getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
 						JoinType.INNER,
-						null,
+						attributeBinding.getLhs().getFromElement().getUniqueIdentifier(),
+						false,
 						true
 				)
 		);

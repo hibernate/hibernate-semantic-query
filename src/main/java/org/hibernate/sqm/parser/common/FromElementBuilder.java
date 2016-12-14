@@ -20,8 +20,6 @@ import org.hibernate.sqm.query.from.SqmRoot;
 
 import org.jboss.logging.Logger;
 
-import static org.hibernate.sqm.Helper.isNotEmpty;
-
 /**
  * @author Steve Ebersole
  */
@@ -139,13 +137,14 @@ public class FromElementBuilder {
 			EntityReference subclassIndicator,
 			PropertyPath sourcePath,
 			JoinType joinType,
-			String fetchParentUniqueIdentifier,
+			String lhsUniqueId,
+			boolean fetched,
 			boolean canReuseImplicitJoins) {
 		assert attributeBinding != null;
 		assert joinType != null;
 
-		if ( isNotEmpty(fetchParentUniqueIdentifier) && canReuseImplicitJoins ) {
-			throw new ParsingException( "Illegal combination of [non-null fetch parent] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
+		if ( fetched && canReuseImplicitJoins ) {
+			throw new ParsingException( "Illegal combination of [fetched] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
 		}
 
 		if ( alias != null && canReuseImplicitJoins ) {
@@ -178,7 +177,8 @@ public class FromElementBuilder {
 					subclassIndicator,
 					sourcePath,
 					joinType,
-					fetchParentUniqueIdentifier
+					lhsUniqueId,
+					fetched
 			);
 
 			if ( canReuseImplicitJoins ) {

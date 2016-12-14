@@ -81,7 +81,8 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 							subclassIndicator,
 							lhs.getFromElement().getPropertyPath().append( attribute.getAttributeName() ),
 							getIntermediateJoinType(),
-							areIntermediateJoinsFetched() ? lhs.getFromElement().getUniqueIdentifier() : null,
+							lhs.getFromElement().getUniqueIdentifier(),
+							areIntermediateJoinsFetched(),
 							canReuseImplicitJoins()
 					)
 			);

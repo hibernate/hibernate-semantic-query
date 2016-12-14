@@ -147,7 +147,8 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 				EntityReference subclassIndicator,
 				PropertyPath path,
 				JoinType joinType,
-				String fetchParentAlias,
+				String lhsUniqueIdentifier,
+				boolean fetched,
 				boolean canReuseImplicitJoins) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}

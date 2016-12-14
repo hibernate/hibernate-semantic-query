@@ -29,7 +29,8 @@ public class JoinFetchTest extends StandardModelTest {
 		assertThat( space.getJoins().size(), is(1) );
 
 		final SqmAttributeJoin sqmJoin = (SqmAttributeJoin) space.getJoins().get( 0 );
-		assertThat( sqmJoin.getFetchParentUniqueIdentifier(), is( space.getRoot().getUniqueIdentifier() ) );
+		assertThat( sqmJoin.isFetched(), is(true) );
+		assertThat( sqmJoin.getLhsUniqueIdentifier(), is( space.getRoot().getUniqueIdentifier() ) );
 
 	}
 }

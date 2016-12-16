@@ -52,6 +52,11 @@ public class SqmAttributeJoin
 				sourcePath,
 				joinType
 		);
+
+		// todo : this shows we ought to drop `lhsUniqueIdentifier`
+		assert lhsUniqueIdentifier.equals( attributeBinding.getLhs().getFromElement().getUniqueIdentifier() ) :
+				"table uids did not match : " + lhsUniqueIdentifier + " <=> " + attributeBinding.getLhs().getFromElement().getUniqueIdentifier();
+
 		this.attributeBinding = attributeBinding;
 		this.intrinsicSubclassIndicator = intrinsicSubclassIndicator;
 		this.lhsUniqueIdentifier = lhsUniqueIdentifier;

@@ -8,13 +8,11 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
 import java.io.Serializable;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.function.FunctionCriteriaExpression;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 
 /**
  * Models the basic concept of a SQL function.
@@ -22,8 +20,8 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaEx
  * @author Steve Ebersole
  */
 public abstract class AbstractFunctionExpression<X>
-		extends AbstractCriteriaExpressionImpl<X>
-		implements FunctionCriteriaExpression<X>, Serializable {
+		extends AbstractJpaExpressionImpl<X>
+		implements JpaExpression<X>, Serializable {
 
 	private final String functionName;
 
@@ -40,29 +38,17 @@ public abstract class AbstractFunctionExpression<X>
 		return number + (int)( number*.75 ) + 1;
 	}
 
-	@Override
 	public String getFunctionName() {
 		return functionName;
+	}
+
+	public BasicType<X> getFunctionResultType() {
+		return getExpressionSqmType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public BasicType<X> getExpressionSqmType() {
 		return (BasicType<X>) super.getExpressionSqmType();
-	}
-
-	@Override
-	public BasicType<X> getFunctionResultType() {
-		return getExpressionSqmType();
-	}
-
-	@Override
-	public boolean isAggregation() {
-		return false;
-	}
-
-	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

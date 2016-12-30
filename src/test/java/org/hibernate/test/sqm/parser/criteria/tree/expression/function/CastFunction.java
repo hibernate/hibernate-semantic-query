@@ -8,14 +8,13 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
 import java.io.Serializable;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.function.CastFunctionCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
 
 
 /**
@@ -28,13 +27,13 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaEx
  */
 public class CastFunction<T,Y>
 		extends AbstractFunctionExpression<T>
-		implements CastFunctionCriteriaExpression<T,Y>, Serializable {
+		implements Serializable {
 	public static final String NAME = "cast";
 
-	private final AbstractCriteriaExpressionImpl<Y> expressionToCast;
+	private final JpaExpression<Y> expressionToCast;
 
 	public CastFunction(
-			AbstractCriteriaExpressionImpl<Y> expressionToCast,
+			JpaExpression<Y> expressionToCast,
 			BasicType<T> castTargetType,
 			Class<T> javaType,
 			CriteriaBuilderImpl criteriaBuilder) {
@@ -43,12 +42,12 @@ public class CastFunction<T,Y>
 	}
 
 	@Override
-	public CriteriaExpression<Y> getExpressionToCast() {
-		return expressionToCast;
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
+		return visitor.visitCastFunction( expressionToCast, getJavaType() );
 	}
 
 	@Override
-	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitCastFunction( this );
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
+		container.add( visitExpression( visitor ), getAlias() );
 	}
 }

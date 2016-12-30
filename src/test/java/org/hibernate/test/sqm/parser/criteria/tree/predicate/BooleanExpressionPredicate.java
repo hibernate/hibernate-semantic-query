@@ -9,12 +9,12 @@ package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 import java.io.Serializable;
 import javax.persistence.criteria.Expression;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 
@@ -25,26 +25,25 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  */
 public class BooleanExpressionPredicate
 		extends AbstractSimplePredicate
-		implements BooleanExpressionCriteriaPredicate, Serializable {
-	private final CriteriaExpression<Boolean> expression;
+		implements JpaPredicate, Serializable {
+	private final JpaExpression<Boolean> expression;
 	private final Boolean assertedValue;
 
-	public BooleanExpressionPredicate(CriteriaBuilderImpl criteriaBuilder, CriteriaExpression<Boolean> expression) {
+	public BooleanExpressionPredicate(CriteriaBuilderImpl criteriaBuilder, JpaExpression<Boolean> expression) {
 		this( criteriaBuilder, expression, Boolean.TRUE );
 	}
 
 	@SuppressWarnings("unchecked")
 	public BooleanExpressionPredicate(
 			CriteriaBuilderImpl criteriaBuilder,
-			CriteriaExpression<Boolean> expression,
+			JpaExpression<Boolean> expression,
 			Boolean assertedValue) {
 		super( criteriaBuilder, (BasicType<Boolean>) expression.getExpressionSqmType() );
 		this.expression = expression;
 		this.assertedValue = assertedValue;
 	}
 
-	@Override
-	public CriteriaExpression<Boolean> getOperand() {
+	public JpaExpression<Boolean> getOperand() {
 		return expression;
 	}
 
@@ -54,6 +53,6 @@ public class BooleanExpressionPredicate
 
 	@Override
 	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
-		return visitor.visitBooleanExpressionPredicate( this );
+		return visitor.visitBooleanExpressionPredicate( expression, assertedValue );
 	}
 }

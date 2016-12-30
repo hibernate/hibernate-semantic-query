@@ -8,10 +8,9 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
 
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.domain.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
@@ -21,8 +20,9 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  *
  * @author Steve Ebersole
  */
-public class LiteralExpression<T> extends AbstractCriteriaExpressionImpl<T>
-		implements LiteralCriteriaExpression<T>, Serializable {
+public class LiteralExpression<T>
+		extends AbstractJpaExpressionImpl<T>
+		implements JpaExpression<T>, Serializable {
 	private Object literal;
 
 	@SuppressWarnings({ "unchecked" })
@@ -61,11 +61,6 @@ public class LiteralExpression<T> extends AbstractCriteriaExpressionImpl<T>
 
 	@Override
 	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitLiteral( this );
-	}
-
-	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		container.add( visitExpression( visitor ), getAlias() );
+		return visitor.visitConstant( getLiteral(), getJavaType() );
 	}
 }

@@ -9,14 +9,15 @@ package org.hibernate.test.sqm.parser.criteria.tree;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.Tuple;
 import javax.persistence.criteria.CollectionJoin;
-import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
@@ -36,12 +37,15 @@ import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
+import org.hibernate.sqm.parser.criteria.tree.select.JpaCompoundSelection;
+import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
+import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.domain.BasicTypeImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.CompoundSelectionImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.ExpressionImplementor;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.ParameterExpressionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.GenericFunctionExpression;
@@ -49,6 +53,9 @@ import org.hibernate.test.sqm.parser.criteria.tree.predicate.BooleanExpressionPr
 import org.hibernate.test.sqm.parser.criteria.tree.predicate.ComparisonPredicate;
 import org.hibernate.test.sqm.parser.criteria.tree.predicate.CompoundPredicate;
 import org.hibernate.test.sqm.parser.criteria.tree.predicate.NullnessPredicate;
+import org.hibernate.test.sqm.parser.criteria.tree.select.ArrayJpaSelectionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.select.DynamicInstantiationImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.select.TupleJpaSelectionImpl;
 
 
 /**
@@ -137,7 +144,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	}
 
 	@Override
-	public CompoundSelection<Tuple> tuple(Selection<?>... selections) {
+	public JpaCompoundSelection<Tuple> tuple(Selection<?>... selections) {
 		return tuple( Arrays.asList( selections ) );
 	}
 
@@ -148,13 +155,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 *
 	 * @return The tuple compound selection
 	 */
-	public CompoundSelection<Tuple> tuple(List<Selection<?>> selections) {
+	public JpaCompoundSelection<Tuple> tuple(List<Selection<?>> selections) {
 		checkMultiselect( selections );
-		return new CompoundSelectionImpl<Tuple>( this, Tuple.class, selections );
+		return new TupleJpaSelectionImpl( this, Tuple.class, toExpressions( selections ) );
 	}
 
 	@Override
-	public CompoundSelection<Object[]> array(Selection<?>... selections) {
+	public JpaCompoundSelection<Object[]> array(Selection<?>... selections) {
 		return array( Arrays.asList( selections ) );
 	}
 
@@ -165,7 +172,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 *
 	 * @return The array compound selection
 	 */
-	public CompoundSelection<Object[]> array(List<Selection<?>> selections) {
+	public JpaCompoundSelection<Object[]> array(List<Selection<?>> selections) {
 		return array( Object[].class, selections );
 	}
 
@@ -178,13 +185,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 *
 	 * @return The array compound selection
 	 */
-	public <Y> CompoundSelection<Y> array(Class<Y> type, List<Selection<?>> selections) {
+	public <Y> JpaCompoundSelection<Y> array(Class<Y> type, List<Selection<?>> selections) {
 		checkMultiselect( selections );
-		return new CompoundSelectionImpl<Y>( this, type, selections );
+		return new ArrayJpaSelectionImpl<>( this, type, toExpressions( selections ) );
 	}
 
 	@Override
-	public <Y> CompoundSelection<Y> construct(Class<Y> result, Selection<?>... selections) {
+	public <Y> JpaCompoundSelection<Y> construct(Class<Y> result, Selection<?>... selections) {
 		return construct( result, Arrays.asList( selections ) );
 	}
 
@@ -197,153 +204,192 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 *
 	 * @return The <b>view</b> compound selection.
 	 */
-	public <Y> CompoundSelection<Y> construct(Class<Y> result, List<Selection<?>> selections) {
+	public <Y> JpaCompoundSelection<Y> construct(Class<Y> result, List<Selection<?>> selections) {
 		checkMultiselect( selections );
-		return new CompoundSelectionImpl<Y>( this, result, selections );
+		return new DynamicInstantiationImpl<>( this, result, toExpressions( selections ) );
+	}
+
+	private List<JpaExpression<?>> toExpressions(List<Selection<?>> selections) {
+		if ( selections == null || selections.isEmpty() ) {
+			return Collections.emptyList();
+		}
+
+		final ArrayList<JpaExpression<?>> expressions = new ArrayList<>();
+		for ( Selection<?> selection : selections ) {
+			if ( selection instanceof JpaExpression ) {
+				expressions.add( (JpaExpression) selection );
+			}
+			else {
+				throw new CriteriaBuilderException(
+						"Expecting javax.persistence.criteria.Selection to be " +
+								"org.hibernate.sqm.parser.criteria.tree.JpaExpression, but found " +
+								selection.toString()
+				);
+			}
+		}
+
+		return expressions;
 	}
 
 
 	// ordering ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	@Override
-	public Order asc(Expression<?> x) {
-		return new OrderImpl( x, true );
+	public JpaOrder asc(Expression<?> x) {
+		if ( !JpaExpression.class.isInstance( x ) ) {
+			throw new CriteriaBuilderException( "Expression no an instance of JpaExpression" );
+		}
+		return new OrderImpl( (JpaExpression<?>) x, true );
 	}
 
 	@Override
-	public Order desc(Expression<?> x) {
-		return new OrderImpl( x, false );
+	public JpaOrder desc(Expression<?> x) {
+		if ( !JpaExpression.class.isInstance( x ) ) {
+			throw new CriteriaBuilderException( "Expression no an instance of JpaExpression" );
+		}
+		return new OrderImpl( (JpaExpression<?>) x, false );
 	}
 
 
 	// predicates ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	public Predicate wrap(Expression<Boolean> expression) {
-		if ( Predicate.class.isInstance( expression ) ) {
-			return ( (Predicate) expression );
+	public JpaPredicate wrap(Expression<Boolean> expression) {
+		if ( JpaPredicate.class.isInstance( expression ) ) {
+			return ( (JpaPredicate) expression );
 		}
 		else {
-			return new BooleanExpressionPredicate( this, (CriteriaExpression<Boolean>) expression );
+			return new BooleanExpressionPredicate( this, (JpaExpression<Boolean>) expression );
 		}
 	}
 
 	@Override
-	public Predicate not(Expression<Boolean> expression) {
+	public JpaPredicate not(Expression<Boolean> expression) {
 		return wrap( expression ).not();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Predicate and(Expression<Boolean> x, Expression<Boolean> y) {
+	public JpaPredicate and(Expression<Boolean> x, Expression<Boolean> y) {
 		return new CompoundPredicate( this, Predicate.BooleanOperator.AND, x, y );
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Predicate or(Expression<Boolean> x, Expression<Boolean> y) {
+	public JpaPredicate or(Expression<Boolean> x, Expression<Boolean> y) {
 		return new CompoundPredicate( this, Predicate.BooleanOperator.OR, x, y );
 	}
 
 	@Override
-	public Predicate and(Predicate... restrictions) {
+	public JpaPredicate and(Predicate... restrictions) {
 		return new CompoundPredicate( this, Predicate.BooleanOperator.AND, restrictions );
 	}
 
 	@Override
-	public Predicate or(Predicate... restrictions) {
+	public JpaPredicate or(Predicate... restrictions) {
 		return new CompoundPredicate( this, Predicate.BooleanOperator.OR, restrictions );
 	}
 
 	@Override
-	public Predicate conjunction() {
+	public JpaPredicate conjunction() {
 		return new CompoundPredicate( this, Predicate.BooleanOperator.AND );
 	}
 
 	@Override
-	public Predicate disjunction() {
+	public JpaPredicate disjunction() {
 		return new CompoundPredicate( this, Predicate.BooleanOperator.OR );
 	}
 
 	@Override
-	public Predicate isTrue(Expression<Boolean> expression) {
-		if ( Predicate.class.isInstance( expression ) ) {
-			return (Predicate) expression;
+	public JpaPredicate isTrue(Expression<Boolean> expression) {
+		if ( JpaPredicate.class.isInstance( expression ) ) {
+			return (JpaPredicate) expression;
 		}
-		return new BooleanExpressionPredicate( this, (CriteriaExpression<Boolean>) expression );
+
+		return wrap( expression );
 	}
 
 	@Override
-	public Predicate isFalse(Expression<Boolean> expression) {
-		if ( Predicate.class.isInstance( expression ) ) {
-			final Predicate predicate = (Predicate) expression;
+	public JpaPredicate isFalse(Expression<Boolean> expression) {
+		if ( JpaPredicate.class.isInstance( expression ) ) {
+			final JpaPredicate predicate = (JpaPredicate) expression;
 			predicate.not();
 			return predicate;
 		}
-		return new BooleanExpressionPredicate( this, (CriteriaExpression<Boolean>) expression, Boolean.FALSE );
+
+		return wrap( expression ).not();
 	}
 
 	@Override
-	public Predicate isNull(Expression<?> x) {
-		return new NullnessPredicate( this, (CriteriaExpression<?>) x );
+	public JpaPredicate isNull(Expression<?> x) {
+		check( x );
+		return new NullnessPredicate( this, (JpaExpression<?>) x );
 	}
 
 	@Override
-	public Predicate isNotNull(Expression<?> x) {
+	public JpaPredicate isNotNull(Expression<?> x) {
 		return isNull( x ).not();
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
-	public Predicate equal(Expression<?> x, Expression<?> y) {
+	public JpaPredicate equal(Expression<?> x, Expression<?> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.EQUAL,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.EQUAL,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate notEqual(Expression<?> x, Expression<?> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.NOT_EQUAL,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.NOT_EQUAL,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate equal(Expression<?> x, Object y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.EQUAL,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.EQUAL,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate notEqual(Expression<?> x, Object y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.NOT_EQUAL,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.NOT_EQUAL,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public <Y extends Comparable<? super Y>> Predicate greaterThan(Expression<? extends Y> x, Expression<? extends Y> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.GREATER_THAN,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
@@ -352,11 +398,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate lessThan(
 			Expression<? extends Y> x,
 			Expression<? extends Y> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.LESS_THAN,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
@@ -365,11 +413,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThanOrEqualTo(
 			Expression<? extends Y> x,
 			Expression<? extends Y> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.GREATER_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
@@ -378,11 +428,13 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate lessThanOrEqualTo(
 			Expression<? extends Y> x,
 			Expression<? extends Y> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.LESS_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
@@ -391,11 +443,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThan(
 			Expression<? extends Y> x,
 			Y y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.GREATER_THAN,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
@@ -404,11 +457,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate lessThan(
 			Expression<? extends Y> x,
 			Y y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.LESS_THAN,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
@@ -417,11 +471,12 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public <Y extends Comparable<? super Y>> Predicate greaterThanOrEqualTo(
 			Expression<? extends Y> x,
 			Y y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.GREATER_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
@@ -430,98 +485,111 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	public<Y extends Comparable<? super Y>> Predicate lessThanOrEqualTo(
 			Expression<? extends Y> x,
 			Y y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.LESS_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate gt(Expression<? extends Number> x, Expression<? extends Number> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.GREATER_THAN,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate lt(Expression<? extends Number> x, Expression<? extends Number> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.LESS_THAN,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate ge(Expression<? extends Number> x, Expression<? extends Number> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				RelationalPredicateOperator.GREATER_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate le(Expression<? extends Number> x, Expression<? extends Number> y) {
+		check( x );
+		check( y );
 		return new ComparisonPredicate(
-				this, RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				(CriteriaExpression<?>) y
+				this, RelationalPredicateOperator.LESS_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				(JpaExpression<?>) y
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate gt(Expression<? extends Number> x, Number y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.GREATER_THAN,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate lt(Expression<? extends Number> x, Number y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.LESS_THAN,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate ge(Expression<? extends Number> x, Number y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.GREATER_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
 	@Override
 	@SuppressWarnings("SuspiciousNameCombination")
 	public Predicate le(Expression<? extends Number> x, Number y) {
+		check( x );
 		return new ComparisonPredicate(
 				this,
-				RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL,
-				(CriteriaExpression<?>) x,
-				y
+				RelationalPredicateOperator.LESS_THAN_OR_EQUAL,
+				(JpaExpression<?>) x,
+				literal( y )
 		);
 	}
 
@@ -728,14 +796,19 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	// other functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> Expression<T> function(String name, Class<T> returnType, Expression<?>... arguments) {
-		final BasicTypeImpl<T> returnSqmType = (BasicTypeImpl<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
+		if ( arguments == null || arguments.length == 0 ) {
+			return function( name, returnType );
+		}
+
+		final BasicType<T> returnSqmType = (BasicType<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
 		return new GenericFunctionExpression<T>(
 				name,
 				returnSqmType,
 				returnType,
 				this,
-				(CriteriaExpression<?>[]) arguments
+				(JpaExpression<?>[]) arguments
 		);
 	}
 
@@ -747,9 +820,10 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 *
 	 * @return The function expression
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> Expression<T> function(String name, Class<T> returnType) {
-		final BasicTypeImpl<T> returnSqmType = (BasicTypeImpl<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
-		return new GenericFunctionExpression<T>( name, returnSqmType, returnType, this );
+		final BasicType<T> returnSqmType = (BasicType<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
+		return new GenericFunctionExpression<>( name, returnSqmType, returnType, this );
 	}
 
 	@Override
@@ -1176,39 +1250,47 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 
 	// casting ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
 	@Override
-	public ExpressionImplementor<Long> toLong(Expression<? extends Number> expression) {
-		return ( (ExpressionImplementor<? extends Number>) expression ).asLong();
+	public JpaExpression<Long> toLong(Expression<? extends Number> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asLong();
 	}
 
 	@Override
-	public ExpressionImplementor<Integer> toInteger(Expression<? extends Number> expression) {
-		return ( (ExpressionImplementor<? extends Number>) expression ).asInteger();
+	public JpaExpression<Integer> toInteger(Expression<? extends Number> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asInteger();
 	}
 
 	@Override
-	public ExpressionImplementor<Float> toFloat(Expression<? extends Number> expression) {
-		return ( (ExpressionImplementor<? extends Number>) expression ).asFloat();
+	public JpaExpression<Float> toFloat(Expression<? extends Number> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asFloat();
 	}
 
 	@Override
-	public ExpressionImplementor<Double> toDouble(Expression<? extends Number> expression) {
-		return ( (ExpressionImplementor<? extends Number>) expression ).asDouble();
+	public JpaExpression<Double> toDouble(Expression<? extends Number> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asDouble();
 	}
 
 	@Override
-	public ExpressionImplementor<BigDecimal> toBigDecimal(Expression<? extends Number> expression) {
-		return ( (ExpressionImplementor<? extends Number>) expression ).asBigDecimal();
+	public JpaExpression<BigDecimal> toBigDecimal(Expression<? extends Number> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asBigDecimal();
 	}
 
 	@Override
-	public ExpressionImplementor<BigInteger> toBigInteger(Expression<? extends Number> expression) {
-		return ( (ExpressionImplementor<? extends Number>) expression ).asBigInteger();
+	public JpaExpression<BigInteger> toBigInteger(Expression<? extends Number> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asBigInteger();
 	}
 
 	@Override
-	public ExpressionImplementor<String> toString(Expression<Character> characterExpression) {
-		return ( (ExpressionImplementor<Character>) characterExpression ).asString();
+	public JpaExpression<String> toString(Expression<Character> expression) {
+		check( expression );
+		return ( (JpaExpression<?>) expression ).asString();
 	}
 
 	@Override
@@ -1485,4 +1567,34 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 		return isMember(eExpression, cExpression).not();
 	}
 
+
+	public void check(Selection<?> selection) {
+		if ( !JpaSelection.class.isInstance( selection ) ) {
+			throw new CriteriaBuilderException(
+					"Expecting javax.persistence.criteria.Selection to be " +
+							"org.hibernate.sqm.parser.criteria.tree.select.JpaSelection, but was : " +
+							selection.toString()
+			);
+		}
+	}
+
+	private void check(Expression<?> expr) {
+		if ( !JpaExpression.class.isInstance( expr ) ) {
+			throw new CriteriaBuilderException(
+					"Expecting javax.persistence.criteria.Expression to be " +
+							"org.hibernate.sqm.parser.criteria.tree.JpaExpression, but was : " +
+							expr.toString()
+			);
+		}
+	}
+
+	public void check(Order order) {
+		if ( !JpaOrder.class.isInstance( order ) ) {
+			throw new CriteriaBuilderException(
+					"Expecting javax.persistence.criteria.Order to be " +
+							"org.hibernate.sqm.parser.criteria.tree.JpaOrder, but was : " +
+							order.toString()
+			);
+		}
+	}
 }

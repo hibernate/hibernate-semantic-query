@@ -12,21 +12,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import javax.persistence.Tuple;
-import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.FetchParent;
-import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.BasicType;
@@ -36,25 +28,23 @@ import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.SelectionImplementor;
-import org.hibernate.sqm.parser.criteria.spi.expression.BooleanExpressionCriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.LiteralCriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.function.CastFunctionCriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
-import org.hibernate.sqm.parser.criteria.spi.predicate.ComparisonCriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
+import org.hibernate.sqm.parser.common.Stack;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
+import org.hibernate.sqm.parser.criteria.tree.JpaQuerySpec;
+import org.hibernate.sqm.parser.criteria.tree.JpaSubquery;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaAttributeJoin;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaFetch;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
-import org.hibernate.sqm.query.expression.ConstantFieldSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigDecimalSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralBigIntegerSqmExpression;
@@ -64,12 +54,10 @@ import org.hibernate.sqm.query.expression.LiteralFalseSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralFloatSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
-import org.hibernate.sqm.query.expression.LiteralNullSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralStringSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralTrueSqmExpression;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
-import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
@@ -94,6 +82,7 @@ import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
 import org.hibernate.sqm.query.order.SortSpecification;
+import org.hibernate.sqm.query.paging.LimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
@@ -105,10 +94,9 @@ import org.hibernate.sqm.query.predicate.MemberOfSqmPredicate;
 import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
 import org.hibernate.sqm.query.select.SqmSelectClause;
 import org.hibernate.sqm.query.select.SqmSelection;
@@ -121,10 +109,15 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// top level statement visitation
 
 	public static SqmSelectStatement interpretSelectCriteria(CriteriaQuery query, ParsingContext parsingContext) {
-		CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
+		if ( !JpaCriteriaQuery.class.isInstance( query ) ) {
+			throw new IllegalArgumentException( "CriteriaQuery to interpret must implement org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery" );
+		}
+
+		final JpaCriteriaQuery jpaCriteriaQuery = (JpaCriteriaQuery) query;
+		final CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
 
 		final SqmSelectStatementImpl selectStatement = new SqmSelectStatementImpl();
-		selectStatement.applyQuerySpec( interpreter.visitQuerySpec( query ) );
+		selectStatement.applyQuerySpec( interpreter.visitQuerySpec( jpaCriteriaQuery.getQuerySpec() ) );
 
 		return selectStatement;
 	}
@@ -134,8 +127,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// visitation
 
 	private final ParsingContext parsingContext;
-
-	private QuerySpecProcessingState currentQuerySpecProcessingState;
+	private final Stack<QuerySpecProcessingState> querySpecProcessingStateStack = new Stack<>();
 
 	// todo : hook up this structure for tracking DomainReferenceBindings
 	private Map<Path,DomainReferenceBinding> pathToDomainBindingXref = new HashMap<>();
@@ -144,97 +136,109 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		this.parsingContext = parsingContext;
 	}
 
-	private OrderByClause visitOrderBy(AbstractQuery abstractQuery) {
-		if ( !( abstractQuery instanceof CriteriaQuery<?> ) ) {
+
+	private SqmQuerySpec visitQuerySpec(JpaQuerySpec jpaQuerySpec) {
+		querySpecProcessingStateStack.push(
+				new QuerySpecProcessingStateStandardImpl( parsingContext, querySpecProcessingStateStack.getCurrent() )
+		);
+
+		try {
+			return new SqmQuerySpec(
+					visitFromClause( jpaQuerySpec ),
+					visitSelectClause( jpaQuerySpec ),
+					visitWhereClause( jpaQuerySpec ),
+					visitOrderBy( jpaQuerySpec ),
+					visitLimitOffset( jpaQuerySpec )
+			);
+		}
+		finally {
+			querySpecProcessingStateStack.pop();
+		}
+	}
+
+	private LimitOffsetClause visitLimitOffset(JpaQuerySpec<?> jpaQuerySpec) {
+		// not yet supported in criteria
+		return null;
+	}
+
+	private OrderByClause visitOrderBy(JpaQuerySpec<?> jpaQuerySpec) {
+		if ( jpaQuerySpec.getOrderList() == null || jpaQuerySpec.getOrderList().isEmpty() ) {
 			return null;
 		}
-		final CriteriaQuery<?> jpaCriteria = (CriteriaQuery<?>) abstractQuery;
+
 		final OrderByClause sqmOrderByClause = new OrderByClause();
-		if ( !jpaCriteria.getOrderList().isEmpty() ) {
-			for ( Order orderItem : jpaCriteria.getOrderList() ) {
-				sqmOrderByClause.addSortSpecification(
-						new SortSpecification(
-								visitExpression( orderItem.getExpression() ),
-								orderItem.isAscending() ? SortOrder.ASCENDING : SortOrder.DESCENDING
-						)
-				);
-			}
+		for ( JpaOrder jpaOrder : jpaQuerySpec.getOrderList() ) {
+			sqmOrderByClause.addSortSpecification(
+					new SortSpecification(
+							jpaOrder.getExpression().visitExpression( this ),
+							jpaOrder.isAscending() ? SortOrder.ASCENDING : SortOrder.DESCENDING
+					)
+			);
 		}
 		return sqmOrderByClause;
 	}
 
-
-	private SqmQuerySpec visitQuerySpec(AbstractQuery jpaCriteria) {
-		currentQuerySpecProcessingState = new QuerySpecProcessingStateStandardImpl( parsingContext, currentQuerySpecProcessingState );
-		try {
-			return new SqmQuerySpec(
-					visitFromClause( jpaCriteria ),
-					visitSelectClause( jpaCriteria ),
-					visitWhereClause( jpaCriteria ),
-					visitOrderBy( jpaCriteria ),
-					/* LimitOffsetClause */ null
-			);
-		}
-		finally {
-			currentQuerySpecProcessingState = currentQuerySpecProcessingState.getContainingQueryState();
-		}
-	}
-
-	private SqmFromClause visitFromClause(AbstractQuery<?> jpaCriteria) {
+	private SqmFromClause visitFromClause(JpaQuerySpec<?> jpaQuerySpec) {
 		final SqmFromClause fromClause = new SqmFromClause();
-		for ( Root<?> jpaRoot : jpaCriteria.getRoots() ) {
-			final RootImplementor root = (RootImplementor) jpaRoot;
-			root.prepareAlias( parsingContext.getImplicitAliasGenerator() );
+		for ( JpaRoot<?> jpaRoot : jpaQuerySpec.getFromClause().getRoots() ) {
 			final FromElementSpace space = fromClause.makeFromElementSpace();
-			final SqmRoot sqmRoot = currentQuerySpecProcessingState.getFromElementBuilder().makeRootEntityFromElement(
+			final SqmRoot sqmRoot = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().makeRootEntityFromElement(
 					space,
-					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( root.getEntityType().getEntityName() ),
-					root.getAlias()
+					jpaRoot.getEntityType(),
+					interpretAlias( jpaRoot.getAlias() )
 			);
 			space.setRoot( sqmRoot );
-			bindJoins( root, sqmRoot, space );
-			bindFetches( root, sqmRoot, space );
+			bindJoins( jpaRoot, sqmRoot, space );
+			bindFetches( jpaRoot, sqmRoot, space );
 		}
 
 		return fromClause;
 	}
 
-	private void bindJoins(From<?,?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
+	private void bindJoins(JpaFrom<?,?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Join<?, ?> join : lhs.getJoins() ) {
-			final String alias = join.getAlias();
+			final JpaAttributeJoin<?,?> jpaAttributeJoin = (JpaAttributeJoin<?, ?>) join;
+			final String alias = jpaAttributeJoin.getAlias();
 
-			final AttributeBinding attrBinding = parsingContext.findOrCreateAttributeBinding(
+			final AttributeBinding attributeBinding = parsingContext.findOrCreateAttributeBinding(
 					sqmLhs.getDomainReferenceBinding(),
-					join.getAttribute().getName()
+					jpaAttributeJoin.getAttribute().getName()
 			);
 
-			final SqmAttributeJoin sqmJoin = currentQuerySpecProcessingState.getFromElementBuilder().buildAttributeJoin(
-					attrBinding,
+			// todo : handle treats
+
+			final SqmAttributeJoin sqmJoin = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildAttributeJoin(
+					attributeBinding,
 					alias,
-					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( join.getAttribute().getJavaType() ),
-					sqmLhs.getPropertyPath().append( attrBinding.getAttribute().getAttributeName() ),
+					// todo : this is where treat would be applied
+					null,
+					sqmLhs.getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
 					convert( join.getJoinType() ),
 					sqmLhs.getUniqueIdentifier(),
 					false,
 					false
 			);
 			space.addJoin( sqmJoin );
-			bindJoins( join, sqmJoin, space );
+			bindJoins( jpaAttributeJoin, sqmJoin, space );
 		}
 	}
 
 	private void bindFetches(FetchParent<?, ?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Fetch<?, ?> fetch : lhs.getFetches() ) {
-			final String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
+			final JpaFetch<?,?> jpaFetch = (JpaFetch<?, ?>) fetch;
 
 			final AttributeBinding attrBinding = parsingContext.findOrCreateAttributeBinding(
 					sqmLhs.getDomainReferenceBinding(),
 					fetch.getAttribute().getName()
 			);
-			final SqmAttributeJoin sqmFetch = currentQuerySpecProcessingState.getFromElementBuilder().buildAttributeJoin(
+
+			// todo : handle treats
+
+			final SqmAttributeJoin sqmFetch = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildAttributeJoin(
 					attrBinding,
-					alias,
-					parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( fetch.getAttribute().getJavaType() ),
+					interpretAlias( jpaFetch.getAlias() ),
+					// todo : this is where treat would be applied
+					null,
 					sqmLhs.getPropertyPath().append( attrBinding.getAttribute().getAttributeName() ),
 					convert( fetch.getJoinType() ),
 					sqmLhs.getUniqueIdentifier(),
@@ -262,62 +266,30 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		throw new ParsingException( "Unrecognized JPA JoinType : " + joinType );
 	}
 
-	private SqmSelectClause visitSelectClause(AbstractQuery jpaCriteria) {
-		final SqmSelectClause sqmSelectClause = new SqmSelectClause( jpaCriteria.isDistinct() );
+	private SqmSelectClause visitSelectClause(JpaQuerySpec<?> jpaQuerySpec) {
+		final SqmSelectClause sqmSelectClause = new SqmSelectClause( jpaQuerySpec.getSelectClause().isDistinct() );
 
-		applySelection( jpaCriteria.getSelection(), sqmSelectClause );
+		jpaQuerySpec.getSelectClause().getSelection().visitSelections( this, sqmSelectClause );
 
 		return sqmSelectClause;
 	}
 
-	private void applySelection(Selection<?> selection, SqmAliasedExpressionContainer container) {
-		if ( selection instanceof SelectionImplementor ) {
-			( (SelectionImplementor) selection ).visitSelections( this, container );
-		}
-		else if ( selection.isCompoundSelection() ) {
-			final SqmAliasedExpressionContainer containerForSelections;
-			final Class selectionResultType = selection.getJavaType();
-			if ( Tuple.class.isAssignableFrom( selectionResultType )
-					|| selectionResultType.isArray()
-					|| selectionResultType.equals( Object.class ) ) {
-				containerForSelections = container;
-			}
-			else if ( List.class.equals( selectionResultType ) ) {
-				containerForSelections = SqmDynamicInstantiation.forListInstantiation();
-			}
-			else if ( Map.class.equals( selectionResultType ) ) {
-				containerForSelections = SqmDynamicInstantiation.forMapInstantiation();
-			}
-			else {
-				containerForSelections = SqmDynamicInstantiation.forClassInstantiation( selectionResultType );
-			}
+	@Override
+	public void visitDynamicInstantiation(Class target, List<JpaExpression<?>> arguments) {
+		final SqmDynamicInstantiation dynamicInstantiation;
 
-			for ( Selection<?> nestedSelection : selection.getCompoundSelectionItems() ) {
-				applySelection( nestedSelection, containerForSelections );
-			}
+		if ( List.class.equals( target ) ) {
+			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation();
 		}
-		else if ( selection instanceof javax.persistence.criteria.Expression ) {
-			container.add(
-					visitExpression( (javax.persistence.criteria.Expression) selection ),
-					interpretAlias( selection.getAlias() )
-			);
+		else if ( Map.class.equals( target ) ) {
+			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation();
 		}
 		else {
-			// check the "compound selection items" anyway..
-			if ( selection.getCompoundSelectionItems().size() == 1 ) {
-				applySelection( selection.getCompoundSelectionItems().get( 0 ), container );
-			}
-			else {
-				throw new QueryException(
-						String.format(
-								Locale.ROOT,
-								"Unexpected JPA Criteria Selection type [%s] encountered; " +
-										"was expecting Selection with either #isCompoundSelection()==true or " +
-										"SelectionImplementor/Expression implementation",
-								selection.getClass().getName()
-						)
-				);
-			}
+			dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( target );
+		}
+
+		for ( JpaExpression<?> argument : arguments ) {
+			dynamicInstantiation.add( argument.visitExpression( this ), argument.getAlias() );
 		}
 	}
 
@@ -339,14 +311,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Expressions
 
-	private SqmExpression visitExpression(javax.persistence.criteria.Expression<?> expression) {
-		return ( (CriteriaExpression) expression ).visitExpression( this );
-	}
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends Enum> ConstantEnumSqmExpression<T> visitEnumConstant(T value) {
-		return new ConstantEnumSqmExpression<T>(
+		return new ConstantEnumSqmExpression<>(
 				value,
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveBasicType( value.getClass() )
 		);
@@ -354,47 +322,79 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> ConstantFieldSqmExpression<T> visitConstant(T value) {
+	public <T> LiteralSqmExpression<T> visitConstant(T value) {
 		if ( value == null ) {
 			throw new NullPointerException( "Value passed as `constant value` cannot be null" );
 		}
 
-		return visitConstant(
-				value,
-				parsingContext.getConsumerContext().getDomainMetamodel().resolveBasicType( value.getClass() )
+		return visitConstant( value, (Class<T>) value.getClass() );
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> LiteralSqmExpression<T> visitConstant(T value, Class<T> javaType) {
+		if ( Boolean.class.isAssignableFrom( javaType ) ) {
+			if ( (Boolean) value ) {
+				return (LiteralSqmExpression<T>) new LiteralTrueSqmExpression();
+			}
+			else {
+				return (LiteralSqmExpression<T>) new LiteralFalseSqmExpression();
+			}
+		}
+		else if ( Integer.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralIntegerSqmExpression( (Integer) value );
+		}
+		else if ( Long.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralLongSqmExpression( (Long) value );
+		}
+		else if ( Float.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralFloatSqmExpression( (Float) value );
+		}
+		else if ( Double.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralDoubleSqmExpression( (Double) value );
+		}
+		else if ( BigInteger.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralBigIntegerSqmExpression( (BigInteger) value );
+		}
+		else if ( BigDecimal.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralBigDecimalSqmExpression( (BigDecimal) value );
+		}
+		else if ( Character.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralCharacterSqmExpression( (Character) value );
+		}
+		else if ( String.class.isAssignableFrom( javaType ) ) {
+			return (LiteralSqmExpression<T>) new LiteralStringSqmExpression( (String) value );
+		}
+
+		throw new QueryException(
+				"Unexpected literal expression [value=" + value +
+						", javaType=" + javaType.getName() +
+						"]; expecting boolean, int, long, float, double, BigInteger, BigDecimal, char, or String"
 		);
 	}
 
 	@Override
-	public <T> ConstantFieldSqmExpression<T> visitConstant(T value, BasicType typeDescriptor) {
-		// todo : implement
-		throw new NotYetImplementedException();
-
-//		return new ConstantFieldSqmExpression<T>( value, typeDescriptor );
+	public UnaryOperationSqmExpression visitUnaryOperation(
+			UnaryOperationSqmExpression.Operation operation,
+			JpaExpression<?> expression) {
+		return new UnaryOperationSqmExpression( operation, expression.visitExpression( this ) );
 	}
 
 	@Override
 	public UnaryOperationSqmExpression visitUnaryOperation(
 			UnaryOperationSqmExpression.Operation operation,
-			javax.persistence.criteria.Expression expression) {
-		return new UnaryOperationSqmExpression( operation, visitExpression( expression ) );
-	}
-
-	@Override
-	public UnaryOperationSqmExpression visitUnaryOperation(
-			UnaryOperationSqmExpression.Operation operation,
-			javax.persistence.criteria.Expression expression,
+			JpaExpression<?> expression,
 			BasicType resultType) {
-		return new UnaryOperationSqmExpression( operation, visitExpression( expression ), resultType );
+		return new UnaryOperationSqmExpression( operation, expression.visitExpression( this ), resultType );
 	}
 
 	@Override
 	public BinaryArithmeticSqmExpression visitArithmetic(
 			BinaryArithmeticSqmExpression.Operation operation,
-			javax.persistence.criteria.Expression expression1,
-			javax.persistence.criteria.Expression expression2) {
-		final SqmExpression firstOperand = visitExpression( expression1 );
-		final SqmExpression secondOperand = visitExpression( expression2 );
+			JpaExpression<?> expression1,
+			JpaExpression<?> expression2) {
+		final SqmExpression firstOperand = expression1.visitExpression( this );
+		final SqmExpression secondOperand = expression2.visitExpression( this );
 		return new BinaryArithmeticSqmExpression(
 				operation,
 				firstOperand,
@@ -410,19 +410,19 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	@Override
 	public BinaryArithmeticSqmExpression visitArithmetic(
 			BinaryArithmeticSqmExpression.Operation operation,
-			javax.persistence.criteria.Expression expression1,
-			javax.persistence.criteria.Expression expression2,
+			JpaExpression<?> expression1,
+			JpaExpression<?> expression2,
 			BasicType resultType) {
 		return new BinaryArithmeticSqmExpression(
 				operation,
-				visitExpression( expression1 ),
-				visitExpression( expression2 ),
+				expression1.visitExpression( this ),
+				expression2.visitExpression( this ),
 				resultType
 		);
 	}
 
 	@Override
-	public SqmFrom visitIdentificationVariableReference(From reference) {
+	public SqmFrom visitIdentificationVariableReference(JpaFrom<?, ?>  reference) {
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 
@@ -430,7 +430,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SingularAttributeBinding visitAttributeReference(From attributeSource, String attributeName) {
+	public SingularAttributeBinding visitAttributeReference(JpaFrom<?, ?> attributeSource, String attributeName) {
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 
@@ -453,10 +453,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public GenericFunctionSqmExpression visitFunction(
 			String name,
 			BasicType resultTypeDescriptor,
-			List<javax.persistence.criteria.Expression<?>> expressions) {
+			List<JpaExpression<?>> arguments) {
 		final List<SqmExpression> sqmExpressions = new ArrayList<>();
-		for ( javax.persistence.criteria.Expression expression : expressions ) {
-			sqmExpressions.add( visitExpression( expression ) );
+		for ( JpaExpression<?> argument : arguments ) {
+			sqmExpressions.add( argument.visitExpression( this ) );
 		}
 
 		return new GenericFunctionSqmExpression( name, resultTypeDescriptor, sqmExpressions );
@@ -466,41 +466,44 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public GenericFunctionSqmExpression visitFunction(
 			String name,
 			BasicType resultTypeDescriptor,
-			javax.persistence.criteria.Expression<?>... expressions) {
+			JpaExpression<?>[] arguments) {
 		// todo : handle the standard function calls specially...
 		// for now always use the generic expression
-		final List<SqmExpression> arguments = new ArrayList<>();
-		if ( expressions != null ) {
-			for ( javax.persistence.criteria.Expression expression : expressions ) {
-				arguments.add( visitExpression( expression ) );
+		final List<SqmExpression> sqmArguments = new ArrayList<>();
+		if ( arguments != null ) {
+			for ( JpaExpression<?> expression : arguments ) {
+				sqmArguments.add( expression.visitExpression( this ) );
 			}
 
 		}
 		return new GenericFunctionSqmExpression(
 				name,
 				resultTypeDescriptor,
-				arguments
+				sqmArguments
 		);
 	}
 
 	@Override
-	public AvgFunctionSqmExpression visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		final SqmExpression sqmExpression = visitExpression( expression );
+	public AvgFunctionSqmExpression visitAvgFunction(JpaExpression<?> expression, boolean distinct) {
+		final SqmExpression sqmExpression = expression.visitExpression( this );
 		return new AvgFunctionSqmExpression(
 				sqmExpression,
 				distinct,
-				(BasicType) sqmExpression.getExpressionType()
+				sqmExpression.getExpressionType()
 		);
 	}
 
 	@Override
-	public AvgFunctionSqmExpression visitAvgFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new AvgFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
+	public AvgFunctionSqmExpression visitAvgFunction(
+			JpaExpression<?> expression,
+			boolean distinct,
+			BasicType resultType) {
+		return new AvgFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
 	@Override
-	public CountFunctionSqmExpression visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		final SqmExpression sqmExpression = visitExpression( expression );
+	public CountFunctionSqmExpression visitCountFunction(JpaExpression<?> expression, boolean distinct) {
+		final SqmExpression sqmExpression = expression.visitExpression( this );
 		return new CountFunctionSqmExpression(
 				sqmExpression,
 				distinct,
@@ -509,8 +512,11 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public CountFunctionSqmExpression visitCountFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new CountFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
+	public CountFunctionSqmExpression visitCountFunction(
+			JpaExpression<?> expression,
+			boolean distinct,
+			BasicType resultType) {
+		return new CountFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
 	@Override
@@ -527,30 +533,36 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public MaxFunctionSqmExpression visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		final SqmExpression sqmExpression = visitExpression( expression );
-		return new MaxFunctionSqmExpression( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
+	public MaxFunctionSqmExpression visitMaxFunction(JpaExpression<?> expression, boolean distinct) {
+		final SqmExpression sqmExpression = expression.visitExpression( this );
+		return new MaxFunctionSqmExpression( sqmExpression, distinct, sqmExpression.getExpressionType() );
 	}
 
 	@Override
-	public MaxFunctionSqmExpression visitMaxFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new MaxFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
+	public MaxFunctionSqmExpression visitMaxFunction(
+			JpaExpression<?> expression,
+			boolean distinct,
+			BasicType resultType) {
+		return new MaxFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
 	@Override
-	public MinFunctionSqmExpression visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		final SqmExpression sqmExpression = visitExpression( expression );
-		return new MinFunctionSqmExpression( sqmExpression, distinct, (BasicType) sqmExpression.getExpressionType() );
+	public MinFunctionSqmExpression visitMinFunction(JpaExpression<?> expression, boolean distinct) {
+		final SqmExpression sqmExpression = expression.visitExpression( this );
+		return new MinFunctionSqmExpression( sqmExpression, distinct, sqmExpression.getExpressionType() );
 	}
 
 	@Override
-	public MinFunctionSqmExpression visitMinFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new MinFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
+	public MinFunctionSqmExpression visitMinFunction(
+			JpaExpression<?> expression,
+			boolean distinct,
+			BasicType resultType) {
+		return new MinFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
 	@Override
-	public SumFunctionSqmExpression visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct) {
-		final SqmExpression sqmExpression = visitExpression( expression );
+	public SumFunctionSqmExpression visitSumFunction(JpaExpression<?> expression, boolean distinct) {
+		final SqmExpression sqmExpression = expression.visitExpression( this );
 		return new SumFunctionSqmExpression(
 				sqmExpression,
 				distinct,
@@ -559,28 +571,26 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SumFunctionSqmExpression visitSumFunction(javax.persistence.criteria.Expression expression, boolean distinct, BasicType resultType) {
-		return new SumFunctionSqmExpression( visitExpression( expression ), distinct, resultType );
+	public SumFunctionSqmExpression visitSumFunction(
+			JpaExpression<?> expression,
+			boolean distinct,
+			BasicType resultType) {
+		return new SumFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
+	}
+
+	@Override
+	public ConcatSqmExpression visitConcat(JpaExpression<?> expression1, JpaExpression<?> expression2) {
+		return new ConcatSqmExpression( expression1.visitExpression( this ), expression2.visitExpression( this ) );
 	}
 
 	@Override
 	public ConcatSqmExpression visitConcat(
-			javax.persistence.criteria.Expression expression1,
-			javax.persistence.criteria.Expression expression2) {
-		return new ConcatSqmExpression(
-				visitExpression( expression1 ),
-				visitExpression( expression2 )
-		);
-	}
-
-	@Override
-	public ConcatSqmExpression visitConcat(
-			javax.persistence.criteria.Expression expression1,
-			javax.persistence.criteria.Expression expression2,
+			JpaExpression<?> expression1,
+			JpaExpression<?> expression2,
 			BasicType resultType) {
 		return new ConcatSqmExpression(
-				visitExpression( expression1 ),
-				visitExpression( expression2 ),
+				expression1.visitExpression( this ),
+				expression2.visitExpression( this ),
 				resultType
 		);
 	}
@@ -604,8 +614,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SubQuerySqmExpression visitSubQuery(Subquery subquery) {
-		final SqmQuerySpec subQuerySpec = visitQuerySpec( subquery );
+	public SubQuerySqmExpression visitSubQuery(JpaSubquery jpaSubquery) {
+		final SqmQuerySpec subQuerySpec = visitQuerySpec( jpaSubquery.getQuerySpec() );
 
 		return new SubQuerySqmExpression( subQuerySpec, determineTypeDescriptor( subQuerySpec.getSelectClause() ) );
 	}
@@ -624,24 +634,16 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// Predicates
 
 
-	private SqmWhereClause visitWhereClause(AbstractQuery<?> jpaCriteria) {
+	private SqmWhereClause visitWhereClause(JpaQuerySpec<?> jpaQuerySpec) {
 		final SqmWhereClause whereClause = new SqmWhereClause();
-		if ( jpaCriteria.getRestriction() != null ) {
-			whereClause.setPredicate( visitPredicate( jpaCriteria.getRestriction() ) );
+		if ( jpaQuerySpec.getRestriction() != null ) {
+			whereClause.setPredicate( jpaQuerySpec.getRestriction().visitPredicate( this ) );
 		}
 		return whereClause;
 	}
 
-	private SqmPredicate visitPredicate(javax.persistence.criteria.Predicate predicate) {
-		return ( (CriteriaPredicate) predicate ).visitPredicate( this );
-	}
-
-	private SqmPredicate visitPredicate(javax.persistence.criteria.Expression<Boolean> predicate) {
-		return ( (CriteriaPredicate) predicate ).visitPredicate( this );
-	}
-
 	@Override
-	public AndSqmPredicate visitAndPredicate(List<javax.persistence.criteria.Expression<Boolean>> predicates) {
+	public AndSqmPredicate visitAndPredicate(List<JpaPredicate> predicates) {
 		final int predicateCount = predicates.size();
 
 		if ( predicateCount < 2 ) {
@@ -651,15 +653,15 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 
 		AndSqmPredicate result = new AndSqmPredicate(
-				visitPredicate( predicates.get( 0 ) ),
-				visitPredicate( predicates.get( 1 ) )
+				predicates.get( 0 ).visitPredicate( this ),
+				predicates.get( 1 ).visitPredicate( this )
 		);
 
 		if ( predicateCount > 2 ) {
 			for ( int i = 2; i < predicateCount; i++ ) {
 				result = new AndSqmPredicate(
 						result,
-						visitPredicate( predicates.get( i ) )
+						predicates.get( i ).visitPredicate( this )
 				);
 			}
 		}
@@ -668,7 +670,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public OrSqmPredicate visitOrPredicate(List<javax.persistence.criteria.Expression<Boolean>> predicates) {
+	public OrSqmPredicate visitOrPredicate(List<JpaPredicate> predicates) {
 		final int predicateCount = predicates.size();
 
 		if ( predicateCount < 2 ) {
@@ -678,15 +680,15 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 
 		OrSqmPredicate result = new OrSqmPredicate(
-				visitPredicate( predicates.get( 0 ) ),
-				visitPredicate( predicates.get( 1 ) )
+				predicates.get( 0 ).visitPredicate( this ),
+				predicates.get( 1 ).visitPredicate( this )
 		);
 
 		if ( predicateCount > 2 ) {
 			for ( int i = 2; i < predicateCount; i++ ) {
 				result = new OrSqmPredicate(
 						result,
-						visitPredicate( predicates.get( i ) )
+						predicates.get( i ).visitPredicate( this )
 				);
 			}
 		}
@@ -695,51 +697,51 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public EmptinessSqmPredicate visitEmptinessPredicate(From attributeSource, String attributeName, boolean negated) {
+	public EmptinessSqmPredicate visitEmptinessPredicate(JpaFrom attributeSource, String attributeName, boolean negated) {
 		final SingularAttributeBinding attributeReference = visitAttributeReference( attributeSource, attributeName );
 		return new EmptinessSqmPredicate( attributeReference, negated );
 	}
 
 	@Override
-	public MemberOfSqmPredicate visitMemberOfPredicate(From attributeSource, String attributeName, boolean negated) {
+	public MemberOfSqmPredicate visitMemberOfPredicate(JpaFrom attributeSource, String attributeName, boolean negated) {
 		throw new NotYetImplementedException();
 	}
 
 	@Override
 	public BetweenSqmPredicate visitBetweenPredicate(
-			javax.persistence.criteria.Expression expression,
-			javax.persistence.criteria.Expression lowerBound,
-			javax.persistence.criteria.Expression upperBound,
+			JpaExpression<?> expression,
+			JpaExpression<?> lowerBound,
+			JpaExpression<?> upperBound,
 			boolean negated) {
 		return new BetweenSqmPredicate(
-				visitExpression( expression ),
-				visitExpression( lowerBound ),
-				visitExpression( upperBound ),
+				expression.visitExpression( this ),
+				lowerBound.visitExpression( this ),
+				upperBound.visitExpression( this ),
 				negated
 		);
 	}
 
 	@Override
 	public LikeSqmPredicate visitLikePredicate(
-			javax.persistence.criteria.Expression<String> matchExpression,
-			javax.persistence.criteria.Expression<String> pattern,
-			javax.persistence.criteria.Expression<Character> escapeCharacter,
+			JpaExpression<String> matchExpression,
+			JpaExpression<String> pattern,
+			JpaExpression<Character> escapeCharacter,
 			boolean negated) {
 		return new LikeSqmPredicate(
-				visitExpression( matchExpression ),
-				visitExpression( pattern ),
-				visitExpression( escapeCharacter ),
+				matchExpression.visitExpression( this ),
+				pattern.visitExpression( this ),
+				escapeCharacter.visitExpression( this ),
 				negated
 		);
 	}
 
 	@Override
 	public InSubQuerySqmPredicate visitInSubQueryPredicate(
-			javax.persistence.criteria.Expression testExpression,
-			Subquery subquery,
+			JpaExpression<?> testExpression,
+			JpaSubquery<?> subquery,
 			boolean negated) {
 		return new InSubQuerySqmPredicate(
-				visitExpression( testExpression ),
+				testExpression.visitExpression( this ),
 				visitSubQuery( subquery ),
 				negated
 		);
@@ -747,142 +749,106 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	public InListSqmPredicate visitInTupleListPredicate(
-			javax.persistence.criteria.Expression testExpression,
-			List<javax.persistence.criteria.Expression> expressionsList,
+			JpaExpression<?> testExpression,
+			List<JpaExpression<?>> expressionsList,
 			boolean negated) {
-		final List<SqmExpression> expressions = new ArrayList<SqmExpression>();
-		for ( javax.persistence.criteria.Expression expression : expressionsList ) {
-			expressions.add( visitExpression( expression ) );
+		final List<SqmExpression> expressions = new ArrayList<>();
+		for ( JpaExpression<?> expression : expressionsList ) {
+			expressions.add( expression.visitExpression( this ) );
 		}
 
 		return new InListSqmPredicate(
-				visitExpression( testExpression ),
+				testExpression.visitExpression( this ),
 				expressions,
 				negated
 		);
 	}
 
 	@Override
-	public BooleanExpressionSqmPredicate visitBooleanExpressionPredicate(BooleanExpressionCriteriaPredicate predicate) {
-		return new BooleanExpressionSqmPredicate( visitExpression( predicate.getOperand() ) );
+	public BooleanExpressionSqmPredicate visitBooleanExpressionPredicate(
+			JpaExpression<Boolean> testExpression,
+			Boolean assertValue) {
+		// for now we only support TRUE assertions
+		assert assertValue == Boolean.TRUE;
+		return new BooleanExpressionSqmPredicate( testExpression.visitExpression( this ) );
 	}
 
 	@Override
-	public SqmExpression visitRoot(RootImplementor root) {
-		return currentQuerySpecProcessingState.findFromElementByIdentificationVariable( root.getAlias() );
+	public SqmExpression visitRoot(JpaRoot root) {
+		return querySpecProcessingStateStack.getCurrent().findFromElementByIdentificationVariable( root.getAlias() );
 	}
 
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// New sigs
 
+
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> LiteralSqmExpression<T> visitLiteral(LiteralCriteriaExpression expression) {
-		if ( expression.getLiteral() == null ) {
-			return (LiteralSqmExpression<T>) new LiteralNullSqmExpression();
-		}
+	public SqmExpression visitParameter(String name, int position, Class javaType) {
+		// todo : add hooks for knowing when we are in a context that allows "multi-valued parameter bindings"
+		//		for now assume no...
+		boolean canBeMultiValued = false;
 
-		final Class literalJavaType = expression.getJavaType();
-		if ( Boolean.class.isAssignableFrom( literalJavaType ) ) {
-			if ( (Boolean) expression.getLiteral() ) {
-				return (LiteralSqmExpression<T>) new LiteralTrueSqmExpression();
-			}
-			else {
-				return (LiteralSqmExpression<T>) new LiteralFalseSqmExpression();
-			}
+		if ( isNotEmpty( name ) ) {
+			return new NamedParameterSqmExpression( name, canBeMultiValued );
 		}
-		else if ( Integer.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralIntegerSqmExpression( (Integer) expression.getLiteral() );
+		else {
+			assert position >= 0;
+			return new PositionalParameterSqmExpression( position, canBeMultiValued );
 		}
-		else if ( Long.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralLongSqmExpression( (Long) expression.getLiteral() );
-		}
-		else if ( Float.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralFloatSqmExpression( (Float) expression.getLiteral() );
-		}
-		else if ( Double.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralDoubleSqmExpression( (Double) expression.getLiteral() );
-		}
-		else if ( BigInteger.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralBigIntegerSqmExpression( (BigInteger) expression.getLiteral() );
-		}
-		else if ( BigDecimal.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralBigDecimalSqmExpression( (BigDecimal) expression.getLiteral() );
-		}
-		else if ( Character.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralCharacterSqmExpression( (Character) expression.getLiteral() );
-		}
-		else if ( String.class.isAssignableFrom( literalJavaType ) ) {
-			return (LiteralSqmExpression<T>) new LiteralStringSqmExpression( (String) expression.getLiteral() );
-		}
-
-		throw new QueryException(
-				"Unexpected literal expression [value=" + expression.getLiteral() +
-						", javaType=" + literalJavaType.getName() +
-						"]; expecting boolean, int, long, float, double, BigInteger, BigDecimal, char, or String"
-		);
 	}
 
 	@Override
-	public <T> ParameterSqmExpression visitParameter(ParameterCriteriaExpression<T> expression) {
-		// the `false` literal here indicates whether multi-valued binding is allowed for this parameter
-		// todo : we need to account for this ^^ like in HQL parsing...
-
-		if ( isNotEmpty( expression.getName() ) ) {
-			return new NamedParameterSqmExpression( expression.getName(), false, expression.getExpressionSqmType() );
-		}
-		else if ( expression.getPosition() != null ) {
-			return new PositionalParameterSqmExpression( expression.getPosition(), false, expression.getExpressionSqmType() );
-		}
-
-		throw new QueryException( "ParameterExpression did not define name nor position" );
-	}
-
-	@Override
-	public <T,Y> CastFunctionSqmExpression visitCastFunction(CastFunctionCriteriaExpression<T,Y> function) {
+	public <T, C> CastFunctionSqmExpression visitCastFunction(
+			JpaExpression<T> expressionToCast,
+			Class<C> castTarget) {
 		return new CastFunctionSqmExpression(
-				function.getExpressionToCast().visitExpression( this ),
-				function.getFunctionResultType()
+				expressionToCast.visitExpression( this ),
+				// ugh
+				// todo : decide how we want to handle basic types in SQM
+				parsingContext.getConsumerContext().getDomainMetamodel().resolveCastTargetType( castTarget.getName() )
 		);
 	}
 
 	@Override
-	public <T> GenericFunctionSqmExpression visitGenericFunction(GenericFunctionCriteriaExpression<T> function) {
+	public GenericFunctionSqmExpression visitGenericFunction(
+			String functionName,
+			BasicType resultType,
+			List<JpaExpression<?>> jpaArguments) {
 		final List<SqmExpression> arguments;
-		if ( function.getArguments() != null && !function.getArguments().isEmpty() ) {
+		if ( jpaArguments != null && !jpaArguments.isEmpty() ) {
 			arguments = new ArrayList<>();
-			for ( CriteriaExpression<?> argument : function.getArguments() ) {
+			for ( JpaExpression<?> argument : jpaArguments ) {
 				arguments.add( argument.visitExpression( this ) );
 			}
 		}
 		else {
 			arguments = Collections.emptyList();
 		}
-		return new GenericFunctionSqmExpression(
-				function.getFunctionName(),
-				function.getFunctionResultType(),
-				arguments
-		);
+
+		return new GenericFunctionSqmExpression( functionName, resultType, arguments );
 	}
 
 	@Override
-	public RelationalSqmPredicate visitRelationalPredicate(ComparisonCriteriaPredicate predicate) {
+	public RelationalSqmPredicate visitRelationalPredicate(
+			RelationalPredicateOperator operator,
+			JpaExpression<?> lhs,
+			JpaExpression<?> rhs) {
 		return new RelationalSqmPredicate(
-				predicate.getComparisonOperator(),
-				visitExpression( predicate.getLeftHandOperand() ),
-				visitExpression( predicate.getRightHandOperand() )
+				operator,
+				lhs.visitExpression( this ),
+				rhs.visitExpression( this )
 		);
 	}
 
 	@Override
-	public NegatedSqmPredicate visitNegatedPredicate(NegatedCriteriaPredicate predicate) {
-		return new NegatedSqmPredicate( visitPredicate( predicate.getPredicateToBeNegated() ) );
+	public NegatedSqmPredicate visitNegatedPredicate(JpaPredicate affirmativePredicate) {
+		return new NegatedSqmPredicate( affirmativePredicate.visitPredicate( this ) );
 	}
 
 	@Override
-	public NullnessSqmPredicate visitNullnessPredicate(NullnessCriteriaPredicate predicate) {
-		return new NullnessSqmPredicate( visitExpression( predicate.getOperand() ) );
+	public NullnessSqmPredicate visitNullnessPredicate(JpaExpression<?> testExpression) {
+		return new NullnessSqmPredicate( testExpression.visitExpression( this ) );
 	}
 
 }

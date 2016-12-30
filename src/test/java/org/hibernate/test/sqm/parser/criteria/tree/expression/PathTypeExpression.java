@@ -10,9 +10,8 @@ import java.io.Serializable;
 
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.test.sqm.domain.Type;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.path.AbstractPathImpl;
@@ -22,7 +21,7 @@ import org.hibernate.test.sqm.parser.criteria.tree.path.AbstractPathImpl;
  *
  * @author Steve Ebersole
  */
-public class PathTypeExpression<T> extends AbstractCriteriaExpressionImpl<T> implements Serializable {
+public class PathTypeExpression<T> extends AbstractJpaExpressionImpl<T> implements Serializable {
 	private final AbstractPathImpl<T> pathImpl;
 
 	public PathTypeExpression(
@@ -36,11 +35,6 @@ public class PathTypeExpression<T> extends AbstractCriteriaExpressionImpl<T> imp
 
 	@Override
 	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		throw new NotYetImplementedException(  );
-	}
-
-	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
 		throw new NotYetImplementedException(  );
 	}
 }

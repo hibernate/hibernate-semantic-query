@@ -8,12 +8,9 @@ package org.hibernate.test.sqm.parser.criteria.tree;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import javax.persistence.Query;
+import java.util.stream.Collectors;
 import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -25,21 +22,26 @@ import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.EntityType;
 
+import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
+import org.hibernate.sqm.parser.criteria.tree.JpaQuerySpec;
+import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
+
 import org.jboss.logging.Logger;
 
 /**
  * The Hibernate implementation of the JPA {@link CriteriaQuery} contract.  Mostly a set of delegation to its
- * internal {@link QueryStructure}.
+ * internal {@link JpaQuerySpecImpl}.
  *
  * @author Steve Ebersole
  */
-public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<T>, Serializable {
+public class CriteriaQueryImpl<T> extends AbstractNode implements JpaCriteriaQuery<T>, Serializable {
 	private static final Logger log = Logger.getLogger( CriteriaQueryImpl.class );
 
 	private final Class<T> returnType;
 
-	private final QueryStructure<T> queryStructure;
-	private List<Order> orderSpecs = Collections.emptyList();
+	private final JpaQuerySpecImpl<T> queryStructure;
 
 
 	public CriteriaQueryImpl(
@@ -47,7 +49,7 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 			Class<T> returnType) {
 		super( criteriaBuilder );
 		this.returnType = returnType;
-		this.queryStructure = new QueryStructure<T>( this, criteriaBuilder );
+		this.queryStructure = new JpaQuerySpecImpl<T>( this, criteriaBuilder );
 	}
 
 	@Override
@@ -75,13 +77,15 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 		return ( Selection<T> ) queryStructure.getSelection();
 	}
 
-	public void applySelection(Selection<? extends T> selection) {
+	public void applySelection(JpaSelection<? extends T> selection) {
 		queryStructure.setSelection( selection );
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public CriteriaQuery<T> select(Selection<? extends T> selection) {
-		applySelection( selection );
+		criteriaBuilder().check( selection );
+		applySelection( (JpaSelection<? extends T>) selection );
 		return this;
 	}
 
@@ -94,13 +98,13 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 	@Override
 	@SuppressWarnings({ "unchecked" })
 	public CriteriaQuery<T> multiselect(List<Selection<?>> selections) {
-		final Selection<? extends T> selection;
+		final JpaSelection<? extends T> selection;
 
 		if ( Tuple.class.isAssignableFrom( getResultType() ) ) {
-			selection = ( Selection<? extends T> ) criteriaBuilder().tuple( selections );
+			selection = (JpaSelection<? extends T>) criteriaBuilder().tuple( selections );
 		}
 		else if ( getResultType().isArray() ) {
-			selection = ( Selection<? extends T> )  criteriaBuilder().array(
+			selection = ( JpaSelection<? extends T> )  criteriaBuilder().array(
 					(Class<Object[]>) getResultType(),
 					selections
 			);
@@ -113,11 +117,11 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 					);
 				}
 				case 1: {
-					selection = ( Selection<? extends T> ) selections.get( 0 );
+					selection = (JpaSelection<? extends T>) selections.get( 0 );
 					break;
 				}
 				default: {
-					selection = ( Selection<? extends T> ) criteriaBuilder().array( selections );
+					selection = (JpaSelection<? extends T>) criteriaBuilder().array( selections );
 				}
 			}
 		}
@@ -133,7 +137,7 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 
 	@Override
 	public Set<Root<?>> getRoots() {
-		return queryStructure.getRoots();
+		return queryStructure.getFromClause().getRoots().stream().collect( Collectors.toSet() );
 	}
 
 	@Override
@@ -175,18 +179,22 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 
 	@Override
 	public List<Expression<?>> getGroupList() {
-		return queryStructure.getGroupings();
+		return queryStructure.getGroupings().stream().collect( Collectors.toList() );
 	}
 
 	@Override
 	public CriteriaQuery<T> groupBy(Expression<?>... groupings) {
-		queryStructure.setGroupings( groupings );
+		queryStructure.setGroupings( (JpaExpression<?>[]) groupings );
 		return this;
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public CriteriaQuery<T> groupBy(List<Expression<?>> groupings) {
-		queryStructure.setGroupings( groupings );
+		groupings.forEach( expr -> {
+			criteriaBuilder().check( expr );
+			queryStructure.setGroupings( (List<JpaExpression<?>>) expr );
+		} );
 		return this;
 	}
 
@@ -212,23 +220,26 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 
 	@Override
 	public List<Order> getOrderList() {
-		return orderSpecs;
+		return queryStructure.getOrderList().stream().collect( Collectors.toList() );
 	}
 
 	@Override
 	public CriteriaQuery<T> orderBy(Order... orders) {
-		if ( orders != null && orders.length > 0 ) {
-			orderSpecs = Arrays.asList( orders );
-		}
-		else {
-			orderSpecs = Collections.emptyList();
+		queryStructure.clearOrderList();
+		for ( Order order : orders ) {
+			criteriaBuilder().check( order );
+			queryStructure.addOrderBy( (JpaOrder) order );
 		}
 		return this;
 	}
 
 	@Override
 	public CriteriaQuery<T> orderBy(List<Order> orders) {
-		orderSpecs = orders;
+		queryStructure.clearOrderList();
+		orders.forEach( order -> {
+			criteriaBuilder().check( order );
+			queryStructure.addOrderBy( (JpaOrder) order );
+		} );
 		return this;
 	}
 
@@ -278,5 +289,10 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 		//
 		// todo : should we put an implicit marker in the selection to this fact to make later processing easier?
 		return true;
+	}
+
+	@Override
+	public JpaQuerySpec getQuerySpec() {
+		return queryStructure;
 	}
 }

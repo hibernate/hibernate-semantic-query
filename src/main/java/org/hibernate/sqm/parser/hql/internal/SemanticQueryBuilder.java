@@ -137,6 +137,7 @@ import org.hibernate.sqm.query.predicate.NegatableSqmPredicate;
 import org.hibernate.sqm.query.predicate.NegatedSqmPredicate;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmWhereClause;
@@ -1034,7 +1035,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalPredicateOperator.EQUAL, lhs, rhs );
 	}
 
 	@Override
@@ -1054,7 +1055,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.NOT_EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalPredicateOperator.NOT_EQUAL, lhs, rhs );
 	}
 
 	@Override
@@ -1074,7 +1075,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.GREATER_THAN, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalPredicateOperator.GREATER_THAN, lhs, rhs );
 	}
 
 	@Override
@@ -1094,7 +1095,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.GREATER_THAN_OR_EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalPredicateOperator.GREATER_THAN_OR_EQUAL, lhs, rhs );
 	}
 
 	@Override
@@ -1114,7 +1115,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.LESS_THAN, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalPredicateOperator.LESS_THAN, lhs, rhs );
 	}
 
 	@Override
@@ -1134,7 +1135,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			}
 		}
 
-		return new RelationalSqmPredicate( RelationalSqmPredicate.Operator.LESS_THAN_OR_EQUAL, lhs, rhs );
+		return new RelationalSqmPredicate( RelationalPredicateOperator.LESS_THAN_OR_EQUAL, lhs, rhs );
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
+import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
@@ -73,7 +74,7 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getOperator(), is( RelationalSqmPredicate.Operator.EQUAL ) );
+		assertThat( relationalPredicate.getOperator(), is( RelationalPredicateOperator.EQUAL ) );
 
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 311 ) );
@@ -101,7 +102,7 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getOperator(), is( RelationalSqmPredicate.Operator.GREATER_THAN ) );
+		assertThat( relationalPredicate.getOperator(), is( RelationalPredicateOperator.GREATER_THAN ) );
 
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );

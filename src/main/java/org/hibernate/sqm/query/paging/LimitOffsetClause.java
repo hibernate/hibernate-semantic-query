@@ -7,11 +7,6 @@
 package org.hibernate.sqm.query.paging;
 
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.order.SortSpecification;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Christian Beikov

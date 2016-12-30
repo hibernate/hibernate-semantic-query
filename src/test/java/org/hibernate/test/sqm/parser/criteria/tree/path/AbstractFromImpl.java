@@ -28,10 +28,10 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
 
 
 /**
@@ -41,7 +41,7 @@ import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
  */
 public abstract class AbstractFromImpl<Z, X>
 		extends AbstractPathImpl<X>
-		implements From<Z, X>, FromImplementor<Z, X>, Serializable {
+		implements JpaFrom<Z, X>, Serializable {
 
 	public static final JoinType DEFAULT_JOIN_TYPE = JoinType.INNER;
 
@@ -54,20 +54,13 @@ public abstract class AbstractFromImpl<Z, X>
 		this( criteriaBuilder, sqmType, javaType, null );
 	}
 
-	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, org.hibernate.test.sqm.domain.Type sqmType, Class<X> javaType, PathSource pathSource) {
+	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, org.hibernate.test.sqm.domain.Type sqmType, Class<X> javaType, JpaPathSource pathSource) {
 		super( criteriaBuilder, sqmType, javaType, pathSource );
 	}
 
 	@Override
-	public void prepareAlias(ImplicitAliasGenerator implicitAliasGenerator) {
-		if ( getAlias() == null ) {
-			setAlias( implicitAliasGenerator.buildUniqueImplicitAlias() );
-		}
-	}
-
-	@Override
 	@SuppressWarnings({"unchecked"})
-	public PathSource<Z> getPathSource() {
+	public JpaPathSource<Z> getPathSource() {
 		return super.getPathSource();
 	}
 
@@ -81,7 +74,6 @@ public abstract class AbstractFromImpl<Z, X>
 		return true;
 	}
 
-	@Override
 	public Attribute<?, ?> getAttribute() {
 		return null;
 	}
@@ -110,7 +102,7 @@ public abstract class AbstractFromImpl<Z, X>
 	//		that may be cleaner code-wise, it is certainly means creating a lot of "extra"
 	//		classes since we'd need one for each Subquery#correlate method
 
-	private FromImplementor<Z, X> correlationParent;
+	private JpaFrom<Z, X> correlationParent;
 
 	private JoinScope<X> joinScope = new BasicJoinScope();
 
@@ -162,7 +154,7 @@ public abstract class AbstractFromImpl<Z, X>
 	}
 
 	@Override
-	public FromImplementor<Z, X> getCorrelationParent() {
+	public JpaFrom<Z, X> getCorrelationParent() {
 		if ( correlationParent == null ) {
 			throw new IllegalStateException(
 					String.format(
@@ -182,10 +174,10 @@ public abstract class AbstractFromImpl<Z, X>
 //		return correlationDelegate;
 //	}
 
-	protected abstract FromImplementor<Z, X> createCorrelationDelegate();
+	protected abstract JpaFrom<Z, X> createCorrelationDelegate();
 
 	@Override
-	public void prepareCorrelationDelegate(FromImplementor<Z, X> parent) {
+	public void prepareCorrelationDelegate(JpaFrom<Z, X> parent) {
 		this.joinScope = new CorrelationJoinScope();
 		this.correlationParent = parent;
 	}

@@ -9,21 +9,23 @@ package org.hibernate.test.sqm.parser.criteria.tree.path;
 import java.io.Serializable;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.test.sqm.domain.EntityType;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.path.RootImplementor;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
+import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
+import org.hibernate.test.sqm.domain.EntityType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
 
 /**
  * Hibernate implementation of the JPA {@link Root} contract
  *
  * @author Steve Ebersole
  */
-public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplementor<X>, Serializable {
+public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Serializable {
 	private final EntityType entityType;
 	private final boolean allowJoins;
 
@@ -49,7 +51,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 	}
 
 	@Override
-	protected FromImplementor<X, X> createCorrelationDelegate() {
+	protected JpaFrom<X, X> createCorrelationDelegate() {
 		return new RootImpl<X>( criteriaBuilder(), getEntityType() );
 	}
 
@@ -92,7 +94,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 
 	@Override
 	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		container.add( visitExpression( visitor ), getAlias() );
+		container.add( visitor.visitRoot( this ), getAlias() );
 	}
 
 	public static class TreatedRoot<T> extends RootImpl<T> {
@@ -123,7 +125,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements RootImplemento
 		}
 
 		@Override
-		protected PathSource getPathSourceForSubPaths() {
+		protected JpaPathSource<T> getPathSourceForSubPaths() {
 			return this;
 		}
 	}

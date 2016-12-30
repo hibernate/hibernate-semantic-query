@@ -10,55 +10,57 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.predicate.CriteriaPredicate;
-import org.hibernate.sqm.parser.criteria.spi.predicate.NegatedCriteriaPredicate;
+import org.hibernate.sqm.parser.ParsingException;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
-import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 
 /**
  * @author Steve Ebersole
  */
-public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Boolean>
-		implements PredicateImplementor, NegatedCriteriaPredicate, Serializable {
-	private final PredicateImplementor predicate;
+public class NegatedPredicateWrapper
+		extends AbstractJpaExpressionImpl<Boolean>
+		implements JpaPredicate, Serializable {
+	private final JpaPredicate predicate;
 	private final BooleanOperator negatedOperator;
-	private final List<Expression<Boolean>> negatedExpressions;
+	private final List<JpaPredicate> negatedPredicates;
 
 	@SuppressWarnings("unchecked")
-	public NegatedPredicateWrapper(PredicateImplementor predicate) {
+	public NegatedPredicateWrapper(JpaPredicate predicate) {
 		super(
-				predicate.criteriaBuilder(),
-				(Type) ( (CriteriaExpression) predicate ).getExpressionSqmType(),
+				(CriteriaBuilderImpl) predicate.criteriaBuilder(),
+				null,
 				Boolean.class
 		);
 		this.predicate = predicate;
-		this.negatedOperator = predicate.isJunction()
+		this.negatedOperator = predicate.getOperator() == BooleanOperator.AND
 				? CompoundPredicate.reverseOperator( predicate.getOperator() )
 				: predicate.getOperator();
-		this.negatedExpressions = negateCompoundExpressions( predicate.getExpressions(), predicate.criteriaBuilder() );
+		this.negatedPredicates = negateCompoundExpressions(
+				predicate.getExpressions(),
+				(CriteriaBuilderImpl) predicate.criteriaBuilder()
+		);
 	}
 
-	private static List<Expression<Boolean>> negateCompoundExpressions(
+	private static List<JpaPredicate> negateCompoundExpressions(
 			List<Expression<Boolean>> expressions,
 			CriteriaBuilderImpl criteriaBuilder) {
 		if ( expressions == null || expressions.isEmpty() ) {
 			return Collections.emptyList();
 		}
 
-		final List<Expression<Boolean>> negatedExpressions = new ArrayList<Expression<Boolean>>();
+		final List<JpaPredicate> negatedExpressions = new ArrayList<>();
 		for ( Expression<Boolean> expression : expressions ) {
 			if ( Predicate.class.isInstance( expression ) ) {
-				negatedExpressions.add( ( (Predicate) expression ).not() );
+				negatedExpressions.add( ( (JpaPredicate) expression ).not() );
 			}
 			else {
 				negatedExpressions.add( criteriaBuilder.not( expression ) );
@@ -73,28 +75,18 @@ public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Bool
 	}
 
 	@Override
-	public boolean isJunction() {
-		return predicate.isJunction();
-	}
-
-	@Override
 	public boolean isNegated() {
-		return ! predicate.isNegated();
+		return !predicate.isNegated();
 	}
 
 	@Override
 	public List<Expression<Boolean>> getExpressions() {
-		return negatedExpressions;
+		return negatedPredicates.stream().collect( Collectors.toList() );
 	}
 
 	@Override
-	public Predicate not() {
+	public JpaPredicate not() {
 		return new NegatedPredicateWrapper( this );
-	}
-
-	@Override
-	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		throw new UnsupportedOperationException( "Not expecting call to visitExpression on predicate" );
 	}
 
 	@Override
@@ -103,13 +95,7 @@ public class NegatedPredicateWrapper extends AbstractCriteriaExpressionImpl<Bool
 	}
 
 	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		throw new UnsupportedOperationException( "Predicates cannot be used as select expression" );
-
-	}
-
-	@Override
-	public CriteriaPredicate getPredicateToBeNegated() {
-		return predicate;
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
+		throw new ParsingException( "Unexpected call to visitExpression on JpaPredicate" );
 	}
 }

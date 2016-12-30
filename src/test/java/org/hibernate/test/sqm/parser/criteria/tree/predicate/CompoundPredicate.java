@@ -10,10 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.hibernate.test.sqm.domain.BasicType;
@@ -29,7 +31,7 @@ public class CompoundPredicate
 		extends AbstractPredicateImpl
 		implements Serializable {
 	private BooleanOperator operator;
-	private final List<Expression<Boolean>> expressions = new ArrayList<Expression<Boolean>>();
+	private final List<JpaPredicate> predicates = new ArrayList<>();
 
 	/**
 	 * Constructs an empty conjunction or disjunction.
@@ -82,8 +84,8 @@ public class CompoundPredicate
 	}
 
 	private void applyExpressions(List<Expression<Boolean>> expressions) {
-		this.expressions.clear();
-		this.expressions.addAll( expressions );
+		this.predicates.clear();
+		expressions.forEach( expr -> this.predicates.add( criteriaBuilder().wrap( expr ) ) );
 	}
 
 	@Override
@@ -93,10 +95,9 @@ public class CompoundPredicate
 
 	@Override
 	public List<Expression<Boolean>> getExpressions() {
-		return expressions;
+		return predicates.stream().collect( Collectors.toList() );
 	}
 
-	@Override
 	public boolean isJunction() {
 		return true;
 	}
@@ -107,7 +108,7 @@ public class CompoundPredicate
 	 * 2. not (x && y) is (not x || not y)
 	 */
 	@Override
-	public Predicate not() {
+	public JpaPredicate not() {
 		return new NegatedPredicateWrapper( this );
 	}
 
@@ -130,10 +131,10 @@ public class CompoundPredicate
 	@Override
 	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
 		if ( operator == BooleanOperator.AND ) {
-			return visitor.visitAndPredicate( getExpressions() );
+			return visitor.visitAndPredicate( predicates );
 		}
 		else {
-			return visitor.visitOrPredicate( getExpressions() );
+			return visitor.visitOrPredicate( predicates );
 		}
 	}
 }

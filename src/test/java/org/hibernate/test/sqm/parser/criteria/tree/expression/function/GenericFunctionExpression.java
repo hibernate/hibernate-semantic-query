@@ -10,13 +10,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.expression.function.GenericFunctionCriteriaExpression;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -26,15 +24,15 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  */
 public class GenericFunctionExpression<X>
 		extends AbstractFunctionExpression<X>
-		implements GenericFunctionCriteriaExpression<X> {
-	private final List<CriteriaExpression<?>> arguments;
+		implements JpaExpression<X> {
+	private final List<JpaExpression<?>> arguments;
 
 	public GenericFunctionExpression(
 			String functionName,
 			BasicType sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder) {
-		this( functionName, sqmType, javaType, criteriaBuilder, Collections.<CriteriaExpression<?>>emptyList() );
+		this( functionName, sqmType, javaType, criteriaBuilder, Collections.emptyList() );
 	}
 
 	public GenericFunctionExpression(
@@ -42,7 +40,7 @@ public class GenericFunctionExpression<X>
 			BasicType sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder,
-			CriteriaExpression<?>... arguments) {
+			JpaExpression<?>... arguments) {
 		this( functionName, sqmType, javaType, criteriaBuilder, Arrays.asList( arguments ) );
 	}
 
@@ -51,7 +49,7 @@ public class GenericFunctionExpression<X>
 			BasicType sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder,
-			List<CriteriaExpression<?>> arguments) {
+			List<JpaExpression<?>> arguments) {
 		super( functionName, sqmType, javaType, criteriaBuilder);
 		this.arguments = arguments;
 	}
@@ -60,23 +58,16 @@ public class GenericFunctionExpression<X>
 		return number + (int)( number*.75 ) + 1;
 	}
 
-	@Override
-	public boolean isAggregation() {
-		return false;
-	}
-
-	@Override
-	public List<CriteriaExpression<?>> getArguments() {
+	public List<JpaExpression<?>> getArguments() {
 		return arguments;
 	}
 
 	@Override
 	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitGenericFunction( this );
-	}
-
-	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		container.add( visitExpression( visitor ), getAlias() );
+		return visitor.visitGenericFunction(
+				getFunctionName(),
+				getFunctionResultType(),
+				getArguments()
+		);
 	}
 }

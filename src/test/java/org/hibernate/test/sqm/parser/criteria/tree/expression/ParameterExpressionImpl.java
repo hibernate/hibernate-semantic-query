@@ -7,13 +7,13 @@
 package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
+import javax.persistence.criteria.ParameterExpression;
+
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.hibernate.test.sqm.domain.Type;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.ParameterCriteriaExpression;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
-
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -23,8 +23,8 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  * @author Steve Ebersole
  */
 public class ParameterExpressionImpl<T>
-		extends AbstractCriteriaExpressionImpl<T>
-		implements ParameterCriteriaExpression<T>, Serializable {
+		extends AbstractJpaExpressionImpl<T>
+		implements JpaExpression<T>, ParameterExpression<T>, Serializable {
 	private final String name;
 	private final Integer position;
 
@@ -57,12 +57,10 @@ public class ParameterExpressionImpl<T>
 		this.position = null;
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
 
-	@Override
 	public Integer getPosition() {
 		return position;
 	}
@@ -73,12 +71,6 @@ public class ParameterExpressionImpl<T>
 
 	@Override
 	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		return visitor.visitParameter( this );
-	}
-
-	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		// for now, disallow parameters as selections.  ultimately would need wrapped in cast
-		throw new UnsupportedOperationException( "Parameters are not supported as selections" );
+		return visitor.visitParameter( getName(), getPosition(), getJavaType() );
 	}
 }

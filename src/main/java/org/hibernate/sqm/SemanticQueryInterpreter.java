@@ -63,7 +63,15 @@ public class SemanticQueryInterpreter {
 	 * @return The semantic representation of the incoming criteria query.
 	 */
 	public static SqmSelectStatement interpret(CriteriaQuery query, ConsumerContext consumerContext) {
-		return CriteriaInterpreter.interpretSelectCriteria( query, new ParsingContext( consumerContext ) );
+		try {
+			return CriteriaInterpreter.interpretSelectCriteria( query, new ParsingContext( consumerContext ) );
+		}
+		catch (QueryException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new InterpretationException( "<criteria>", e );
+		}
 	}
 
 	/**

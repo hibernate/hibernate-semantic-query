@@ -11,13 +11,15 @@ import java.util.List;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Selection;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
+import org.hibernate.sqm.parser.ParsingException;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 
 /**
  * Basic template support for {@link Predicate} implementors providing
@@ -26,8 +28,8 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaEx
  * @author Steve Ebersole
  */
 public abstract class AbstractPredicateImpl
-		extends AbstractCriteriaExpressionImpl<Boolean>
-		implements PredicateImplementor, Serializable {
+		extends AbstractJpaExpressionImpl<Boolean>
+		implements JpaPredicate, Serializable {
 
 	protected AbstractPredicateImpl(CriteriaBuilderImpl criteriaBuilder, BasicType<Boolean> sqmType) {
 		super( criteriaBuilder, sqmType, Boolean.class );
@@ -37,19 +39,8 @@ public abstract class AbstractPredicateImpl
 		return false;
 	}
 
-	public Predicate not() {
+	public JpaPredicate not() {
 		return new NegatedPredicateWrapper( this );
-	}
-
-
-	@Override
-	public SqmExpression visitExpression(CriteriaVisitor visitor) {
-		throw new UnsupportedOperationException( "Not expecting call to visitExpression on predicate" );
-	}
-
-	@Override
-	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
-		throw new UnsupportedOperationException( "Predicates cannot be used as select expression" );
 	}
 
 
@@ -67,4 +58,13 @@ public abstract class AbstractPredicateImpl
 		return super.getCompoundSelectionItems();
 	}
 
+	@Override
+	public SqmExpression visitExpression(CriteriaVisitor visitor) {
+		throw new ParsingException( "Unexpected call to visitExpression on JpaPredicate" );
+	}
+
+	@Override
+	public void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container) {
+		throw new ParsingException( "Unexpected call to visitSelections on JpaPredicate" );
+	}
 }

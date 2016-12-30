@@ -8,9 +8,9 @@ package org.hibernate.test.sqm.parser.criteria.tree.predicate;
 
 import java.io.Serializable;
 
-import org.hibernate.sqm.parser.criteria.spi.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.spi.expression.CriteriaExpression;
-import org.hibernate.sqm.parser.criteria.spi.predicate.NullnessCriteriaPredicate;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
@@ -26,8 +26,8 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  */
 public class NullnessPredicate
 		extends AbstractSimplePredicate
-		implements NullnessCriteriaPredicate, Serializable {
-	private final CriteriaExpression<?> operand;
+		implements JpaPredicate, Serializable {
+	private final JpaExpression<?> operand;
 
 	/**
 	 * Constructs the affirmitive form of nullness checking (<i>IS NULL</i>).  To
@@ -37,18 +37,17 @@ public class NullnessPredicate
 	 * @param criteriaBuilder The query builder from whcih this originates.
 	 * @param operand The expression to check.
 	 */
-	public NullnessPredicate(CriteriaBuilderImpl criteriaBuilder, CriteriaExpression<?> operand) {
+	public NullnessPredicate(CriteriaBuilderImpl criteriaBuilder, JpaExpression<?> operand) {
 		super( criteriaBuilder );
 		this.operand = operand;
 	}
 
-	@Override
-	public CriteriaExpression<?> getOperand() {
+	public JpaExpression<?> getOperand() {
 		return operand;
 	}
 
 	@Override
 	public SqmPredicate visitPredicate(CriteriaVisitor visitor) {
-		return visitor.visitNullnessPredicate( this );
+		return visitor.visitNullnessPredicate( operand );
 	}
 }

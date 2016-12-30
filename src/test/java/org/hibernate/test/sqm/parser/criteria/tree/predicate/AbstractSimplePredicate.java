@@ -12,8 +12,11 @@ import java.util.List;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.test.sqm.domain.BasicType;
+import org.hibernate.sqm.parser.ParsingException;
+import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.query.expression.SqmExpression;
 
+import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 
@@ -39,10 +42,6 @@ public abstract class AbstractSimplePredicate
 		assert sqmType != null;
 	}
 
-	@Override
-	public boolean isJunction() {
-		return false;
-	}
 
 	@Override
 	public Predicate.BooleanOperator getOperator() {
@@ -53,5 +52,4 @@ public abstract class AbstractSimplePredicate
 	public final List<Expression<Boolean>> getExpressions() {
 		return NO_EXPRESSIONS;
 	}
-
 }

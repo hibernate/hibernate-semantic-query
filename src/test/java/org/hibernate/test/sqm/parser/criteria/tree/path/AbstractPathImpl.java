@@ -18,11 +18,12 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.test.sqm.domain.Type;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPath;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
 
+import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-import org.hibernate.test.sqm.parser.criteria.tree.PathSource;
-import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractCriteriaExpressionImpl;
+import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.PathTypeExpression;
 
 /**
@@ -31,10 +32,10 @@ import org.hibernate.test.sqm.parser.criteria.tree.expression.PathTypeExpression
  * @author Steve Ebersole
  */
 public abstract class AbstractPathImpl<X>
-		extends AbstractCriteriaExpressionImpl<X>
-		implements PathImplementor<X>, PathSource<X>, Serializable {
+		extends AbstractJpaExpressionImpl<X>
+		implements JpaPath<X>, JpaPathSource<X>, Serializable {
 
-	private final PathSource pathSource;
+	private final JpaPathSource pathSource;
 	private final Expression<Class<? extends X>> typeExpression;
 	private Map<String,Path> attributePathRegistry;
 
@@ -50,18 +51,18 @@ public abstract class AbstractPathImpl<X>
 			CriteriaBuilderImpl criteriaBuilder,
 			Type sqmType,
 			Class<X> javaType,
-			PathSource pathSource) {
+			JpaPathSource pathSource) {
 		super( criteriaBuilder, sqmType, javaType );
 		this.pathSource = pathSource;
 		this.typeExpression =  new PathTypeExpression( criteriaBuilder(), sqmType, getJavaType(), this );
 	}
 
-	public PathSource getPathSource() {
+	public JpaPathSource getPathSource() {
 		return pathSource;
 	}
 
 	@Override
-	public PathSource<?> getParentPath() {
+	public JpaPathSource<?> getParentPath() {
 		return getPathSource();
 	}
 
@@ -91,7 +92,7 @@ public abstract class AbstractPathImpl<X>
 
 	protected final RuntimeException unknownAttribute(String attributeName) {
 		String message = "Unable to resolve attribute [" + attributeName + "] against path";
-		PathSource<?> source = getPathSource();
+		JpaPathSource<?> source = getPathSource();
 		if ( source != null ) {
 			message += " [" + source.getPathIdentifier() + "]";
 		}
@@ -133,7 +134,7 @@ public abstract class AbstractPathImpl<X>
 		throw new NotYetImplementedException();
 	}
 
-	protected PathSource getPathSourceForSubPaths() {
+	protected JpaPathSource getPathSourceForSubPaths() {
 		return this;
 	}
 

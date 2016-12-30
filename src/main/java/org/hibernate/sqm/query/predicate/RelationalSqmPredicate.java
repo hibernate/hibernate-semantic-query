@@ -13,53 +13,13 @@ import org.hibernate.sqm.query.expression.SqmExpression;
  * @author Steve Ebersole
  */
 public class RelationalSqmPredicate implements SqmPredicate, NegatableSqmPredicate {
-	public enum Operator {
-		EQUAL {
-			@Override
-			public Operator negate() {
-				return NOT_EQUAL;
-			}
-		},
-		NOT_EQUAL {
-			@Override
-			public Operator negate() {
-				return EQUAL;
-			}
-		},
-		GREATER_THAN {
-			@Override
-			public Operator negate() {
-				return LESS_THAN_OR_EQUAL;
-			}
-		},
-		GREATER_THAN_OR_EQUAL {
-			@Override
-			public Operator negate() {
-				return LESS_THAN;
-			}
-		},
-		LESS_THAN {
-			@Override
-			public Operator negate() {
-				return GREATER_THAN_OR_EQUAL;
-			}
-		},
-		LESS_THAN_OR_EQUAL {
-			@Override
-			public Operator negate() {
-				return GREATER_THAN;
-			}
-		};
-
-		public abstract Operator negate();
-	}
 
 	private final SqmExpression leftHandExpression;
 	private final SqmExpression rightHandExpression;
-	private Operator operator;
+	private RelationalPredicateOperator operator;
 
 	public RelationalSqmPredicate(
-			Operator operator,
+			RelationalPredicateOperator operator,
 			SqmExpression leftHandExpression,
 			SqmExpression rightHandExpression) {
 		this.leftHandExpression = leftHandExpression;
@@ -75,7 +35,7 @@ public class RelationalSqmPredicate implements SqmPredicate, NegatableSqmPredica
 		return rightHandExpression;
 	}
 
-	public Operator getOperator() {
+	public RelationalPredicateOperator getOperator() {
 		return operator;
 	}
 

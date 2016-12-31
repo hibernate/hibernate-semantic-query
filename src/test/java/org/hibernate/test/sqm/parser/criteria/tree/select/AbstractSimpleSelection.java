@@ -31,7 +31,7 @@ public abstract class AbstractSimpleSelection<X>
 		super( criteriaBuilder, javaType );
 	}
 
-	public Selection<X> alias(String alias) {
+	public JpaSelection<X> alias(String alias) {
 		setAlias( alias );
 		return this;
 	}

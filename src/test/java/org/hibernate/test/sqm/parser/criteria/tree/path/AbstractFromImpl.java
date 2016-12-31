@@ -10,14 +10,11 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.persistence.criteria.CollectionJoin;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.ListJoin;
-import javax.persistence.criteria.MapJoin;
-import javax.persistence.criteria.SetJoin;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
@@ -28,7 +25,14 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaAttributeJoin;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaCollectionJoin;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaFetch;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaListJoin;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaMapJoin;
+import org.hibernate.sqm.parser.criteria.tree.from.JpaSetJoin;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
@@ -206,12 +210,12 @@ public abstract class AbstractFromImpl<Z, X>
 	}
 
 	@Override
-	public <Y> Join<X, Y> join(SingularAttribute<? super X, Y> singularAttribute) {
+	public <Y> JpaAttributeJoin<X, Y> join(SingularAttribute<? super X, Y> singularAttribute) {
 		return join( singularAttribute, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <Y> Join<X, Y> join(SingularAttribute<? super X, Y> attribute, JoinType jt) {
+	public <Y> JpaAttributeJoin<X, Y> join(SingularAttribute<? super X, Y> attribute, JoinType jt) {
 //		if ( !canBeJoinSource() ) {
 //			throw illegalJoin();
 //		}
@@ -245,12 +249,12 @@ public abstract class AbstractFromImpl<Z, X>
 //	}
 
 	@Override
-	public <Y> CollectionJoin<X, Y> join(CollectionAttribute<? super X, Y> collection) {
+	public <Y> JpaCollectionJoin<X, Y> join(CollectionAttribute<? super X, Y> collection) {
 		return join( collection, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <Y> CollectionJoin<X, Y> join(CollectionAttribute<? super X, Y> collection, JoinType jt) {
+	public <Y> JpaCollectionJoin<X, Y> join(CollectionAttribute<? super X, Y> collection, JoinType jt) {
 //		if ( !canBeJoinSource() ) {
 //			throw illegalJoin();
 //		}
@@ -282,12 +286,12 @@ public abstract class AbstractFromImpl<Z, X>
 //	}
 
 	@Override
-	public <Y> SetJoin<X, Y> join(SetAttribute<? super X, Y> set) {
+	public <Y> JpaSetJoin<X, Y> join(SetAttribute<? super X, Y> set) {
 		return join( set, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <Y> SetJoin<X, Y> join(SetAttribute<? super X, Y> set, JoinType jt) {
+	public <Y> JpaSetJoin<X, Y> join(SetAttribute<? super X, Y> set, JoinType jt) {
 //		if ( !canBeJoinSource() ) {
 //			throw illegalJoin();
 //		}
@@ -311,12 +315,12 @@ public abstract class AbstractFromImpl<Z, X>
 //	}
 
 	@Override
-	public <Y> ListJoin<X, Y> join(ListAttribute<? super X, Y> list) {
+	public <Y> JpaListJoin<X, Y> join(ListAttribute<? super X, Y> list) {
 		return join( list, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <Y> ListJoin<X, Y> join(ListAttribute<? super X, Y> list, JoinType jt) {
+	public <Y> JpaListJoin<X, Y> join(ListAttribute<? super X, Y> list, JoinType jt) {
 //		if ( !canBeJoinSource() ) {
 //			throw illegalJoin();
 //		}
@@ -340,12 +344,12 @@ public abstract class AbstractFromImpl<Z, X>
 //	}
 
 	@Override
-	public <K, V> MapJoin<X, K, V> join(MapAttribute<? super X, K, V> map) {
+	public <K, V> JpaMapJoin<X, K, V> join(MapAttribute<? super X, K, V> map) {
 		return join( map, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <K, V> MapJoin<X, K, V> join(MapAttribute<? super X, K, V> map, JoinType jt) {
+	public <K, V> JpaMapJoin<X, K, V> join(MapAttribute<? super X, K, V> map, JoinType jt) {
 //		if ( !canBeJoinSource() ) {
 //			throw illegalJoin();
 //		}
@@ -369,13 +373,13 @@ public abstract class AbstractFromImpl<Z, X>
 //	}
 
 	@Override
-	public <X, Y> Join<X, Y> join(String attributeName) {
+	public <X, Y> JpaAttributeJoin<X, Y> join(String attributeName) {
 		return join( attributeName, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked"})
-	public <X, Y> Join<X, Y> join(String attributeName, JoinType jt) {
+	public <X, Y> JpaAttributeJoin<X, Y> join(String attributeName, JoinType jt) {
 		if ( !canBeJoinSource() ) {
 			throw illegalJoin();
 		}
@@ -388,31 +392,31 @@ public abstract class AbstractFromImpl<Z, X>
 		if ( attribute.isCollection() ) {
 			final PluralAttribute pluralAttribute = (PluralAttribute) attribute;
 			if ( PluralAttribute.CollectionType.COLLECTION.equals( pluralAttribute.getCollectionType() ) ) {
-				return (Join<X, Y>) join( (CollectionAttribute) attribute, jt );
+				return (JpaAttributeJoin<X, Y>) join( (CollectionAttribute) attribute, jt );
 			}
 			else if ( PluralAttribute.CollectionType.LIST.equals( pluralAttribute.getCollectionType() ) ) {
-				return (Join<X, Y>) join( (ListAttribute) attribute, jt );
+				return (JpaAttributeJoin<X, Y>) join( (ListAttribute) attribute, jt );
 			}
 			else if ( PluralAttribute.CollectionType.SET.equals( pluralAttribute.getCollectionType() ) ) {
-				return (Join<X, Y>) join( (SetAttribute) attribute, jt );
+				return (JpaAttributeJoin<X, Y>) join( (SetAttribute) attribute, jt );
 			}
 			else {
-				return (Join<X, Y>) join( (MapAttribute) attribute, jt );
+				return (JpaAttributeJoin<X, Y>) join( (MapAttribute) attribute, jt );
 			}
 		}
 		else {
-			return (Join<X, Y>) join( (SingularAttribute) attribute, jt );
+			return (JpaAttributeJoin<X, Y>) join( (SingularAttribute) attribute, jt );
 		}
 	}
 
 	@Override
-	public <X, Y> CollectionJoin<X, Y> joinCollection(String attributeName) {
+	public <X, Y> JpaCollectionJoin<X, Y> joinCollection(String attributeName) {
 		return joinCollection( attributeName, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked"})
-	public <X, Y> CollectionJoin<X, Y> joinCollection(String attributeName, JoinType jt) {
+	public <X, Y> JpaCollectionJoin<X, Y> joinCollection(String attributeName, JoinType jt) {
 		final Attribute<X, ?> attribute = (Attribute<X, ?>) locateAttribute( attributeName );
 		if ( !attribute.isCollection() ) {
 			throw new IllegalArgumentException( "Requested attribute was not a collection" );
@@ -423,17 +427,17 @@ public abstract class AbstractFromImpl<Z, X>
 			throw new IllegalArgumentException( "Requested attribute was not a collection" );
 		}
 
-		return (CollectionJoin<X, Y>) join( (CollectionAttribute) attribute, jt );
+		return (JpaCollectionJoin<X, Y>) join( (CollectionAttribute) attribute, jt );
 	}
 
 	@Override
-	public <X, Y> SetJoin<X, Y> joinSet(String attributeName) {
+	public <X, Y> JpaSetJoin<X, Y> joinSet(String attributeName) {
 		return joinSet( attributeName, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked"})
-	public <X, Y> SetJoin<X, Y> joinSet(String attributeName, JoinType jt) {
+	public <X, Y> JpaSetJoin<X, Y> joinSet(String attributeName, JoinType jt) {
 		final Attribute<X, ?> attribute = (Attribute<X, ?>) locateAttribute( attributeName );
 		if ( !attribute.isCollection() ) {
 			throw new IllegalArgumentException( "Requested attribute was not a set" );
@@ -444,17 +448,17 @@ public abstract class AbstractFromImpl<Z, X>
 			throw new IllegalArgumentException( "Requested attribute was not a set" );
 		}
 
-		return (SetJoin<X, Y>) join( (SetAttribute) attribute, jt );
+		return (JpaSetJoin<X, Y>) join( (SetAttribute) attribute, jt );
 	}
 
 	@Override
-	public <X, Y> ListJoin<X, Y> joinList(String attributeName) {
+	public <X, Y> JpaListJoin<X, Y> joinList(String attributeName) {
 		return joinList( attributeName, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked"})
-	public <X, Y> ListJoin<X, Y> joinList(String attributeName, JoinType jt) {
+	public <X, Y> JpaListJoin<X, Y> joinList(String attributeName, JoinType jt) {
 		final Attribute<X, ?> attribute = (Attribute<X, ?>) locateAttribute( attributeName );
 		if ( !attribute.isCollection() ) {
 			throw new IllegalArgumentException( "Requested attribute was not a list" );
@@ -465,17 +469,17 @@ public abstract class AbstractFromImpl<Z, X>
 			throw new IllegalArgumentException( "Requested attribute was not a list" );
 		}
 
-		return (ListJoin<X, Y>) join( (ListAttribute) attribute, jt );
+		return (JpaListJoin<X, Y>) join( (ListAttribute) attribute, jt );
 	}
 
 	@Override
-	public <X, K, V> MapJoin<X, K, V> joinMap(String attributeName) {
+	public <X, K, V> JpaMapJoin<X, K, V> joinMap(String attributeName) {
 		return joinMap( attributeName, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked"})
-	public <X, K, V> MapJoin<X, K, V> joinMap(String attributeName, JoinType jt) {
+	public <X, K, V> JpaMapJoin<X, K, V> joinMap(String attributeName, JoinType jt) {
 		final Attribute<X, ?> attribute = (Attribute<X, ?>) locateAttribute( attributeName );
 		if ( !attribute.isCollection() ) {
 			throw new IllegalArgumentException( "Requested attribute was not a map" );
@@ -486,7 +490,7 @@ public abstract class AbstractFromImpl<Z, X>
 			throw new IllegalArgumentException( "Requested attribute was not a map" );
 		}
 
-		return (MapJoin<X, K, V>) join( (MapAttribute) attribute, jt );
+		return (JpaMapJoin<X, K, V>) join( (MapAttribute) attribute, jt );
 	}
 
 
@@ -512,12 +516,12 @@ public abstract class AbstractFromImpl<Z, X>
 	}
 
 	@Override
-	public <Y> Fetch<X, Y> fetch(SingularAttribute<? super X, Y> singularAttribute) {
+	public <Y> JpaFetch<X, Y> fetch(SingularAttribute<? super X, Y> singularAttribute) {
 		return fetch( singularAttribute, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <Y> Fetch<X, Y> fetch(SingularAttribute<? super X, Y> attribute, JoinType jt) {
+	public <Y> JpaFetch<X, Y> fetch(SingularAttribute<? super X, Y> attribute, JoinType jt) {
 //		if ( !canBeFetchSource() ) {
 //			throw illegalFetch();
 //		}
@@ -530,12 +534,12 @@ public abstract class AbstractFromImpl<Z, X>
 	}
 
 	@Override
-	public <Y> Fetch<X, Y> fetch(PluralAttribute<? super X, ?, Y> pluralAttribute) {
+	public <Y> JpaFetch<X, Y> fetch(PluralAttribute<? super X, ?, Y> pluralAttribute) {
 		return fetch( pluralAttribute, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
-	public <Y> Fetch<X, Y> fetch(PluralAttribute<? super X, ?, Y> pluralAttribute, JoinType jt) {
+	public <Y> JpaFetch<X, Y> fetch(PluralAttribute<? super X, ?, Y> pluralAttribute, JoinType jt) {
 //		if ( !canBeFetchSource() ) {
 //			throw illegalFetch();
 //		}
@@ -561,23 +565,23 @@ public abstract class AbstractFromImpl<Z, X>
 	}
 
 	@Override
-	public <X, Y> Fetch<X, Y> fetch(String attributeName) {
+	public <X, Y> JpaFetch<X, Y> fetch(String attributeName) {
 		return fetch( attributeName, DEFAULT_JOIN_TYPE );
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked"})
-	public <X, Y> Fetch<X, Y> fetch(String attributeName, JoinType jt) {
+	public <X, Y> JpaFetch<X, Y> fetch(String attributeName, JoinType jt) {
 		if ( !canBeFetchSource() ) {
 			throw illegalFetch();
 		}
 
 		Attribute<X, ?> attribute = (Attribute<X, ?>) locateAttribute( attributeName );
 		if ( attribute.isCollection() ) {
-			return (Fetch<X, Y>) fetch( (PluralAttribute) attribute, jt );
+			return (JpaFetch<X, Y>) fetch( (PluralAttribute) attribute, jt );
 		}
 		else {
-			return (Fetch<X, Y>) fetch( (SingularAttribute) attribute, jt );
+			return (JpaFetch<X, Y>) fetch( (SingularAttribute) attribute, jt );
 		}
 	}
 }

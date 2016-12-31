@@ -18,6 +18,7 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPath;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
 
@@ -36,7 +37,7 @@ public abstract class AbstractPathImpl<X>
 		implements JpaPath<X>, JpaPathSource<X>, Serializable {
 
 	private final JpaPathSource pathSource;
-	private final Expression<Class<? extends X>> typeExpression;
+	private final JpaExpression<Class<? extends X>> typeExpression;
 	private Map<String,Path> attributePathRegistry;
 
 	/**
@@ -68,9 +69,10 @@ public abstract class AbstractPathImpl<X>
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
-	public Expression<Class<? extends X>> type() {
+	public JpaExpression<Class<? extends X>> type() {
 		return typeExpression;
 	}
+
 
 	public abstract String getPathIdentifier();
 
@@ -114,7 +116,7 @@ public abstract class AbstractPathImpl<X>
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
-	public <Y> Path<Y> get(SingularAttribute<? super X, Y> attribute) {
+	public <Y> JpaPath<Y> get(SingularAttribute<? super X, Y> attribute) {
 //		if ( ! canBeDereferenced() ) {
 //			throw illegalDereference();
 //		}
@@ -140,7 +142,7 @@ public abstract class AbstractPathImpl<X>
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
-	public <E, C extends Collection<E>> Expression<C> get(PluralAttribute<X, C, E> attribute) {
+	public <E, C extends Collection<E>> JpaExpression<C> get(PluralAttribute<X, C, E> attribute) {
 //		if ( ! canBeDereferenced() ) {
 //			throw illegalDereference();
 //		}
@@ -157,7 +159,7 @@ public abstract class AbstractPathImpl<X>
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
-	public <K, V, M extends Map<K, V>> Expression<M> get(MapAttribute<X, K, V> attribute) {
+	public <K, V, M extends Map<K, V>> JpaExpression<M> get(MapAttribute<X, K, V> attribute) {
 //		if ( ! canBeDereferenced() ) {
 //			throw illegalDereference();
 //		}
@@ -174,7 +176,7 @@ public abstract class AbstractPathImpl<X>
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
-	public <Y> Path<Y> get(String attributeName) {
+	public <Y> JpaPath<Y> get(String attributeName) {
 //		if ( ! canBeDereferenced() ) {
 //			throw illegalDereference();
 //		}

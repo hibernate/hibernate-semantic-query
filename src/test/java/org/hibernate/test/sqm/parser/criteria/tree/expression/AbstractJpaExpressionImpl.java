@@ -14,6 +14,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 
 import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.domain.Type;
@@ -45,9 +46,9 @@ public abstract class AbstractJpaExpressionImpl<T>
 
 	@Override
 	@SuppressWarnings({ "unchecked" })
-	public <X> Expression<X> as(Class<X> type) {
+	public <X> JpaExpression<X> as(Class<X> type) {
 		if ( type.equals( getJavaType() ) ) {
-			return (Expression<X>) this;
+			return (JpaExpression<X>) this;
 		}
 		else {
 			return new CastFunction<>(
@@ -60,33 +61,33 @@ public abstract class AbstractJpaExpressionImpl<T>
 	}
 
 	@Override
-	public Predicate isNull() {
+	public JpaPredicate isNull() {
 		return criteriaBuilder().isNull( this );
 	}
 
 	@Override
-	public Predicate isNotNull() {
+	public JpaPredicate isNotNull() {
 		return criteriaBuilder().isNotNull( this );
 	}
 
 	@Override
-	public Predicate in(Object... values) {
-		return criteriaBuilder().in( this, values );
+	public JpaPredicate in(Object... values) {
+		return (JpaPredicate) criteriaBuilder().in( this, values );
 	}
 
 	@Override
-	public Predicate in(Expression<?>... values) {
-		return criteriaBuilder().in( this, values );
+	public JpaPredicate in(Expression<?>... values) {
+		return (JpaPredicate) criteriaBuilder().in( this, values );
 	}
 
 	@Override
-	public Predicate in(Collection<?> values) {
-		return criteriaBuilder().in( this, values.toArray() );
+	public JpaPredicate in(Collection<?> values) {
+		return (JpaPredicate) criteriaBuilder().in( this, values.toArray() );
 	}
 
 	@Override
-	public Predicate in(Expression<Collection<?>> values) {
-		return criteriaBuilder().in( this, values );
+	public JpaPredicate in(Expression<Collection<?>> values) {
+		return (JpaPredicate) criteriaBuilder().in( this, values );
 	}
 
 	@Override

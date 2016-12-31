@@ -10,3 +10,6 @@
 * group-by entity support.  e.g. `select p, count(*) from Person p group by p`
 * ? - should we automatically transform any `count(*)` to `count(1)` ?
  	performance
+* ? - Define specific PluralAttributeReference contracts for List, Set, Map, Collection?  The thought process here
+ 	is that we could then also define specific `#createJoin(JpaFrom)` and `#createFetch(JpaFrom)` methods - 
+ 	or a single `#createJoin(JpaFrom, boolean)` (the boolean indicating whether the join is a fetch)

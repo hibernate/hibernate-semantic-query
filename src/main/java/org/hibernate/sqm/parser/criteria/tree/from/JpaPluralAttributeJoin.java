@@ -6,12 +6,10 @@
  */
 package org.hibernate.sqm.parser.criteria.tree.from;
 
-import javax.persistence.criteria.Fetch;
+import javax.persistence.criteria.PluralJoin;
 
 /**
  * @author Steve Ebersole
  */
-public interface JpaFetch<Z,X> extends Fetch<Z,X>, JpaFrom<Z,X> {
-	@Override
-	JpaFetchParent<?, Z> getParent();
+public interface JpaPluralAttributeJoin<Z,C,E> extends JpaAttributeJoin<Z,E>, PluralJoin<Z,C,E> {
 }

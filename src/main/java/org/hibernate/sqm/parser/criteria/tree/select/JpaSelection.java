@@ -9,11 +9,12 @@ package org.hibernate.sqm.parser.criteria.tree.select;
 import javax.persistence.criteria.Selection;
 
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaTupleElement;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
 /**
  * @author Steve Ebersole
  */
-public interface JpaSelection<T> extends Selection<T> {
+public interface JpaSelection<T> extends Selection<T>, JpaTupleElement<T> {
 	void visitSelections(CriteriaVisitor visitor, SqmAliasedExpressionContainer container);
 }

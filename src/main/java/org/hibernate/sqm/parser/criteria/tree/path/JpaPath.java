@@ -6,7 +6,13 @@
  */
 package org.hibernate.sqm.parser.criteria.tree.path;
 
+import java.util.Collection;
+import java.util.Map;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
+import javax.persistence.metamodel.MapAttribute;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 
@@ -26,4 +32,24 @@ public interface JpaPath<X> extends Path<X>, JpaExpression<X> {
 	 * @return The properly typed view of this path.
 	 */
 	<T extends X> JpaPath<T> treatAs(Class<T> treatAsType);
+
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Co-variant returns
+
+
+	@Override
+	<Y> JpaPath<Y> get(SingularAttribute<? super X, Y> attribute);
+
+	@Override
+	<E, C extends Collection<E>> JpaExpression<C> get(PluralAttribute<X, C, E> collection);
+
+	@Override
+	<K, V, M extends Map<K, V>> JpaExpression<M> get(MapAttribute<X, K, V> map);
+
+	@Override
+	JpaExpression<Class<? extends X>> type();
+
+	@Override
+	<Y> JpaPath<Y> get(String attributeName);
 }

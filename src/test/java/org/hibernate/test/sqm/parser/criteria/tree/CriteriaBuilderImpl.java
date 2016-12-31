@@ -37,6 +37,7 @@ import javax.persistence.criteria.Subquery;
 
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
 import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
@@ -78,17 +79,17 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	// Query builders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	@Override
-	public CriteriaQuery<Object> createQuery() {
-		return new CriteriaQueryImpl<Object>( this, Object.class );
+	public JpaCriteriaQuery<Object> createQuery() {
+		return new CriteriaQueryImpl<>( this, Object.class );
 	}
 
 	@Override
-	public <T> CriteriaQuery<T> createQuery(Class<T> resultClass) {
+	public <T> JpaCriteriaQuery<T> createQuery(Class<T> resultClass) {
 		return new CriteriaQueryImpl<T>( this, resultClass );
 	}
 
 	@Override
-	public CriteriaQuery<Tuple> createTupleQuery() {
+	public JpaCriteriaQuery<Tuple> createTupleQuery() {
 		return new CriteriaQueryImpl<Tuple>( this, Tuple.class );
 	}
 

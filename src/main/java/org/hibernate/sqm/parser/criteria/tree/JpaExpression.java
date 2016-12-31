@@ -8,6 +8,7 @@ package org.hibernate.sqm.parser.criteria.tree;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
 import javax.persistence.criteria.Expression;
 
 import org.hibernate.sqm.domain.DomainReference;
@@ -70,4 +71,32 @@ public interface JpaExpression<T> extends Expression<T>, JpaSelection<T> {
 	 * @return <tt>this</tt> but as a string
 	 */
 	JpaExpression<String> asString();
+
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Co-variant returns
+
+	@Override
+	JpaPredicate isNull();
+
+	@Override
+	JpaPredicate isNotNull();
+
+	@Override
+	JpaPredicate in(Object... values);
+
+	@Override
+	JpaPredicate in(Expression<?>[] values);
+
+	@Override
+	JpaPredicate in(Collection<?> values);
+
+	@Override
+	JpaPredicate in(Expression<Collection<?>> values);
+
+	@Override
+	<X> JpaExpression<X> as(Class<X> type);
+
+	@Override
+	JpaSelection<T> alias(String name);
 }

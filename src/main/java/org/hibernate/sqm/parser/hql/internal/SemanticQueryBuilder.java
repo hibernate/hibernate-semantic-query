@@ -1774,7 +1774,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		for ( HqlParser.SimpleCaseWhenContext simpleCaseWhen : ctx.simpleCaseWhen() ) {
 			caseExpression.when(
 					(SqmExpression) simpleCaseWhen.expression( 0 ).accept( this ),
-					(SqmExpression) simpleCaseWhen.expression( 0 ).accept( this )
+					(SqmExpression) simpleCaseWhen.expression( 1 ).accept( this )
 			);
 		}
 

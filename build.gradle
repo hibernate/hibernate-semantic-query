@@ -44,7 +44,7 @@ repositories {
 
 sourceCompatibility = 1.8
 
-group = 'org.hibernate'
+group = 'org.hibernate.sqm'
 version = '1.0.0-SNAPSHOT'
 
 configurations {

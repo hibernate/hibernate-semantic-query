@@ -12,6 +12,7 @@ import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
 import org.hibernate.sqm.query.expression.ConstantEnumSqmExpression;
 import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
@@ -106,6 +107,8 @@ public interface CriteriaVisitor {
 			JpaExpression<?> expression1,
 			JpaExpression<?> expression2,
 			BasicType resultType);
+
+	CoalesceSqmExpression visitCoalesce(List<JpaExpression<?>> expressions);
 
 	EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable);
 	EntityTypeLiteralSqmExpression visitEntityType(String identificationVariable, String attributeName);

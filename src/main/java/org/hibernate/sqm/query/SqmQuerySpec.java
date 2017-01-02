@@ -50,7 +50,6 @@ public class SqmQuerySpec implements SqmFromClauseContainer, SqmWhereClauseConta
 		return fromClause;
 	}
 
-	@Override
 	public SqmWhereClause getWhereClause() {
 		return whereClause;
 	}

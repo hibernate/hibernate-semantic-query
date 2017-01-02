@@ -29,7 +29,6 @@ public class SqmDeleteStatementImpl extends AbstractSqmStatement implements SqmD
 		return entityFromElement;
 	}
 
-	@Override
 	public SqmWhereClause getWhereClause() {
 		return whereClause;
 	}

@@ -42,7 +42,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	@Override
-	public SqmFromClause getFromClause() {
+	public DmlFromClause getFromClause() {
 		return fromClause;
 	}
 
@@ -78,6 +78,10 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	@Override
 	public FromElementBuilder getFromElementBuilder() {
 		return fromElementBuilder;
+	}
+
+	public DmlFromElementSpace getDmlFromElementSpace() {
+		return fromClause.fromElementSpace;
 	}
 
 	public static class DmlFromClause extends SqmFromClause {

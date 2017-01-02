@@ -7,24 +7,24 @@
 package org.hibernate.sqm.query.predicate;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
 
 /**
  * @author Steve Ebersole
  */
 public class EmptinessSqmPredicate extends AbstractNegatableSqmPredicate {
-	private final SqmExpression expression;
+	private final PluralAttributeBinding expression;
 
-	public EmptinessSqmPredicate(SqmExpression expression) {
+	public EmptinessSqmPredicate(PluralAttributeBinding expression) {
 		this( expression, false );
 	}
 
-	public EmptinessSqmPredicate(SqmExpression expression, boolean negated) {
+	public EmptinessSqmPredicate(PluralAttributeBinding expression, boolean negated) {
 		super( negated );
 		this.expression = expression;
 	}
 
-	public SqmExpression getExpression() {
+	public PluralAttributeBinding getExpression() {
 		return expression;
 	}
 

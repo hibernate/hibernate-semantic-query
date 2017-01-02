@@ -8,14 +8,12 @@ package org.hibernate.test.sqm.parser.hql;
 
 import java.util.List;
 
-import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
-import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.select.SqmSelection;
 

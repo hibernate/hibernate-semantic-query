@@ -125,6 +125,7 @@ public class QuerySplitter {
 		return expanded;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static class UnmappedPolymorphismReplacer extends BaseSemanticQueryWalker {
 		private final SqmRoot unmappedPolymorphicFromElement;
 		private final EntityReference mappedDescriptor;
@@ -434,7 +435,7 @@ public class QuerySplitter {
 		@Override
 		public EmptinessSqmPredicate visitIsEmptyPredicate(EmptinessSqmPredicate predicate) {
 			return new EmptinessSqmPredicate(
-					(SqmExpression) predicate.getExpression().accept( this ),
+					(PluralAttributeBinding) predicate.getExpression().accept( this ),
 					predicate.isNegated()
 			);
 		}
@@ -639,7 +640,7 @@ public class QuerySplitter {
 			return new AvgFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(BasicType) expression.getExpressionType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -662,7 +663,7 @@ public class QuerySplitter {
 			return new MaxFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(BasicType) expression.getExpressionType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -671,7 +672,7 @@ public class QuerySplitter {
 			return new MinFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(BasicType) expression.getExpressionType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -754,7 +755,7 @@ public class QuerySplitter {
 				arguments.add( (SqmExpression) argument.accept( this ) );
 			}
 
-			return new ConcatFunctionSqmExpression( (BasicType) expression.getFunctionResultType(), arguments );
+			return new ConcatFunctionSqmExpression( expression.getFunctionResultType(), arguments );
 		}
 
 		@Override

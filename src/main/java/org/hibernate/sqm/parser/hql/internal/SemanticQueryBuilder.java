@@ -1013,7 +1013,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public EmptinessSqmPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
 		return new EmptinessSqmPredicate(
-				(SqmExpression) ctx.expression().accept( this ),
+				(PluralAttributeBinding) ctx.expression().accept( this ),
 				ctx.NOT() != null
 		);
 	}

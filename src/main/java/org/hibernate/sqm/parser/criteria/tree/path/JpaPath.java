@@ -8,18 +8,20 @@ package org.hibernate.sqm.parser.criteria.tree.path;
 
 import java.util.Collection;
 import java.util.Map;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaPath<X> extends Path<X>, JpaExpression<X> {
+	DomainReference getDomainReference();
+
 	@Override
 	JpaPathSource<?> getParentPath();
 

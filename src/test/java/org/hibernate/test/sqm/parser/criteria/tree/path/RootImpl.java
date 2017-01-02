@@ -9,6 +9,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.path;
 import java.io.Serializable;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
@@ -80,6 +81,11 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Se
 	@Override
 	public String getPathIdentifier() {
 		return getAlias();
+	}
+
+	@Override
+	public DomainReference getDomainReference() {
+		return entityType;
 	}
 
 	@Override

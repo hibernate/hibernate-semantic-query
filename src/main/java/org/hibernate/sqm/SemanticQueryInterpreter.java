@@ -77,24 +77,40 @@ public class SemanticQueryInterpreter {
 	/**
 	 * Perform the interpretation of a (delete) criteria query.
 	 *
-	 * @param query The criteria query
+	 * @param criteria The DELETE criteria
 	 * @param consumerContext Callback information
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	public static SqmDeleteStatement interpret(CriteriaDelete query, ConsumerContext consumerContext) {
-		throw new NotYetImplementedException();
+	public static SqmDeleteStatement interpret(CriteriaDelete criteria, ConsumerContext consumerContext) {
+		try {
+			return CriteriaInterpreter.interpretDeleteCriteria( criteria, new ParsingContext( consumerContext ) );
+		}
+		catch (QueryException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new InterpretationException( "<criteria>", e );
+		}
 	}
 
 	/**
 	 * Perform the interpretation of a (update) criteria query.
 	 *
-	 * @param query The criteria query
+	 * @param criteria The criteria query
 	 * @param consumerContext Callback information
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	public static SqmUpdateStatement interpret(CriteriaUpdate query, ConsumerContext consumerContext) {
-		throw new NotYetImplementedException();
+	public static SqmUpdateStatement interpret(CriteriaUpdate criteria, ConsumerContext consumerContext) {
+		try {
+			return CriteriaInterpreter.interpretUpdateCriteria( criteria, new ParsingContext( consumerContext ) );
+		}
+		catch (QueryException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new InterpretationException( "<criteria>", e );
+		}
 	}
 }

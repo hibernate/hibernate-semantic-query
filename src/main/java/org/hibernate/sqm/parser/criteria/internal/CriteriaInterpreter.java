@@ -13,12 +13,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.FetchParent;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
 
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.BasicType;
@@ -27,21 +28,31 @@ import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
+import org.hibernate.sqm.parser.common.QuerySpecProcessingStateDmlImpl;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
 import org.hibernate.sqm.parser.common.Stack;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
+import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaDelete;
 import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
+import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaUpdate;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
 import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.parser.criteria.tree.JpaQuerySpec;
 import org.hibernate.sqm.parser.criteria.tree.JpaSubquery;
+import org.hibernate.sqm.parser.criteria.tree.JpaUpdateAssignment;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaAttributeJoin;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFetch;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaAttributePath;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPath;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPluralAttributePath;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaSingularAttributePath;
+import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
+import org.hibernate.sqm.query.SqmUpdateStatement;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
@@ -65,6 +76,7 @@ import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
@@ -79,7 +91,9 @@ import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
+import org.hibernate.sqm.query.internal.SqmDeleteStatementImpl;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
+import org.hibernate.sqm.query.internal.SqmUpdateStatementImpl;
 import org.hibernate.sqm.query.order.OrderByClause;
 import org.hibernate.sqm.query.order.SortOrder;
 import org.hibernate.sqm.query.order.SortSpecification;
@@ -109,18 +123,36 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// top level statement visitation
 
-	public static SqmSelectStatement interpretSelectCriteria(CriteriaQuery query, ParsingContext parsingContext) {
-		if ( !JpaCriteriaQuery.class.isInstance( query ) ) {
+	public static SqmSelectStatement interpretSelectCriteria(CriteriaQuery criteria, ParsingContext parsingContext) {
+		if ( !JpaCriteriaQuery.class.isInstance( criteria ) ) {
 			throw new IllegalArgumentException( "CriteriaQuery to interpret must implement org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery" );
 		}
 
-		final JpaCriteriaQuery jpaCriteriaQuery = (JpaCriteriaQuery) query;
+		final JpaCriteriaQuery jpaCriteriaQuery = (JpaCriteriaQuery) criteria;
 		final CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
 
 		final SqmSelectStatementImpl selectStatement = new SqmSelectStatementImpl();
 		selectStatement.applyQuerySpec( interpreter.visitQuerySpec( jpaCriteriaQuery.getQuerySpec() ) );
 
 		return selectStatement;
+	}
+
+	public static <E> SqmDeleteStatement interpretDeleteCriteria(CriteriaDelete<E> criteria, ParsingContext parsingContext) {
+		if ( !JpaCriteriaDelete.class.isInstance( criteria ) ) {
+			throw new IllegalArgumentException( "CriteriaDelete to interpret must implement org.hibernate.sqm.query.SqmDeleteStatement" );
+		}
+
+		final CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
+		return interpreter.visitDeleteCriteria( (JpaCriteriaDelete<E>) criteria );
+	}
+
+	public static <E> SqmUpdateStatement interpretUpdateCriteria(CriteriaUpdate<E> criteria, ParsingContext parsingContext) {
+		if ( !JpaCriteriaUpdate.class.isInstance( criteria ) ) {
+			throw new IllegalArgumentException( "CriteriaUpdate to interpret must implement org.hibernate.sqm.query.JpaCriteriaUpdate" );
+		}
+
+		final CriteriaInterpreter interpreter = new CriteriaInterpreter( parsingContext );
+		return interpreter.visitUpdateCriteria( (JpaCriteriaUpdate<E>) criteria );
 	}
 
 
@@ -130,13 +162,179 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	private final ParsingContext parsingContext;
 	private final Stack<QuerySpecProcessingState> querySpecProcessingStateStack = new Stack<>();
 
-	// todo : hook up this structure for tracking DomainReferenceBindings
-	private Map<Path,DomainReferenceBinding> pathToDomainBindingXref = new HashMap<>();
-
 	private CriteriaInterpreter(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
 	}
 
+
+	private <E> SqmDeleteStatement visitDeleteCriteria(JpaCriteriaDelete<E> jpaCriteria) {
+		final QuerySpecProcessingStateDmlImpl dmlProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
+		querySpecProcessingStateStack.push( dmlProcessingState );
+
+		try {
+			final SqmRoot entityToDelete = dmlProcessingState.getFromElementBuilder().makeRootEntityFromElement(
+					dmlProcessingState.getDmlFromElementSpace(),
+					jpaCriteria.getRoot().getEntityType(),
+					interpretAlias( jpaCriteria.getRoot().getAlias() )
+			);
+
+			final SqmDeleteStatementImpl sqmStatement = new SqmDeleteStatementImpl( entityToDelete );
+
+			if ( jpaCriteria.getRestriction() != null ) {
+				sqmStatement.getWhereClause().setPredicate( jpaCriteria.getRestriction().visitPredicate( this ) );
+			}
+
+			return sqmStatement;
+		}
+		finally {
+			querySpecProcessingStateStack.pop();
+		}
+	}
+
+	private <E> SqmUpdateStatement visitUpdateCriteria(JpaCriteriaUpdate<E> jpaCriteria) {
+		final QuerySpecProcessingStateDmlImpl dmlProcessingState = new QuerySpecProcessingStateDmlImpl( parsingContext );
+		querySpecProcessingStateStack.push( dmlProcessingState );
+
+		try {
+			final SqmRoot entityToUpdate = dmlProcessingState.getFromElementBuilder().makeRootEntityFromElement(
+					dmlProcessingState.getDmlFromElementSpace(),
+					jpaCriteria.getRoot().getEntityType(),
+					interpretAlias( jpaCriteria.getRoot().getAlias() )
+			);
+
+			final SqmUpdateStatementImpl sqmStatement = new SqmUpdateStatementImpl( entityToUpdate );
+
+			for ( JpaUpdateAssignment assignment : jpaCriteria.getAssignments() ) {
+				sqmStatement.getSetClause().addAssignment(
+						(SingularAttributeBinding) resolveAttributeBinding( entityToUpdate, assignment.getTargetAttributePath() ),
+						assignment.getUpdatedValue().visitExpression( this )
+				);
+			}
+
+			if ( jpaCriteria.getRestriction() != null ) {
+				sqmStatement.getWhereClause().setPredicate( jpaCriteria.getRestriction().visitPredicate( this ) );
+			}
+
+			return sqmStatement;
+		}
+		finally {
+			querySpecProcessingStateStack.pop();
+		}
+	}
+
+	private final Map<JpaPath,DomainReferenceBinding> jpaPathResolutionMap = new HashMap<>();
+
+	private DomainReferenceBinding resolvePath(JpaPath jpaPath) {
+		final DomainReferenceBinding existing = jpaPathResolutionMap.get( jpaPath );
+		if ( existing != null ) {
+			return existing;
+		}
+
+		if ( jpaPath instanceof JpaFrom ) {
+			return resolveJpaFrom0( (JpaFrom) jpaPath );
+		}
+
+		if ( jpaPath instanceof JpaAttributePath ) {
+			return resolveJpaAttributePath0( (JpaAttributePath) jpaPath );
+		}
+
+		throw new ParsingException( "Could not determine how to resolve JpaPath : " + jpaPath );
+	}
+
+	private DomainReferenceBinding resolveJpaFrom(JpaFrom jpaFrom) {
+		final DomainReferenceBinding existing = jpaPathResolutionMap.get( jpaFrom );
+		if ( existing != null ) {
+			return existing;
+		}
+
+		return resolveJpaFrom0( jpaFrom );
+	}
+
+	private DomainReferenceBinding resolveJpaFrom0(JpaFrom jpaFrom) {
+		if ( jpaFrom instanceof JpaRoot ) {
+			return makeSqmRoot(
+					querySpecProcessingStateStack.getCurrent().getFromClause(),
+					(JpaRoot<?>) jpaFrom
+			).getDomainReferenceBinding();
+		}
+		else if ( jpaFrom instanceof JpaAttributeJoin ) {
+			final JpaAttributeJoin jpaAttributeJoin = (JpaAttributeJoin) jpaFrom;
+			final DomainReferenceBinding parentPathBinding = resolvePath( jpaAttributeJoin.getParentPath() );
+			return makeSqmAttributeJoin(
+					parentPathBinding.getFromElement(),
+					parentPathBinding.getFromElement().getContainingSpace(),
+					jpaAttributeJoin
+			).getDomainReferenceBinding();
+		}
+
+		throw new ParsingException( "Could not determine how to resolve JpaFrom : " + jpaFrom );
+	}
+
+	private AttributeBinding resolveJpaAttributePath(JpaAttributePath jpaPath) {
+		final DomainReferenceBinding existing = jpaPathResolutionMap.get( jpaPath );
+		if ( existing != null ) {
+			return (AttributeBinding) existing;
+		}
+
+		return resolveJpaAttributePath0( jpaPath );
+	}
+
+	private AttributeBinding resolveJpaAttributePath0(JpaAttributePath jpaPath) {
+		if ( jpaPath instanceof JpaSingularAttributePath ) {
+			return resolveSingularAttributePath0( (JpaSingularAttributePath) jpaPath );
+		}
+
+		if ( jpaPath instanceof JpaPluralAttributePath ) {
+			return resolvePluralAttributePath0( (JpaPluralAttributePath) jpaPath );
+		}
+
+		throw new ParsingException( "Could not determine how to resolve JpaAttributePath : " + jpaPath );
+	}
+
+	private SingularAttributeBinding resolveSingularAttributePath(JpaSingularAttributePath jpaAttributePath) {
+		final DomainReferenceBinding existing = jpaPathResolutionMap.get( jpaAttributePath );
+		if ( existing != null ) {
+			return (SingularAttributeBinding) existing;
+		}
+
+		return resolveSingularAttributePath0( jpaAttributePath );
+	}
+
+	private SingularAttributeBinding resolveSingularAttributePath0(JpaSingularAttributePath jpaAttributePath) {
+		final DomainReferenceBinding attributeSourceBinding = resolvePath( jpaAttributePath.getParentPath() );
+		final SingularAttributeBinding attributeBinding = (SingularAttributeBinding) parsingContext.findOrCreateAttributeBinding(
+				attributeSourceBinding,
+				jpaAttributePath.getDomainReference()
+		);
+		jpaPathResolutionMap.put( jpaAttributePath, attributeBinding );
+		return attributeBinding;
+	}
+
+	private PluralAttributeBinding resolvePluralAttributePath(JpaPluralAttributePath jpaAttributePath) {
+		final DomainReferenceBinding existing = jpaPathResolutionMap.get( jpaAttributePath );
+		if ( existing != null ) {
+			return (PluralAttributeBinding) existing;
+		}
+
+		return resolvePluralAttributePath0( jpaAttributePath );
+	}
+
+	private PluralAttributeBinding resolvePluralAttributePath0(JpaPluralAttributePath jpaAttributePath) {
+		final DomainReferenceBinding attributeSourceBinding = resolvePath( jpaAttributePath.getParentPath() );
+		final PluralAttributeBinding attributeBinding = (PluralAttributeBinding) parsingContext.findOrCreateAttributeBinding(
+				attributeSourceBinding,
+				jpaAttributePath.getDomainReference()
+		);
+		jpaPathResolutionMap.put( jpaAttributePath, attributeBinding );
+		return attributeBinding;
+	}
+
+	private AttributeBinding resolveAttributeBinding(SqmFrom sqmFrom, JpaAttributePath attributePath) {
+		return parsingContext.findOrCreateAttributeBinding(
+				sqmFrom.getDomainReferenceBinding(),
+				attributePath.getDomainReference()
+		);
+	}
 
 	private SqmQuerySpec visitQuerySpec(JpaQuerySpec jpaQuerySpec) {
 		querySpecProcessingStateStack.push(
@@ -182,46 +380,60 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	private SqmFromClause visitFromClause(JpaQuerySpec<?> jpaQuerySpec) {
 		final SqmFromClause fromClause = new SqmFromClause();
 		for ( JpaRoot<?> jpaRoot : jpaQuerySpec.getFromClause().getRoots() ) {
-			final FromElementSpace space = fromClause.makeFromElementSpace();
-			final SqmRoot sqmRoot = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().makeRootEntityFromElement(
-					space,
-					jpaRoot.getEntityType(),
-					interpretAlias( jpaRoot.getAlias() )
-			);
-			space.setRoot( sqmRoot );
-			bindJoins( jpaRoot, sqmRoot, space );
-			bindFetches( jpaRoot, sqmRoot, space );
+			makeSqmRoot( fromClause, jpaRoot );
 		}
 
 		return fromClause;
 	}
 
+	private SqmRoot makeSqmRoot(SqmFromClause fromClause, JpaRoot<?> jpaRoot) {
+		final FromElementSpace space = fromClause.makeFromElementSpace();
+		final SqmRoot sqmRoot = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().makeRootEntityFromElement(
+				space,
+				jpaRoot.getEntityType(),
+				interpretAlias( jpaRoot.getAlias() )
+		);
+		space.setRoot( sqmRoot );
+		bindJoins( jpaRoot, sqmRoot, space );
+		bindFetches( jpaRoot, sqmRoot, space );
+		jpaPathResolutionMap.put( jpaRoot, sqmRoot.getDomainReferenceBinding() );
+
+		return sqmRoot;
+	}
+
 	private void bindJoins(JpaFrom<?,?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
 		for ( Join<?, ?> join : lhs.getJoins() ) {
-			final JpaAttributeJoin<?,?> jpaAttributeJoin = (JpaAttributeJoin<?, ?>) join;
-			final String alias = jpaAttributeJoin.getAlias();
-
-			final AttributeBinding attributeBinding = parsingContext.findOrCreateAttributeBinding(
-					sqmLhs.getDomainReferenceBinding(),
-					jpaAttributeJoin.getAttribute().getName()
-			);
-
-			// todo : handle treats
-
-			final SqmAttributeJoin sqmJoin = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildAttributeJoin(
-					attributeBinding,
-					alias,
-					// todo : this is where treat would be applied
-					null,
-					sqmLhs.getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
-					convert( join.getJoinType() ),
-					sqmLhs.getUniqueIdentifier(),
-					false,
-					false
-			);
-			space.addJoin( sqmJoin );
-			bindJoins( jpaAttributeJoin, sqmJoin, space );
+			makeSqmAttributeJoin( sqmLhs, space, join );
 		}
+	}
+
+	private SqmAttributeJoin makeSqmAttributeJoin(SqmFrom sqmLhs, FromElementSpace space, Join<?, ?> join) {
+		final JpaAttributeJoin<?,?> jpaAttributeJoin = (JpaAttributeJoin<?, ?>) join;
+		final String alias = jpaAttributeJoin.getAlias();
+
+		final AttributeBinding attributeBinding = parsingContext.findOrCreateAttributeBinding(
+				sqmLhs.getDomainReferenceBinding(),
+				jpaAttributeJoin.getAttribute().getName()
+		);
+
+		// todo : handle treats
+
+		final SqmAttributeJoin sqmJoin = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildAttributeJoin(
+				attributeBinding,
+				alias,
+				// todo : this is where treat would be applied
+				null,
+				sqmLhs.getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
+				convert( join.getJoinType() ),
+				sqmLhs.getUniqueIdentifier(),
+				false,
+				false
+		);
+		space.addJoin( sqmJoin );
+		bindJoins( jpaAttributeJoin, sqmJoin, space );
+		jpaPathResolutionMap.put( jpaAttributeJoin, sqmJoin.getDomainReferenceBinding() );
+
+		return sqmJoin;
 	}
 
 	private void bindFetches(FetchParent<?, ?> lhs, SqmFrom sqmLhs, FromElementSpace space) {
@@ -248,6 +460,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			);
 			space.addJoin( sqmFetch );
 			bindFetches( fetch, sqmFetch, space );
+			jpaPathResolutionMap.put( jpaFetch, sqmFetch.getDomainReferenceBinding() );
 		}
 	}
 
@@ -423,15 +636,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SqmFrom visitIdentificationVariableReference(JpaFrom<?, ?>  reference) {
-		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
-		throw new NotYetImplementedException();
-
-//		return currentQuerySpecProcessingState.findFromElementByIdentificationVariable( reference.getAlias() );
-	}
-
-	@Override
 	public SingularAttributeBinding visitAttributeReference(JpaFrom<?, ?> attributeSource, String attributeName) {
+		// todo : see
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 
@@ -705,13 +911,22 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public EmptinessSqmPredicate visitEmptinessPredicate(JpaFrom attributeSource, String attributeName, boolean negated) {
-		final SingularAttributeBinding attributeReference = visitAttributeReference( attributeSource, attributeName );
-		return new EmptinessSqmPredicate( attributeReference, negated );
+	public EmptinessSqmPredicate visitEmptinessPredicate(JpaPluralAttributePath pluralAttributePath, boolean negated) {
+		// resolve the plural attribute binding
+		final DomainReferenceBinding lhs = resolvePath( pluralAttributePath.getParentPath() );
+
+		final AttributeBinding attributeBinding = parsingContext.findOrCreateAttributeBinding(
+				lhs,
+				pluralAttributePath.getDomainReference()
+		);
+		if ( !PluralAttributeBinding.class.isInstance( attributeBinding ) ) {
+			throw new ParsingException( "JpaPluralAttributePath resolved to non-PluralAttributeBinding : " + attributeBinding );
+		}
+		return new EmptinessSqmPredicate( (PluralAttributeBinding) attributeBinding, negated );
 	}
 
 	@Override
-	public MemberOfSqmPredicate visitMemberOfPredicate(JpaFrom attributeSource, String attributeName, boolean negated) {
+	public MemberOfSqmPredicate visitMemberOfPredicate(JpaPluralAttributePath pluralAttributePath, boolean negated) {
 		throw new NotYetImplementedException();
 	}
 
@@ -858,5 +1073,4 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public NullnessSqmPredicate visitNullnessPredicate(JpaExpression<?> testExpression) {
 		return new NullnessSqmPredicate( testExpression.visitExpression( this ) );
 	}
-
 }

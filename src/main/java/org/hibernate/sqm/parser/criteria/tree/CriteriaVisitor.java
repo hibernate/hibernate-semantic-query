@@ -11,6 +11,8 @@ import java.util.List;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaPluralAttributePath;
+import org.hibernate.sqm.parser.criteria.tree.path.JpaSingularAttributePath;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.sqm.query.expression.CoalesceSqmExpression;
 import org.hibernate.sqm.query.expression.ConcatSqmExpression;
@@ -75,7 +77,10 @@ public interface CriteriaVisitor {
 			JpaExpression<?> expression2,
 			BasicType resultType);
 
-	SqmFrom visitIdentificationVariableReference(JpaFrom<?,?> reference);
+//	SingularAttributeBinding visitSingularAttributePath(JpaSingularAttributePath attributePath);
+//	SingularAttributeBinding visitPluralAttributePath(JpaPluralAttributePath attributePath);
+//	// todo : visitPluralAttributeElementPath and visitPluralAttributeIndex
+
 	SingularAttributeBinding visitAttributeReference(JpaFrom<?,?> attributeSource, String attributeName);
 
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, List<JpaExpression<?>> arguments);
@@ -124,8 +129,8 @@ public interface CriteriaVisitor {
 	AndSqmPredicate visitAndPredicate(List<JpaPredicate> predicates);
 	OrSqmPredicate visitOrPredicate(List<JpaPredicate> predicates);
 
-	EmptinessSqmPredicate visitEmptinessPredicate(JpaFrom attributeSource, String attributeName, boolean negated);
-	MemberOfSqmPredicate visitMemberOfPredicate(JpaFrom attributeSource, String attributeName, boolean negated);
+	EmptinessSqmPredicate visitEmptinessPredicate(JpaPluralAttributePath pluralAttributePath, boolean negated);
+	MemberOfSqmPredicate visitMemberOfPredicate(JpaPluralAttributePath pluralAttributePath, boolean negated);
 
 	BetweenSqmPredicate visitBetweenPredicate(
 			JpaExpression<?> expression,

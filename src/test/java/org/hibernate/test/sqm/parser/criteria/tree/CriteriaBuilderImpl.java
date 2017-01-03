@@ -46,7 +46,7 @@ import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
 import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 
 import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.test.sqm.domain.BasicTypeImpl;
+import org.hibernate.test.sqm.type.internal.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.ParameterExpressionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.GenericFunctionExpression;

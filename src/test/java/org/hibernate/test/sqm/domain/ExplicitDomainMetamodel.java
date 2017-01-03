@@ -11,13 +11,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.domain.NoSuchAttributeException;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+
+import org.hibernate.test.sqm.type.internal.BasicTypeImpl;
+import org.hibernate.test.sqm.type.internal.EmbeddableTypeImpl;
+import org.hibernate.test.sqm.type.internal.EntityTypeImpl;
+import org.hibernate.test.sqm.type.spi.SingularSqmAttribute;
 
 import org.jboss.logging.Logger;
 
@@ -72,8 +77,8 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public AttributeReference resolveAttributeReference(DomainReference source, String attributeName) {
-		final AttributeReference attrRef = locateAttributeReference( source, attributeName );
+	public SqmAttributeReference resolveAttributeReference(DomainReference source, String attributeName) {
+		final SqmAttributeReference attrRef = locateAttributeReference( source, attributeName );
 		if ( attrRef == null ) {
 			throw new NoSuchAttributeException( "Could not locate attribute named [" + attributeName + " relative to [" + source.asLoggableText() + "]" );
 		}
@@ -81,7 +86,7 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public AttributeReference locateAttributeReference(DomainReference source, String attributeName) {
+	public SqmAttributeReference locateAttributeReference(DomainReference source, String attributeName) {
 		final Type type = extractType( source, Type.class );
 		if ( !ManagedType.class.isInstance( type ) ) {
 			throw new IllegalArgumentException( "Passed DomainReference [" + source + "] not known to expose attributes" );
@@ -124,11 +129,11 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 		if ( reference instanceof Type ) {
 			type = (Type) reference;
 		}
-		else if ( reference instanceof SingularAttribute ) {
-			type = ( (SingularAttribute) reference ).getType();
+		else if ( reference instanceof SingularSqmAttribute ) {
+			type = ( (SingularSqmAttribute) reference ).getType();
 		}
-		else if ( reference instanceof PluralAttribute ) {
-			type = ( (PluralAttribute) reference ).getElementType();
+		else if ( reference instanceof PluralSqmAttribute ) {
+			type = ( (PluralSqmAttribute) reference ).getElementType();
 		}
 		else if ( reference instanceof PluralAttributeElementImpl ) {
 			type = ( (PluralAttributeElementImpl) reference ).getElementType();

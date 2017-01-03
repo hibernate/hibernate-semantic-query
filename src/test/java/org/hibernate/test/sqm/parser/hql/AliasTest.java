@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.AliasCollisionException;
 import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
@@ -28,7 +28,7 @@ import org.hibernate.sqm.query.predicate.SqmWhereClause;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
-import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.type.internal.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Test;

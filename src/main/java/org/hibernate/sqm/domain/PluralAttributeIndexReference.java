@@ -9,7 +9,7 @@ package org.hibernate.sqm.domain;
 /**
  * Models a reference to the collection's index (list-index / map-key)
  */
-public interface PluralAttributeIndexReference extends DomainReference, PotentialEntityReferenceExporter {
+public interface PluralAttributeIndexReference extends SqmNavigable, PotentialEntityReferenceExporter {
 	enum IndexClassification {
 		BASIC,
 		EMBEDDABLE,

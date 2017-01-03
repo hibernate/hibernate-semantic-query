@@ -9,8 +9,8 @@ package org.hibernate.sqm.parser.common;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.domain.AttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.PropertyPath;
@@ -64,10 +64,10 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	private boolean rootExposesAttribute(String attributeName) {
-		final AttributeReference attrRef = getParsingContext().getConsumerContext()
+		final SqmNavigable sqmNavigable = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.locateAttributeReference( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
-		return attrRef != null;
+				.locateNavigable( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
+		return sqmNavigable != null;
 	}
 
 	@Override

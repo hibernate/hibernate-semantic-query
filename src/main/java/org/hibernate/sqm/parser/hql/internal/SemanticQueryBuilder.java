@@ -19,11 +19,11 @@ import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
 import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference.CollectionClassification;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference.CollectionClassification;
 import org.hibernate.sqm.domain.PolymorphicEntityReference;
-import org.hibernate.sqm.domain.SingularAttributeReference;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.LiteralNumberFormatException;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
@@ -1203,7 +1203,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final SingularAttributeBinding attributeBinding = (SingularAttributeBinding) pathResolution;
-		if ( !PluralAttributeReference.class.isInstance( attributeBinding.getAttribute() ) ) {
+		if ( !PluralSqmAttributeReference.class.isInstance( attributeBinding.getAttribute() ) ) {
 			throw new SemanticException( "Path argument to MEMBER OF must be a collection" );
 		}
 
@@ -1286,8 +1286,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( binding instanceof SingularAttributeBinding ) {
 			final SingularAttributeBinding attrBinding = (SingularAttributeBinding) binding;
 
-			if ( attrBinding.getAttribute() instanceof SingularAttributeReference ) {
-				final SingularAttributeReference attrRef = (SingularAttributeReference) attrBinding.getAttribute();
+			if ( attrBinding.getAttribute() instanceof SingularSqmAttributeReference ) {
+				final SingularSqmAttributeReference attrRef = (SingularSqmAttributeReference) attrBinding.getAttribute();
 				if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.BASIC
 						|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.EMBEDDED ) {
 					throw new SemanticException(
@@ -1305,8 +1305,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		if ( binding instanceof SingularAttributeBinding ) {
 			final SingularAttributeBinding attrBinding = (SingularAttributeBinding) binding;
 
-			if ( attrBinding.getAttribute() instanceof PluralAttributeReference ) {
-				final PluralAttributeReference attrRef = (PluralAttributeReference) attrBinding.getAttribute();
+			if ( attrBinding.getAttribute() instanceof PluralSqmAttributeReference ) {
+				final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) attrBinding.getAttribute();
 				if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
 						|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
 						|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
@@ -1322,7 +1322,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 		if ( binding instanceof MapKeyBinding ) {
 			final MapKeyBinding mapKeyBinding = (MapKeyBinding) binding;
-			final PluralAttributeReference attrRef = (PluralAttributeReference) mapKeyBinding.getPluralAttributeBinding().getAttribute();
+			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) mapKeyBinding.getPluralAttributeBinding().getAttribute();
 			if ( attrRef.getIndexReference().getClassification() == IndexClassification.ANY
 					|| attrRef.getIndexReference().getClassification() == IndexClassification.BASIC
 					|| attrRef.getIndexReference().getClassification() == IndexClassification.EMBEDDABLE ) {
@@ -1335,7 +1335,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 		if ( binding instanceof PluralAttributeElementBinding ) {
 			final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) binding;
-			final PluralAttributeReference attrRef = (PluralAttributeReference) elementBinding.getPluralAttributeBinding().getAttribute();
+			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) elementBinding.getPluralAttributeBinding().getAttribute();
 			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
 					|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
 					|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
@@ -1348,7 +1348,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 		if ( binding instanceof PluralAttributeIndexedAccessBinding ) {
 			final PluralAttributeIndexedAccessBinding indexedAccessBinding = (PluralAttributeIndexedAccessBinding) binding;
-			final PluralAttributeReference attrRef = (PluralAttributeReference) indexedAccessBinding.getPluralAttributeBinding().getAttribute();
+			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) indexedAccessBinding.getPluralAttributeBinding().getAttribute();
 			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
 					|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
 					|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
@@ -1446,7 +1446,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		final PluralAttributeBinding attributeBinding = (PluralAttributeBinding) pathResolution;
-		if ( !PluralAttributeReference.class.isInstance( attributeBinding.getAttribute() )
+		if ( !PluralSqmAttributeReference.class.isInstance( attributeBinding.getAttribute() )
 				|| attributeBinding.getAttribute().getIndexReference() == null ) {
 			throw new SemanticException(
 					"Index operator only valid for indexed collections (maps, lists, arrays) : " +
@@ -1473,7 +1473,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		// the binding would additionally need to be an AttributeBindingSource
 		// and expose a Bindable
 
-		final PluralAttributeReference attRef = attributeBinding.getAttribute();
+		final PluralSqmAttributeReference attRef = attributeBinding.getAttribute();
 		if ( !canBeDereferenced( attRef.getElementReference().getClassification() ) ) {
 			throw new SemanticException(
 					String.format(
@@ -1562,7 +1562,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@SuppressWarnings("RedundantIfStatement")
 	private PluralAttributeBinding asPluralAttribute(DomainReferenceBinding attributeBinding) {
-		if ( !PluralAttributeReference.class.isInstance( attributeBinding.getBoundDomainReference() ) ) {
+		if ( !PluralSqmAttributeReference.class.isInstance( attributeBinding.getBoundDomainReference() ) ) {
 			throw new SemanticException( "Expecting plural-attribute, but found : " + attributeBinding );
 		}
 

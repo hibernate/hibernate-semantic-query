@@ -13,9 +13,9 @@ import java.util.Map;
 
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
 import org.hibernate.sqm.domain.PolymorphicEntityReference;
-import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmQuerySpec;
@@ -338,13 +338,13 @@ public class QuerySplitter {
 			if ( fromElement.getAttributeBinding() instanceof PluralAttributeBinding ) {
 				attributeBindingCopy = new PluralAttributeBinding(
 						lhsBindingCopy,
-						(PluralAttributeReference) fromElement.getAttributeBinding().getAttribute()
+						(PluralSqmAttributeReference) fromElement.getAttributeBinding().getAttribute()
 				);
 			}
 			else {
 				attributeBindingCopy = new SingularAttributeBinding(
 						lhsBindingCopy,
-						(SingularAttributeReference) fromElement.getAttributeBinding().getAttribute()
+						(SingularSqmAttributeReference) fromElement.getAttributeBinding().getAttribute()
 				);
 			}
 
@@ -605,14 +605,14 @@ public class QuerySplitter {
 				if ( expression instanceof PluralAttributeBinding ) {
 					attributeBindingCopy = new PluralAttributeBinding(
 							expression.getLhs(),
-							(PluralAttributeReference) expression.getAttribute(),
+							(PluralSqmAttributeReference) expression.getAttribute(),
 							expression.getFromElement()
 					);
 				}
 				else {
 					attributeBindingCopy = new SingularAttributeBinding(
 							expression.getLhs(),
-							(SingularAttributeReference) expression.getBoundDomainReference(),
+							(SingularSqmAttributeReference) expression.getBoundDomainReference(),
 							expression.getFromElement()
 					);
 				}

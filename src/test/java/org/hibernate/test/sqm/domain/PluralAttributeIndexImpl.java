@@ -16,11 +16,11 @@ import org.hibernate.sqm.domain.PluralAttributeIndexReference;
  * @author Steve Ebersole
  */
 class PluralAttributeIndexImpl implements PluralAttributeIndexReference {
-	private final PluralAttributeImpl pluralAttribute;
+	private final PluralSqmAttributeImpl pluralAttribute;
 	private final IndexClassification classification;
 	private final Type indexType;
 
-	public PluralAttributeIndexImpl(PluralAttributeImpl pluralAttribute, IndexClassification classification, Type indexType) {
+	public PluralAttributeIndexImpl(PluralSqmAttributeImpl pluralAttribute, IndexClassification classification, Type indexType) {
 		this.pluralAttribute = pluralAttribute;
 		this.classification = classification;
 		this.indexType = indexType;

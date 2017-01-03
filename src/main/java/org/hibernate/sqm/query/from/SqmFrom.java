@@ -11,13 +11,14 @@ import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.NavigableBinding;
 
 /**
  * Models a Bindable's inclusion in the {@code FROM} clause.
  *
  * @author Steve Ebersole
  */
-public interface SqmFrom extends SqmExpression, Downcastable {
+public interface SqmFrom extends SqmExpression, NavigableBinding, Downcastable {
 	/**
 	 * Obtain reference to the FromElementSpace that this FromElement belongs to.
 	 */

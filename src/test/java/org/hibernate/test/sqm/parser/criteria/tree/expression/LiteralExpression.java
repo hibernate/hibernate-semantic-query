@@ -12,7 +12,7 @@ import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
-import org.hibernate.test.sqm.domain.BasicTypeImpl;
+import org.hibernate.test.sqm.type.internal.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**

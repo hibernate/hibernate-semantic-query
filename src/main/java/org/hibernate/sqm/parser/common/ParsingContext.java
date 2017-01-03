@@ -10,9 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.domain.AttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
+import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.sqm.domain.SqmNavigableSource;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
@@ -34,7 +36,7 @@ public class ParsingContext {
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
 	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
 
-	private Map<SqmFrom,Map<AttributeReference,SqmAttributeJoin>> attributeJoinMapByFromElement;
+	private Map<SqmFrom,Map<SqmAttributeReference,SqmAttributeJoin>> attributeJoinMapByFromElement;
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -64,7 +66,7 @@ public class ParsingContext {
 	}
 
 	public void cacheAttributeJoin(SqmFrom lhs, SqmAttributeJoin join) {
-		Map<AttributeReference,SqmAttributeJoin> attributeJoinMap = null;
+		Map<SqmAttributeReference,SqmAttributeJoin> attributeJoinMap = null;
 		if ( attributeJoinMapByFromElement == null ) {
 			attributeJoinMapByFromElement = new HashMap<>();
 		}
@@ -87,12 +89,12 @@ public class ParsingContext {
 		}
 	}
 
-	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, AttributeReference attribute) {
+	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, SqmAttributeReference attribute) {
 		if ( attributeJoinMapByFromElement == null ) {
 			return null;
 		}
 
-		final Map<AttributeReference,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+		final Map<SqmAttributeReference,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
 
 		if ( attributeJoinMap == null ) {
 			return null;
@@ -101,21 +103,10 @@ public class ParsingContext {
 		return attributeJoinMap.get( attribute );
 	}
 
-	private Map<SqmFrom,Map<AttributeReference,AttributeBinding>> attributeBindingsMap;
+	private Map<SqmNavigableSource,Map<SqmNavigable,AttributeBinding>> attributeBindingsMap;
 
-	public AttributeBinding findOrCreateAttributeBinding(
-			DomainReferenceBinding lhs,
-			String attributeName) {
-		return findOrCreateAttributeBinding(
-				lhs,
-				consumerContext.getDomainMetamodel().resolveAttributeReference( lhs.getBoundDomainReference(), attributeName )
-		);
-	}
-
-	public AttributeBinding findOrCreateAttributeBinding(
-			DomainReferenceBinding lhs,
-			AttributeReference attribute) {
-		Map<AttributeReference,AttributeBinding> bindingsMap = null;
+	public SqmNavigable findOrCreateNavigable(SqmNavigableSource lhs, String navigableName) {
+		Map<SqmAttributeReference,AttributeBinding> bindingsMap = null;
 
 		if ( attributeBindingsMap == null ) {
 			attributeBindingsMap = new HashMap<>();
@@ -131,11 +122,45 @@ public class ParsingContext {
 
 		AttributeBinding attributeBinding = bindingsMap.get( attribute );
 		if ( attributeBinding == null ) {
-			if ( attribute instanceof PluralAttributeReference ) {
-				attributeBinding = new PluralAttributeBinding( lhs, (PluralAttributeReference) attribute );
+			if ( attribute instanceof PluralSqmAttributeReference ) {
+				attributeBinding = new PluralAttributeBinding( lhs, (PluralSqmAttributeReference) attribute );
 			}
 			else {
-				attributeBinding = new SingularAttributeBinding( lhs, (SingularAttributeReference) attribute );
+				attributeBinding = new SingularAttributeBinding( lhs, (SingularSqmAttributeReference) attribute );
+			}
+			bindingsMap.put( attribute, attributeBinding );
+		}
+
+		return findOrCreateNavigable(
+				lhs,
+				consumerContext.getDomainMetamodel().resolveNavigable( lhs.getBoundDomainReference(), navigableName )
+		);
+	}
+
+	public SqmNavigable findOrCreateNavigable(
+			SqmNavigableSource lhs,
+			Na attribute) {
+		Map<SqmAttributeReference,AttributeBinding> bindingsMap = null;
+
+		if ( attributeBindingsMap == null ) {
+			attributeBindingsMap = new HashMap<>();
+		}
+		else {
+			bindingsMap = attributeBindingsMap.get( lhs.getFromElement() );
+		}
+
+		if ( bindingsMap == null ) {
+			bindingsMap = new HashMap<>();
+			attributeBindingsMap.put( lhs.getFromElement(), bindingsMap );
+		}
+
+		AttributeBinding attributeBinding = bindingsMap.get( attribute );
+		if ( attributeBinding == null ) {
+			if ( attribute instanceof PluralSqmAttributeReference ) {
+				attributeBinding = new PluralAttributeBinding( lhs, (PluralSqmAttributeReference) attribute );
+			}
+			else {
+				attributeBinding = new SingularAttributeBinding( lhs, (SingularSqmAttributeReference) attribute );
 			}
 			bindingsMap.put( attribute, attributeBinding );
 		}

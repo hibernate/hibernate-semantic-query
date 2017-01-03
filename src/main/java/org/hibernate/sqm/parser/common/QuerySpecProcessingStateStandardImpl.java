@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
@@ -90,10 +90,10 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 	}
 
 	private boolean definesAttribute(DomainReferenceBinding domainReferenceBinding, String name) {
-		final AttributeReference resolvedAttributeReference = getParsingContext().getConsumerContext()
+		final SqmAttributeReference resolvedSqmAttributeReference = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
 				.locateAttributeReference( domainReferenceBinding.getBoundDomainReference(), name );
-		return resolvedAttributeReference != null;
+		return resolvedSqmAttributeReference != null;
 	}
 
 	@Override

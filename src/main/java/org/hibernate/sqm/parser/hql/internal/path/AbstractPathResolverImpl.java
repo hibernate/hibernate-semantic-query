@@ -8,10 +8,10 @@ package org.hibernate.sqm.parser.hql.internal.path;
 
 import java.util.Locale;
 
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.SingularAttributeReference;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.query.JoinType;
@@ -48,7 +48,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 	protected AttributeBinding buildIntermediateAttributeJoin(
 			DomainReferenceBinding lhs,
 			String pathPart) {
-		final AttributeReference attrRef = context().getParsingContext()
+		final SqmAttributeReference attrRef = context().getParsingContext()
 				.getConsumerContext()
 				.getDomainMetamodel()
 				.resolveAttributeReference( lhs.getFromElement().getDomainReferenceBinding().getBoundDomainReference(), pathPart );
@@ -60,7 +60,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 
 	protected AttributeBinding buildAttributeJoin(
 			DomainReferenceBinding lhs,
-			AttributeReference joinedAttributeDescriptor,
+			SqmAttributeReference joinedAttributeDescriptor,
 			EntityReference subclassIndicator) {
 		final AttributeBinding attributeBinding = context().getParsingContext()
 				.findOrCreateAttributeBinding( lhs, joinedAttributeDescriptor );
@@ -83,8 +83,8 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return attributeBinding;
 	}
 
-	protected void validateIntermediateAttributeJoin(DomainReferenceBinding lhs, AttributeReference joinedAttributeDescriptor) {
-		if ( !SingularAttributeReference.class.isInstance( joinedAttributeDescriptor ) ) {
+	protected void validateIntermediateAttributeJoin(DomainReferenceBinding lhs, SqmAttributeReference joinedAttributeDescriptor) {
+		if ( !SingularSqmAttributeReference.class.isInstance( joinedAttributeDescriptor ) ) {
 			throw new SemanticException(
 					String.format(
 							Locale.ROOT,
@@ -96,7 +96,7 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		}
 		else {
 			// make sure it is Bindable
-			final SingularAttributeReference singularAttribute = (SingularAttributeReference) joinedAttributeDescriptor;
+			final SingularSqmAttributeReference singularAttribute = (SingularSqmAttributeReference) joinedAttributeDescriptor;
 			if ( !canBeDereferenced( singularAttribute.getAttributeTypeClassification() ) ) {
 				throw new SemanticException(
 						String.format(
@@ -124,12 +124,12 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 		return false;
 	}
 
-	protected AttributeReference resolveAttributeDescriptor(SqmFrom lhs, String attributeName) {
+	protected SqmAttributeReference resolveAttributeDescriptor(SqmFrom lhs, String attributeName) {
 		return resolveAttributeDescriptor( lhs.getDomainReferenceBinding(), attributeName );
 
 	}
 
-	protected AttributeReference resolveAttributeDescriptor(DomainReferenceBinding lhs, String attributeName) {
+	protected SqmAttributeReference resolveAttributeDescriptor(DomainReferenceBinding lhs, String attributeName) {
 		return context().getParsingContext()
 				.getConsumerContext()
 				.getDomainMetamodel()
@@ -160,8 +160,8 @@ public abstract class AbstractPathResolverImpl implements PathResolver {
 	}
 
 	private boolean joinable(AttributeBinding attributeBinding) {
-		if ( attributeBinding.getAttribute() instanceof SingularAttributeReference ) {
-			final SingularAttributeReference attrRef = (SingularAttributeReference) attributeBinding.getAttribute();
+		if ( attributeBinding.getAttribute() instanceof SingularSqmAttributeReference ) {
+			final SingularSqmAttributeReference attrRef = (SingularSqmAttributeReference) attributeBinding.getAttribute();
 			if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.BASIC
 					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ANY ) {
 				return false;

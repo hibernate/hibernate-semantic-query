@@ -6,20 +6,20 @@
  */
 package org.hibernate.sqm.query.expression.domain;
 
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeBinding extends AbstractAttributeBinding<PluralAttributeReference> {
-	public PluralAttributeBinding(DomainReferenceBinding lhs, PluralAttributeReference attribute) {
+public class PluralAttributeBinding extends AbstractAttributeBinding<PluralSqmAttributeReference> {
+	public PluralAttributeBinding(DomainReferenceBinding lhs, PluralSqmAttributeReference attribute) {
 		super( lhs, attribute );
 	}
 
 	public PluralAttributeBinding(
 			DomainReferenceBinding lhs,
-			PluralAttributeReference attribute,
+			PluralSqmAttributeReference attribute,
 			SqmAttributeJoin join) {
 		super( lhs, attribute, join );
 	}

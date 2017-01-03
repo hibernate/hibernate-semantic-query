@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
@@ -58,14 +58,14 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	protected AttributeBinding resolveTerminalAttributeBinding(
 			DomainReferenceBinding lhs,
 			String terminalName) {
-		final AttributeReference attribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
+		final SqmAttributeReference attribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
 		return resolveTerminal( lhs, terminalName, attribute, null );
 	}
 
 	private AttributeBinding resolveTerminal(
 			DomainReferenceBinding lhs,
 			String terminalName,
-			AttributeReference attribute,
+			SqmAttributeReference attribute,
 			EntityReference subclassIndicator) {
 		final AttributeBinding attributeBinding = context().getParsingContext().findOrCreateAttributeBinding(
 				lhs,
@@ -97,7 +97,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 			DomainReferenceBinding lhs,
 			String terminalName,
 			EntityReference subclassIndicator) {
-		final AttributeReference attribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
+		final SqmAttributeReference attribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
 		return resolveTerminal( lhs, terminalName, attribute, subclassIndicator );
 	}
 

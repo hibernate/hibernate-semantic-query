@@ -8,19 +8,19 @@ package org.hibernate.test.sqm.domain;
 
 import java.util.Optional;
 
-import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.domain.EntityReference;
 import org.hibernate.sqm.domain.PluralAttributeElementReference;
+import org.hibernate.sqm.domain.type.DomainType;
 
 /**
  * @author Steve Ebersole
  */
-class PluralAttributeElementImpl implements PluralAttributeElementReference {
-	private final PluralAttributeImpl pluralAttribute;
+public class PluralAttributeElementImpl implements PluralAttributeElementReference {
+	private final PluralSqmAttributeImpl pluralAttribute;
 	private final ElementClassification classification;
 	private final Type elementType;
 
-	public PluralAttributeElementImpl(PluralAttributeImpl pluralAttribute, ElementClassification classification, Type elementType) {
+	public PluralAttributeElementImpl(PluralSqmAttributeImpl pluralAttribute, ElementClassification classification, Type elementType) {
 		this.pluralAttribute = pluralAttribute;
 		this.classification = classification;
 		this.elementType = elementType;
@@ -41,7 +41,7 @@ class PluralAttributeElementImpl implements PluralAttributeElementReference {
 	}
 
 	@Override
-	public DomainReference getType() {
+	public DomainType getType() {
 		return getElementType();
 	}
 

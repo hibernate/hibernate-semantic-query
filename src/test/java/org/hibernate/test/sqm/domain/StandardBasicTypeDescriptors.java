@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.hibernate.test.sqm.type.internal.BasicTypeImpl;
+
 /**
  * @author Steve Ebersole
  */

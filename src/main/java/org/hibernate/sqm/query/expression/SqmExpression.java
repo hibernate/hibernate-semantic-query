@@ -8,6 +8,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.DomainType;
 
 /**
  * The base contract for any kind of expression node in the SQM tree.
@@ -23,7 +24,7 @@ public interface SqmExpression {
 	 *
 	 * @return The expression's type.
 	 */
-	DomainReference getExpressionType();
+	DomainType getExpressionType();
 
 	/**
 	 * Obtain reference to the type, or {@code null}, for this expression that can be used

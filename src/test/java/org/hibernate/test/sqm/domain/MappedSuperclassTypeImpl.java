@@ -6,6 +6,8 @@
  */
 package org.hibernate.test.sqm.domain;
 
+import org.hibernate.test.sqm.type.internal.AbstractIdentifiableType;
+
 /**
  * @author Steve Ebersole
  */

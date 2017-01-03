@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.AttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
 import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
-import org.hibernate.sqm.domain.SingularAttributeReference;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.ResolutionContext;
@@ -52,11 +52,11 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 	@Override
 	protected void validateIntermediateAttributeJoin(
 			DomainReferenceBinding lhs,
-			AttributeReference joinedAttribute) {
+			SqmAttributeReference joinedAttribute) {
 		super.validateIntermediateAttributeJoin( lhs, joinedAttribute );
 
-		if ( SingularAttributeReference.class.isInstance( joinedAttribute ) ) {
-			final SingularAttributeReference attrRef = (SingularAttributeReference) joinedAttribute;
+		if ( SingularSqmAttributeReference.class.isInstance( joinedAttribute ) ) {
+			final SingularSqmAttributeReference attrRef = (SingularSqmAttributeReference) joinedAttribute;
 			if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ANY
 					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.MANY_TO_ONE
 					| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ONE_TO_ONE ) {
@@ -67,7 +67,7 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 			}
 		}
 		else {
-			final PluralAttributeReference attrRef = (PluralAttributeReference) joinedAttribute;
+			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) joinedAttribute;
 			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
 					|| attrRef.getElementReference().getClassification() == ElementClassification.ONE_TO_MANY
 					|| attrRef.getElementReference().getClassification() == ElementClassification.MANY_TO_MANY ) {

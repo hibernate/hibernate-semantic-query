@@ -16,7 +16,7 @@ import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
-import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.type.internal.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.junit.Test;
 

@@ -7,14 +7,14 @@
 package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
  * @author Steve Ebersole
  */
-public abstract class AbstractAttributeBinding<A extends AttributeReference> implements AttributeBinding {
+public abstract class AbstractAttributeBinding<A extends SqmAttributeReference> implements AttributeBinding {
 	private final DomainReferenceBinding lhs;
 	private final A attribute;
 	private SqmAttributeJoin join;

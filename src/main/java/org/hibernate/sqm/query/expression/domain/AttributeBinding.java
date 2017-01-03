@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.expression.domain;
 
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
@@ -14,10 +14,11 @@ import org.hibernate.sqm.query.from.SqmAttributeJoin;
  *
  * @author Steve Ebersole
  */
-public interface AttributeBinding extends DomainReferenceBinding {
+public interface AttributeBinding extends NavigableBinding {
 	DomainReferenceBinding getLhs();
 
-	AttributeReference getAttribute();
+	@Override
+	SqmAttributeReference getBoundNavigable();
 
 	@Override
 	SqmAttributeJoin getFromElement();

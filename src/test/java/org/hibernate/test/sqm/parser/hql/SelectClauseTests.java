@@ -13,11 +13,11 @@ import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference.CollectionClassification;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference.CollectionClassification;
 import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
 import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.EntityBinding;
 import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
@@ -33,7 +33,7 @@ import org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
-import org.hibernate.test.sqm.domain.EntityTypeImpl;
+import org.hibernate.test.sqm.type.internal.EntityTypeImpl;
 import org.hibernate.test.sqm.domain.ExplicitDomainMetamodel;
 import org.hibernate.test.sqm.domain.StandardBasicTypeDescriptors;
 import org.junit.Rule;
@@ -385,7 +385,7 @@ public class SelectClauseTests {
 		);
 
 		final MapKeyBinding mapKeyPathExpression = (MapKeyBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final PluralAttributeReference attrRef = (PluralAttributeReference) mapKeyPathExpression.getPluralAttributeBinding().getAttribute();
+		final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) mapKeyPathExpression.getPluralAttributeBinding().getAttribute();
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 		assertThat( attrRef.getIndexReference().getClassification(), is( IndexClassification.BASIC) );
 		assertThat( mapKeyPathExpression.getExpressionType(), sameInstance( attrRef.getIndexReference().getType() ) );
@@ -404,7 +404,7 @@ public class SelectClauseTests {
 		);
 
 		final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final PluralAttributeReference attrRef = elementBinding.getPluralAttributeReference();
+		final PluralSqmAttributeReference attrRef = elementBinding.getPluralAttributeReference();
 
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 //		assertThat( elementBinding.getExpressionType(), sameInstance( attrRef.getElementReference().getType() ) );
@@ -423,7 +423,7 @@ public class SelectClauseTests {
 		);
 
 		final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final PluralAttributeReference attrRef = elementBinding.getPluralAttributeReference();
+		final PluralSqmAttributeReference attrRef = elementBinding.getPluralAttributeReference();
 
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.LIST) );
 //		assertThat( elementBinding.getExpressionType(), sameInstance( attrRef.getElementReference().getType() ) );
@@ -455,7 +455,7 @@ public class SelectClauseTests {
 		assertThat( mapEntryFunction.getAttributeBinding().getFromElement(), notNullValue() );
 		assertThat( mapEntryFunction.getAttributeBinding().getFromElement().getIdentificationVariable(), is( "l") );
 
-		final PluralAttributeReference attrRef = (PluralAttributeReference) mapEntryFunction.getAttributeBinding().getAttribute();
+		final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) mapEntryFunction.getAttributeBinding().getAttribute();
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 
 		// Key

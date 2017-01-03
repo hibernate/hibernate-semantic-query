@@ -6,22 +6,22 @@
  */
 package org.hibernate.sqm.query.expression.domain;
 
-import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 /**
  * @author Steve Ebersole
  */
-public class SingularAttributeBinding extends AbstractAttributeBinding<SingularAttributeReference> {
+public class SingularAttributeBinding extends AbstractAttributeBinding<SingularSqmAttributeReference> {
 	public SingularAttributeBinding(
 			DomainReferenceBinding lhs,
-			SingularAttributeReference attribute) {
+			SingularSqmAttributeReference attribute) {
 		super( lhs, attribute );
 	}
 
 	public SingularAttributeBinding(
 			DomainReferenceBinding lhs,
-			SingularAttributeReference attribute,
+			SingularSqmAttributeReference attribute,
 			SqmAttributeJoin join) {
 		super( lhs, attribute, join );
 	}

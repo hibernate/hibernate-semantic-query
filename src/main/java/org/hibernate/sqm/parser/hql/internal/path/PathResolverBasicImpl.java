@@ -6,10 +6,10 @@
  */
 package org.hibernate.sqm.parser.hql.internal.path;
 
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.SingularAttributeReference;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference;
+import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.query.expression.domain.AttributeBinding;
 import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
@@ -119,7 +119,7 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 	protected AttributeBinding resolveTerminalAttributeBinding(
 			DomainReferenceBinding lhs,
 			String terminalName) {
-		final AttributeReference attribute = resolveAttributeDescriptor( lhs, terminalName );
+		final SqmAttributeReference attribute = resolveAttributeDescriptor( lhs, terminalName );
 		if ( shouldRenderTerminalAttributeBindingAsJoin() && isJoinable( attribute ) ) {
 			log.debugf(
 					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-join",
@@ -148,9 +148,9 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 		}
 	}
 
-	private boolean isJoinable(AttributeReference attribute) {
-		if ( SingularAttributeReference.class.isInstance( attribute ) ) {
-			final SingularAttributeReference attrRef = (SingularAttributeReference) attribute;
+	private boolean isJoinable(SqmAttributeReference attribute) {
+		if ( SingularSqmAttributeReference.class.isInstance( attribute ) ) {
+			final SingularSqmAttributeReference attrRef = (SingularSqmAttributeReference) attribute;
 			return attrRef.getAttributeTypeClassification() == SingularAttributeClassification.EMBEDDED
 					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.MANY_TO_ONE
 					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ONE_TO_ONE;
@@ -171,7 +171,7 @@ public class PathResolverBasicImpl extends AbstractPathResolverImpl {
 			DomainReferenceBinding lhs,
 			String terminalName,
 			EntityReference subclassIndicator) {
-		final AttributeReference joinedAttribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
+		final SqmAttributeReference joinedAttribute = resolveAttributeDescriptor( lhs.getFromElement(), terminalName );
 		log.debugf( "Resolved terminal treated-path : %s -> %s", joinedAttribute, subclassIndicator );
 		final AttributeBinding joinBinding = buildAttributeJoin(
 				// todo : just do a cast for now, but this needs to be thought out (Binding -> SqmFrom)

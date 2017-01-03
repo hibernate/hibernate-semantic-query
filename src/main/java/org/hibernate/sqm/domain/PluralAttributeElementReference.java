@@ -9,7 +9,7 @@ package org.hibernate.sqm.domain;
 /**
  * Models a reference to the collection's element(s)
  */
-public interface PluralAttributeElementReference extends DomainReference, PotentialEntityReferenceExporter {
+public interface PluralAttributeElementReference extends SqmNavigable {
 	enum ElementClassification {
 		BASIC,
 		EMBEDDABLE,

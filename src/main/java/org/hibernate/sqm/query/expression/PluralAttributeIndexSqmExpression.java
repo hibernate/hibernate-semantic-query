@@ -9,7 +9,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.PluralSqmAttributeReference;
 import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
 
 /**
@@ -26,7 +26,7 @@ public class PluralAttributeIndexSqmExpression implements SqmExpression {
 		return attributeBinding;
 	}
 
-	private PluralAttributeReference pluralAttributeReference() {
+	private PluralSqmAttributeReference pluralAttributeReference() {
 		return attributeBinding.getAttribute();
 	}
 

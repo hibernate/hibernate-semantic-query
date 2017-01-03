@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 
 import org.hibernate.sqm.domain.EntityReference;
 
+import org.hibernate.test.sqm.type.internal.EntityTypeImpl;
+import org.hibernate.test.sqm.type.spi.Attribute;
+
 /**
  * @author Steve Ebersole
  */

@@ -32,13 +32,13 @@ public class DynamicInstantiationImpl<T> extends AbstractCompoundSelection<T> {
 		final SqmDynamicInstantiation dynamicInstantiation;
 
 		if ( List.class.equals( getJavaType() ) ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation();
+			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation( visitor.getParsingContext() );
 		}
 		else if ( Map.class.equals( getJavaType() ) ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation();
+			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation( visitor.getParsingContext() );
 		}
 		else {
-			dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( getJavaType() );
+			dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( getJavaType(), visitor.getParsingContext() );
 		}
 
 		for ( JpaExpression<?> argument : getExpressions() ) {

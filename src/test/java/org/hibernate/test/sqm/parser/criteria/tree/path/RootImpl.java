@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.path;
 import java.io.Serializable;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
@@ -18,7 +18,6 @@ import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
-import org.hibernate.test.sqm.domain.EntityType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -27,14 +26,14 @@ import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
  * @author Steve Ebersole
  */
 public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Serializable {
-	private final EntityType entityType;
+	private final EntityPersister entityType;
 	private final boolean allowJoins;
 
-	public RootImpl(CriteriaBuilderImpl criteriaBuilder, EntityType entityType) {
+	public RootImpl(CriteriaBuilderImpl criteriaBuilder, EntityPersister entityType) {
 		this( criteriaBuilder, entityType, true );
 	}
 
-	public RootImpl(CriteriaBuilderImpl criteriaBuilder, EntityType entityType, boolean allowJoins) {
+	public RootImpl(CriteriaBuilderImpl criteriaBuilder, EntityPersister entityType, boolean allowJoins) {
 //		super( criteriaBuilder, entityType.getJavaType() );
 		super( criteriaBuilder, entityType, null );
 		this.entityType = entityType;
@@ -42,7 +41,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Se
 	}
 
 	@Override
-	public EntityType getEntityType() {
+	public EntityPersister getEntityType() {
 		return entityType;
 	}
 
@@ -84,7 +83,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Se
 	}
 
 	@Override
-	public DomainReference getDomainReference() {
+	public EntityPersister getNavigable() {
 		return entityType;
 	}
 
@@ -110,7 +109,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Se
 		public TreatedRoot(RootImpl<? super T> original, Class<T> treatAsType) {
 			super(
 					original.criteriaBuilder(),
-					(EntityType) original.criteriaBuilder().consumerContext().getDomainMetamodel().resolveEntityReference( treatAsType )
+					(EntityPersister) original.criteriaBuilder().consumerContext().getDomainMetamodel().resolveEntityReference( treatAsType )
 			);
 			this.original = original;
 			this.treatAsType = treatAsType;

@@ -6,15 +6,8 @@
  */
 package org.hibernate.sqm.query.from;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 
 import org.jboss.logging.Logger;
 
@@ -29,26 +22,31 @@ public abstract class AbstractFrom implements SqmFrom {
 	private final FromElementSpace fromElementSpace;
 	private final String uid;
 	private final String alias;
-	private final DomainReferenceBinding binding;
-	private final EntityReference subclassIndicator;
-	private final PropertyPath sourcePath;
-
-	private Map<EntityReference,Downcast> downcastMap;
+	private final SqmNavigableBinding binding;
+	private final SqmExpressableTypeEntity subclassIndicator;
 
 	protected AbstractFrom(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			DomainReferenceBinding binding,
-			EntityReference subclassIndicator,
-			PropertyPath sourcePath) {
+			SqmNavigableBinding binding,
+			SqmExpressableTypeEntity subclassIndicator) {
 		this.fromElementSpace = fromElementSpace;
 		this.uid = uid;
 		this.alias = alias;
 		this.binding = binding;
 		this.subclassIndicator = subclassIndicator;
-		this.sourcePath = sourcePath;
 	}
+
+	@Override
+	public SqmNavigableBinding getBinding() {
+		return binding;
+	}
+
+//	@Override
+//	public SqmNavigableSource getBoundNavigable() {
+//		return binding.getBoundNavigable();
+//	}
 
 	@Override
 	public FromElementSpace getContainingSpace() {
@@ -66,65 +64,7 @@ public abstract class AbstractFrom implements SqmFrom {
 	}
 
 	@Override
-	public DomainReferenceBinding getDomainReferenceBinding() {
-		return binding;
-	}
-
-	@Override
-	public DomainReference getExpressionType() {
-		return binding.getBoundDomainReference();
-	}
-
-	@Override
-	public DomainReference getInferableType() {
-		return getExpressionType();
-	}
-
-	@Override
-	public EntityReference getIntrinsicSubclassIndicator() {
+	public SqmExpressableTypeEntity getIntrinsicSubclassIndicator() {
 		return subclassIndicator;
-	}
-
-	@Override
-	public PropertyPath getPropertyPath() {
-		return sourcePath;
-	}
-
-	@Override
-	public String asLoggableText() {
-		return sourcePath.getFullPath();
-	}
-
-	@Override
-	public void addDowncast(Downcast downcast) {
-		Downcast existing = null;
-		if ( downcastMap == null ) {
-			downcastMap = new HashMap<>();
-		}
-		else {
-			existing = downcastMap.get( downcast.getTargetType() );
-		}
-
-		final Downcast toPut;
-		if ( existing == null ) {
-			toPut = downcast;
-		}
-		else {
-			// todo : depending on how we ultimately define TreatedAsInformation defines what exactly needs to happen here..
-			//		for now, just keep the existing...
-			toPut = existing;
-		}
-
-		downcastMap.put( downcast.getTargetType(), toPut );
-	}
-
-	@Override
-	public Collection<Downcast> getDowncasts() {
-		if ( downcastMap == null ) {
-			return Collections.emptySet();
-		}
-		else {
-			return downcastMap.values();
-		}
 	}
 }

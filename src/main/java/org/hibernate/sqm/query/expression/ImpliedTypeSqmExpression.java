@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * Extension for Expressions whose Type can be implied from their surroundings.
@@ -19,5 +19,5 @@ public interface ImpliedTypeSqmExpression extends SqmExpression {
 	 *
 	 * @param type The implied type.
 	 */
-	void impliedType(DomainReference type);
+	void impliedType(SqmExpressableType type);
 }

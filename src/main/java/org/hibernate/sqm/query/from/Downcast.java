@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 
 /**
  * Models information about a downcast (TREAT AS).
@@ -14,13 +14,28 @@ import org.hibernate.sqm.domain.EntityReference;
  * @author Steve Ebersole
  */
 public class Downcast {
-	private final EntityReference downcastTarget;
+	private final SqmExpressableTypeEntity downcastTarget;
+	private boolean intrinsic;
 
-	public Downcast(EntityReference downcastTarget) {
-		this.downcastTarget = downcastTarget;
+	public Downcast(SqmExpressableTypeEntity downcastTarget) {
+		this( downcastTarget, false );
 	}
 
-	public EntityReference getTargetType() {
+	public Downcast(SqmExpressableTypeEntity downcastTarget, boolean intrinsic) {
+		this.downcastTarget = downcastTarget;
+		this.intrinsic = intrinsic;
+	}
+
+	public SqmExpressableTypeEntity getTargetType() {
 		return downcastTarget;
+	}
+
+	public boolean isIntrinsic() {
+		return intrinsic;
+	}
+
+	public void makeIntrinsic() {
+		// one-way toggle
+		intrinsic = true;
 	}
 }

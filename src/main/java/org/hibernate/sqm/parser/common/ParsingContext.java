@@ -7,19 +7,14 @@
 package org.hibernate.sqm.parser.common;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.domain.SqmAttributeReference;
 import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.SqmNavigableSource;
-import org.hibernate.sqm.domain.PluralSqmAttributeReference;
-import org.hibernate.sqm.domain.SingularSqmAttributeReference;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
-import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.sqm.parser.ParsingException;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
 import org.hibernate.sqm.query.from.SqmFrom;
 
 import org.jboss.logging.Logger;
@@ -36,7 +31,7 @@ public class ParsingContext {
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
 	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
 
-	private Map<SqmFrom,Map<SqmAttributeReference,SqmAttributeJoin>> attributeJoinMapByFromElement;
+	private Map<SqmNavigableSourceBinding,Map<SqmNavigable,SqmNavigableBinding>> navigableBindingMapBySource;
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -65,106 +60,88 @@ public class ParsingContext {
 		globalFromElementMap.get( uid );
 	}
 
-	public void cacheAttributeJoin(SqmFrom lhs, SqmAttributeJoin join) {
-		Map<SqmAttributeReference,SqmAttributeJoin> attributeJoinMap = null;
-		if ( attributeJoinMapByFromElement == null ) {
-			attributeJoinMapByFromElement = new HashMap<>();
+	public void cacheNavigableBinding(SqmNavigableBinding binding) {
+		assert binding.getSourceBinding() != null;
+
+		Map<SqmNavigable, SqmNavigableBinding> navigableBindingMap = null;
+		if ( navigableBindingMapBySource == null ) {
+			navigableBindingMapBySource = new HashMap<>();
 		}
 		else {
-			attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+			navigableBindingMap = navigableBindingMapBySource.get( binding.getSourceBinding() );
 		}
 
-		if ( attributeJoinMap == null ) {
-			attributeJoinMap = new HashMap<>();
-			attributeJoinMapByFromElement.put( lhs, attributeJoinMap );
+		if ( navigableBindingMap == null ) {
+			navigableBindingMap = new HashMap<>();
+			navigableBindingMapBySource.put( binding.getSourceBinding(), navigableBindingMap );
 		}
 
-		final SqmAttributeJoin previous = attributeJoinMap.put( join.getAttributeBinding().getAttribute(), join );
+		final SqmNavigableBinding previous = navigableBindingMap.put( binding.getBoundNavigable(), binding );
 		if ( previous != null ) {
 			log.debugf(
-					"Caching SqmAttributeJoin [%s] over-wrote previous cache entry [%s]",
-					join,
+					"Caching NavigableBinding [%s] over-wrote previous cache entry [%s]",
+					binding,
 					previous
 			);
 		}
 	}
 
-	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, SqmAttributeReference attribute) {
-		if ( attributeJoinMapByFromElement == null ) {
+	public SqmNavigableBinding getCachedNavigableBinding(SqmNavigableSourceBinding source, SqmNavigable navigable) {
+		if ( navigableBindingMapBySource == null ) {
 			return null;
 		}
 
-		final Map<SqmAttributeReference,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+		final Map<SqmNavigable, SqmNavigableBinding> navigableBindingMap = navigableBindingMapBySource.get( source );
 
-		if ( attributeJoinMap == null ) {
+		if ( navigableBindingMap == null ) {
 			return null;
 		}
 
-		return attributeJoinMap.get( attribute );
+		return navigableBindingMap.get( navigable );
 	}
 
-	private Map<SqmNavigableSource,Map<SqmNavigable,AttributeBinding>> attributeBindingsMap;
+	public SqmNavigableBinding findOrCreateNavigableBinding(
+			SqmNavigableSourceBinding lhs,
+			String navigableName) {
+		final SqmNavigable sqmNavigable = lhs.getBoundNavigable().findNavigable( navigableName );
 
-	public SqmNavigable findOrCreateNavigable(SqmNavigableSource lhs, String navigableName) {
-		Map<SqmAttributeReference,AttributeBinding> bindingsMap = null;
+		if ( sqmNavigable == null ) {
+			throw new ParsingException(
+					String.format(
+							Locale.ROOT,
+							"Could not resolve SqmNavigable for [%s].[%s]",
+							lhs.getPropertyPath().getFullPath(),
+							navigableName
+					)
+			);
+		}
 
-		if ( attributeBindingsMap == null ) {
-			attributeBindingsMap = new HashMap<>();
+		return findOrCreateNavigableBinding( lhs, sqmNavigable );
+	}
+
+	public SqmNavigableBinding findOrCreateNavigableBinding(
+			SqmNavigableSourceBinding lhs,
+			SqmNavigable sqmNavigable) {
+		Map<SqmNavigable,SqmNavigableBinding> bindingsMap = null;
+
+		if ( navigableBindingMapBySource == null ) {
+			navigableBindingMapBySource = new HashMap<>();
 		}
 		else {
-			bindingsMap = attributeBindingsMap.get( lhs.getFromElement() );
+			bindingsMap = navigableBindingMapBySource.get( lhs );
 		}
 
 		if ( bindingsMap == null ) {
 			bindingsMap = new HashMap<>();
-			attributeBindingsMap.put( lhs.getFromElement(), bindingsMap );
+			navigableBindingMapBySource.put( lhs, bindingsMap );
 		}
 
-		AttributeBinding attributeBinding = bindingsMap.get( attribute );
-		if ( attributeBinding == null ) {
-			if ( attribute instanceof PluralSqmAttributeReference ) {
-				attributeBinding = new PluralAttributeBinding( lhs, (PluralSqmAttributeReference) attribute );
-			}
-			else {
-				attributeBinding = new SingularAttributeBinding( lhs, (SingularSqmAttributeReference) attribute );
-			}
-			bindingsMap.put( attribute, attributeBinding );
-		}
-
-		return findOrCreateNavigable(
-				lhs,
-				consumerContext.getDomainMetamodel().resolveNavigable( lhs.getBoundDomainReference(), navigableName )
+		return bindingsMap.computeIfAbsent(
+				sqmNavigable,
+				k -> NavigableBindingHelper.createNavigableBinding(
+						lhs,
+						sqmNavigable
+				)
 		);
-	}
-
-	public SqmNavigable findOrCreateNavigable(
-			SqmNavigableSource lhs,
-			Na attribute) {
-		Map<SqmAttributeReference,AttributeBinding> bindingsMap = null;
-
-		if ( attributeBindingsMap == null ) {
-			attributeBindingsMap = new HashMap<>();
-		}
-		else {
-			bindingsMap = attributeBindingsMap.get( lhs.getFromElement() );
-		}
-
-		if ( bindingsMap == null ) {
-			bindingsMap = new HashMap<>();
-			attributeBindingsMap.put( lhs.getFromElement(), bindingsMap );
-		}
-
-		AttributeBinding attributeBinding = bindingsMap.get( attribute );
-		if ( attributeBinding == null ) {
-			if ( attribute instanceof PluralSqmAttributeReference ) {
-				attributeBinding = new PluralAttributeBinding( lhs, (PluralSqmAttributeReference) attribute );
-			}
-			else {
-				attributeBinding = new SingularAttributeBinding( lhs, (SingularSqmAttributeReference) attribute );
-			}
-			bindingsMap.put( attribute, attributeBinding );
-		}
-
-		return attributeBinding;
 	}
 }

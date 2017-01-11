@@ -7,8 +7,9 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
 
 /**
  * Represents the {@code SIZE()} function.
@@ -17,26 +18,31 @@ import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
  * @author Gunnar Morling
  */
 public class CollectionSizeSqmExpression implements SqmExpression {
-	private final PluralAttributeBinding pluralAttributeBinding;
+	private final SqmPluralAttributeBinding pluralAttributeBinding;
+	private final SqmExpressableTypeBasic sizeType;
 
-	public CollectionSizeSqmExpression(PluralAttributeBinding pluralAttributeBinding) {
+	public CollectionSizeSqmExpression(SqmPluralAttributeBinding pluralAttributeBinding, SqmExpressableTypeBasic sizeType) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
+		this.sizeType = sizeType;
 	}
 
-	public PluralAttributeBinding getPluralAttributeBinding() {
+	public SqmPluralAttributeBinding getPluralAttributeBinding() {
 		return pluralAttributeBinding;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
-		// we'd need some form of "basic type memento" and to be able to ask the
-		// consumer for the "basic type memento" for a Long.class
-		return null;
+	public SqmExpressableTypeBasic getExpressionType() {
+		return sizeType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmExpressableTypeBasic getInferableType() {
 		return getExpressionType();
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return getExpressionType().getExportedDomainType();
 	}
 
 	@Override

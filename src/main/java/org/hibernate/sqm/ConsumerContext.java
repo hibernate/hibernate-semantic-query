@@ -30,7 +30,7 @@ public interface ConsumerContext {
 	 *
 	 * @return The Class reference.  Should never
 	 *
-	 * @throws ClassNotFoundException
+	 * @todo Should this return DomainType?  Ala `DomainMetamodel#javaTypeToDomainType`
 	 */
 	Class classByName(String name) throws ClassNotFoundException;
 

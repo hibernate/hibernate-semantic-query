@@ -13,14 +13,14 @@ import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaPath<X> extends Path<X>, JpaExpression<X> {
-	DomainReference getDomainReference();
+	SqmNavigable getNavigable();
 
 	@Override
 	JpaPathSource<?> getParentPath();

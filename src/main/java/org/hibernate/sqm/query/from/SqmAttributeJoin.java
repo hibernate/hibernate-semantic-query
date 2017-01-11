@@ -7,11 +7,10 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.jboss.logging.Logger;
@@ -26,61 +25,54 @@ public class SqmAttributeJoin
 		implements SqmQualifiedJoin {
 	private static final Logger log = Logger.getLogger( SqmAttributeJoin.class );
 
-	private final AttributeBinding attributeBinding;
-	private final EntityReference intrinsicSubclassIndicator;
-	private final String lhsUniqueIdentifier;
+	private final SqmFrom lhs;
+	private final SqmAttributeBinding attributeBinding;
+	private final SqmExpressableTypeEntity intrinsicSubclassIndicator;
 	private final boolean fetched;
 
 	private SqmPredicate onClausePredicate;
 
 	public SqmAttributeJoin(
-			FromElementSpace containingSpace,
-			AttributeBinding attributeBinding,
+			SqmFrom lhs,
+			SqmAttributeBinding attributeBinding,
 			String uid,
 			String alias,
-			EntityReference intrinsicSubclassIndicator,
-			PropertyPath sourcePath,
+			SqmExpressableTypeEntity intrinsicSubclassIndicator,
 			JoinType joinType,
-			String lhsUniqueIdentifier,
 			boolean fetched) {
 		super(
-				containingSpace,
+				attributeBinding.getSourceBinding().getExportedFromElement().getContainingSpace(),
 				uid,
 				alias,
 				attributeBinding,
 				intrinsicSubclassIndicator,
-				sourcePath,
 				joinType
 		);
-
-		// todo : this shows we ought to drop `lhsUniqueIdentifier`
-		assert lhsUniqueIdentifier.equals( attributeBinding.getLhs().getFromElement().getUniqueIdentifier() ) :
-				"table uids did not match : " + lhsUniqueIdentifier + " <=> " + attributeBinding.getLhs().getFromElement().getUniqueIdentifier();
+		this.lhs = lhs;
 
 		this.attributeBinding = attributeBinding;
 		this.intrinsicSubclassIndicator = intrinsicSubclassIndicator;
-		this.lhsUniqueIdentifier = lhsUniqueIdentifier;
 		this.fetched = fetched;
 
-		attributeBinding.injectAttributeJoin( this );
+		attributeBinding.injectExportedFromElement( this );
 	}
 
-	public AttributeBinding getAttributeBinding() {
+	public SqmFrom getLhs() {
+		return lhs;
+	}
+
+	public SqmAttributeBinding getAttributeBinding() {
 		return attributeBinding;
 	}
 
 	@Override
-	public AttributeBinding getDomainReferenceBinding() {
+	public SqmNavigableBinding getBinding() {
 		return getAttributeBinding();
 	}
 
 	@Override
-	public EntityReference getIntrinsicSubclassIndicator() {
+	public SqmExpressableTypeEntity getIntrinsicSubclassIndicator() {
 		return intrinsicSubclassIndicator;
-	}
-
-	public String getLhsUniqueIdentifier() {
-		return lhsUniqueIdentifier;
 	}
 
 	public boolean isFetched() {
@@ -100,16 +92,6 @@ public class SqmAttributeJoin
 		);
 
 		this.onClausePredicate = predicate;
-	}
-
-	@Override
-	public DomainReference getExpressionType() {
-		return attributeBinding.getAttribute();
-	}
-
-	@Override
-	public DomainReference getInferableType() {
-		return attributeBinding.getAttribute();
 	}
 
 	@Override

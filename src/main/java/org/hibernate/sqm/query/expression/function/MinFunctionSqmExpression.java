@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -18,7 +18,7 @@ public class MinFunctionSqmExpression
 		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "min";
 
-	public MinFunctionSqmExpression(SqmExpression argument, boolean distinct, DomainReference resultType) {
+	public MinFunctionSqmExpression(SqmExpression argument, boolean distinct, SqmDomainTypeBasic resultType) {
 		super( argument, distinct, resultType );
 	}
 

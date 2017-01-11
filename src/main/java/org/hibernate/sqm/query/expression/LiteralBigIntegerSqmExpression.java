@@ -9,13 +9,14 @@ package org.hibernate.sqm.query.expression;
 import java.math.BigInteger;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralBigIntegerSqmExpression extends AbstractLiteralSqmExpressionImpl<BigInteger> {
-	public LiteralBigIntegerSqmExpression(BigInteger value) {
-		super( value );
+	public LiteralBigIntegerSqmExpression(BigInteger value, SqmExpressableTypeBasic expressionType) {
+		super( value, expressionType );
 	}
 
 	@Override

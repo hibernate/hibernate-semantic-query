@@ -6,8 +6,9 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.domain.SqmAttributeReference;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
@@ -54,27 +55,27 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
 		return fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementExposingAttribute(String name) {
-		DomainReferenceBinding found = null;
+	public SqmNavigableBinding findNavigableBindingExposingAttribute(String name) {
+		SqmNavigableBinding found = null;
 		for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
-			if ( definesAttribute( space.getRoot().getDomainReferenceBinding(), name ) ) {
+			if ( definesAttribute( space.getRoot().getBinding(), name ) ) {
 				if ( found != null ) {
 					throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );
 				}
-				found = space.getRoot().getDomainReferenceBinding();
+				found = space.getRoot().getBinding();
 			}
 
 			for ( SqmJoin join : space.getJoins() ) {
-				if ( definesAttribute( join.getDomainReferenceBinding(), name ) ) {
+				if ( definesAttribute( join.getBinding(), name ) ) {
 					if ( found != null ) {
 						throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );
 					}
-					found = join.getDomainReferenceBinding();
+					found = join.getBinding();
 				}
 			}
 		}
@@ -82,18 +83,25 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 		if ( found == null ) {
 			if ( getContainingQueryState() != null ) {
 				log.debugf( "Unable to resolve unqualified attribute [%s] in local SqmFromClause; checking containingQueryState" );
-				found = getContainingQueryState().findFromElementExposingAttribute( name );
+				found = getContainingQueryState().findNavigableBindingExposingAttribute( name );
 			}
 		}
 
 		return found;
 	}
 
-	private boolean definesAttribute(DomainReferenceBinding domainReferenceBinding, String name) {
-		final SqmAttributeReference resolvedSqmAttributeReference = getParsingContext().getConsumerContext()
-				.getDomainMetamodel()
-				.locateAttributeReference( domainReferenceBinding.getBoundDomainReference(), name );
-		return resolvedSqmAttributeReference != null;
+	private boolean definesAttribute(SqmNavigableBinding sourceBinding, String name) {
+		if ( !SqmNavigableSourceBinding.class.isInstance( sourceBinding ) ) {
+			return false;
+		}
+
+		final SqmNavigable navigable = ( (SqmNavigableSourceBinding) sourceBinding ).getBoundNavigable().findNavigable( name );
+		return navigable != null;
+	}
+
+	private boolean definesAttribute(SqmNavigableSourceBinding sourceBinding, String name) {
+		final SqmNavigable navigable = sourceBinding.getBoundNavigable().findNavigable( name );
+		return navigable != null;
 	}
 
 	@Override

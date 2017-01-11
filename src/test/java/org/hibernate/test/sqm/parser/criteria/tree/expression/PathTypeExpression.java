@@ -9,7 +9,7 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 import java.io.Serializable;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.test.sqm.domain.Type;
+import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
@@ -26,10 +26,10 @@ public class PathTypeExpression<T> extends AbstractJpaExpressionImpl<T> implemen
 
 	public PathTypeExpression(
 			CriteriaBuilderImpl criteriaBuilder,
-			Type sqmType,
+			SqmNavigable sqmNavigable,
 			Class<T> javaType,
 			AbstractPathImpl<T> pathImpl) {
-		super( criteriaBuilder, sqmType, javaType );
+		super( criteriaBuilder, sqmNavigable, javaType );
 		this.pathImpl = pathImpl;
 	}
 

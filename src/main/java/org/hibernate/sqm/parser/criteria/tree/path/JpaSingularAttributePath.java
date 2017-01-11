@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm.parser.criteria.tree.path;
 
-import org.hibernate.sqm.domain.SingularSqmAttributeReference;
+import org.hibernate.sqm.domain.SqmSingularAttribute;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaSingularAttributePath<T> extends JpaAttributePath<T> {
 	@Override
-	SingularSqmAttributeReference getDomainReference();
+	SqmSingularAttribute getNavigable();
 }

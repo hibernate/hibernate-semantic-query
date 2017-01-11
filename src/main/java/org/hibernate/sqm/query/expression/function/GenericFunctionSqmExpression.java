@@ -9,7 +9,7 @@ package org.hibernate.sqm.query.expression.function;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -21,7 +21,7 @@ public class GenericFunctionSqmExpression extends AbstractFunctionSqmExpression 
 
 	public GenericFunctionSqmExpression(
 			String functionName,
-			BasicType resultType,
+			SqmExpressableTypeBasic resultType,
 			List<SqmExpression> arguments) {
 		super( resultType );
 		this.functionName = functionName;

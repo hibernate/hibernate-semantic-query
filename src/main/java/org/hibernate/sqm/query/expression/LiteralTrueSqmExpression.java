@@ -7,13 +7,14 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralTrueSqmExpression extends AbstractLiteralSqmExpressionImpl<Boolean> {
-	public LiteralTrueSqmExpression() {
-		super( Boolean.TRUE );
+	public LiteralTrueSqmExpression(SqmExpressableTypeBasic expressionType) {
+		super( Boolean.TRUE, expressionType );
 	}
 
 	@Override

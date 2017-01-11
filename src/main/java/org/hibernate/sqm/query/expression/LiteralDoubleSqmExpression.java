@@ -7,13 +7,14 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralDoubleSqmExpression extends AbstractLiteralSqmExpressionImpl<Double> {
-	public LiteralDoubleSqmExpression(Double value) {
-		super( value );
+	public LiteralDoubleSqmExpression(Double value, SqmExpressableTypeBasic sqmExpressableTypeBasic) {
+		super( value, sqmExpressableTypeBasic );
 	}
 
 	@Override

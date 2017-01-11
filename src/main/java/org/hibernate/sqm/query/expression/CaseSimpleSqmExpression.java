@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -20,8 +21,8 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	private List<WhenFragment> whenFragments = new ArrayList<>();
 	private SqmExpression otherwise;
 
-	private DomainReference type;
-	private DomainReference impliedType;
+	private SqmExpressableType expressableType;
+	private SqmExpressableType impliedType;
 
 	public CaseSimpleSqmExpression(SqmExpression fixture) {
 		this.fixture = fixture;
@@ -41,33 +42,33 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 
 	public void otherwise(SqmExpression otherwiseExpression) {
 		this.otherwise = otherwiseExpression;
-		// todo : inject implied type?
+		// todo : inject implied expressableType?
 	}
 
 	public void when(SqmExpression test, SqmExpression result) {
 		whenFragments.add( new WhenFragment( test, result ) );
-		// todo : inject implied type?
+		// todo : inject implied expressableType?
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
+	public void impliedType(SqmExpressableType type) {
 		this.impliedType = type;
 		// todo : visit whenFragments and elseExpression
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public SqmDomainType getExportedDomainType() {
 		if ( impliedType != null ) {
-			return impliedType;
+			return impliedType.getExportedDomainType();
 		}
 
 		if ( otherwise != null ) {
-			return otherwise.getExpressionType();
+			return otherwise.getExpressionType().getExportedDomainType();
 		}
 
 		for ( WhenFragment whenFragment : whenFragments ) {
 			if ( whenFragment.result.getExpressionType() != null ) {
-				return whenFragment.result.getExpressionType();
+				return whenFragment.result.getExpressionType().getExportedDomainType();
 			}
 		}
 
@@ -75,7 +76,12 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmExpressableType getExpressionType() {
+		return expressableType;
+	}
+
+	@Override
+	public SqmExpressableType getInferableType() {
 		if ( otherwise != null ) {
 			return otherwise.getInferableType();
 		}
@@ -86,7 +92,7 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 			}
 		}
 
-		return null;
+		return expressableType;
 	}
 
 	@Override

@@ -6,6 +6,8 @@
  */
 package org.hibernate.sqm.query.select;
 
+import org.hibernate.sqm.domain.type.SqmDomainType;
+
 /**
  * Represents the thing-to-be-instantiated in a dynamic instantiation expression.  Hibernate
  * supports 3 "natures" of dynamic instantiation target; see {@link Nature} for further details.
@@ -45,6 +47,8 @@ public interface SqmDynamicInstantiationTarget<T> {
 	 */
 	Nature getNature();
 
+	SqmDomainType getDomainType();
+
 	/**
 	 * For {@link Nature#CLASS} this will return the Class to be instantiated.  For
 	 * {@link Nature#MAP} and {@link Nature#LIST} this will return {@code Map.class}
@@ -52,5 +56,7 @@ public interface SqmDynamicInstantiationTarget<T> {
 	 *
 	 * @return The type to be instantiated.
 	 */
-	Class getJavaType();
+	default Class getJavaType() {
+		return getDomainType().getJavaType();
+	}
 }

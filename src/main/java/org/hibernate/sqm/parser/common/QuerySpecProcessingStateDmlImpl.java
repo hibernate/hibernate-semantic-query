@@ -9,13 +9,14 @@ package org.hibernate.sqm.parser.common;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SqmExpressableTypeEmbedded;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.sqm.domain.type.SqmDomainTypeEmbeddable;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
@@ -47,16 +48,16 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
 		return fromClause.fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable )
-				? fromClause.fromElementSpace.getRoot().getDomainReferenceBinding()
+				? fromClause.fromElementSpace.getRoot().getBinding()
 				: null;
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementExposingAttribute(String attributeName) {
+	public SqmNavigableBinding findNavigableBindingExposingAttribute(String attributeName) {
 		if ( rootExposesAttribute( attributeName ) ) {
-			return fromClause.fromElementSpace.getRoot().getDomainReferenceBinding();
+			return fromClause.fromElementSpace.getRoot().getBinding();
 		}
 		else {
 			return null;
@@ -66,7 +67,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	private boolean rootExposesAttribute(String attributeName) {
 		final SqmNavigable sqmNavigable = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.locateNavigable( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
+				.locateNavigable( fromClause.fromElementSpace.getRoot().getBinding().getBoundNavigable(), attributeName );
 		return sqmNavigable != null;
 	}
 
@@ -131,7 +132,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 
 		@Override
 		public SqmCrossJoin makeCrossJoinedFromElement(
-				FromElementSpace fromElementSpace, String uid, EntityReference entityType, String alias) {
+				FromElementSpace fromElementSpace, String uid, SqmExpressableTypeEntity entityType, String alias) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
@@ -139,21 +140,29 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 		public SqmEntityJoin buildEntityJoin(
 				FromElementSpace fromElementSpace,
 				String alias,
-				EntityReference entityType,
+				SqmExpressableTypeEntity entityType,
 				JoinType joinType) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
 		@Override
 		public SqmAttributeJoin buildAttributeJoin(
-				AttributeBinding attributeBinding,
+				SqmAttributeBinding attributeBinding,
 				String alias,
-				EntityReference subclassIndicator,
-				PropertyPath path,
+				SqmExpressableTypeEntity subclassIndicator,
 				JoinType joinType,
-				String lhsUniqueIdentifier,
 				boolean fetched,
 				boolean canReuseImplicitJoins) {
+			if ( SqmExpressableTypeEmbedded.class.isInstance( attributeBinding.getBoundNavigable() ) ) {
+				return super.buildAttributeJoin(
+						attributeBinding,
+						alias,
+						subclassIndicator,
+						joinType,
+						fetched,
+						canReuseImplicitJoins
+				);
+			}
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 	}

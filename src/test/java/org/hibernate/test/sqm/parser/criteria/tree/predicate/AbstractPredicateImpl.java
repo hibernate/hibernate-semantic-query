@@ -15,9 +15,9 @@ import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.domain.SqmExpressableType;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
-import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 
@@ -31,7 +31,7 @@ public abstract class AbstractPredicateImpl
 		extends AbstractJpaExpressionImpl<Boolean>
 		implements JpaPredicate, Serializable {
 
-	protected AbstractPredicateImpl(CriteriaBuilderImpl criteriaBuilder, BasicType<Boolean> sqmType) {
+	protected AbstractPredicateImpl(CriteriaBuilderImpl criteriaBuilder, SqmExpressableType sqmType) {
 		super( criteriaBuilder, sqmType, Boolean.class );
 	}
 

@@ -18,11 +18,11 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPath;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
 
-import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.PathTypeExpression;
@@ -50,12 +50,12 @@ public abstract class AbstractPathImpl<X>
 	@SuppressWarnings({ "unchecked" })
 	public AbstractPathImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			Type sqmType,
+			SqmNavigable sqmNavigable,
 			Class<X> javaType,
 			JpaPathSource pathSource) {
-		super( criteriaBuilder, sqmType, javaType );
+		super( criteriaBuilder, sqmNavigable, javaType );
 		this.pathSource = pathSource;
-		this.typeExpression =  new PathTypeExpression( criteriaBuilder(), sqmType, getJavaType(), this );
+		this.typeExpression =  new PathTypeExpression( criteriaBuilder(), sqmNavigable, getJavaType(), this );
 	}
 
 	public JpaPathSource getPathSource() {

@@ -8,12 +8,13 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 
 import java.io.Serializable;
 
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
-import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 
@@ -34,7 +35,7 @@ public class CastFunction<T,Y>
 
 	public CastFunction(
 			JpaExpression<Y> expressionToCast,
-			BasicType<T> castTargetType,
+			SqmExpressableTypeBasic castTargetType,
 			Class<T> javaType,
 			CriteriaBuilderImpl criteriaBuilder) {
 		super( NAME, castTargetType, javaType, criteriaBuilder );

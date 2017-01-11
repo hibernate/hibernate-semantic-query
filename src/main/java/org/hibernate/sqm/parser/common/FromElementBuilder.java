@@ -6,11 +6,13 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SqmExpressableTypeEmbedded;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.sqm.domain.SqmSingularAttributeEmbedded;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
@@ -52,7 +54,7 @@ public class FromElementBuilder {
 	 */
 	public SqmRoot makeRootEntityFromElement(
 			FromElementSpace fromElementSpace,
-			EntityReference entityBinding,
+			SqmExpressableTypeEntity entityBinding,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
@@ -81,14 +83,14 @@ public class FromElementBuilder {
 	public SqmCrossJoin makeCrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
 			String uid,
-			EntityReference entityBinding,
+			SqmExpressableTypeEntity entityToJoin,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for cross joined entity reference [%s]",
 					alias,
-					entityBinding.getEntityName()
+					entityToJoin.getEntityName()
 			);
 		}
 
@@ -96,7 +98,7 @@ public class FromElementBuilder {
 				fromElementSpace,
 				uid,
 				alias,
-				entityBinding
+				entityToJoin
 		);
 		fromElementSpace.addJoin( join );
 		parsingContext.registerFromElementByUniqueId( join );
@@ -107,14 +109,14 @@ public class FromElementBuilder {
 	public SqmEntityJoin buildEntityJoin(
 			FromElementSpace fromElementSpace,
 			String alias,
-			EntityReference entityType,
+			SqmExpressableTypeEntity entityToJoin,
 			JoinType joinType) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for entity join [%s]",
 					alias,
-					entityType.getEntityName()
+					entityToJoin.getEntityName()
 			);
 		}
 
@@ -122,7 +124,7 @@ public class FromElementBuilder {
 				fromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
 				alias,
-				entityType,
+				entityToJoin,
 				joinType
 		);
 		fromElementSpace.addJoin( join );
@@ -132,16 +134,15 @@ public class FromElementBuilder {
 	}
 
 	public SqmAttributeJoin buildAttributeJoin(
-			AttributeBinding attributeBinding,
+			SqmAttributeBinding attributeBinding,
 			String alias,
-			EntityReference subclassIndicator,
-			PropertyPath sourcePath,
+			SqmExpressableTypeEntity subclassIndicator,
 			JoinType joinType,
-			String lhsUniqueId,
 			boolean fetched,
 			boolean canReuseImplicitJoins) {
 		assert attributeBinding != null;
 		assert joinType != null;
+		assert attributeBinding.getSourceBinding() != null;
 
 		if ( fetched && canReuseImplicitJoins ) {
 			throw new ParsingException( "Illegal combination of [fetched] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
@@ -158,36 +159,43 @@ public class FromElementBuilder {
 			log.debugf(
 					"Generated implicit alias [%s] for attribute join [%s.%s]",
 					alias,
-					attributeBinding.getLhs().getFromElement().getIdentificationVariable(),
-					attributeBinding.getAttribute().getAttributeName()
+					attributeBinding.getSourceBinding().getExportedFromElement().getIdentificationVariable(),
+					attributeBinding.getBoundNavigable().getAttributeName()
 			);
 		}
 
 		SqmAttributeJoin join = null;
 		if ( canReuseImplicitJoins ) {
-			join = parsingContext.getCachedAttributeJoin( attributeBinding.getLhs().getFromElement(), attributeBinding.getAttribute() );
+			final SqmNavigableBinding navigableBinding = parsingContext.getCachedNavigableBinding( attributeBinding.getSourceBinding(), attributeBinding.getBoundNavigable() );
+			join = (SqmAttributeJoin) NavigableBindingHelper.resolveExportedFromElement( navigableBinding );
 		}
 
 		if ( join == null ) {
 			join = new SqmAttributeJoin(
-					attributeBinding.getLhs().getFromElement().getContainingSpace(),
+					attributeBinding.getSourceBinding().getExportedFromElement(),
 					attributeBinding,
 					parsingContext.makeUniqueIdentifier(),
 					alias,
 					subclassIndicator,
-					sourcePath,
 					joinType,
-					lhsUniqueId,
 					fetched
 			);
 
 			if ( canReuseImplicitJoins ) {
-				parsingContext.cacheAttributeJoin( attributeBinding.getLhs().getFromElement(), join );
+				parsingContext.cacheNavigableBinding( attributeBinding );
 			}
 
-			attributeBinding.getLhs().getFromElement().getContainingSpace().addJoin( join );
 			parsingContext.registerFromElementByUniqueId( join );
 			registerAlias( join );
+
+			if ( !SqmExpressableTypeEmbedded.class.isInstance( attributeBinding.getBoundNavigable() ) ) {
+				// it's a composite-valued navigable, create a join but do not register it
+				//		as
+
+				// unless this is a collection element or index...
+
+				attributeBinding.getSourceBinding().getExportedFromElement().getContainingSpace().addJoin( join );
+			}
 		}
 
 		return join;
@@ -204,6 +212,6 @@ public class FromElementBuilder {
 			log.debug( "Alias registration for implicit FromElement alias : " + alias );
 		}
 
-		aliasRegistry.registerAlias( sqmFrom.getDomainReferenceBinding() );
+		aliasRegistry.registerAlias( sqmFrom.getBinding() );
 	}
 }

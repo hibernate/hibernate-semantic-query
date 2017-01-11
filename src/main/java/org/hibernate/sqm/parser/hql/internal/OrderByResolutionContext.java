@@ -6,13 +6,14 @@
  */
 package org.hibernate.sqm.parser.hql.internal;
 
+import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.sqm.domain.SqmNavigableSource;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
 import org.hibernate.sqm.parser.common.FromElementBuilder;
 import org.hibernate.sqm.parser.common.FromElementLocator;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.ResolutionContext;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
@@ -34,15 +35,15 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
 		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable ) ) {
-				return fromElementSpace.getRoot().getDomainReferenceBinding();
+				return fromElementSpace.getRoot().getBinding();
 			}
 
 			for ( SqmJoin joinedFromElement : fromElementSpace.getJoins() ) {
 				if ( joinedFromElement.getIdentificationVariable().equals( identificationVariable ) ) {
-					return joinedFromElement.getDomainReferenceBinding();
+					return joinedFromElement.getBinding();
 				}
 			}
 		}
@@ -52,15 +53,15 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementExposingAttribute(String attributeName) {
+	public SqmNavigableBinding findNavigableBindingExposingAttribute(String attributeName) {
 		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( exposesAttribute( fromElementSpace.getRoot(), attributeName ) ) {
-				return fromElementSpace.getRoot().getDomainReferenceBinding();
+				return fromElementSpace.getRoot().getBinding();
 			}
 
 			for ( SqmJoin joinedFromElement : fromElementSpace.getJoins() ) {
 				if ( exposesAttribute( joinedFromElement, attributeName ) ) {
-					return joinedFromElement.getDomainReferenceBinding();
+					return joinedFromElement.getBinding();
 				}
 			}
 		}
@@ -70,7 +71,16 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	private boolean exposesAttribute(SqmFrom sqmFrom, String attributeName) {
-		return parsingContext.getConsumerContext().getDomainMetamodel().locateAttributeReference( sqmFrom.getDomainReferenceBinding().getBoundDomainReference(), attributeName ) != null;
+		final SqmNavigable navigable = sqmFrom.getBinding().getBoundNavigable();
+		if ( !SqmNavigableSource.class.isInstance( navigable ) ) {
+			return false;
+		}
+
+		final SqmNavigable found = parsingContext.getConsumerContext()
+				.getDomainMetamodel()
+				.locateNavigable( (SqmNavigableSource) navigable, attributeName );
+
+		return found != null;
 	}
 
 	@Override

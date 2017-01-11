@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm.parser.criteria.tree.path;
 
-import org.hibernate.sqm.domain.SqmAttributeReference;
+import org.hibernate.sqm.domain.SqmAttribute;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaAttributePath<T> extends JpaPath<T> {
 	@Override
-	SqmAttributeReference getDomainReference();
+	SqmAttribute getNavigable();
 }

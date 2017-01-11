@@ -7,7 +7,9 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -21,32 +23,32 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 	private final Operation operation;
 	private final SqmExpression operand;
 
-	private DomainReference typeDescriptor;
+	private SqmDomainTypeBasic typeDescriptor;
 
 	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand) {
-		this( operation, operand, operand.getExpressionType() );
+		this( operation, operand, (SqmDomainTypeBasic) operand.getExpressionType() );
 	}
 
-	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, DomainReference typeDescriptor) {
+	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, SqmDomainTypeBasic typeDescriptor) {
 		this.operation = operation;
 		this.operand = operand;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public SqmDomainTypeBasic getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
-		return operand.getExpressionType();
+	public SqmDomainTypeBasic getInferableType() {
+		return (SqmDomainTypeBasic) operand.getExpressionType();
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
+	public void impliedType(SqmExpressableType type) {
 		if ( type != null ) {
-			this.typeDescriptor = type;
+			this.typeDescriptor = (SqmDomainTypeBasic) type;
 			if ( operand instanceof ImpliedTypeSqmExpression ) {
 				( (ImpliedTypeSqmExpression) operand ).impliedType( type );
 			}
@@ -69,5 +71,10 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 
 	public Operation getOperation() {
 		return operation;
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return getExpressionType();
 	}
 }

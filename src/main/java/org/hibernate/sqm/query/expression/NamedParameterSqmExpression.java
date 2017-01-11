@@ -7,7 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -15,33 +16,33 @@ import org.hibernate.sqm.domain.DomainReference;
 public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	private final String name;
 	private final boolean canBeMultiValued;
-	private DomainReference typeDescriptor;
+	private SqmExpressableType expressableType;
 
 	public NamedParameterSqmExpression(String name, boolean canBeMultiValued) {
 		this.name = name;
 		this.canBeMultiValued = canBeMultiValued;
 	}
 
-	public NamedParameterSqmExpression(String name, boolean canBeMultiValued, DomainReference typeDescriptor) {
+	public NamedParameterSqmExpression(String name, boolean canBeMultiValued, SqmExpressableType expressableType) {
 		this.name = name;
 		this.canBeMultiValued = canBeMultiValued;
-		this.typeDescriptor = typeDescriptor;
+		this.expressableType = expressableType;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
-		return typeDescriptor;
+	public SqmExpressableType getExpressionType() {
+		return expressableType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
-		return null;
+	public SqmExpressableType getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
-		if ( type != null ) {
-			this.typeDescriptor = type;
+	public void impliedType(SqmExpressableType expressableType) {
+		if ( expressableType != null ) {
+			this.expressableType = expressableType;
 		}
 	}
 
@@ -71,7 +72,12 @@ public class NamedParameterSqmExpression implements ParameterSqmExpression {
 	}
 
 	@Override
-	public DomainReference getAnticipatedType() {
+	public SqmExpressableType getAnticipatedType() {
 		return getExpressionType();
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return getExpressionType().getExportedDomainType();
 	}
 }

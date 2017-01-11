@@ -6,7 +6,10 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
+import org.hibernate.sqm.parser.SemanticException;
 
 /**
  * @author Steve Ebersole
@@ -14,14 +17,15 @@ import org.hibernate.sqm.domain.DomainReference;
 public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmExpression<T> {
 	private final T value;
 
-	private DomainReference type;
+	private SqmExpressableTypeBasic type;
 
 	public AbstractLiteralSqmExpressionImpl(T value) {
 		this.value = value;
 	}
 
-	public AbstractLiteralSqmExpressionImpl(T value, DomainReference type) {
+	public AbstractLiteralSqmExpressionImpl(T value, SqmExpressableTypeBasic type) {
 		this.value = value;
+		this.type = type;
 	}
 
 	@Override
@@ -30,25 +34,33 @@ public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmE
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public SqmExpressableTypeBasic getExpressionType() {
 		return type;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmExpressableTypeBasic getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public void impliedType(SqmExpressableType type) {
 		if ( type != null ) {
-			this.type = type;
+			if ( !SqmExpressableTypeBasic.class.isInstance( type ) ) {
+				throw new SemanticException( "Inferrable type for literal was found to be a non-basic value : " + type );
+			}
+			this.type = (SqmExpressableTypeBasic) type;
 		}
 	}
 
 	@Override
 	public String asLoggableText() {
 		return "Literal( " + value + ")";
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return type.getExportedDomainType();
 	}
 }

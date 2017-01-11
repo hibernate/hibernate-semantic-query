@@ -12,8 +12,8 @@ import javax.persistence.criteria.ParameterExpression;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
-import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -30,7 +30,7 @@ public class ParameterExpressionImpl<T>
 
 	public ParameterExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			Type sqmType,
+			SqmExpressableType sqmType,
 			Class<T> javaType,
 			String name) {
 		super( criteriaBuilder, sqmType, javaType );
@@ -40,7 +40,7 @@ public class ParameterExpressionImpl<T>
 
 	public ParameterExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			Type sqmType,
+			SqmExpressableType sqmType,
 			Class<T> javaType,
 			Integer position) {
 		super( criteriaBuilder, sqmType, javaType );
@@ -50,7 +50,7 @@ public class ParameterExpressionImpl<T>
 
 	public ParameterExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			Type sqmType,
+			SqmExpressableType sqmType,
 			Class<T> javaType) {
 		super( criteriaBuilder, sqmType, javaType );
 		this.name = null;

@@ -9,8 +9,8 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression.function;
 import java.io.Serializable;
 
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
-import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;
 
@@ -27,7 +27,7 @@ public abstract class AbstractFunctionExpression<X>
 
 	public AbstractFunctionExpression(
 			String functionName,
-			BasicType sqmType,
+			SqmExpressableType sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder) {
 		super( criteriaBuilder, sqmType, javaType );
@@ -42,13 +42,7 @@ public abstract class AbstractFunctionExpression<X>
 		return functionName;
 	}
 
-	public BasicType<X> getFunctionResultType() {
+	public SqmExpressableType getFunctionResultType() {
 		return getExpressionSqmType();
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public BasicType<X> getExpressionSqmType() {
-		return (BasicType<X>) super.getExpressionSqmType();
 	}
 }

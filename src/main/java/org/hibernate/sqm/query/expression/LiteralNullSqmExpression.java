@@ -7,31 +7,33 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralNullSqmExpression implements LiteralSqmExpression<Void> {
+	private SqmExpressableType injectedExpressionType;
+
+	public LiteralNullSqmExpression() {
+		injectedExpressionType = NULL_TYPE;
+	}
+
 	@Override
 	public Void getLiteralValue() {
 		return null;
 	}
 
 	@Override
-	public BasicType getExpressionType() {
-		return NULL_TYPE;
+	public SqmExpressableType getExpressionType() {
+		return injectedExpressionType;
 	}
 
 	@Override
-	public BasicType getInferableType() {
-		return null;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public SqmExpressableType getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
@@ -44,7 +46,12 @@ public class LiteralNullSqmExpression implements LiteralSqmExpression<Void> {
 		return "<literal-null>";
 	}
 
-	private static BasicType NULL_TYPE = new BasicType() {
+	private static SqmDomainTypeBasic NULL_TYPE = new SqmDomainTypeBasic() {
+		@Override
+		public SqmDomainTypeBasic getExportedDomainType() {
+			return null;
+		}
+
 		@Override
 		public Class getJavaType() {
 			return void.class;
@@ -55,4 +62,14 @@ public class LiteralNullSqmExpression implements LiteralSqmExpression<Void> {
 			return "NULL";
 		}
 	};
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return injectedExpressionType.getExportedDomainType();
+	}
+
+	@Override
+	public void impliedType(SqmExpressableType type) {
+		injectedExpressionType = type;
+	}
 }

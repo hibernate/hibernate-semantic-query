@@ -340,6 +340,10 @@ entityTypeReference
 	: TYPE LEFT_PAREN (path | parameter) RIGHT_PAREN
 	;
 
+entityLiteralReference
+	:
+	;
+
 caseStatement
 	: simpleCaseStatement
 	| searchedCaseStatement
@@ -410,7 +414,7 @@ dateTimeLiteralText
 
 parameter
 	: COLON identifier					# NamedParameter
-	| QUESTION_MARK INTEGER_LITERAL		# PositionalParameter
+	| QUESTION_MARK INTEGER_LITERAL?	# PositionalParameter
 	;
 
 function

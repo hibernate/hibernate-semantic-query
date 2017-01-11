@@ -7,24 +7,24 @@
 package org.hibernate.sqm.query.predicate;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
 
 /**
  * @author Steve Ebersole
  */
 public class MemberOfSqmPredicate extends AbstractNegatableSqmPredicate {
-	private final SingularAttributeBinding attributeBinding;
+	private final SqmSingularAttributeBinding attributeBinding;
 
-	public MemberOfSqmPredicate(SingularAttributeBinding attributeBinding) {
+	public MemberOfSqmPredicate(SqmSingularAttributeBinding attributeBinding) {
 		this( attributeBinding, false );
 	}
 
-	public MemberOfSqmPredicate(SingularAttributeBinding attributeBinding, boolean negated) {
+	public MemberOfSqmPredicate(SqmSingularAttributeBinding attributeBinding, boolean negated) {
 		super( negated );
 		this.attributeBinding = attributeBinding;
 	}
 
-	public SingularAttributeBinding getAttributeBinding() {
+	public SqmSingularAttributeBinding getAttributeBinding() {
 		return attributeBinding;
 	}
 

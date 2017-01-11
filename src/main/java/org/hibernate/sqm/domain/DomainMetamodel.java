@@ -6,7 +6,8 @@
  */
 package org.hibernate.sqm.domain;
 
-import org.hibernate.sqm.domain.type.BasicDomainType;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainType;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 
 /**
@@ -18,21 +19,23 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
  * @author Steve Ebersole
  */
 public interface DomainMetamodel {
-	EntityReference resolveEntityReference(String entityName);
-	EntityReference resolveEntityReference(Class javaType);
+	SqmExpressableTypeEntity resolveEntityReference(String entityName);
+	SqmExpressableTypeEntity resolveEntityReference(Class javaType);
 
 	SqmNavigable locateNavigable(SqmNavigableSource source, String navigableName);
 	SqmNavigable resolveNavigable(SqmNavigableSource source, String navigableName) throws NoSuchAttributeException;
 
 	// - just push the cast target text into the tree.  let the consumer figure out how to interpret it?
-	BasicDomainType resolveCastTargetType(String name);
+	SqmExpressableTypeBasic resolveCastTargetType(String name);
 
-	BasicDomainType resolveBasicType(Class javaType);
+	SqmExpressableTypeBasic resolveBasicType(Class javaType);
 
-	BasicDomainType resolveArithmeticType(
-			DomainReference firstType,
-			DomainReference secondType,
+	SqmExpressableTypeBasic resolveArithmeticType(
+			SqmExpressableTypeBasic firstType,
+			SqmExpressableTypeBasic secondType,
 			BinaryArithmeticSqmExpression.Operation operation);
 
-	BasicDomainType resolveSumFunctionType(DomainReference argumentType);
+	SqmExpressableTypeBasic resolveSumFunctionType(SqmExpressableTypeBasic argumentType);
+
+	SqmDomainType javaTypeToDomainType(Class javaType);
 }

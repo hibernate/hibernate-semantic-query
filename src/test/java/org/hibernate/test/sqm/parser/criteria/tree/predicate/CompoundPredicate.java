@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
+import org.hibernate.orm.type.spi.BasicType;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
-import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -42,7 +42,7 @@ public class CompoundPredicate
 	 */
 	public CompoundPredicate(CriteriaBuilderImpl criteriaBuilder, BooleanOperator operator) {
 		super( criteriaBuilder,
-			   (BasicType<Boolean>) criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( Boolean.class )
+			   criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( Boolean.class )
 		);
 		this.operator = operator;
 	}

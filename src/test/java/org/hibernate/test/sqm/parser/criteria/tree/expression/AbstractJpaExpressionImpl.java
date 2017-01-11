@@ -11,13 +11,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
 
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.test.sqm.domain.Type;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.CastFunction;
 import org.hibernate.test.sqm.parser.criteria.tree.select.AbstractSimpleSelection;
@@ -30,17 +28,18 @@ import org.hibernate.test.sqm.parser.criteria.tree.select.AbstractSimpleSelectio
 public abstract class AbstractJpaExpressionImpl<T>
 		extends AbstractSimpleSelection<T>
 		implements JpaExpression<T>, Serializable {
-	private Type sqmType;
+	private SqmExpressableType sqmType;
 
 	public AbstractJpaExpressionImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			Type sqmType,
+			SqmExpressableType sqmType,
 			Class<T> javaType) {
 		super( criteriaBuilder, javaType );
+		this.sqmType = sqmType;
 	}
 
 	@Override
-	public Type getExpressionSqmType() {
+	public SqmExpressableType getExpressionSqmType() {
 		return sqmType;
 	}
 
@@ -51,9 +50,9 @@ public abstract class AbstractJpaExpressionImpl<T>
 			return (JpaExpression<X>) this;
 		}
 		else {
-			return new CastFunction<>(
+			return new CastFunction(
 					this,
-					(BasicType<X>) criteriaBuilder().consumerContext().getDomainMetamodel().resolveBasicType( type ),
+					criteriaBuilder().consumerContext().getDomainMetamodel().resolveBasicType( type ),
 					type,
 					criteriaBuilder()
 			);

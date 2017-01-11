@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 import org.jboss.logging.Logger;
 
@@ -29,16 +31,21 @@ public class SqmDynamicInstantiation
 		implements SqmExpression, SqmAliasedExpressionContainer<SqmDynamicInstantiationArgument> {
 	private static final Logger log = Logger.getLogger( SqmDynamicInstantiation.class );
 
-	public static SqmDynamicInstantiation forClassInstantiation(Class targetJavaType) {
-		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( CLASS, targetJavaType ) );
+	public static SqmDynamicInstantiation forClassInstantiation(Class targetJavaType, ParsingContext parsingContext) {
+		final SqmDomainType domainType = parsingContext.getConsumerContext().getDomainMetamodel().javaTypeToDomainType( targetJavaType );
+		return new SqmDynamicInstantiation(
+				new DynamicInstantiationTargetImpl( CLASS, domainType )
+		);
 	}
 
-	public static SqmDynamicInstantiation forMapInstantiation() {
-		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( MAP, Map.class ) );
+	public static SqmDynamicInstantiation forMapInstantiation(ParsingContext parsingContext) {
+		final SqmDomainType domainType = parsingContext.getConsumerContext().getDomainMetamodel().javaTypeToDomainType( Map.class );
+		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( MAP, domainType ) );
 	}
 
-	public static SqmDynamicInstantiation forListInstantiation() {
-		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( LIST, List.class ) );
+	public static SqmDynamicInstantiation forListInstantiation(ParsingContext parsingContext) {
+		final SqmDomainType domainType = parsingContext.getConsumerContext().getDomainMetamodel().javaTypeToDomainType( List.class );
+		return new SqmDynamicInstantiation( new DynamicInstantiationTargetImpl( LIST, domainType ) );
 	}
 
 	private final SqmDynamicInstantiationTarget instantiationTarget;
@@ -54,12 +61,12 @@ public class SqmDynamicInstantiation
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public SqmExpressableType getExpressionType() {
 		return null;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmExpressableType getInferableType() {
 		return null;
 	}
 
@@ -121,14 +128,19 @@ public class SqmDynamicInstantiation
 		return new SqmDynamicInstantiation( getInstantiationTarget() );
 	}
 
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return null;
+	}
+
 	private static class DynamicInstantiationTargetImpl implements SqmDynamicInstantiationTarget {
 		private final Nature nature;
-		private final Class javaType;
+		private final SqmDomainType domainType;
 
 
-		public DynamicInstantiationTargetImpl(Nature nature, Class javaType) {
+		public DynamicInstantiationTargetImpl(Nature nature, SqmDomainType domainType) {
 			this.nature = nature;
-			this.javaType = javaType;
+			this.domainType = domainType;
 		}
 
 		@Override
@@ -137,8 +149,8 @@ public class SqmDynamicInstantiation
 		}
 
 		@Override
-		public Class getJavaType() {
-			return javaType;
+		public SqmDomainType getDomainType() {
+			return domainType;
 		}
 	}
 }

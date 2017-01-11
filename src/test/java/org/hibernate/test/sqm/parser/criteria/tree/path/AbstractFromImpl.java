@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
@@ -25,7 +24,7 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
+import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaAttributeJoin;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaCollectionJoin;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFetch;
@@ -54,12 +53,17 @@ public abstract class AbstractFromImpl<Z, X>
 
 	public AbstractFromImpl(
 			CriteriaBuilderImpl criteriaBuilder,
-			org.hibernate.test.sqm.domain.Type sqmType, Class<X> javaType) {
-		this( criteriaBuilder, sqmType, javaType, null );
+			SqmNavigable sqmNavigable,
+			Class<X> javaType) {
+		this( criteriaBuilder, sqmNavigable, javaType, null );
 	}
 
-	public AbstractFromImpl(CriteriaBuilderImpl criteriaBuilder, org.hibernate.test.sqm.domain.Type sqmType, Class<X> javaType, JpaPathSource pathSource) {
-		super( criteriaBuilder, sqmType, javaType, pathSource );
+	public AbstractFromImpl(
+			CriteriaBuilderImpl criteriaBuilder,
+			SqmNavigable sqmNavigable,
+			Class<X> javaType,
+			JpaPathSource pathSource) {
+		super( criteriaBuilder, sqmNavigable, javaType, pathSource );
 	}
 
 	@Override

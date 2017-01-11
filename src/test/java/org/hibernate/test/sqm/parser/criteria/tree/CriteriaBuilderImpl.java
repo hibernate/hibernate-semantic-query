@@ -35,8 +35,10 @@ import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.SetJoin;
 import javax.persistence.criteria.Subquery;
 
+import org.hibernate.orm.type.internal.BasicTypeImpl;
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
@@ -45,8 +47,6 @@ import org.hibernate.sqm.parser.criteria.tree.select.JpaCompoundSelection;
 import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
 import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 
-import org.hibernate.test.sqm.domain.BasicType;
-import org.hibernate.test.sqm.type.internal.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.ParameterExpressionImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.GenericFunctionExpression;
@@ -803,8 +803,8 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			return function( name, returnType );
 		}
 
-		final BasicType<T> returnSqmType = (BasicType<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
-		return new GenericFunctionExpression<T>(
+		final SqmExpressableTypeBasic returnSqmType = consumerContext().getDomainMetamodel().resolveBasicType( returnType );
+		return new GenericFunctionExpression(
 				name,
 				returnSqmType,
 				returnType,
@@ -823,7 +823,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Expression<T> function(String name, Class<T> returnType) {
-		final BasicType<T> returnSqmType = (BasicType<T>) consumerContext().getDomainMetamodel().resolveBasicType( returnType );
+		final SqmExpressableTypeBasic returnSqmType = consumerContext().getDomainMetamodel().resolveBasicType( returnType );
 		return new GenericFunctionExpression<>( name, returnSqmType, returnType, this );
 	}
 

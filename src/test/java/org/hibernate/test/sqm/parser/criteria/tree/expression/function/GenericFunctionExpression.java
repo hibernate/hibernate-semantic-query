@@ -10,11 +10,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
-import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 
 /**
@@ -29,7 +30,7 @@ public class GenericFunctionExpression<X>
 
 	public GenericFunctionExpression(
 			String functionName,
-			BasicType sqmType,
+			SqmExpressableTypeBasic sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder) {
 		this( functionName, sqmType, javaType, criteriaBuilder, Collections.emptyList() );
@@ -37,7 +38,7 @@ public class GenericFunctionExpression<X>
 
 	public GenericFunctionExpression(
 			String functionName,
-			BasicType sqmType,
+			SqmExpressableTypeBasic sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder,
 			JpaExpression<?>... arguments) {
@@ -46,7 +47,7 @@ public class GenericFunctionExpression<X>
 
 	public GenericFunctionExpression(
 			String functionName,
-			BasicType sqmType,
+			SqmExpressableTypeBasic sqmType,
 			Class<X> javaType,
 			CriteriaBuilderImpl criteriaBuilder,
 			List<JpaExpression<?>> arguments) {
@@ -60,6 +61,11 @@ public class GenericFunctionExpression<X>
 
 	public List<JpaExpression<?>> getArguments() {
 		return arguments;
+	}
+
+	@Override
+	public SqmExpressableTypeBasic getFunctionResultType() {
+		return (SqmDomainTypeBasic) super.getFunctionResultType();
 	}
 
 	@Override

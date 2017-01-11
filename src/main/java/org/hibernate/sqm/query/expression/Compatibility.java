@@ -19,8 +19,8 @@ public class Compatibility {
 	private static final Map<Class,Class> primitiveToWrapper;
 	private static final Map<Class,Class> wrapperToPrimitive;
 	static {
-		primitiveToWrapper = new ConcurrentHashMap<Class, Class>();
-		wrapperToPrimitive = new ConcurrentHashMap<Class, Class>();
+		primitiveToWrapper = new ConcurrentHashMap<>();
+		wrapperToPrimitive = new ConcurrentHashMap<>();
 		map( boolean.class, Boolean.class );
 		map( char.class, Character.class );
 		map( byte.class, Byte.class );

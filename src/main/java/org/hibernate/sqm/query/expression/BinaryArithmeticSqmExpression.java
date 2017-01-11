@@ -7,7 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -17,17 +18,22 @@ public class BinaryArithmeticSqmExpression implements SqmExpression {
 	private final SqmExpression lhsOperand;
 	private final SqmExpression rhsOperand;
 
-	private DomainReference expressionType;
+	private SqmExpressableType expressionType;
 
 	public BinaryArithmeticSqmExpression(
 			Operation operation,
 			SqmExpression lhsOperand,
 			SqmExpression rhsOperand,
-			DomainReference expressionType) {
+			SqmExpressableType expressionType) {
 		this.operation = operation;
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
 		this.expressionType = expressionType;
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return expressionType.getExportedDomainType();
 	}
 
 	public enum Operation {
@@ -104,12 +110,12 @@ public class BinaryArithmeticSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public SqmExpressableType getExpressionType() {
 		return expressionType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmExpressableType getInferableType() {
 		return expressionType;
 	}
 

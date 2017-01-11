@@ -14,20 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.StrictJpaComplianceViolation;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
-import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
-import org.hibernate.sqm.domain.PluralSqmAttributeReference;
-import org.hibernate.sqm.domain.PluralSqmAttributeReference.CollectionClassification;
-import org.hibernate.sqm.domain.PolymorphicEntityReference;
-import org.hibernate.sqm.domain.SingularSqmAttributeReference;
-import org.hibernate.sqm.domain.SingularSqmAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SqmExpressableType;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
+import org.hibernate.sqm.domain.SqmNavigableSource;
+import org.hibernate.sqm.domain.SqmPluralAttribute;
+import org.hibernate.sqm.domain.SqmPluralAttribute.CollectionClassification;
+import org.hibernate.sqm.domain.SqmPluralAttributeElement;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.parser.LiteralNumberFormatException;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.SemanticException;
+import org.hibernate.sqm.parser.UnknownEntityException;
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
+import org.hibernate.sqm.parser.common.NavigableBindingHelper;
 import org.hibernate.sqm.parser.common.ParameterDeclarationContext;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.QuerySpecProcessingState;
@@ -36,12 +40,12 @@ import org.hibernate.sqm.parser.common.QuerySpecProcessingStateStandardImpl;
 import org.hibernate.sqm.parser.common.Stack;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParserBaseVisitor;
-import org.hibernate.sqm.parser.hql.internal.path.PathHelper;
-import org.hibernate.sqm.parser.hql.internal.path.PathResolver;
-import org.hibernate.sqm.parser.hql.internal.path.PathResolverBasicImpl;
-import org.hibernate.sqm.parser.hql.internal.path.PathResolverJoinAttributeImpl;
-import org.hibernate.sqm.parser.hql.internal.path.PathResolverJoinPredicateImpl;
-import org.hibernate.sqm.parser.hql.internal.path.PathResolverSelectClauseImpl;
+import org.hibernate.sqm.parser.hql.internal.navigable.NavigableBindingResolver;
+import org.hibernate.sqm.parser.hql.internal.navigable.PathHelper;
+import org.hibernate.sqm.parser.hql.internal.navigable.PathResolverBasicImpl;
+import org.hibernate.sqm.parser.hql.internal.navigable.PathResolverJoinAttributeImpl;
+import org.hibernate.sqm.parser.hql.internal.navigable.PathResolverJoinPredicateImpl;
+import org.hibernate.sqm.parser.hql.internal.navigable.PathResolverSelectClauseImpl;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.SqmDeleteStatement;
 import org.hibernate.sqm.query.SqmInsertSelectStatement;
@@ -76,25 +80,43 @@ import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.NullifSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
-import org.hibernate.sqm.query.expression.domain.EntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.domain.MapEntrySqmExpression;
-import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
-import org.hibernate.sqm.query.expression.domain.MaxElementSqmExpression;
-import org.hibernate.sqm.query.expression.domain.MaxIndexSqmExpression;
-import org.hibernate.sqm.query.expression.domain.MinElementSqmExpression;
-import org.hibernate.sqm.query.expression.domain.MinIndexSqmExpression;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeIndexedAccessBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.CollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.CollectionElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.CollectionElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.CollectionElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.CollectionIndexBinding;
+import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
+import org.hibernate.sqm.query.expression.domain.IndexedElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.IndexedElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.IndexedElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.MapEntryBinding;
+import org.hibernate.sqm.query.expression.domain.MaxElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.MaxIndexBinding;
+import org.hibernate.sqm.query.expression.domain.MaxIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.MaxIndexBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.MaxIndexBindingEntity;
+import org.hibernate.sqm.query.expression.domain.MinElementBinding;
+import org.hibernate.sqm.query.expression.domain.MinElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.MinElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.MinElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.MinIndexBinding;
+import org.hibernate.sqm.query.expression.domain.MinIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.MinIndexBindingEmbeddable;
+import org.hibernate.sqm.query.expression.domain.MinIndexBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmEmbeddableTypedBinding;
+import org.hibernate.sqm.query.expression.domain.SqmEntityTypeSqmExpression;
+import org.hibernate.sqm.query.expression.domain.SqmEntityTypedBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableResolutionContext;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmRestrictedCollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
 import org.hibernate.sqm.query.expression.function.AggregateFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
@@ -114,6 +136,7 @@ import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmFromExporter;
 import org.hibernate.sqm.query.from.SqmQualifiedJoin;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.ParameterCollector;
@@ -154,7 +177,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 /**
  * @author Steve Ebersole
  */
-public class SemanticQueryBuilder extends HqlParserBaseVisitor {
+public class SemanticQueryBuilder extends HqlParserBaseVisitor implements SqmNavigableResolutionContext {
 	private static final Logger log = Logger.getLogger( SemanticQueryBuilder.class );
 
 	/**
@@ -172,7 +195,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	private final ParsingContext parsingContext;
 
-	private final Stack<PathResolver> pathResolverStack = new Stack<>();
+	private final Stack<NavigableBindingResolver> pathResolverStack = new Stack<>();
 	private final Stack<ParameterDeclarationContext> parameterDeclarationContextStack = new Stack<>();
 	private final Stack<QuerySpecProcessingState> querySpecProcessingStateStack = new Stack<>();
 
@@ -344,7 +367,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		// select the root
 		final SqmSelectClause selectClause = new SqmSelectClause( false );
 		final SqmFrom root = fromClause.getFromElementSpaces().get( 0 ).getRoot();
-		selectClause.addSelection( new SqmSelection( root ) );
+		selectClause.addSelection( new SqmSelection( root.getBinding() ) );
 		return selectClause;
 	}
 
@@ -367,8 +390,27 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public SqmSelection visitSelection(HqlParser.SelectionContext ctx) {
 		SqmExpression selectExpression = visitSelectExpression( ctx.selectExpression() );
-		if ( selectExpression instanceof PluralAttributeBinding ) {
-			selectExpression = new PluralAttributeElementBinding( (PluralAttributeBinding) selectExpression );
+		if ( selectExpression instanceof SqmPluralAttributeBinding ) {
+			final SqmPluralAttributeBinding pluralAttributeBinding = (SqmPluralAttributeBinding) selectExpression;
+			final SqmPluralAttributeElement elementReference = pluralAttributeBinding.getBoundNavigable().getElementReference();
+			switch ( elementReference.getClassification() ) {
+				case ANY: {
+					throw new NotYetImplementedException(  );
+				}
+				case BASIC: {
+					selectExpression = new CollectionElementBindingBasic( pluralAttributeBinding );
+					break;
+				}
+				case EMBEDDABLE: {
+					selectExpression = new CollectionElementBindingEmbedded( pluralAttributeBinding );
+					break;
+				}
+				case ONE_TO_MANY:
+				case MANY_TO_MANY: {
+					selectExpression = new CollectionElementBindingEntity( pluralAttributeBinding );
+					break;
+				}
+			}
 		}
 
 		final SqmSelection selection = new SqmSelection(
@@ -449,16 +491,16 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final SqmDynamicInstantiation dynamicInstantiation;
 
 		if ( ctx.dynamicInstantiationTarget().MAP() != null ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation();
+			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation( parsingContext );
 		}
 		else if ( ctx.dynamicInstantiationTarget().LIST() != null ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation();
+			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation( parsingContext );
 		}
 		else {
 			final String className = ctx.dynamicInstantiationTarget().dotIdentifierSequence().getText();
 			try {
 				final Class targetJavaType = parsingContext.getConsumerContext().classByName( className );
-				dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( targetJavaType );
+				dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( targetJavaType, parsingContext );
 			}
 			catch (ClassNotFoundException e) {
 				throw new SemanticException( "Unable to resolve class named for dynamic instantiation : " + className );
@@ -493,13 +535,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public SqmFrom visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
+	public SqmNavigableBinding visitJpaSelectObjectSyntax(HqlParser.JpaSelectObjectSyntaxContext ctx) {
 		final String alias = ctx.identifier().getText();
-		final DomainReferenceBinding binding = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
+		final SqmNavigableBinding binding = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 		if ( binding == null ) {
 			throw new SemanticException( "Unable to resolve alias [" +  alias + "] in selection [" + ctx.getText() + "]" );
 		}
-		return binding.getFromElement();
+		return binding;
 	}
 
 	@Override
@@ -630,19 +672,24 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	protected SqmRoot resolveDmlRootEntityReference(HqlParser.MainEntityPersisterReferenceContext rootEntityContext) {
-		final EntityReference entityBinding = resolveEntityReference( rootEntityContext.dotIdentifierSequence() );
+		final String entityName = rootEntityContext.dotIdentifierSequence().getText();
+		final SqmExpressableTypeEntity entityReference = resolveEntityReference( entityName );
+		if ( entityReference == null ) {
+			throw new UnknownEntityException( "Could not resolve entity name [" + entityName + "] as DML target", entityName );
+		}
+
 		String alias = interpretIdentificationVariable( rootEntityContext.identificationVariableDef() );
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for DML root entity reference [%s]",
 					alias,
-					entityBinding.getEntityName()
+					entityReference.getEntityName()
 			);
 		}
-		final SqmRoot root = new SqmRoot( null, parsingContext.makeUniqueIdentifier(), alias, entityBinding );
+		final SqmRoot root = new SqmRoot( null, parsingContext.makeUniqueIdentifier(), alias, entityReference );
 		parsingContext.registerFromElementByUniqueId( root );
-		querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().registerAlias( root.getDomainReferenceBinding() );
+		querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().registerAlias( root.getBinding() );
 		querySpecProcessingStateStack.getCurrent().getFromClause().getFromElementSpaces().get( 0 ).setRoot( root );
 		return root;
 	}
@@ -692,7 +739,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				);
 
 				for ( HqlParser.AssignmentContext assignmentContext : ctx.setClause().assignment() ) {
-					final SingularAttributeBinding stateField = (SingularAttributeBinding) pathResolverStack.getCurrent().resolvePath(
+					final SqmSingularAttributeBinding stateField = (SqmSingularAttributeBinding) pathResolverStack.getCurrent().resolvePath(
 							splitPathParts( assignmentContext.dotIdentifierSequence() )
 					);
 					// todo : validate "state field" expression
@@ -724,17 +771,22 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public SqmInsertSelectStatement visitInsertStatement(HqlParser.InsertStatementContext ctx) {
 		querySpecProcessingStateStack.push( new QuerySpecProcessingStateDmlImpl( parsingContext ) );
 		try {
-			final EntityReference entityBinding = resolveEntityReference( ctx.insertSpec().intoSpec().dotIdentifierSequence() );
+			final String entityName = ctx.insertSpec().intoSpec().dotIdentifierSequence().getText();
+			final SqmExpressableTypeEntity entityReference = resolveEntityReference( entityName );
+			if ( entityReference == null ) {
+				throw new UnknownEntityException( "Could not resolve entity name [" + entityName + "] as INSERT target", entityName );
+			}
+
 			String alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
 					"Generated implicit alias [%s] for INSERT target [%s]",
 					alias,
-					entityBinding.getEntityName()
+					entityReference.getEntityName()
 			);
 
-			SqmRoot root = new SqmRoot( null, parsingContext.makeUniqueIdentifier(), alias, entityBinding );
+			SqmRoot root = new SqmRoot( null, parsingContext.makeUniqueIdentifier(), alias, entityReference );
 			parsingContext.registerFromElementByUniqueId( root );
-			querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().registerAlias( root.getDomainReferenceBinding() );
+			querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().registerAlias( root.getBinding() );
 			querySpecProcessingStateStack.getCurrent().getFromClause().getFromElementSpaces().get( 0 ).setRoot( root );
 
 			// for now we only support the INSERT-SELECT form
@@ -746,7 +798,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				insertStatement.setSelectQuery( visitQuerySpec( ctx.querySpec() ) );
 
 				for ( HqlParser.DotIdentifierSequenceContext stateFieldCtx : ctx.insertSpec().targetFieldsSpec().dotIdentifierSequence() ) {
-					final SingularAttributeBinding stateField = (SingularAttributeBinding) pathResolverStack.getCurrent().resolvePath(
+					final SqmSingularAttributeBinding stateField = (SqmSingularAttributeBinding) pathResolverStack.getCurrent().resolvePath(
 							splitPathParts( stateFieldCtx )
 					);
 					// todo : validate each resolved stateField...
@@ -797,14 +849,16 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public SqmRoot visitFromElementSpaceRoot(HqlParser.FromElementSpaceRootContext ctx) {
-		final EntityReference entityBinding = resolveEntityReference(
-				ctx.mainEntityPersisterReference().dotIdentifierSequence()
-		);
+		final String entityName = ctx.mainEntityPersisterReference().dotIdentifierSequence().getText();
+		final SqmExpressableTypeEntity entityReference = resolveEntityReference( entityName );
+		if ( entityReference == null ) {
+			throw new UnknownEntityException( "Could not resolve entity name [" + entityName + "] used as root", entityName );
+		}
 
-		if ( PolymorphicEntityReference.class.isInstance( entityBinding ) ) {
+		if ( SqmExpressableTypeEntityPolymorphicEntity.class.isInstance( entityReference ) ) {
 			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 				throw new StrictJpaComplianceViolation(
-						"Encountered unmapped polymorphic reference [" + entityBinding.getEntityName()
+						"Encountered unmapped polymorphic reference [" + entityReference.getEntityName()
 								+ "], but strict JPQL compliance was requested",
 						StrictJpaComplianceViolation.Type.UNMAPPED_POLYMORPHISM
 				);
@@ -815,39 +869,44 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 		return querySpecProcessingStateStack.getCurrent().getFromElementBuilder().makeRootEntityFromElement(
 				currentFromElementSpace,
-				entityBinding,
+				entityReference,
 				interpretIdentificationVariable( ctx.mainEntityPersisterReference().identificationVariableDef() )
 		);
 	}
 
-	private EntityReference resolveEntityReference(HqlParser.DotIdentifierSequenceContext dotIdentifierSequenceContext) {
-		final String entityName = dotIdentifierSequenceContext.getText();
-		final EntityReference entityTypeDescriptor = parsingContext.getConsumerContext()
-				.getDomainMetamodel()
-				.resolveEntityReference( entityName );
-		if ( entityTypeDescriptor == null ) {
-			throw new SemanticException( "Unresolved entity name : " + entityName );
+	private SqmExpressableTypeEntity resolveEntityReference(String entityName) {
+		log.debugf( "Attempting to resolve path [%s] as entity reference...", entityName );
+		SqmExpressableTypeEntity reference = null;
+		try {
+			reference = parsingContext.getConsumerContext()
+					.getDomainMetamodel()
+					.resolveEntityReference( entityName );
 		}
-		return entityTypeDescriptor;
+		catch (Exception ignore) {
+		}
+
+		return reference;
 	}
 
 	@Override
 	public SqmCrossJoin visitCrossJoin(HqlParser.CrossJoinContext ctx) {
-		final EntityReference entityBinding = resolveEntityReference(
-				ctx.mainEntityPersisterReference().dotIdentifierSequence()
-		);
+		final String entityName = ctx.mainEntityPersisterReference().dotIdentifierSequence().getText();
+		final SqmExpressableTypeEntity entityReference = resolveEntityReference( entityName );
+		if ( entityReference == null ) {
+			throw new UnknownEntityException( "Could not resolve entity name [" + entityName + "] used as CROSS JOIN target", entityName );
+		}
 
-		if ( PolymorphicEntityReference.class.isInstance( entityBinding ) ) {
+		if ( SqmExpressableTypeEntityPolymorphicEntity.class.isInstance( entityReference ) ) {
 			throw new SemanticException(
 					"Unmapped polymorphic references are only valid as sqm root, not in cross join : " +
-							entityBinding.getEntityName()
+							entityReference.getEntityName()
 			);
 		}
 
 		return querySpecProcessingStateStack.getCurrent().getFromElementBuilder().makeCrossJoinedFromElement(
 				currentFromElementSpace,
 				parsingContext.makeUniqueIdentifier(),
-				entityBinding,
+				entityReference,
 				interpretIdentificationVariable( ctx.mainEntityPersisterReference().identificationVariableDef() )
 		);
 	}
@@ -865,8 +924,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		);
 
 		try {
-			PluralAttributeBinding attributeBinding = asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) );
-			return attributeBinding.getFromElement();
+			SqmPluralAttributeBinding attributeBinding = asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) );
+			return attributeBinding.getExportedFromElement();
 		}
 		finally {
 			pathResolverStack.pop();
@@ -882,7 +941,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				throw new SemanticException( "FULL OUTER joins are not yet supported : " + ctx.getText() );
 			}
 			if ( ctx.RIGHT() != null ) {
-				throw new SemanticException( "FULL OUTER joins are not yet supported : " + ctx.getText() );
+				throw new SemanticException( "RIGHT OUTER joins are not yet supported : " + ctx.getText() );
 			}
 
 			joinType = JoinType.LEFT;
@@ -910,30 +969,62 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 			// Object because join-target might be either an Entity join (... join Address a on ...)
 			// or an attribute-join (... from p.address a on ...)
-			final Object joinedPath = ctx.qualifiedJoinRhs().path().accept( this );
-			if ( joinedPath instanceof AttributeBinding ) {
-				final AttributeBinding binding = (AttributeBinding) joinedPath;
-				resolveAttributeJoinIfNot( binding, identificationVariable );
-				joinedFromElement = binding.getFromElement();
-			}
-			else if ( joinedPath instanceof EntityTypeLiteralSqmExpression ) {
-				joinedFromElement = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildEntityJoin(
-						currentFromElementSpace,
-						identificationVariable,
-						( (EntityTypeLiteralSqmExpression) joinedPath ).getExpressionType(),
-						joinType
-				);
+			final Object joinRhsResolution = ctx.qualifiedJoinRhs().path().accept( this );
+			final SqmNavigableBinding navigableBinding;
+			if ( joinRhsResolution instanceof EntityTypeLiteralSqmExpression ) {
+				// convert the EntityTypeLiteralSqmExpression into an EntityBinding
+				final EntityTypeLiteralSqmExpression entityReference = (EntityTypeLiteralSqmExpression) joinRhsResolution;
+				navigableBinding = new EntityBindingImpl( entityReference.getExpressionType() );
 			}
 			else {
-				throw new ParsingException( "Unexpected qualifiedJoin.path resolution type : " + joinedPath );
+				navigableBinding = (SqmNavigableBinding) joinRhsResolution;
 			}
 
+			if ( navigableBinding instanceof SqmAttributeBinding ) {
+				resolveAttributeJoinIfNot( (SqmAttributeBinding) navigableBinding, identificationVariable );
+			}
+			else if ( navigableBinding instanceof CollectionElementBinding ) {
+				resolveCollectionElementJoinIfNot( (CollectionElementBinding) navigableBinding, identificationVariable );
+			}
+			else if ( navigableBinding instanceof CollectionIndexBinding ) {
+				resolveCollectionIndexJoinIfNot( (CollectionIndexBinding) navigableBinding, identificationVariable );
+			}
+			else if ( navigableBinding instanceof SqmEntityTypedBinding ) {
+				// should be an EntityBindingImpl
+				assert navigableBinding instanceof EntityBindingImpl;
+
+				final SqmEntityTypedBinding entityBinding = (SqmEntityTypedBinding) navigableBinding;
+				if ( entityBinding.getExportedFromElement() == null ) {
+					entityBinding.injectExportedFromElement(
+							querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildEntityJoin(
+									currentFromElementSpace,
+									identificationVariable,
+									entityBinding.getBoundNavigable(),
+									JoinType.INNER
+							)
+					);
+				}
+			}
+			else if ( navigableBinding instanceof SqmEmbeddableTypedBinding ) {
+				final SqmEmbeddableTypedBinding compositeBinding = (SqmEmbeddableTypedBinding) navigableBinding;
+				if ( compositeBinding.getExportedFromElement() == null ) {
+					// todo : can we create a SqmFrom element specific to a CompositeBinding?
+					throw new NotYetImplementedException( "Support for SqmFrom generation specific to CompositeBinding not yet implemented" );
+				}
+			}
+			else {
+				throw new ParsingException( "Unexpected qualifiedJoin.path resolution type : " + navigableBinding );
+			}
+
+			joinedFromElement = (SqmQualifiedJoin) ( (SqmFromExporter) navigableBinding ).getExportedFromElement();
 			currentJoinRhs = joinedFromElement;
 
 			if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 				if ( !ImplicitAliasGenerator.isImplicitAlias( joinedFromElement.getIdentificationVariable() ) ) {
-					if ( SingularAttributeBinding.class.isInstance( joinedPath ) ) {
-						if ( SingularAttributeBinding.class.cast( joinedPath ).getFromElement().isFetched() ) {
+					if ( SqmSingularAttributeBinding.class.isInstance( joinedFromElement.getBinding() )
+							&& SqmFromExporter.class.isInstance( joinedFromElement.getBinding() ) ) {
+						final SqmAttributeJoin attributeJoin = (SqmAttributeJoin) joinedFromElement;
+						if ( attributeJoin.isFetched() ) {
 							throw new StrictJpaComplianceViolation(
 									"Encountered aliased fetch join, but strict JPQL compliance was requested",
 									StrictJpaComplianceViolation.Type.ALIASED_FETCH_JOIN
@@ -953,6 +1044,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			currentJoinRhs = null;
 			pathResolverStack.pop();
 		}
+	}
+
+	private void resolveCollectionElementJoinIfNot(CollectionElementBinding binding, String identificationVariable) {
+		throw new NotYetImplementedException(  );
+	}
+
+	private void resolveCollectionIndexJoinIfNot(CollectionIndexBinding binding, String identificationVariable) {
+		throw new NotYetImplementedException(  );
 	}
 
 	private SqmQualifiedJoin currentJoinRhs;
@@ -1013,7 +1112,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	@Override
 	public EmptinessSqmPredicate visitIsEmptyPredicate(HqlParser.IsEmptyPredicateContext ctx) {
 		return new EmptinessSqmPredicate(
-				(PluralAttributeBinding) ctx.expression().accept( this ),
+				(SqmPluralAttributeBinding) ctx.expression().accept( this ),
 				ctx.NOT() != null
 		);
 	}
@@ -1196,14 +1295,14 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public SqmPredicate visitMemberOfPredicate(HqlParser.MemberOfPredicateContext ctx) {
-		final DomainReferenceBinding pathResolution = (DomainReferenceBinding) ctx.path().accept( this );
+		final SqmNavigableBinding pathResolution = (SqmNavigableBinding) ctx.path().accept( this );
 
-		if ( !SingularAttributeBinding.class.isInstance( pathResolution ) ) {
+		if ( !SqmSingularAttributeBinding.class.isInstance( pathResolution ) ) {
 			throw new SemanticException( "Could not resolve path [" + ctx.path().getText() + "] as an attribute reference" );
 		}
 
-		final SingularAttributeBinding attributeBinding = (SingularAttributeBinding) pathResolution;
-		if ( !PluralSqmAttributeReference.class.isInstance( attributeBinding.getAttribute() ) ) {
+		final SqmSingularAttributeBinding attributeBinding = (SqmSingularAttributeBinding) pathResolution;
+		if ( !SqmPluralAttribute.class.isInstance( attributeBinding.getBoundNavigable() ) ) {
 			throw new SemanticException( "Path argument to MEMBER OF must be a collection" );
 		}
 
@@ -1269,115 +1368,46 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 		else if ( ctx.entityTypeReference().path() != null ) {
-			final DomainReferenceBinding binding = (DomainReferenceBinding) ctx.entityTypeReference().path().accept( this );
+			final SqmNavigableBinding binding = (SqmNavigableBinding) ctx.entityTypeReference().path().accept( this );
 			validateBindingAsEntityTypeExpression( binding );
-			return new EntityTypeSqmExpression( binding );
+			return new SqmEntityTypeSqmExpression( binding );
 		}
 
 		throw new ParsingException( "Could not interpret grammar context as 'entity type' expression : " + ctx.getText() );
 	}
 
-	private void validateBindingAsEntityTypeExpression(DomainReferenceBinding binding) {
-		if ( binding instanceof EntityBinding ) {
+	private void validateBindingAsEntityTypeExpression(SqmNavigableBinding binding) {
+		if ( binding instanceof SqmEntityTypedBinding ) {
 			// its ok
 			return;
 		}
 
-		if ( binding instanceof SingularAttributeBinding ) {
-			final SingularAttributeBinding attrBinding = (SingularAttributeBinding) binding;
-
-			if ( attrBinding.getAttribute() instanceof SingularSqmAttributeReference ) {
-				final SingularSqmAttributeReference attrRef = (SingularSqmAttributeReference) attrBinding.getAttribute();
-				if ( attrRef.getAttributeTypeClassification() == SingularAttributeClassification.BASIC
-						|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.EMBEDDED ) {
-					throw new SemanticException(
-							"Path used in TYPE() resolved to a singular attribute of non-entity type : "
-									+ attrRef.getAttributeTypeClassification().name()
-					);
-				}
-
-				return;
-			}
-		}
-
-		// this ^^ is all JPA allows.  Any of these below should technically validate against strict compliance check
-
-		if ( binding instanceof SingularAttributeBinding ) {
-			final SingularAttributeBinding attrBinding = (SingularAttributeBinding) binding;
-
-			if ( attrBinding.getAttribute() instanceof PluralSqmAttributeReference ) {
-				final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) attrBinding.getAttribute();
-				if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
-						|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
-						|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
-					throw new SemanticException(
-							"Path used in TYPE() resolved to a plural attribute of non-entity type elements : "
-									+ attrRef.getElementReference().getClassification().name()
-					);
-				}
-
-				return;
-			}
-		}
-
-		if ( binding instanceof MapKeyBinding ) {
-			final MapKeyBinding mapKeyBinding = (MapKeyBinding) binding;
-			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) mapKeyBinding.getPluralAttributeBinding().getAttribute();
-			if ( attrRef.getIndexReference().getClassification() == IndexClassification.ANY
-					|| attrRef.getIndexReference().getClassification() == IndexClassification.BASIC
-					|| attrRef.getIndexReference().getClassification() == IndexClassification.EMBEDDABLE ) {
-				throw new SemanticException(
-						"Path used in TYPE() [" + mapKeyBinding.asLoggableText() + "] resolved to a Map KEY() expression, but the Map's keys are of non-entity type : "
-								+ attrRef.getIndexReference().getClassification().name()
-				);
-			}
-		}
-
-		if ( binding instanceof PluralAttributeElementBinding ) {
-			final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) binding;
-			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) elementBinding.getPluralAttributeBinding().getAttribute();
-			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
-					|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
-					|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
-				throw new SemanticException(
-						"Path used in TYPE() [" + elementBinding.asLoggableText() + "] resolved to a plural attribute VALUE() expression, but the elements are of non-entity type : "
-								+ attrRef.getElementReference().getClassification().name()
-				);
-			}
-		}
-
-		if ( binding instanceof PluralAttributeIndexedAccessBinding ) {
-			final PluralAttributeIndexedAccessBinding indexedAccessBinding = (PluralAttributeIndexedAccessBinding) binding;
-			final PluralSqmAttributeReference attrRef = (PluralSqmAttributeReference) indexedAccessBinding.getPluralAttributeBinding().getAttribute();
-			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
-					|| attrRef.getElementReference().getClassification() == ElementClassification.BASIC
-					|| attrRef.getElementReference().getClassification() == ElementClassification.EMBEDDABLE ) {
-				throw new SemanticException(
-						"Path used in TYPE() [" + indexedAccessBinding.asLoggableText() + "] resolved to an index-access expression, but the elements are of non-entity type : "
-								+ attrRef.getIndexReference().getClassification().name()
-				);
-			}
-		}
-
+		throw new SemanticException(
+				"Path used in TYPE() resolved to a non-EntityBinding : " + binding
+		);
 	}
 
 	@Override
 	public SqmExpression visitSimplePath(HqlParser.SimplePathContext ctx) {
 		// SimplePath might represent any number of things
-		final DomainReferenceBinding binding = pathAsDomainReferenceBinding( splitPathParts( ctx.dotIdentifierSequence() ) );
+		final SqmNavigableBinding binding = pathAsNavigableBinding( splitPathParts( ctx.dotIdentifierSequence() ) );
 		if ( binding != null ) {
 			return binding;
 		}
 
 		final String pathText = ctx.getText();
 
-		try {
-			final EntityReference entityType = parsingContext.getConsumerContext().getDomainMetamodel().resolveEntityReference( pathText );
-			if ( entityType != null ) {
-				return new EntityTypeLiteralSqmExpression( entityType );
-			}
-		}
-		catch (IllegalArgumentException ignore) {
+		final SqmExpressableTypeEntity entityReference = resolveEntityReference( pathText );
+		if ( entityReference != null ) {
+			// todo : how this should be handled depends on the parent context...
+			// 		inside a FROM-CLAUSE (although be careful of treats) -> EntityBindingImpl
+			//		otherwise -> EntityTypeLiteralSqmExpression
+			//
+			// an example of the warning about treats...
+			//		from Person p cross join (treat Person as Person)...
+
+			return new EntityTypeLiteralSqmExpression( entityReference );
+//			return new EntityBindingImpl( entityReference );
 		}
 
 		try {
@@ -1391,43 +1421,38 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		throw new SemanticException( "Could not interpret token : " + pathText );
 	}
 
-	protected DomainReferenceBinding pathAsDomainReferenceBinding(String[] pathParts) {
+	protected SqmNavigableBinding pathAsNavigableBinding(String[] pathParts) {
 		return pathResolverStack.getCurrent().resolvePath( pathParts );
 	}
 
 	@Override
-	public MapEntrySqmExpression visitMapEntryPath(HqlParser.MapEntryPathContext ctx) {
+	public MapEntryBinding visitMapEntryPath(HqlParser.MapEntryPathContext ctx) {
 		if ( inWhereClause ) {
 			throw new SemanticException(
 					"entry() function may only be used in SELECT clauses; specified "
 							+ "path [" + ctx.pathAsMap().path().getText() + "] is used in WHERE clause" );
 		}
 
-		final PluralAttributeBinding pathResolution = asMap( (DomainReferenceBinding) ctx.pathAsMap().path().accept( this ) );
+		final SqmPluralAttributeBinding pathResolution = asMap( (SqmNavigableBinding) ctx.pathAsMap().path().accept( this ) );
 		resolveAttributeJoinIfNot( pathResolution );
-		return new MapEntrySqmExpression( pathResolution );
+		return new MapEntryBinding( pathResolution );
 	}
 
-	private void resolveAttributeJoinIfNot(AttributeBinding binding) {
+	private void resolveAttributeJoinIfNot(SqmAttributeBinding binding) {
 		resolveAttributeJoinIfNot( binding, null );
 	}
 
-	private void resolveAttributeJoinIfNot(AttributeBinding attributeBinding, String alias) {
-		if ( attributeBinding.getFromElement() != null ) {
+	private void resolveAttributeJoinIfNot(SqmAttributeBinding attributeBinding, String alias) {
+		if ( attributeBinding.getExportedFromElement() != null ) {
 			return;
 		}
 
-		// binding can be any of:
-		//		2) From
-		//		1) AttributeBiding
-		attributeBinding.injectAttributeJoin(
+		attributeBinding.injectExportedFromElement(
 				querySpecProcessingStateStack.getCurrent().getFromElementBuilder().buildAttributeJoin(
 						attributeBinding,
 						alias,
 						null,
-						attributeBinding.getLhs().getFromElement().getPropertyPath().append( attributeBinding.getAttribute().getAttributeName() ),
 						JoinType.INNER,
-						attributeBinding.getLhs().getFromElement().getUniqueIdentifier(),
 						false,
 						true
 				)
@@ -1435,9 +1460,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public DomainReferenceBinding visitIndexedPath(HqlParser.IndexedPathContext ctx) {
+	public SqmNavigableBinding visitIndexedPath(HqlParser.IndexedPathContext ctx) {
 		final Object pathResolution = ctx.path().accept( this );
-		if ( !PluralAttributeBinding.class.isInstance( pathResolution ) ) {
+		if ( !SqmPluralAttributeBinding.class.isInstance( pathResolution ) ) {
 			// assume it is a semantic problem...
 			throw new SemanticException(
 					"Expecting reference to a plural-attribute, but path [" + ctx.path().getText() +
@@ -1445,23 +1470,52 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		final PluralAttributeBinding attributeBinding = (PluralAttributeBinding) pathResolution;
-		if ( !PluralSqmAttributeReference.class.isInstance( attributeBinding.getAttribute() )
-				|| attributeBinding.getAttribute().getIndexReference() == null ) {
+		final SqmPluralAttributeBinding attributeBinding = (SqmPluralAttributeBinding) pathResolution;
+		if ( !SqmPluralAttribute.class.isInstance( attributeBinding.getBoundNavigable() )
+				|| attributeBinding.getBoundNavigable().getIndexReference() == null ) {
 			throw new SemanticException(
 					"Index operator only valid for indexed collections (maps, lists, arrays) : " +
-							attributeBinding.getAttribute()
+							attributeBinding.getBoundNavigable()
 			);
 		}
+
+		final SqmPluralAttribute attRef = attributeBinding.getBoundNavigable();
+		final SqmPluralAttributeElement elementReference = attributeBinding.getBoundNavigable().getElementReference();
 
 		final SqmExpression indexExpression = (SqmExpression) ctx.expression().accept( this );
 
 		// todo : would be nice to validate the index's type against the Collection-index's type
+		assertAreSame( attributeBinding.getBoundNavigable().getIndexReference().getExportedDomainType(), indexExpression.getExportedDomainType() );
 
-		final PluralAttributeIndexedAccessBinding indexedReference = new PluralAttributeIndexedAccessBinding(
-				attributeBinding,
-				indexExpression
-		);
+		// determine the kind of IndexedElementBinding to create
+		final SqmRestrictedCollectionElementBinding indexedReference;
+		switch ( elementReference.getClassification() ) {
+			case ANY: {
+				throw new NotYetImplementedException(  );
+			}
+			case BASIC: {
+				indexedReference = new IndexedElementBindingBasic( attributeBinding, indexExpression );
+				break;
+			}
+			case EMBEDDABLE: {
+				indexedReference = new IndexedElementBindingEmbedded( attributeBinding, indexExpression );
+				break;
+			}
+			case ONE_TO_MANY:
+			case MANY_TO_MANY: {
+				indexedReference = new IndexedElementBindingEntity(
+						attributeBinding,
+						indexExpression
+				);
+				break;
+			}
+			default: {
+				throw new UnsupportedOperationException(
+						"Unrecognized plural-attribute element classification : " +
+								elementReference.getClassification().name()
+				);
+			}
+		}
 
 		if ( ctx.pathTerminal() == null ) {
 			return indexedReference;
@@ -1473,14 +1527,13 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		// the binding would additionally need to be an AttributeBindingSource
 		// and expose a Bindable
 
-		final PluralSqmAttributeReference attRef = attributeBinding.getAttribute();
-		if ( !canBeDereferenced( attRef.getElementReference().getClassification() ) ) {
+		if ( ! SqmNavigableSource.class.isInstance( elementReference ) ) {
 			throw new SemanticException(
 					String.format(
 							Locale.ROOT,
 							"Plural attribute elements [%s.%s - as resolved from %s] cannot be dereferenced - [%s]",
-							attributeBinding.getLhs().getFromElement().asLoggableText(),
-							attributeBinding.getAttribute().getAttributeName(),
+							attributeBinding.getSourceBinding().asLoggableText(),
+							attributeBinding.getBoundNavigable().getAttributeName(),
 							ctx.path().getText(),
 							attRef.getElementReference().getClassification().name()
 					)
@@ -1488,26 +1541,28 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		return pathResolverStack.getCurrent().resolvePath(
-				indexedReference,
+				(SqmNavigableSourceBinding) indexedReference,
 				PathHelper.split( ctx.pathTerminal().getText() )
 		);
 	}
 
-	private boolean canBeDereferenced(ElementClassification elementClassification) {
-		return elementClassification == ElementClassification.EMBEDDABLE
-				|| elementClassification == ElementClassification.ONE_TO_MANY
-				|| elementClassification == ElementClassification.MANY_TO_MANY;
-	}
-
-	private boolean canBeDereferenced(IndexClassification indexClassification) {
-		return indexClassification == IndexClassification.EMBEDDABLE
-				|| indexClassification == IndexClassification.ONE_TO_MANY
-				|| indexClassification == IndexClassification.MANY_TO_MANY;
+	private void assertAreSame(SqmDomainType expected, SqmDomainType actual) {
+		if ( !expected.equals( actual ) ) {
+			log.debugf( "Expected domain type [%s] but found [%s]", expected, actual  );
+		}
 	}
 
 	@Override
-	public DomainReferenceBinding visitCompoundPath(HqlParser.CompoundPathContext ctx) {
-		final DomainReferenceBinding root = (DomainReferenceBinding) ctx.pathRoot().accept( this );
+	public SqmNavigableBinding visitCompoundPath(HqlParser.CompoundPathContext ctx) {
+		SqmNavigableBinding rootPath = (SqmNavigableBinding) ctx.pathRoot().accept( this );
+		if ( ctx.pathTerminal() == null ) {
+			// can happen for non-dereferenced KEY() and VALUE() references...
+			return rootPath;
+
+			// todo : a better solution is to better structure the grammar rules.
+		}
+
+		final SqmNavigableSourceBinding root = (SqmNavigableSourceBinding) rootPath ;
 
 		log.debugf(
 				"Resolved CompoundPath pathRoot [%s] : %s",
@@ -1526,15 +1581,15 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public Object visitMapKeyPathRoot(HqlParser.MapKeyPathRootContext ctx) {
-		final PluralAttributeBinding pathResolution = visitPathAsMap( ctx.pathAsMap() );
+	public SqmNavigableBinding visitMapKeyPathRoot(HqlParser.MapKeyPathRootContext ctx) {
+		final SqmPluralAttributeBinding pathResolution = visitPathAsMap( ctx.pathAsMap() );
 		resolveAttributeJoinIfNot( pathResolution );
-		return new MapKeyBinding( pathResolution );
+		return NavigableBindingHelper.createCollectionIndexBinding( pathResolution, pathResolution.getBoundNavigable().getIndexReference() );
 	}
 
-	private PluralAttributeBinding asMap(DomainReferenceBinding binding) {
-		PluralAttributeBinding attributeBinding = asPluralAttribute( binding );
-		if ( attributeBinding.getAttribute().getCollectionClassification() != CollectionClassification.MAP ) {
+	private SqmPluralAttributeBinding asMap(SqmNavigableBinding binding) {
+		SqmPluralAttributeBinding attributeBinding = asPluralAttribute( binding );
+		if ( attributeBinding.getBoundNavigable().getCollectionClassification() != CollectionClassification.MAP ) {
 			throw new SemanticException( "Expecting persistent Map reference, but found : " + binding );
 		}
 
@@ -1542,11 +1597,11 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	@Override
-	public PluralAttributeElementBinding visitCollectionValuePathRoot(HqlParser.CollectionValuePathRootContext ctx) {
-		final PluralAttributeBinding attributeBinding = asPluralAttribute( (DomainReferenceBinding) ctx.collectionReference().accept( this ) );
+	public CollectionElementBinding visitCollectionValuePathRoot(HqlParser.CollectionValuePathRootContext ctx) {
+		final SqmPluralAttributeBinding attributeBinding = asPluralAttribute( (SqmNavigableBinding) ctx.collectionReference().accept( this ) );
 
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
-			if ( attributeBinding.getAttribute().getCollectionClassification() != CollectionClassification.MAP ) {
+			if ( attributeBinding.getBoundNavigable().getCollectionClassification() != CollectionClassification.MAP ) {
 				throw new StrictJpaComplianceViolation(
 						"Encountered application of value() function to path expression which does not " +
 								"resolve to a persistent Map, but strict JPQL compliance was requested. specified "
@@ -1557,37 +1612,36 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		}
 
 		resolveAttributeJoinIfNot( attributeBinding );
-		return new PluralAttributeElementBinding( attributeBinding );
+
+		return NavigableBindingHelper.createCollectionElementBinding( attributeBinding, attributeBinding.getBoundNavigable().getElementReference() );
 	}
 
 	@SuppressWarnings("RedundantIfStatement")
-	private PluralAttributeBinding asPluralAttribute(DomainReferenceBinding attributeBinding) {
-		if ( !PluralSqmAttributeReference.class.isInstance( attributeBinding.getBoundDomainReference() ) ) {
+	private SqmPluralAttributeBinding asPluralAttribute(SqmNavigableBinding attributeBinding) {
+		if ( !SqmPluralAttribute.class.isInstance( attributeBinding.getBoundNavigable() ) ) {
 			throw new SemanticException( "Expecting plural-attribute, but found : " + attributeBinding );
 		}
 
-		return (PluralAttributeBinding) attributeBinding;
+		return (SqmPluralAttributeBinding) attributeBinding;
 	}
 
 	@Override
-	public PluralAttributeBinding visitCollectionReference(HqlParser.CollectionReferenceContext ctx) {
-		return asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) );
+	public SqmPluralAttributeBinding visitCollectionReference(HqlParser.CollectionReferenceContext ctx) {
+		return asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) );
 	}
 
 	@Override
-	public PluralAttributeBinding visitPathAsMap(HqlParser.PathAsMapContext ctx) {
-		final DomainReferenceBinding pathResolution = (DomainReferenceBinding) ctx.path().accept( this );
+	public SqmPluralAttributeBinding visitPathAsMap(HqlParser.PathAsMapContext ctx) {
+		final SqmNavigableBinding pathResolution = (SqmNavigableBinding) ctx.path().accept( this );
 		return asMap( pathResolution );
 	}
 
 	@Override
-	public DomainReferenceBinding visitTreatedPathRoot(HqlParser.TreatedPathRootContext ctx) {
+	public SqmNavigableBinding visitTreatedPathRoot(HqlParser.TreatedPathRootContext ctx) {
 		final String treatAsName = ctx.dotIdentifierSequence().get( 1 ).getText();
-		final EntityReference treatAsTypeDescriptor = parsingContext.getConsumerContext()
-				.getDomainMetamodel()
-				.resolveEntityReference( treatAsName );
+		final SqmExpressableTypeEntity treatAsTypeDescriptor = resolveEntityReference( treatAsName );
 		if ( treatAsTypeDescriptor == null ) {
-			throw new SemanticException( "TREAT-AS target type [" + treatAsName + "] did not reference an entity" );
+			throw new UnknownEntityException( "Could not resolve entity name [" + treatAsName + "] as TREAT target", treatAsName );
 		}
 
 		return pathResolverStack.getCurrent().resolveTreatedPath(
@@ -1662,8 +1716,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				firstOperand,
 				secondOperand,
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveArithmeticType(
-						firstOperand.getExpressionType(),
-						secondOperand.getExpressionType(),
+						(SqmExpressableTypeBasic) firstOperand.getExpressionType(),
+						(SqmExpressableTypeBasic) secondOperand.getExpressionType(),
 						BinaryArithmeticSqmExpression.Operation.ADD
 				)
 		);
@@ -1682,8 +1736,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				firstOperand,
 				secondOperand,
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveArithmeticType(
-						firstOperand.getExpressionType(),
-						secondOperand.getExpressionType(),
+						(SqmDomainTypeBasic) firstOperand.getExpressionType(),
+						(SqmDomainTypeBasic) secondOperand.getExpressionType(),
 						BinaryArithmeticSqmExpression.Operation.SUBTRACT
 				)
 		);
@@ -1702,8 +1756,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				firstOperand,
 				secondOperand,
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveArithmeticType(
-						firstOperand.getExpressionType(),
-						secondOperand.getExpressionType(),
+						(SqmDomainTypeBasic) firstOperand.getExpressionType(),
+						(SqmDomainTypeBasic) secondOperand.getExpressionType(),
 						BinaryArithmeticSqmExpression.Operation.MULTIPLY
 				)
 		);
@@ -1722,8 +1776,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				firstOperand,
 				secondOperand,
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveArithmeticType(
-						firstOperand.getExpressionType(),
-						secondOperand.getExpressionType(),
+						(SqmDomainTypeBasic) firstOperand.getExpressionType(),
+						(SqmDomainTypeBasic) secondOperand.getExpressionType(),
 						BinaryArithmeticSqmExpression.Operation.DIVIDE
 				)
 		);
@@ -1742,8 +1796,8 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				firstOperand,
 				secondOperand,
 				parsingContext.getConsumerContext().getDomainMetamodel().resolveArithmeticType(
-						firstOperand.getExpressionType(),
-						secondOperand.getExpressionType(),
+						(SqmDomainTypeBasic) firstOperand.getExpressionType(),
+						(SqmDomainTypeBasic) secondOperand.getExpressionType(),
 						BinaryArithmeticSqmExpression.Operation.MODULO
 				)
 		);
@@ -1880,9 +1934,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	}
 
 	private LiteralSqmExpression<Boolean> booleanLiteral(boolean value) {
+		final SqmExpressableTypeBasic expressionType = resolveExpressableTypeBasic( Boolean.class );
 		return value
-				? new LiteralTrueSqmExpression()
-				: new LiteralFalseSqmExpression();
+				? new LiteralTrueSqmExpression( expressionType )
+				: new LiteralFalseSqmExpression( expressionType );
 	}
 
 	private LiteralCharacterSqmExpression characterLiteral(String text) {
@@ -1890,17 +1945,26 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			// todo : or just treat it as a String literal?
 			throw new ParsingException( "Value for CHARACTER_LITERAL token was more than 1 character" );
 		}
-		return new LiteralCharacterSqmExpression( text.charAt( 0 ) );
+		return new LiteralCharacterSqmExpression(
+				text.charAt( 0 ),
+				resolveExpressableTypeBasic( Character.class )
+		);
 	}
 
 	private LiteralSqmExpression stringLiteral(String text) {
-		return new LiteralStringSqmExpression( text );
+		return new LiteralStringSqmExpression(
+				text,
+				resolveExpressableTypeBasic( String.class )
+		);
 	}
 
 	protected LiteralIntegerSqmExpression integerLiteral(String text) {
 		try {
 			final Integer value = Integer.valueOf( text );
-			return new LiteralIntegerSqmExpression( value );
+			return new LiteralIntegerSqmExpression(
+					value,
+					resolveExpressableTypeBasic( Integer.class )
+			);
 		}
 		catch (NumberFormatException e) {
 			throw new LiteralNumberFormatException(
@@ -1917,7 +1981,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 				text = text.substring( 0, text.length() - 1 );
 			}
 			final Long value = Long.valueOf( text );
-			return new LiteralLongSqmExpression( value );
+			return new LiteralLongSqmExpression(
+					value,
+					resolveExpressableTypeBasic( Long.class )
+			);
 		}
 		catch (NumberFormatException e) {
 			throw new LiteralNumberFormatException(
@@ -1933,7 +2000,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			if ( text.endsWith( "bi" ) || text.endsWith( "BI" ) ) {
 				text = text.substring( 0, text.length() - 2 );
 			}
-			return new LiteralBigIntegerSqmExpression( new BigInteger( text ) );
+			return new LiteralBigIntegerSqmExpression(
+					new BigInteger( text ),
+					resolveExpressableTypeBasic( BigInteger.class  )
+			);
 		}
 		catch (NumberFormatException e) {
 			throw new LiteralNumberFormatException(
@@ -1945,7 +2015,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	protected LiteralFloatSqmExpression floatLiteral(String text) {
 		try {
-			return new LiteralFloatSqmExpression( Float.valueOf( text ) );
+			return new LiteralFloatSqmExpression(
+					Float.valueOf( text ),
+					resolveExpressableTypeBasic( Float.class )
+			);
 		}
 		catch (NumberFormatException e) {
 			throw new LiteralNumberFormatException(
@@ -1957,7 +2030,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	protected LiteralDoubleSqmExpression doubleLiteral(String text) {
 		try {
-			return new LiteralDoubleSqmExpression( Double.valueOf( text ) );
+			return new LiteralDoubleSqmExpression(
+					Double.valueOf( text ),
+					resolveExpressableTypeBasic( Double.class )
+			);
 		}
 		catch (NumberFormatException e) {
 			throw new LiteralNumberFormatException(
@@ -1973,7 +2049,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			if ( text.endsWith( "bd" ) || text.endsWith( "BD" ) ) {
 				text = text.substring( 0, text.length() - 2 );
 			}
-			return new LiteralBigDecimalSqmExpression( new BigDecimal( text ) );
+			return new LiteralBigDecimalSqmExpression(
+					new BigDecimal( text ),
+					resolveExpressableTypeBasic( BigDecimal.class )
+			);
 		}
 		catch (NumberFormatException e) {
 			throw new LiteralNumberFormatException(
@@ -1981,6 +2060,10 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 					e
 			);
 		}
+	}
+
+	private SqmExpressableTypeBasic resolveExpressableTypeBasic(Class javaType) {
+		return parsingContext.getConsumerContext().getDomainMetamodel().resolveBasicType( javaType );
 	}
 
 	@Override
@@ -2000,6 +2083,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 
 	@Override
 	public PositionalParameterSqmExpression visitPositionalParameter(HqlParser.PositionalParameterContext ctx) {
+		if ( ctx.INTEGER_LITERAL() == null ) {
+			throw new SemanticException( "Encountered positional parameter which did not declare position (? instead of, e.g., ?1)" );
+		}
 		final PositionalParameterSqmExpression param = new PositionalParameterSqmExpression(
 				Integer.valueOf( ctx.INTEGER_LITERAL().getText() ),
 				parameterDeclarationContextStack.getCurrent().isMultiValuedBindingAllowed()
@@ -2074,7 +2160,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new AvgFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				expr.getExpressionType()
+				(SqmDomainTypeBasic) expr.getExpressionType()
 		);
 	}
 
@@ -2093,12 +2179,12 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			arguments.add( (SqmExpression) argument.accept( this ) );
 		}
 
-		return new ConcatFunctionSqmExpression( arguments.get( 0 ).getExpressionType(), arguments );
+		return new ConcatFunctionSqmExpression( (SqmDomainTypeBasic) arguments.get( 0 ).getExpressionType(), arguments );
 	}
 
 	@Override
 	public AggregateFunctionSqmExpression visitCountFunction(HqlParser.CountFunctionContext ctx) {
-		final DomainReference longType = parsingContext.getConsumerContext().getDomainMetamodel().resolveBasicType( Long.class );
+		final SqmExpressableTypeBasic longType = resolveExpressableTypeBasic( Long.class );
 		if ( ctx.ASTERISK() != null ) {
 			return new CountStarFunctionSqmExpression( ctx.DISTINCT() != null, longType );
 		}
@@ -2117,7 +2203,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new MaxFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				expr.getExpressionType()
+				(SqmDomainTypeBasic) expr.getExpressionType()
 		);
 	}
 
@@ -2127,7 +2213,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new MinFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				expr.getExpressionType()
+				(SqmDomainTypeBasic) expr.getExpressionType()
 		);
 	}
 
@@ -2138,7 +2224,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		final SqmExpression length = ctx.substringFunctionLengthArgument() == null
 				? null
 				: (SqmExpression) ctx.substringFunctionLengthArgument().accept( this );
-		return new SubstringFunctionSqmExpression( source.getExpressionType(), source, start, length );
+		return new SubstringFunctionSqmExpression( (SqmDomainTypeBasic) source.getExpressionType(), source, start, length );
 	}
 
 	@Override
@@ -2147,7 +2233,9 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new SumFunctionSqmExpression(
 				expr,
 				ctx.DISTINCT() != null,
-				parsingContext.getConsumerContext().getDomainMetamodel().resolveSumFunctionType( expr.getExpressionType() )
+				parsingContext.getConsumerContext()
+						.getDomainMetamodel()
+						.resolveSumFunctionType( (SqmExpressableTypeBasic) expr.getExpressionType() )
 		);
 	}
 
@@ -2155,7 +2243,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public TrimFunctionSqmExpression visitTrimFunction(HqlParser.TrimFunctionContext ctx) {
 		final SqmExpression source = (SqmExpression) ctx.expression().accept( this );
 		return new TrimFunctionSqmExpression(
-				source.getExpressionType(),
+				(SqmDomainTypeBasic) source.getExpressionType(),
 				visitTrimSpecification( ctx.trimSpecification() ),
 				visitTrimCharacter( ctx.trimCharacter() ),
 				source
@@ -2182,25 +2270,33 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			if ( trimCharText.length() != 1 ) {
 				throw new SemanticException( "Expecting [trim character] for TRIM function to be  single character, found : " + trimCharText );
 			}
-			return new LiteralCharacterSqmExpression( trimCharText.charAt( 0 ) );
+			return new LiteralCharacterSqmExpression(
+					trimCharText.charAt( 0 ),
+					resolveExpressableTypeBasic( Character.class )
+			);
 		}
 		if ( ctx.STRING_LITERAL() != null ) {
 			final String trimCharText = ctx.STRING_LITERAL().getText();
 			if ( trimCharText.length() != 1 ) {
 				throw new SemanticException( "Expecting [trim character] for TRIM function to be  single character, found : " + trimCharText );
 			}
-			return new LiteralCharacterSqmExpression( trimCharText.charAt( 0 ) );
+			return new LiteralCharacterSqmExpression(
+					trimCharText.charAt( 0 ),
+					resolveExpressableTypeBasic( Character.class ));
 		}
 
 		// JPA says space is the default
-		return new LiteralCharacterSqmExpression( ' ' );
+		return new LiteralCharacterSqmExpression(
+				' ',
+				resolveExpressableTypeBasic( Character.class )
+		);
 	}
 
 	@Override
 	public UpperFunctionSqmExpression visitUpperFunction(HqlParser.UpperFunctionContext ctx) {
 		final SqmExpression expression = (SqmExpression) ctx.expression().accept( this );
 		return new UpperFunctionSqmExpression(
-				expression.getExpressionType(),
+				(SqmDomainTypeBasic) expression.getExpressionType(),
 				expression
 		);
 	}
@@ -2209,39 +2305,32 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 	public LowerFunctionSqmExpression visitLowerFunction(HqlParser.LowerFunctionContext ctx) {
 		final SqmExpression expression = (SqmExpression) ctx.expression().accept( this );
 		return new LowerFunctionSqmExpression(
-				expression.getExpressionType(),
+				(SqmDomainTypeBasic) expression.getExpressionType(),
 				expression
 		);
 	}
 
 	@Override
 	public CollectionSizeSqmExpression visitCollectionSizeFunction(HqlParser.CollectionSizeFunctionContext ctx) {
-		final PluralAttributeBinding attributeBinding = asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) );
-		return new CollectionSizeSqmExpression( attributeBinding );
+		final SqmPluralAttributeBinding attributeBinding = asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) );
+		return new CollectionSizeSqmExpression(
+				attributeBinding,
+				resolveExpressableTypeBasic( Integer.class )
+		);
 	}
 
 	@Override
-	public PluralAttributeIndexSqmExpression visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
+	public CollectionIndexBinding visitCollectionIndexFunction(HqlParser.CollectionIndexFunctionContext ctx) {
 		final String alias = ctx.identifier().getText();
 
-		final DomainReferenceBinding binding = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
+		final SqmNavigableBinding binding = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().getAliasRegistry().findFromElementByAlias( alias );
 
-		PluralAttributeBinding attributeBinding = null;
-		if ( PluralAttributeBinding.class.isInstance( binding ) ) {
-			attributeBinding = (PluralAttributeBinding) binding;
-		}
-		else if ( SqmAttributeJoin.class.isInstance( binding ) ) {
-			final SqmAttributeJoin join = (SqmAttributeJoin) binding;
-			if ( PluralAttributeBinding.class.isInstance( join.getAttributeBinding() ) ) {
-				attributeBinding = (PluralAttributeBinding) join.getAttributeBinding();
-			}
-		}
-
-
-		if ( attributeBinding == null ) {
+		if ( binding == null || !SqmPluralAttributeBinding.class.isInstance( binding ) ) {
 			// most likely a semantic problem, but not necessarily...
-			throw new ParsingException( "Could not resolve identification variable [" + alias + "] as plural-attribute" );
+			throw new ParsingException( "Could not resolve identification variable [" + alias + "] as plural-attribute, encountered : " + binding );
 		}
+
+		final SqmPluralAttributeBinding attributeBinding = (SqmPluralAttributeBinding) binding;
 
 		if ( !isIndexedPluralAttribute( attributeBinding ) ) {
 			throw new SemanticException(
@@ -2251,70 +2340,113 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 			);
 		}
 
-		return new PluralAttributeIndexSqmExpression( attributeBinding );
+		return NavigableBindingHelper.createCollectionIndexBinding( attributeBinding, attributeBinding.getBoundNavigable().getIndexReference() );
 	}
 
-	private boolean isIndexedPluralAttribute(PluralAttributeBinding attributeBinding) {
-		return attributeBinding.getAttribute().getCollectionClassification() == CollectionClassification.MAP
-				|| attributeBinding.getAttribute().getCollectionClassification() == CollectionClassification.LIST;
+	private boolean isIndexedPluralAttribute(SqmPluralAttributeBinding attributeBinding) {
+		return attributeBinding.getBoundNavigable().getCollectionClassification() == CollectionClassification.MAP
+				|| attributeBinding.getBoundNavigable().getCollectionClassification() == CollectionClassification.LIST;
 	}
 
-	private boolean isList(PluralAttributeBinding attributeBinding) {
-		return attributeBinding.getAttribute().getCollectionClassification() == CollectionClassification.LIST;
+	private boolean isList(SqmPluralAttributeBinding attributeBinding) {
+		return attributeBinding.getBoundNavigable().getCollectionClassification() == CollectionClassification.LIST;
 	}
 
 	@Override
-	public MaxElementSqmExpression visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
+	public MaxElementBindingBasic visitMaxElementFunction(HqlParser.MaxElementFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
-		return new MaxElementSqmExpression( asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) ) );
+		return new MaxElementBindingBasic( asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) ) );
 	}
 
 	@Override
-	public MinElementSqmExpression visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
+	public MinElementBinding visitMinElementFunction(HqlParser.MinElementFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
-		return new MinElementSqmExpression( asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) ) );
+		final SqmPluralAttributeBinding pluralAttributeBinding = asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) );
+		switch ( pluralAttributeBinding.getBoundNavigable().getElementReference().getClassification() ) {
+			case BASIC: {
+				return new MinElementBindingBasic( pluralAttributeBinding );
+			}
+			case EMBEDDABLE: {
+				return new MinElementBindingEmbedded( pluralAttributeBinding );
+			}
+			case ONE_TO_MANY:
+			case MANY_TO_MANY: {
+				return new MinElementBindingEntity( pluralAttributeBinding );
+			}
+			default: {
+				throw new NotYetImplementedException( "min-element function not yet supported for ANY elements" );
+			}
+		}
 	}
 
 	@Override
-	public MaxIndexSqmExpression visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
+	public MaxIndexBinding visitMaxIndexFunction(HqlParser.MaxIndexFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
-		final PluralAttributeBinding attributeBinding = asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) );
-		if (!isIndexedPluralAttribute( attributeBinding ) ) {
+		final SqmPluralAttributeBinding attributeBinding = asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) );
+		if ( !isIndexedPluralAttribute( attributeBinding ) ) {
 			throw new SemanticException(
 					"maxindex() function can only be applied to path expressions which resolve to an " +
 							"indexed collection (list,map); specified path [" + ctx.path().getText() +
-							"] resolved to " + attributeBinding.getAttribute()
+							"] resolved to " + attributeBinding.getBoundNavigable()
 			);
 		}
 
-		return new MaxIndexSqmExpression( attributeBinding );
+		switch ( attributeBinding.getBoundNavigable().getIndexReference().getClassification() ) {
+			case BASIC: {
+				return new MaxIndexBindingBasic( attributeBinding );
+			}
+			case EMBEDDABLE: {
+				return new MaxIndexBindingEmbedded( attributeBinding );
+			}
+			case ONE_TO_MANY:
+			case MANY_TO_MANY: {
+				return new MaxIndexBindingEntity( attributeBinding );
+			}
+			default: {
+				throw new NotYetImplementedException(  );
+			}
+		}
 	}
 
 	@Override
-	public MinIndexSqmExpression visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
+	public MinIndexBinding visitMinIndexFunction(HqlParser.MinIndexFunctionContext ctx) {
 		if ( parsingContext.getConsumerContext().useStrictJpaCompliance() ) {
 			throw new StrictJpaComplianceViolation( StrictJpaComplianceViolation.Type.HQL_COLLECTION_FUNCTION );
 		}
 
-		final PluralAttributeBinding attributeBinding = asPluralAttribute( (DomainReferenceBinding) ctx.path().accept( this ) );
-		if (!isIndexedPluralAttribute( attributeBinding ) ) {
+		final SqmPluralAttributeBinding attributeBinding = asPluralAttribute( (SqmNavigableBinding) ctx.path().accept( this ) );
+		if ( !isIndexedPluralAttribute( attributeBinding ) ) {
 			throw new SemanticException(
 					"minindex() function can only be applied to path expressions which resolve to an " +
 							"indexed collection (list,map); specified path [" + ctx.path().getText() +
-							"] resolved to " + attributeBinding.getAttribute()
+							"] resolved to " + attributeBinding.getBoundNavigable()
 			);
 		}
 
-		return new MinIndexSqmExpression( attributeBinding );
+		switch ( attributeBinding.getBoundNavigable().getIndexReference().getClassification() ) {
+			case BASIC: {
+				return new MinIndexBindingBasic( attributeBinding );
+			}
+			case EMBEDDABLE: {
+				return new MinIndexBindingEmbeddable( attributeBinding );
+			}
+			case ONE_TO_MANY:
+			case MANY_TO_MANY: {
+				return new MinIndexBindingEntity( attributeBinding );
+			}
+			default: {
+				throw new NotYetImplementedException(  );
+			}
+		}
 	}
 
 	@Override
@@ -2323,7 +2455,7 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor {
 		return new SubQuerySqmExpression( querySpec, determineTypeDescriptor( querySpec.getSelectClause() ) );
 	}
 
-	private static DomainReference determineTypeDescriptor(SqmSelectClause selectClause) {
+	private static SqmExpressableType determineTypeDescriptor(SqmSelectClause selectClause) {
 		if ( selectClause.getSelections().size() != 0 ) {
 			return null;
 		}

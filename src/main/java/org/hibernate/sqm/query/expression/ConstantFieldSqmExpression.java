@@ -9,7 +9,9 @@ package org.hibernate.sqm.query.expression;
 import java.lang.reflect.Field;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * Represents a constant that came from a static field reference.
@@ -20,13 +22,13 @@ public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
 	private final Field sourceField;
 	private final T value;
 
-	private DomainReference typeDescriptor;
+	private SqmDomainTypeBasic typeDescriptor;
 
 	public ConstantFieldSqmExpression(Field sourceField, T value) {
 		this( sourceField, value, null );
 	}
 
-	public ConstantFieldSqmExpression(Field sourceField, T value, DomainReference typeDescriptor) {
+	public ConstantFieldSqmExpression(Field sourceField, T value, SqmDomainTypeBasic typeDescriptor) {
 		this.sourceField = sourceField;
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
@@ -42,20 +44,20 @@ public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public SqmDomainTypeBasic getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmDomainTypeBasic getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public void impliedType(SqmExpressableType type) {
 		if ( type != null ) {
-			this.typeDescriptor = type;
+			this.typeDescriptor = (SqmDomainTypeBasic) type;
 		}
 	}
 
@@ -67,5 +69,10 @@ public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
 	@Override
 	public String asLoggableText() {
 		return "ConstantField(" + value + ")";
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return getExpressionType();
 	}
 }

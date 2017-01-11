@@ -12,13 +12,9 @@ import java.util.List;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
-import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
-import org.hibernate.test.sqm.domain.BasicType;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
-
 
 /**
  * TODO : javadoc
@@ -33,11 +29,11 @@ public abstract class AbstractSimplePredicate
 	public AbstractSimplePredicate(CriteriaBuilderImpl criteriaBuilder) {
 		this(
 				criteriaBuilder,
-				(BasicType<Boolean>) criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( Boolean.class )
+				criteriaBuilder.consumerContext().getDomainMetamodel().resolveBasicType( Boolean.class )
 		);
 	}
 
-	public AbstractSimplePredicate(CriteriaBuilderImpl criteriaBuilder, BasicType<Boolean> sqmType) {
+	public AbstractSimplePredicate(CriteriaBuilderImpl criteriaBuilder, SqmExpressableType sqmType) {
 		super( criteriaBuilder, sqmType );
 		assert sqmType != null;
 	}

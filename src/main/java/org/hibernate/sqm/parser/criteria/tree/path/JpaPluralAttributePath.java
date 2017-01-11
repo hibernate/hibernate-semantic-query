@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm.parser.criteria.tree.path;
 
-import org.hibernate.sqm.domain.PluralSqmAttributeReference;
+import org.hibernate.sqm.domain.SqmPluralAttribute;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaPluralAttributePath<C> extends JpaAttributePath<C> {
 	@Override
-	PluralSqmAttributeReference getDomainReference();
+	SqmPluralAttribute getNavigable();
 }

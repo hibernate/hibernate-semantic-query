@@ -8,11 +8,11 @@ package org.hibernate.sqm.parser.criteria.tree.from;
 
 import javax.persistence.criteria.Root;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaRoot<X> extends Root<X>, JpaFrom<X,X> {
-	EntityReference getEntityType();
+	SqmExpressableTypeEntity getEntityType();
 }

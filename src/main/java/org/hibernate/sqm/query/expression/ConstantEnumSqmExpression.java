@@ -7,22 +7,23 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
  */
 public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExpression<T> {
 	private final T value;
-	private DomainReference typeDescriptor;
+	private SqmExpressableType domainType;
 
 	public ConstantEnumSqmExpression(T value) {
 		this( value, null );
 	}
 
-	public ConstantEnumSqmExpression(T value, DomainReference typeDescriptor) {
+	public ConstantEnumSqmExpression(T value, SqmExpressableType domainType) {
 		this.value = value;
-		this.typeDescriptor = typeDescriptor;
+		this.domainType = domainType;
 	}
 
 	@Override
@@ -31,19 +32,19 @@ public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExp
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
-		return typeDescriptor;
+	public SqmExpressableType getExpressionType() {
+		return domainType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public SqmExpressableType getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
-		this.typeDescriptor = type;
+	public void impliedType(SqmExpressableType expressableType) {
+		this.domainType = domainType;
 	}
 
 	@Override
@@ -54,5 +55,10 @@ public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExp
 	@Override
 	public String asLoggableText() {
 		return "EnumConstant(" + value + ")";
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return getExpressionType().getExportedDomainType();
 	}
 }

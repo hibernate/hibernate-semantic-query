@@ -11,14 +11,15 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
+import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 /**
  * @author Andrea Boriero
  */
 public class AliasRegistry {
-	private Map<String, DomainReferenceBinding> fromBindingsByAlias = new HashMap<>();
+	private Map<String, SqmNavigableBinding> navigableBindingsByAlias = new HashMap<>();
 	private Map<String, SqmSelection> selectionsByAlias = new HashMap<>();
 
 	private AliasRegistry parent;
@@ -41,14 +42,15 @@ public class AliasRegistry {
 		}
 	}
 
-	public void registerAlias(DomainReferenceBinding binding) {
-		final DomainReferenceBinding old = fromBindingsByAlias.put( binding.getFromElement().getIdentificationVariable(), binding );
+	public void registerAlias(SqmNavigableBinding binding) {
+		final SqmFrom exportedFromElement = NavigableBindingHelper.resolveExportedFromElement( binding );
+		final SqmNavigableBinding old = navigableBindingsByAlias.put( exportedFromElement.getIdentificationVariable(), binding );
 		if ( old != null ) {
 			throw new AliasCollisionException(
 					String.format(
 							Locale.ENGLISH,
 							"Alias [%s] used for multiple from-clause-elements : %s, %s",
-							binding.getFromElement().getIdentificationVariable(),
+							exportedFromElement.getIdentificationVariable(),
 							old,
 							binding
 					)
@@ -60,9 +62,9 @@ public class AliasRegistry {
 		return selectionsByAlias.get( alias );
 	}
 
-	public DomainReferenceBinding findFromElementByAlias(String alias) {
-		if ( fromBindingsByAlias.containsKey( alias ) ) {
-			return fromBindingsByAlias.get( alias );
+	public SqmNavigableBinding findFromElementByAlias(String alias) {
+		if ( navigableBindingsByAlias.containsKey( alias ) ) {
+			return navigableBindingsByAlias.get( alias );
 		}
 		else if ( parent != null ) {
 			return parent.findFromElementByAlias( alias );
@@ -81,17 +83,17 @@ public class AliasRegistry {
 					)
 			);
 		}
-		final DomainReferenceBinding fromElement = fromBindingsByAlias.get( alias );
-		if ( fromElement != null ) {
-			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBoundDomainReference() ) ) {
+		final SqmNavigableBinding binding = navigableBindingsByAlias.get( alias );
+		if ( binding != null ) {
+			if ( !selection.getExpression().getExpressionType().equals( binding.getBoundNavigable().getExportedDomainType() ) ) {
 				throw new AliasCollisionException(
 						String.format(
 								Locale.ENGLISH,
 								"Alias [%s] used in select-clause for %s is also used in from element: %s for %s",
 								alias,
 								selection.getExpression().getExpressionType(),
-								fromElement,
-								fromElement.getBoundDomainReference()
+								binding,
+								binding.getBoundNavigable()
 						)
 				);
 			}

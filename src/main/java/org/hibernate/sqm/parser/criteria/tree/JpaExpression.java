@@ -11,15 +11,15 @@ import java.math.BigInteger;
 import java.util.Collection;
 import javax.persistence.criteria.Expression;
 
-import org.hibernate.sqm.domain.DomainReference;
 import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
 import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaExpression<T> extends Expression<T>, JpaSelection<T> {
-	DomainReference getExpressionSqmType();
+	SqmExpressableType getExpressionSqmType();
 
 	SqmExpression visitExpression(CriteriaVisitor visitor);
 

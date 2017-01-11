@@ -20,6 +20,7 @@ import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.EntityType;
 
+import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
 import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
@@ -85,24 +86,26 @@ public class JpaQuerySpecImpl<T> implements JpaQuerySpec<T>, Serializable {
 
 	// ROOTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	@SuppressWarnings("unchecked")
 	public <X> Root<X> from(Class<X> entityClass) {
-		org.hibernate.test.sqm.domain.EntityType entityType = (org.hibernate.test.sqm.domain.EntityType) criteriaBuilder.consumerContext()
+		EntityPersister<X> persister = (EntityPersister<X>) criteriaBuilder.consumerContext()
 				.getDomainMetamodel()
 				.resolveEntityReference( entityClass );
-		if ( entityType == null ) {
+		if ( persister == null ) {
 			throw new IllegalArgumentException( entityClass + " is not an entity" );
 		}
-		return from( entityType );
+		return from( persister );
 	}
 
-	private <X> Root<X> from(org.hibernate.test.sqm.domain.EntityType entityType) {
+	private <X> Root<X> from(EntityPersister<X> entityType) {
 		RootImpl<X> root = new RootImpl<X>( criteriaBuilder, entityType );
 		fromClause.addRoot( root );
 		return root;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <X> Root<X> from(String entityName) {
-		org.hibernate.test.sqm.domain.EntityType entityType = (org.hibernate.test.sqm.domain.EntityType) criteriaBuilder.consumerContext()
+		EntityPersister<X> entityType = (EntityPersister<X>) criteriaBuilder.consumerContext()
 				.getDomainMetamodel()
 				.resolveEntityReference( entityName );
 		if ( entityType == null ) {

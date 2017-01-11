@@ -7,7 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -15,27 +16,27 @@ import org.hibernate.sqm.domain.DomainReference;
 public class PositionalParameterSqmExpression implements ParameterSqmExpression {
 	private final int position;
 	private final boolean canBeMultiValued;
-	private DomainReference typeDescriptor;
+	private SqmExpressableType expressableType;
 
 	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued) {
 		this.position = position;
 		this.canBeMultiValued = canBeMultiValued;
 	}
 
-	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued, DomainReference typeDescriptor) {
+	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued, SqmExpressableType expressableType) {
 		this.position = position;
 		this.canBeMultiValued = canBeMultiValued;
-		this.typeDescriptor = typeDescriptor;
+		this.expressableType = expressableType;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
-		return typeDescriptor;
+	public SqmExpressableType getExpressionType() {
+		return expressableType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
-		return null;
+	public SqmExpressableType getInferableType() {
+		return getExpressionType();
 	}
 
 	@Override
@@ -59,9 +60,9 @@ public class PositionalParameterSqmExpression implements ParameterSqmExpression 
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
-		if ( type != null ) {
-			this.typeDescriptor = type;
+	public void impliedType(SqmExpressableType expressableType) {
+		if ( expressableType != null ) {
+			this.expressableType = expressableType;
 		}
 	}
 
@@ -71,7 +72,12 @@ public class PositionalParameterSqmExpression implements ParameterSqmExpression 
 	}
 
 	@Override
-	public DomainReference getAnticipatedType() {
+	public SqmExpressableType getAnticipatedType() {
 		return getExpressionType();
+	}
+
+	@Override
+	public SqmDomainType getExportedDomainType() {
+		return getExpressionType().getExportedDomainType();
 	}
 }

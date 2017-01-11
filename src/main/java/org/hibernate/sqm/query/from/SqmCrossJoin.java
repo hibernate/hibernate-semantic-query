@@ -7,10 +7,9 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
 
 /**
  * @author Steve Ebersole
@@ -21,25 +20,24 @@ public class SqmCrossJoin extends AbstractFrom implements SqmJoin {
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			EntityReference entityReference) {
+			SqmExpressableTypeEntity entityReference) {
 		super(
 				fromElementSpace,
 				uid,
 				alias,
-				new EntityBinding( entityReference ),
-				entityReference,
-				new PropertyPath( null, entityReference.getEntityName() + "(" + alias + ")" )
+				new EntityBindingImpl( entityReference ),
+				entityReference
 		);
-		getDomainReferenceBinding().injectFromElement( this );
+		getBinding().injectExportedFromElement( this );
 	}
 
 	@Override
-	public EntityBinding getDomainReferenceBinding() {
-		return (EntityBinding) super.getDomainReferenceBinding();
+	public EntityBindingImpl getBinding() {
+		return (EntityBindingImpl) super.getBinding();
 	}
 
 	public String getEntityName() {
-		return getDomainReferenceBinding().getBoundDomainReference().getEntityName();
+		return getBinding().getBoundNavigable().getEntityName();
 	}
 
 	@Override

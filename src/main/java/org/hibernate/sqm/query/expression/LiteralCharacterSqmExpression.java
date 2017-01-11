@@ -7,13 +7,15 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
+import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralCharacterSqmExpression extends AbstractLiteralSqmExpressionImpl<Character> {
-	public LiteralCharacterSqmExpression(Character value) {
-		super( value );
+	public LiteralCharacterSqmExpression(Character value, SqmExpressableTypeBasic type) {
+		super( value, type );
+
 	}
 
 	@Override

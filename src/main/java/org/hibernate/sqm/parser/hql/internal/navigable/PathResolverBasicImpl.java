@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.parser.hql.internal.navigable;
 
-import org.hibernate.sqm.domain.SqmAttribute;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.domain.SqmSingularAttribute;
@@ -15,7 +14,7 @@ import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
-import org.hibernate.sqm.query.from.Downcast;
+import org.hibernate.sqm.query.from.SqmDowncast;
 import org.hibernate.sqm.query.from.SqmFromExporter;
 
 import org.jboss.logging.Logger;
@@ -203,7 +202,7 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 				subclassIndicator
 		);
 
-		joinBinding.addDowncast( new Downcast( subclassIndicator ) );
+		joinBinding.addDowncast( new SqmDowncast( subclassIndicator ) );
 
 		return new TreatedNavigableBinding( joinBinding, subclassIndicator );
 	}

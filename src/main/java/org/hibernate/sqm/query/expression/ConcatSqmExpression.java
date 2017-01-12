@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
-import org.hibernate.sqm.query.Helper;
+import org.hibernate.sqm.query.internal.Helper;
 
 /**
  * @author Steve Ebersole

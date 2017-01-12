@@ -9,5 +9,5 @@ package org.hibernate.sqm.query.expression.domain;
 /**
  * @author Steve Ebersole
  */
-public interface SqmRestrictedCollectionElementBinding extends CollectionElementBinding {
+public interface SqmRestrictedCollectionElementBinding extends SqmCollectionElementBinding {
 }

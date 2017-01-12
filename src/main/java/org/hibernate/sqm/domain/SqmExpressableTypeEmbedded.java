@@ -11,7 +11,7 @@ import org.hibernate.sqm.domain.type.SqmDomainTypeEmbeddable;
 /**
  * @author Steve Ebersole
  */
-public interface SqmExpressableTypeEmbedded extends SqmExpressableType, SqmNavigableSource, Loggable {
+public interface SqmExpressableTypeEmbedded extends SqmExpressableType, SqmNavigableSource, SqmLoggable {
 	@Override
 	SqmDomainTypeEmbeddable getExportedDomainType();
 }

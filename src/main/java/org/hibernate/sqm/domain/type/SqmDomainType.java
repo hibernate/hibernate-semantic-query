@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.domain.type;
 
-import org.hibernate.sqm.domain.Loggable;
+import org.hibernate.sqm.domain.SqmLoggable;
 
 /**
  * Represents any "type" used in the domain model.
@@ -18,7 +18,7 @@ import org.hibernate.sqm.domain.Loggable;
  *
  * @author Steve Ebersole
  */
-public interface SqmDomainType extends Loggable {
+public interface SqmDomainType extends SqmLoggable {
 	/**
 	 * The underlying physical Java type.  May be {@code null}.
 	 * <p/>

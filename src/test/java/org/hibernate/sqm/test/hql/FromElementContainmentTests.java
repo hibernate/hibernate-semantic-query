@@ -8,9 +8,9 @@ package org.hibernate.sqm.test.hql;
 
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
+import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.select.SqmSelection;
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -37,7 +37,7 @@ public class FromElementContainmentTests extends StandardModelTest {
 		SqmSelectStatement statement = interpretSelect( query );
 
 		assertEquals( 1, statement.getQuerySpec().getFromClause().getFromElementSpaces().size() );
-		final FromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		final SqmFromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 		assertThat( fromElementSpace.getJoins().size(), is(1) );
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
@@ -53,12 +53,12 @@ public class FromElementContainmentTests extends StandardModelTest {
 		SqmSelectStatement statement = interpretSelect( query );
 
 		assertEquals( 1, statement.getQuerySpec().getFromClause().getFromElementSpaces().size() );
-		final FromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		final SqmFromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 		final SqmRoot fromElement = fromElementSpace.getRoot();
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( EntityBindingImpl.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmEntityBinding.class ) );
 
 		assertSame( fromElement, FromElementHelper.extractExpressionFromElement( selection.getExpression() ) );
 	}
@@ -74,7 +74,7 @@ public class FromElementContainmentTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
-				instanceOf( EntityBindingImpl.class )
+				instanceOf( SqmEntityBinding.class )
 		);
 
 		assertSame(

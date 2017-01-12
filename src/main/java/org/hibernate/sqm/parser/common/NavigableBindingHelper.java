@@ -17,35 +17,35 @@ import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBindingBasic;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBindingEmbedded;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBindingEntity;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBindingBasic;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBindingEmbedded;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBindingEntity;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBinding;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBindingBasic;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBindingEmbedded;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierEmbedded;
 import org.hibernate.sqm.query.expression.domain.SqmEntityTypedBinding;
-import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
-import org.hibernate.sqm.query.expression.domain.IndexedElementBindingBasic;
-import org.hibernate.sqm.query.expression.domain.IndexedElementBindingEmbedded;
-import org.hibernate.sqm.query.expression.domain.IndexedElementBindingEntity;
-import org.hibernate.sqm.query.expression.domain.MaxElementBindingBasic;
-import org.hibernate.sqm.query.expression.domain.MaxElementBindingEmbedded;
-import org.hibernate.sqm.query.expression.domain.MaxElementBindingEntity;
-import org.hibernate.sqm.query.expression.domain.MaxIndexBindingBasic;
-import org.hibernate.sqm.query.expression.domain.MaxIndexBindingEmbedded;
-import org.hibernate.sqm.query.expression.domain.MaxIndexBindingEntity;
-import org.hibernate.sqm.query.expression.domain.MinElementBindingBasic;
-import org.hibernate.sqm.query.expression.domain.MinElementBindingEmbedded;
-import org.hibernate.sqm.query.expression.domain.MinElementBindingEntity;
-import org.hibernate.sqm.query.expression.domain.MinIndexBindingBasic;
-import org.hibernate.sqm.query.expression.domain.MinIndexBindingEmbeddable;
-import org.hibernate.sqm.query.expression.domain.MinIndexBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
+import org.hibernate.sqm.query.expression.domain.SqmIndexedElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmIndexedElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.SqmIndexedElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmMaxElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmMaxElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.SqmMaxElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmMaxIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmMaxIndexBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.SqmMaxIndexBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmMinElementBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmMinElementBindingEmbedded;
+import org.hibernate.sqm.query.expression.domain.SqmMinElementBindingEntity;
+import org.hibernate.sqm.query.expression.domain.SqmMinIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmMinIndexBindingEmbeddable;
+import org.hibernate.sqm.query.expression.domain.SqmMinIndexBindingEntity;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
 import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
@@ -54,7 +54,7 @@ import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBindingBasi
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBindingEmbedded;
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBindingEntity;
 import org.hibernate.sqm.query.expression.domain.SqmRestrictedCollectionElementBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromExporter;
 
@@ -74,7 +74,7 @@ public class NavigableBindingHelper {
 		throw new ParsingException( "Could not resolve SqmFrom element from NavigableBinding : " + binding );
 	}
 
-	public static FromElementSpace extractSpace(SqmFromExporter exporter) {
+	public static SqmFromElementSpace extractSpace(SqmFromExporter exporter) {
 		return exporter.getExportedFromElement() == null ? null : exporter.getExportedFromElement() .getContainingSpace();
 	}
 
@@ -138,7 +138,7 @@ public class NavigableBindingHelper {
 		}
 	}
 
-	public static CollectionElementBinding createCollectionElementBinding(
+	public static SqmCollectionElementBinding createCollectionElementBinding(
 			SqmNavigableSourceBinding source,
 			SqmPluralAttributeElement elementDescriptor) {
 		assert source instanceof SqmPluralAttributeBinding;
@@ -146,14 +146,14 @@ public class NavigableBindingHelper {
 
 		switch ( elementDescriptor.getClassification() ) {
 			case BASIC: {
-				return new CollectionElementBindingBasic( pluralAttributeBinding );
+				return new SqmCollectionElementBindingBasic( pluralAttributeBinding );
 			}
 			case EMBEDDABLE: {
-				return new CollectionElementBindingEmbedded( pluralAttributeBinding );
+				return new SqmCollectionElementBindingEmbedded( pluralAttributeBinding );
 			}
 			case ONE_TO_MANY:
 			case MANY_TO_MANY: {
-				return new CollectionElementBindingEntity( pluralAttributeBinding );
+				return new SqmCollectionElementBindingEntity( pluralAttributeBinding );
 			}
 			default: {
 				throw new NotYetImplementedException();
@@ -167,7 +167,7 @@ public class NavigableBindingHelper {
 		MAX
 	}
 
-	public static CollectionElementBinding createCollectionElementBinding(
+	public static SqmCollectionElementBinding createCollectionElementBinding(
 			CollectionPartBindingType bindingType,
 			SqmNavigableSourceBinding source,
 			SqmPluralAttributeElement elementDescriptor) {
@@ -178,26 +178,26 @@ public class NavigableBindingHelper {
 			case BASIC: {
 				switch ( bindingType ) {
 					case MAX: {
-						return new MaxElementBindingBasic( pluralAttributeBinding );
+						return new SqmMaxElementBindingBasic( pluralAttributeBinding );
 					}
 					case MIN: {
-						return new MinElementBindingBasic( pluralAttributeBinding );
+						return new SqmMinElementBindingBasic( pluralAttributeBinding );
 					}
 					default: {
-						return new CollectionElementBindingBasic( pluralAttributeBinding );
+						return new SqmCollectionElementBindingBasic( pluralAttributeBinding );
 					}
 				}
 			}
 			case EMBEDDABLE: {
 				switch ( bindingType ) {
 					case MAX: {
-						return new MaxElementBindingEmbedded( pluralAttributeBinding );
+						return new SqmMaxElementBindingEmbedded( pluralAttributeBinding );
 					}
 					case MIN: {
-						return new MinElementBindingEmbedded( pluralAttributeBinding );
+						return new SqmMinElementBindingEmbedded( pluralAttributeBinding );
 					}
 					default: {
-						return new CollectionElementBindingEmbedded( pluralAttributeBinding );
+						return new SqmCollectionElementBindingEmbedded( pluralAttributeBinding );
 					}
 				}
 			}
@@ -205,13 +205,13 @@ public class NavigableBindingHelper {
 			case MANY_TO_MANY: {
 				switch ( bindingType ) {
 					case MAX: {
-						return new MaxElementBindingEntity( pluralAttributeBinding );
+						return new SqmMaxElementBindingEntity( pluralAttributeBinding );
 					}
 					case MIN: {
-						return new MinElementBindingEntity( pluralAttributeBinding );
+						return new SqmMinElementBindingEntity( pluralAttributeBinding );
 					}
 					default: {
-						return new CollectionElementBindingEntity( pluralAttributeBinding );
+						return new SqmCollectionElementBindingEntity( pluralAttributeBinding );
 					}
 				}
 			}
@@ -221,7 +221,7 @@ public class NavigableBindingHelper {
 		}
 	}
 
-	public static CollectionIndexBinding createCollectionIndexBinding(
+	public static SqmCollectionIndexBinding createCollectionIndexBinding(
 			SqmNavigableSourceBinding source,
 			SqmPluralAttributeIndex indexDescriptor) {
 		assert source instanceof SqmPluralAttributeBinding;
@@ -229,14 +229,14 @@ public class NavigableBindingHelper {
 
 		switch ( indexDescriptor.getClassification() ) {
 			case BASIC: {
-				return new CollectionIndexBindingBasic( pluralAttributeBinding );
+				return new SqmCollectionIndexBindingBasic( pluralAttributeBinding );
 			}
 			case EMBEDDABLE: {
-				return new CollectionIndexBindingEmbedded( pluralAttributeBinding );
+				return new SqmCollectionIndexBindingEmbedded( pluralAttributeBinding );
 			}
 			case ONE_TO_MANY:
 			case MANY_TO_MANY: {
-				return new CollectionIndexBindingEntity( pluralAttributeBinding );
+				return new SqmCollectionIndexBindingEntity( pluralAttributeBinding );
 			}
 			default: {
 				throw new NotYetImplementedException(  );
@@ -245,7 +245,7 @@ public class NavigableBindingHelper {
 	}
 
 
-	public static CollectionIndexBinding createCollectionIndexBinding(
+	public static SqmCollectionIndexBinding createCollectionIndexBinding(
 			CollectionPartBindingType bindingType,
 			SqmNavigableSourceBinding source,
 			SqmPluralAttributeIndex indexDescriptor) {
@@ -256,26 +256,26 @@ public class NavigableBindingHelper {
 			case BASIC: {
 				switch ( bindingType ) {
 					case MAX: {
-						return new MaxIndexBindingBasic( pluralAttributeBinding );
+						return new SqmMaxIndexBindingBasic( pluralAttributeBinding );
 					}
 					case MIN: {
-						return new MinIndexBindingBasic( pluralAttributeBinding );
+						return new SqmMinIndexBindingBasic( pluralAttributeBinding );
 					}
 					default: {
-						return new CollectionIndexBindingBasic( pluralAttributeBinding );
+						return new SqmCollectionIndexBindingBasic( pluralAttributeBinding );
 					}
 				}
 			}
 			case EMBEDDABLE: {
 				switch ( bindingType ) {
 					case MAX: {
-						return new MaxIndexBindingEmbedded( pluralAttributeBinding );
+						return new SqmMaxIndexBindingEmbedded( pluralAttributeBinding );
 					}
 					case MIN: {
-						return new MinIndexBindingEmbeddable( pluralAttributeBinding );
+						return new SqmMinIndexBindingEmbeddable( pluralAttributeBinding );
 					}
 					default: {
-						return new CollectionIndexBindingEmbedded( pluralAttributeBinding );
+						return new SqmCollectionIndexBindingEmbedded( pluralAttributeBinding );
 					}
 				}
 			}
@@ -283,13 +283,13 @@ public class NavigableBindingHelper {
 			case MANY_TO_MANY: {
 				switch ( bindingType ) {
 					case MAX: {
-						return new MaxIndexBindingEntity( pluralAttributeBinding );
+						return new SqmMaxIndexBindingEntity( pluralAttributeBinding );
 					}
 					case MIN: {
-						return new MinIndexBindingEntity( pluralAttributeBinding );
+						return new SqmMinIndexBindingEntity( pluralAttributeBinding );
 					}
 					default: {
-						return new CollectionIndexBindingEntity( pluralAttributeBinding );
+						return new SqmCollectionIndexBindingEntity( pluralAttributeBinding );
 					}
 				}
 			}
@@ -306,14 +306,14 @@ public class NavigableBindingHelper {
 
 		switch ( elementDescriptor.getClassification() ) {
 			case BASIC: {
-				return new IndexedElementBindingBasic( pluralAttributeBinding, selectorExpression );
+				return new SqmIndexedElementBindingBasic( pluralAttributeBinding, selectorExpression );
 			}
 			case EMBEDDABLE: {
-				return new IndexedElementBindingEmbedded( pluralAttributeBinding, selectorExpression );
+				return new SqmIndexedElementBindingEmbedded( pluralAttributeBinding, selectorExpression );
 			}
 			case ONE_TO_MANY:
 			case MANY_TO_MANY: {
-				return new IndexedElementBindingEntity( pluralAttributeBinding, selectorExpression );
+				return new SqmIndexedElementBindingEntity( pluralAttributeBinding, selectorExpression );
 			}
 			default: {
 				throw new NotYetImplementedException();
@@ -322,7 +322,7 @@ public class NavigableBindingHelper {
 	}
 
 	public static SqmEntityTypedBinding createEntityBinding(SqmExpressableTypeEntity entityReference) {
-		return new EntityBindingImpl( entityReference );
+		return new SqmEntityBinding( entityReference );
 	}
 
 	private NavigableBindingHelper() {

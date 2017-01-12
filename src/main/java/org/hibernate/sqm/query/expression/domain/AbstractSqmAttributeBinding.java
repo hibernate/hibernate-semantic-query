@@ -9,7 +9,7 @@ package org.hibernate.sqm.query.expression.domain;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmAttribute;
 import org.hibernate.sqm.domain.SqmExpressableType;
-import org.hibernate.sqm.query.PropertyPath;
+import org.hibernate.sqm.query.SqmPropertyPath;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromExporter;
@@ -18,11 +18,11 @@ import org.hibernate.sqm.query.from.SqmFromExporter;
  * @author Steve Ebersole
  */
 public abstract class AbstractSqmAttributeBinding<A extends SqmAttribute>
-		extends AbstractNavigableBinding
+		extends AbstractSqmNavigableBinding
 		implements SqmAttributeBinding, SqmFromExporter {
 	private final SqmNavigableSourceBinding sourceBinding;
 	private final A attribute;
-	private final PropertyPath propertyPath;
+	private final SqmPropertyPath propertyPath;
 
 	private SqmAttributeJoin join;
 
@@ -89,7 +89,7 @@ public abstract class AbstractSqmAttributeBinding<A extends SqmAttribute>
 	}
 
 	@Override
-	public PropertyPath getPropertyPath() {
+	public SqmPropertyPath getPropertyPath() {
 		return propertyPath;
 	}
 

@@ -10,12 +10,12 @@ import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigableSource;
 import org.hibernate.sqm.domain.type.SqmDomainType;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AbstractNavigableBinding;
+import org.hibernate.sqm.query.SqmPropertyPath;
+import org.hibernate.sqm.query.expression.domain.AbstractSqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
 import org.hibernate.sqm.domain.SqmExpressableType;
-import org.hibernate.sqm.query.from.Downcast;
+import org.hibernate.sqm.query.from.SqmDowncast;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromExporter;
 
@@ -31,7 +31,7 @@ import org.hibernate.sqm.query.from.SqmFromExporter;
  *
  * @author Steve Ebersole
  */
-public class TreatedNavigableBinding extends AbstractNavigableBinding implements SqmNavigableBinding,
+public class TreatedNavigableBinding extends AbstractSqmNavigableBinding implements SqmNavigableBinding,
 		SqmNavigableSourceBinding {
 	private final SqmNavigableBinding baseBinding;
 	private final SqmExpressableTypeEntity subclassIndicator;
@@ -40,7 +40,7 @@ public class TreatedNavigableBinding extends AbstractNavigableBinding implements
 		this.baseBinding = baseBinding;
 		this.subclassIndicator = subclassIndicator;
 
-		baseBinding.addDowncast( new Downcast( subclassIndicator ) );
+		baseBinding.addDowncast( new SqmDowncast( subclassIndicator ) );
 	}
 
 	public SqmExpressableTypeEntity getSubclassIndicator() {
@@ -63,7 +63,7 @@ public class TreatedNavigableBinding extends AbstractNavigableBinding implements
 	}
 
 	@Override
-	public PropertyPath getPropertyPath() {
+	public SqmPropertyPath getPropertyPath() {
 		return baseBinding.getPropertyPath();
 	}
 

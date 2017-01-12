@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm;
 
-import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SqmDomainMetamodel;
 
 /**
  * Contextual information related to the consumer/caller of the parser - a callback API.
@@ -19,7 +19,7 @@ public interface ConsumerContext {
 	 *
 	 * @return The domain metamodel.
 	 */
-	DomainMetamodel getDomainMetamodel();
+	SqmDomainMetamodel getDomainMetamodel();
 
 	/**
 	 * Resolve any non-classified class reference encountered in the query.

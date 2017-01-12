@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.query.Parameter;
+import org.hibernate.sqm.query.SqmParameter;
 
 /**
  * Describes the context in which a parameter is declared.  This is  used mainly to
- * determine metadata about the parameter ({@link Parameter#allowMultiValuedBinding()}, e.g.)
+ * determine metadata about the parameter ({@link SqmParameter#allowMultiValuedBinding()}, e.g.)
  *
  * @author Steve Ebersole
  */

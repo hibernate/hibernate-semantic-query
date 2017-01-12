@@ -55,7 +55,7 @@ import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
@@ -63,9 +63,9 @@ import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
-import org.hibernate.sqm.query.order.OrderByClause;
-import org.hibernate.sqm.query.order.SortSpecification;
-import org.hibernate.sqm.query.paging.LimitOffsetClause;
+import org.hibernate.sqm.query.order.SqmOrderByClause;
+import org.hibernate.sqm.query.order.SqmSortSpecification;
+import org.hibernate.sqm.query.paging.SqmLimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.EmptinessSqmPredicate;
@@ -98,7 +98,7 @@ public class QuerySplitter {
 		// the unmapped polymorphic reference can only be a root and can be the only
 		// root.  Use that restriction to locate the unmapped polymorphic reference
 		SqmRoot unmappedPolymorphicReference = null;
-		for ( FromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
+		for ( SqmFromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
 			if ( SqmExpressableTypeEntityPolymorphicEntity.class.isInstance( fromElementSpace.getRoot().getBinding().getBoundNavigable() ) ) {
 				unmappedPolymorphicReference = fromElementSpace.getRoot();
 			}
@@ -204,17 +204,17 @@ public class QuerySplitter {
 			}
 		}
 
-		private FromElementSpace currentFromElementSpaceCopy;
+		private SqmFromElementSpace currentFromElementSpaceCopy;
 
 		@Override
-		public FromElementSpace visitFromElementSpace(FromElementSpace fromElementSpace) {
+		public SqmFromElementSpace visitFromElementSpace(SqmFromElementSpace fromElementSpace) {
 			if ( currentFromClauseCopy == null ) {
 				throw new ParsingException( "Current SqmFromClause copy was null" );
 			}
 
-			final FromElementSpace previousCurrent = currentFromElementSpaceCopy;
+			final SqmFromElementSpace previousCurrent = currentFromElementSpaceCopy;
 			try {
-				FromElementSpace copy = currentFromClauseCopy.makeFromElementSpace();
+				SqmFromElementSpace copy = currentFromClauseCopy.makeFromElementSpace();
 				currentFromElementSpaceCopy = copy;
 				super.visitFromElementSpace( fromElementSpace );
 				return copy;
@@ -551,21 +551,21 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public OrderByClause visitOrderByClause(OrderByClause orderByClause) {
+		public SqmOrderByClause visitOrderByClause(SqmOrderByClause orderByClause) {
 			if ( orderByClause == null ) {
 				return null;
 			}
 
-			OrderByClause copy = new OrderByClause();
-			for ( SortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
+			SqmOrderByClause copy = new SqmOrderByClause();
+			for ( SqmSortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
 				copy.addSortSpecification( visitSortSpecification( sortSpecification ) );
 			}
 			return copy;
 		}
 
 		@Override
-		public SortSpecification visitSortSpecification(SortSpecification sortSpecification) {
-			return new SortSpecification(
+		public SqmSortSpecification visitSortSpecification(SqmSortSpecification sortSpecification) {
+			return new SqmSortSpecification(
 					(SqmExpression) sortSpecification.getSortExpression().accept( this ),
 					sortSpecification.getCollation(),
 					sortSpecification.getSortOrder()
@@ -573,12 +573,12 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public LimitOffsetClause visitLimitOffsetClause(LimitOffsetClause limitOffsetClause) {
+		public SqmLimitOffsetClause visitLimitOffsetClause(SqmLimitOffsetClause limitOffsetClause) {
 			if ( limitOffsetClause == null ) {
 				return null;
 			}
 
-			return new LimitOffsetClause(
+			return new SqmLimitOffsetClause(
 					(SqmExpression) limitOffsetClause.getLimitExpression().accept( this ),
 					(SqmExpression) limitOffsetClause.getOffsetExpression().accept( this )
 			);

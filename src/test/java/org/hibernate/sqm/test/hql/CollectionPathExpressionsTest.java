@@ -7,7 +7,7 @@
 package org.hibernate.sqm.test.hql;
 
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBinding;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -35,7 +35,7 @@ public class CollectionPathExpressionsTest extends StandardModelTest {
 		assertThat( statement.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
 
 		final SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( CollectionElementBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmCollectionElementBinding.class ) );
 	}
 
 	@Test

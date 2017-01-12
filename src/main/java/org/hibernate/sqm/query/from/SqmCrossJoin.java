@@ -8,16 +8,16 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
+import org.hibernate.sqm.query.SqmJoinType;
+import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
 
 /**
  * @author Steve Ebersole
  */
-public class SqmCrossJoin extends AbstractFrom implements SqmJoin {
+public class SqmCrossJoin extends AbstractSqmFrom implements SqmJoin {
 
 	public SqmCrossJoin(
-			FromElementSpace fromElementSpace,
+			SqmFromElementSpace fromElementSpace,
 			String uid,
 			String alias,
 			SqmExpressableTypeEntity entityReference) {
@@ -25,15 +25,15 @@ public class SqmCrossJoin extends AbstractFrom implements SqmJoin {
 				fromElementSpace,
 				uid,
 				alias,
-				new EntityBindingImpl( entityReference ),
+				new SqmEntityBinding( entityReference ),
 				entityReference
 		);
 		getBinding().injectExportedFromElement( this );
 	}
 
 	@Override
-	public EntityBindingImpl getBinding() {
-		return (EntityBindingImpl) super.getBinding();
+	public SqmEntityBinding getBinding() {
+		return (SqmEntityBinding) super.getBinding();
 	}
 
 	public String getEntityName() {
@@ -41,8 +41,8 @@ public class SqmCrossJoin extends AbstractFrom implements SqmJoin {
 	}
 
 	@Override
-	public JoinType getJoinType() {
-		return JoinType.CROSS;
+	public SqmJoinType getJoinType() {
+		return SqmJoinType.CROSS;
 	}
 
 	@Override

@@ -17,7 +17,6 @@ import org.hibernate.cache.spi.access.CollectionRegionAccessStrategy;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Component;
-import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Value;
 import org.hibernate.orm.persister.collection.spi.CollectionPersister;
 import org.hibernate.orm.persister.common.spi.AbstractOrmAttribute;
@@ -28,7 +27,6 @@ import org.hibernate.orm.persister.common.spi.OrmAttribute;
 import org.hibernate.orm.persister.common.spi.OrmNavigableSource;
 import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
 import org.hibernate.orm.persister.common.spi.Table;
-import org.hibernate.orm.persister.embeddable.internal.EmbeddableMapperImpl;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.spi.PersisterCreationContext;
@@ -44,8 +42,7 @@ import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.SqmPluralAttributeElement.ElementClassification;
 import org.hibernate.sqm.domain.SqmPluralAttribute.CollectionClassification;
 import org.hibernate.sqm.domain.SqmSingularAttribute.SingularAttributeClassification;
-import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.test.domain.ExplicitDomainMetamodel;
+import org.hibernate.sqm.query.SqmPropertyPath;
 import org.hibernate.type.ArrayType;
 import org.hibernate.type.BagType;
 import org.hibernate.type.CollectionType;
@@ -262,7 +259,7 @@ public class PersisterHelper {
 		return collectionPersister;
 	}
 
-	public static org.hibernate.loader.PropertyPath convert(PropertyPath propertyPath) {
+	public static org.hibernate.loader.PropertyPath convert(SqmPropertyPath propertyPath) {
 		if ( propertyPath.getParent() == null ) {
 			return new org.hibernate.loader.PropertyPath( null, propertyPath.getLocalPath() );
 		}

@@ -14,7 +14,7 @@ import org.hibernate.sqm.query.set.SqmSetClause;
 /**
  * @author Steve Ebersole
  */
-public interface SqmUpdateStatement extends SqmStatementNonSelect, SqmWhereClauseContainer {
+public interface SqmUpdateStatement extends SqmNonSelectStatement, SqmWhereClauseContainer {
 	SqmRoot getEntityFromElement();
 	SqmSetClause getSetClause();
 	SqmWhereClause getWhereClause();

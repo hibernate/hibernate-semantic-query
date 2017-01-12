@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 
 /**
  * @author Steve Ebersole
  */
 public interface SqmJoin extends SqmFrom {
-	JoinType getJoinType();
+	SqmJoinType getJoinType();
 }

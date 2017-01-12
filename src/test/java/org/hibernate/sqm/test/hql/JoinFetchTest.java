@@ -7,7 +7,7 @@
 package org.hibernate.sqm.test.hql;
 
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -25,7 +25,7 @@ public class JoinFetchTest extends StandardModelTest {
 		final SqmSelectStatement statement = interpretSelect( "select s from Person s join fetch s.mate" );
 
 		assertThat( statement.getQuerySpec().getFromClause().getFromElementSpaces().size(), is(1) );
-		final FromElementSpace space = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		final SqmFromElementSpace space = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 
 		assertThat( space.getJoins().size(), is(1) );
 

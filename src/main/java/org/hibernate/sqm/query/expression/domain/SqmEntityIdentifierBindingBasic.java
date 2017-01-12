@@ -9,12 +9,12 @@ package org.hibernate.sqm.query.expression.domain;
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmEntityIdentifier;
 import org.hibernate.sqm.domain.SqmExpressableType;
-import org.hibernate.sqm.query.PropertyPath;
+import org.hibernate.sqm.query.SqmPropertyPath;
 
 /**
  * @author Steve Ebersole
  */
-public class SqmEntityIdentifierBindingBasic extends AbstractNavigableBinding implements SqmEntityIdentifierBinding {
+public class SqmEntityIdentifierBindingBasic extends AbstractSqmNavigableBinding implements SqmEntityIdentifierBinding {
 	private final SqmEntityTypedBinding source;
 	private final SqmEntityIdentifier entityIdentifier;
 
@@ -54,7 +54,7 @@ public class SqmEntityIdentifierBindingBasic extends AbstractNavigableBinding im
 	}
 
 	@Override
-	public PropertyPath getPropertyPath() {
+	public SqmPropertyPath getPropertyPath() {
 		return source.getPropertyPath().append( entityIdentifier.getNavigableName() );
 	}
 }

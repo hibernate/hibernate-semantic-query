@@ -8,14 +8,14 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
+import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
 
 /**
  * @author Steve Ebersole
  */
-public class SqmRoot extends AbstractFrom {
+public class SqmRoot extends AbstractSqmFrom {
 	public SqmRoot(
-			FromElementSpace fromElementSpace,
+			SqmFromElementSpace fromElementSpace,
 			String uid,
 			String alias,
 			SqmExpressableTypeEntity entityReference) {
@@ -23,7 +23,7 @@ public class SqmRoot extends AbstractFrom {
 				fromElementSpace,
 				uid,
 				alias,
-				new EntityBindingImpl( entityReference ),
+				new SqmEntityBinding( entityReference ),
 				entityReference
 		);
 
@@ -31,8 +31,8 @@ public class SqmRoot extends AbstractFrom {
 	}
 
 	@Override
-	public EntityBindingImpl getBinding() {
-		return (EntityBindingImpl) super.getBinding();
+	public SqmEntityBinding getBinding() {
+		return (SqmEntityBinding) super.getBinding();
 	}
 
 	public String getEntityName() {

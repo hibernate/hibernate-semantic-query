@@ -39,16 +39,16 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AbstractSingularIndexBinding;
+import org.hibernate.sqm.query.expression.domain.AbstractSpecificSqmCollectionIndexBinding;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBinding;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBinding;
 import org.hibernate.sqm.query.expression.domain.SqmEntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.domain.MapEntryBinding;
-import org.hibernate.sqm.query.expression.domain.MaxElementBinding;
-import org.hibernate.sqm.query.expression.domain.MinElementBinding;
-import org.hibernate.sqm.query.expression.domain.MinIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmMapEntryBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMaxElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMinElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMinIndexBindingBasic;
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
@@ -63,16 +63,16 @@ import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpressio
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
 import org.hibernate.sqm.query.from.SqmRoot;
-import org.hibernate.sqm.query.order.OrderByClause;
-import org.hibernate.sqm.query.order.SortSpecification;
-import org.hibernate.sqm.query.paging.LimitOffsetClause;
+import org.hibernate.sqm.query.order.SqmOrderByClause;
+import org.hibernate.sqm.query.order.SqmSortSpecification;
+import org.hibernate.sqm.query.paging.SqmLimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
@@ -161,14 +161,14 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 
 	@Override
 	public T visitFromClause(SqmFromClause fromClause) {
-		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
+		for ( SqmFromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			visitFromElementSpace( fromElementSpace );
 		}
 		return (T) fromClause;
 	}
 
 	@Override
-	public T visitFromElementSpace(FromElementSpace fromElementSpace) {
+	public T visitFromElementSpace(SqmFromElementSpace fromElementSpace) {
 		visitRootEntityFromElement( fromElementSpace.getRoot() );
 		for ( SqmJoin joinedFromElement : fromElementSpace.getJoins() ) {
 			joinedFromElement.accept( this );
@@ -311,9 +311,9 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitOrderByClause(OrderByClause orderByClause) {
+	public T visitOrderByClause(SqmOrderByClause orderByClause) {
 		if ( orderByClause.getSortSpecifications() != null ) {
-			for ( SortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
+			for ( SqmSortSpecification sortSpecification : orderByClause.getSortSpecifications() ) {
 				visitSortSpecification( sortSpecification );
 			}
 		}
@@ -321,13 +321,13 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitSortSpecification(SortSpecification sortSpecification) {
+	public T visitSortSpecification(SqmSortSpecification sortSpecification) {
 		sortSpecification.getSortExpression().accept( this );
 		return (T) sortSpecification;
 	}
 
 	@Override
-	public T visitLimitOffsetClause(LimitOffsetClause limitOffsetClause) {
+	public T visitLimitOffsetClause(SqmLimitOffsetClause limitOffsetClause) {
 		if ( limitOffsetClause != null ) {
 			if ( limitOffsetClause.getLimitExpression() != null ) {
 				limitOffsetClause.getLimitExpression().accept( this );
@@ -421,42 +421,42 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitPluralAttributeElementBinding(CollectionElementBinding binding) {
+	public T visitPluralAttributeElementBinding(SqmCollectionElementBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitPluralAttributeIndexFunction(CollectionIndexBinding binding) {
+	public T visitPluralAttributeIndexFunction(SqmCollectionIndexBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMapKeyBinding(CollectionIndexBinding binding) {
+	public T visitMapKeyBinding(SqmCollectionIndexBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMapEntryFunction(MapEntryBinding binding) {
+	public T visitMapEntryFunction(SqmMapEntryBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMaxElementBinding(MaxElementBinding binding) {
+	public T visitMaxElementBinding(SqmMaxElementBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMinElementBinding(MinElementBinding binding) {
+	public T visitMinElementBinding(SqmMinElementBinding binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMaxIndexFunction(AbstractSingularIndexBinding function) {
+	public T visitMaxIndexFunction(AbstractSpecificSqmCollectionIndexBinding function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitMinIndexFunction(MinIndexBindingBasic function) {
+	public T visitMinIndexFunction(SqmMinIndexBindingBasic function) {
 		return (T) function;
 	}
 

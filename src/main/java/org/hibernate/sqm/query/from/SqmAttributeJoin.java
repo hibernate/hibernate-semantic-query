@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
@@ -21,7 +21,7 @@ import org.jboss.logging.Logger;
  * @author Steve Ebersole
  */
 public class SqmAttributeJoin
-		extends AbstractJoin
+		extends AbstractSqmJoin
 		implements SqmQualifiedJoin {
 	private static final Logger log = Logger.getLogger( SqmAttributeJoin.class );
 
@@ -38,7 +38,7 @@ public class SqmAttributeJoin
 			String uid,
 			String alias,
 			SqmExpressableTypeEntity intrinsicSubclassIndicator,
-			JoinType joinType,
+			SqmJoinType joinType,
 			boolean fetched) {
 		super(
 				attributeBinding.getSourceBinding().getExportedFromElement().getContainingSpace(),

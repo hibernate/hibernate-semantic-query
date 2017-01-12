@@ -8,12 +8,11 @@ package org.hibernate.sqm.parser.common;
 
 import org.hibernate.sqm.domain.SqmExpressableTypeEmbedded;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.domain.SqmSingularAttributeEmbedded;
 import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
@@ -53,7 +52,7 @@ public class FromElementBuilder {
 	 * Make the root entity reference for the FromElementSpace
 	 */
 	public SqmRoot makeRootEntityFromElement(
-			FromElementSpace fromElementSpace,
+			SqmFromElementSpace fromElementSpace,
 			SqmExpressableTypeEntity entityBinding,
 			String alias) {
 		if ( alias == null ) {
@@ -81,7 +80,7 @@ public class FromElementBuilder {
 	 * Make the root entity reference for the FromElementSpace
 	 */
 	public SqmCrossJoin makeCrossJoinedFromElement(
-			FromElementSpace fromElementSpace,
+			SqmFromElementSpace fromElementSpace,
 			String uid,
 			SqmExpressableTypeEntity entityToJoin,
 			String alias) {
@@ -107,10 +106,10 @@ public class FromElementBuilder {
 	}
 
 	public SqmEntityJoin buildEntityJoin(
-			FromElementSpace fromElementSpace,
+			SqmFromElementSpace fromElementSpace,
 			String alias,
 			SqmExpressableTypeEntity entityToJoin,
-			JoinType joinType) {
+			SqmJoinType joinType) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
 			log.debugf(
@@ -137,7 +136,7 @@ public class FromElementBuilder {
 			SqmAttributeBinding attributeBinding,
 			String alias,
 			SqmExpressableTypeEntity subclassIndicator,
-			JoinType joinType,
+			SqmJoinType joinType,
 			boolean fetched,
 			boolean canReuseImplicitJoins) {
 		assert attributeBinding != null;

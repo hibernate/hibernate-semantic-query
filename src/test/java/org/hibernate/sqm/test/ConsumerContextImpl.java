@@ -7,23 +7,23 @@
 package org.hibernate.sqm.test;
 
 import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SqmDomainMetamodel;
 
 /**
  * @author Steve Ebersole
  */
 public class ConsumerContextImpl implements ConsumerContext {
-	private final DomainMetamodel modelMetadata;
+	private final SqmDomainMetamodel modelMetadata;
 
 	// false (full HQL support) by default
 	private boolean strictJpaCompliance;
 
-	public ConsumerContextImpl(DomainMetamodel modelMetadata) {
+	public ConsumerContextImpl(SqmDomainMetamodel modelMetadata) {
 		this.modelMetadata = modelMetadata;
 	}
 
 	@Override
-	public DomainMetamodel getDomainMetamodel() {
+	public SqmDomainMetamodel getDomainMetamodel() {
 		return modelMetadata;
 	}
 

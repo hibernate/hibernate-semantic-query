@@ -6,16 +6,15 @@
  */
 package org.hibernate.sqm.parser.hql.internal.navigable;
 
-import org.hibernate.sqm.domain.SqmAttribute;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromExporter;
 
 /**
@@ -25,15 +24,15 @@ import org.hibernate.sqm.query.from.SqmFromExporter;
  * @author Steve Ebersole
  */
 public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
-	private final FromElementSpace fromElementSpace;
-	private final JoinType joinType;
+	private final SqmFromElementSpace fromElementSpace;
+	private final SqmJoinType joinType;
 	private final String alias;
 	private final boolean fetched;
 
 	public PathResolverJoinAttributeImpl(
 			ResolutionContext resolutionContext,
-			FromElementSpace fromElementSpace,
-			JoinType joinType,
+			SqmFromElementSpace fromElementSpace,
+			SqmJoinType joinType,
 			String alias,
 			boolean fetched) {
 		super( resolutionContext );
@@ -49,7 +48,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected JoinType getIntermediateJoinType() {
+	protected SqmJoinType getIntermediateJoinType() {
 		return joinType;
 	}
 

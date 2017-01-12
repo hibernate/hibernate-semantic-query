@@ -16,7 +16,7 @@ import org.hibernate.sqm.SemanticQueryWalker;
  * @author Steve Ebersole
  */
 public interface SqmStatement {
-	Set<Parameter> getQueryParameters();
+	Set<SqmParameter> getQueryParameters();
 
 	<T> T accept(SemanticQueryWalker<T> walker);
 }

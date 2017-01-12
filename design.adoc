@@ -50,17 +50,105 @@ is defined in the second FromElementSpace but refers back to the first which is 
 reference.  This follows the SQL rule for easier understanding
 ====
 
+todo : how to handle joins to composite values in terms of SqmFrom?  Create the join?  Or use the SqmFrom from it's container?
 
-=== Expressions and Bindings
 
-[NOTE]
+=== Type system
+
+SQM defines multiple "layers" to its type system.  The lowest level is called `SqmDomainType`.  The higher-level
+concept is called `SqmExpressableType` (which is a `DomainTypeExporter` which means it exposes a `SqmDomainType`).
+
+The `SqmDomainType` is more-or-less akin to the Java type - on the ORM side, it actually relates to the
+`org.hibernate.type.spi.Type` contract.  `SqmDomainType` is further categorized into:
+
+* `SqmDomainTypeBasic` - a basic value
+* `SqmDomainTypeEmbeddable` - an embeddable/composite value
+* `SqmDomainTypeEntity` - an entity value
+* `SqmDomainTypeAny` - not yet implemented
+
+A `SqmExpressableType` on the other hand represents a specific "thing" that can be the basis for the type
+of an SqmExpression (see below).  `SqmExpressableType` is further categorized into:
+
+* `SqmExpressableTypeBasic`
+* `SqmNavigable`
+	** SqmNavigableSource
+		*** `SqmExpressableTypeEntity`
+		*** `SqmExpressableTypeEmbedded`
+		*** `SqmPluralAttribute`
+	** `SqmAttribute`
+	** `SqmEntityIdentifier`
+	** `SqmPluralAttributeIndex`
+	** `SqmPluralAttributeElement`
+	** `SqmExpressableTypeAny` - not yet implemented
+
+On the ORM side it is expected that `SqmExpressableType` forms the root of the JPA type system impl.
+
+The `SqmNavigable` aspect is hugely important to understand.  It essentially equates to what JPA
+calls a "Bindable".  It defines parts of the domain model that are eligible to be navigated as part of
+path expressions.  A `SqmNavigable` exposes it's "source" as a `SqmNavigableSource`.  As an example, the
+`SqmNavigable` for an entity attribute `Person#age` would the the "age" part and its source would be the
+`EntityPersister` for Person.
+
+A `SqmNavigableSource` is always a `SqmNavigable`.  A `SqmNavigable` may or may not be a `SqmNavigableSource` -
+e.g. a `SqmPluralAttributeElement` is always a `SqmNavigable` (you can "refer to it" in a query), but it is
+only a `SqmNavigableSource` when the PluralAttribute's elements are (1) an embeddable or (2) an entity.
+
+The important concept here is that a `SqmNavigable` is a `SqmExpressableType`, meaning that the navigable itself
+can be used to describe the "type" of an expression, which is important as we start to consolidate ORM-metadata
+into these navigable domain descriptors on the ORM side (e.g. AttributeConverter on the SingularAttribute rather
+than the Attribute's Type).
+
+
+=== Expressions
+
+Expressions (`SqmExpression`) are the basic building block of the query model - they come in many different
+varieties, e.g.
+* a literal
+* a parameter to a reference
+* a reference to a `SqmNavigable`
+* an arithmetic operation
+* a function call
+* etc
+
+Even a predicate is an expression!  See section on predicates below...
+
+`SqmExpression` mainly exposes information about the "type" of the expressions in terms of the
+`SqmExpressableType` discussed above.  Specifically:
+
+* `SqmExpression#getExpressionType` - the type of this expression, if known
+* `SqmExpression#getInferableType` - the type, if known, that can be used to determine
+		the type of other `SqmExpression` nodes in
+
+`#getExpressionType` returns the type of this `SqmExpression`, if known.  `#getInferableType`
+returns the type, if known, that this `SqmExpression` "exports" for the purpose of determining
+"related" `SqmExpression` nodes that did not explicitly define a type.  E.g., assuming a query like:
+
+.Inferable type
 ====
-This section is completely out-of-date
+[source]
+----
+select p from Person p where p.age = ?1
+----
 ====
 
-A Binding is the corollary to `org.hibernate.test.sqm.domain.Bindable` and represents a specific
-usage of that `org.hibernate.test.sqm.domain.Bindable`.  E.g.
+the predicate defines 2 `SqmExpression` nodes:
 
+* the `SqmExpression` for the navigable `p.age`
+* the `SqmExpression` for the parameter `?1`.
+
+`?1` has no inherent type.  However, because it is involved in an equality predicate, we can look at
+the "other side" of the predicate to determine an "implicit" type for the parameter node.  Specifically
+we can look at the other side's `#getInferableType`.  Here, we inherently know the type of `p.age` because
+`Person#age` is a mapped attribute.  So we'd expect the parameter to be of the same type.
+
+The `SqmExpression` form of a `SqmNavigable` is called a `SqmNavigableBinding`.  The `SqmExpression` form of
+a `SqmNavigableSource` is called a `SqmNavigableSourceBinding`.  Just like a `SqmNavigable` exposes its
+`SqmNavigableSource`, so too a `SqmNavigableBinding` exposes its `SqmNavigableSourceBinding`.
+
+Let's look at some example queries and how they translate into expressions, navigable and bindings...
+
+
+.Expressions - Bindings and single SqmFrom
 ====
 [source]
 ----
@@ -68,9 +156,14 @@ select p from Person p
 ----
 ====
 
-The reference `Person p` declares a single Binding for the Bindable (entity) `Person`.
-Further, consider:
+As we saw above, the reference `Person p` creates a `SqmRoot` element.  `SqmFrom` elements do not themselves
+implement `SqmExpression`.  However, `SqmFrom` elements may be expressed via their `SqmFrom#getBinding` returning
+a `SqmNavigableBinding`.  Here specifically the `SqmRoot(Person,p)#getBinding` call returns the
+`EntityBindingImpl` that represents the `SqmRoot(Person,p)#getBinding` in places where an expression is needed, such
+as the reference to `p` as a selection.
 
+
+.Expressions - Bindings and multiple SqmFrom
 ====
 [source]
 ----
@@ -78,12 +171,52 @@ select p, pm from Person p, Person pm
 ----
 ====
 
-Now we have 2 Bindings declared (`Person p` and `Person pm`) for the same Bindable (`Person`).
+Here we end up with 2 distinct `SqmFrom` elements (`SqmRoot(Person,p)` and `SqmRoot(Person,pm)`) each of which
+also defines its own `EntityBindingImpl` (`SqmNavigableBining`) reference.  The selection expressions actually refer
+to those `EntityBindingImpl` references.
+
+
+.Expressions - type determination - arithmetic
+====
+[source]
+----
+select p.age + 10 from Person p
+----
+====
+
+What is the type of the `p.age + 10` expression?  The answer is... it depends.  Specifically, it depends on
+the type of `p.age`.  `10` is interpreted as a literal integer.  The type of the arithmetic expression overall
+then is the resolution of the type you get when you add together (1) a value of the same type as `p.age` and
+(2) a value of integer type.
+
+This is where the `SqmExpressableType` contract mentioned above comes into play.  Both `p.age` and `10`
+expose their `SqmExpressableType`:
+. `p.age` - its `SqmExpressableType` would depend on the exact mapping, but let's assume the persistent
+		attribute is defined as an `Integer` - which means its `SqmExpressableType` would be
+		a `OrmSingularAttributeBasic` (as a `org.hibernate.sqm.domain.SqmExpressableTypeBasic`)
+. `10` - its `SqmExpressableType` would be an ORM `BasicType<Integer>` (as an `SqmDomainTypeBasic`)
+
+Ultimately this decision is delegated to `DomainMetamodel#resolveArithmeticType`
+(`DomainMetamodel#resolveSumFunctionType` is related).
+
+
+[NOTE]
+====
+We need to consider ways to allow customization of the `DomainMetamodel#resolveArithmeticType`
+and `DomainMetamodel#resolveSumFunctionType` hooks.  This is important for custom types.  FWIW
+this does not work today either with custom types.
+====
+
+
+
+=== Predicates
+
+tbd
 
 
 === Downcasts
 
-FromElements (others) act as a source of attribute bindings/references.  For example, given a query defining `Person` as a
+SqmFrom elements act as a source of attribute bindings/references.  For example, given a query defining `Person` as a
 root we can now refer to any of the attributes defined on `Person` and its superclasses in the query.
 
 Sometimes we would like to refer to attributes defined on a subclass of an AttributeBindingSource.  This is where a
@@ -134,6 +267,12 @@ add a TREAT reference to the FromElement.
 Another option is to just keep a list of the referenced attributes for each FromElement.  On the "back end" we can
 work out the subclass table inclusion based on that info.
 ====
+
+== JPA criteria support
+
+At the moment ORM builds a distinct criteria tree that it then asks SQM to parse into an SQM.  I wonder if we
+can/should instead have ORM build an SQM directly from JPA criteria calls.
+
 
 == not supported
 

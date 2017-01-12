@@ -12,7 +12,7 @@ import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.select.SqmSelection;
 
@@ -23,7 +23,6 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertSame;
 
@@ -36,7 +35,7 @@ public class AttributePathTests extends StandardModelTest {
 		final SqmSelectStatement statement = interpretSelect( "select s.mate.name.first, s.mate.name.last from Person s" );
 
 		assertThat( statement.getQuerySpec().getFromClause().getFromElementSpaces().size(), is(1) );
-		final FromElementSpace space = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		final SqmFromElementSpace space = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 
 		assertThat( space.getJoins().size(), is(1) );
 
@@ -63,7 +62,7 @@ public class AttributePathTests extends StandardModelTest {
 		final SqmSelectStatement statement = interpretSelect( "select s.mate from Person s where s.mate.name.first = ?1" );
 
 		assertThat( statement.getQuerySpec().getFromClause().getFromElementSpaces().size(), is(1) );
-		final FromElementSpace space = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		final SqmFromElementSpace space = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 
 		assertThat( space.getJoins().size(), is(1) );
 

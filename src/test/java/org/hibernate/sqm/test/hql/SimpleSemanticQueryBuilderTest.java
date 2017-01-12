@@ -12,7 +12,7 @@ import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
@@ -87,7 +87,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 		assertNotNull( fromClause );
 		assertThat( fromClause.getFromElementSpaces().size(), is( 1 ) );
 
-		FromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( 0 );
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
@@ -108,7 +108,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 		assertNotNull( subqueryFromClause );
 		assertThat( subqueryFromClause.getFromElementSpaces().size(), is( 1 ) );
 
-		FromElementSpace subqueryFromElementSpace = subqueryFromClause.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace subqueryFromElementSpace = subqueryFromClause.getFromElementSpaces().get( 0 );
 		assertThat( subqueryFromElementSpace.getRoot(), notNullValue() );
 
 		assertThat( subqueryFromElementSpace.getJoins().size(), is( 0 ) );
@@ -129,7 +129,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 		assertNotNull( fromClause );
 		assertThat( fromClause.getFromElementSpaces().size(), is( 1 ) );
 
-		FromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( 0 );
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
@@ -150,7 +150,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 		assertNotNull( subqueryFromClause );
 		assertThat( subqueryFromClause.getFromElementSpaces().size(), is( 1 ) );
 
-		FromElementSpace subqueryFromElementSpace = subqueryFromClause.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace subqueryFromElementSpace = subqueryFromClause.getFromElementSpaces().get( 0 );
 		assertThat( subqueryFromElementSpace.getRoot(), notNullValue() );
 
 		assertThat( subqueryFromElementSpace.getJoins().size(), is( 0 ) );
@@ -170,7 +170,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 		SqmFromClause subSubqueryFromClause = subSubqueryPredicate.getSubQueryExpression().getQuerySpec().getFromClause();
 		assertNotNull( subSubqueryFromClause );
 
-		FromElementSpace subSubqueryFromElementSpace = subSubqueryFromClause.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace subSubqueryFromElementSpace = subSubqueryFromClause.getFromElementSpaces().get( 0 );
 		assertThat( subSubqueryFromElementSpace.getRoot(), notNullValue() );
 
 		assertThat( subSubqueryFromElementSpace.getJoins().size(), is( 0 ) );
@@ -191,7 +191,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 		assertNotNull( fromClause );
 		assertThat( fromClause.getFromElementSpaces().size(), is( 1 ) );
 
-		FromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( 0 );
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is( 0 ) );
 
@@ -220,7 +220,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 				.getFromClause();
 		assertNotNull( leftHandPredicateFromClause );
 
-		FromElementSpace leftHandPredicateFromElementSpace = leftHandPredicateFromClause.getFromElementSpaces()
+		SqmFromElementSpace leftHandPredicateFromElementSpace = leftHandPredicateFromClause.getFromElementSpaces()
 				.get( 0 );
 		assertThat( leftHandPredicateFromElementSpace.getRoot(), notNullValue() );
 
@@ -239,7 +239,7 @@ public class SimpleSemanticQueryBuilderTest extends StandardModelTest {
 				.getFromClause();
 		assertNotNull( rightHandPredicateFromClause );
 
-		FromElementSpace rightHandPredicateFromElementSpace = rightHandPredicateFromClause.getFromElementSpaces()
+		SqmFromElementSpace rightHandPredicateFromElementSpace = rightHandPredicateFromClause.getFromElementSpaces()
 				.get( 0 );
 		assertThat( rightHandPredicateFromElementSpace.getRoot(), notNullValue() );
 

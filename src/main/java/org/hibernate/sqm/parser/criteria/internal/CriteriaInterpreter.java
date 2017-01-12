@@ -50,6 +50,7 @@ import org.hibernate.sqm.parser.criteria.tree.path.JpaPath;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPluralAttributePath;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaSingularAttributePath;
 import org.hibernate.sqm.query.SqmDeleteStatement;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmUpdateStatement;
@@ -88,17 +89,17 @@ import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmDeleteStatementImpl;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
 import org.hibernate.sqm.query.internal.SqmUpdateStatementImpl;
-import org.hibernate.sqm.query.order.OrderByClause;
-import org.hibernate.sqm.query.order.SortOrder;
-import org.hibernate.sqm.query.order.SortSpecification;
-import org.hibernate.sqm.query.paging.LimitOffsetClause;
+import org.hibernate.sqm.query.order.SqmOrderByClause;
+import org.hibernate.sqm.query.order.SqmSortOrder;
+import org.hibernate.sqm.query.order.SqmSortSpecification;
+import org.hibernate.sqm.query.paging.SqmLimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
@@ -359,22 +360,22 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 	}
 
-	private LimitOffsetClause visitLimitOffset(JpaQuerySpec<?> jpaQuerySpec) {
+	private SqmLimitOffsetClause visitLimitOffset(JpaQuerySpec<?> jpaQuerySpec) {
 		// not yet supported in criteria
 		return null;
 	}
 
-	private OrderByClause visitOrderBy(JpaQuerySpec<?> jpaQuerySpec) {
+	private SqmOrderByClause visitOrderBy(JpaQuerySpec<?> jpaQuerySpec) {
 		if ( jpaQuerySpec.getOrderList() == null || jpaQuerySpec.getOrderList().isEmpty() ) {
 			return null;
 		}
 
-		final OrderByClause sqmOrderByClause = new OrderByClause();
+		final SqmOrderByClause sqmOrderByClause = new SqmOrderByClause();
 		for ( JpaOrder jpaOrder : jpaQuerySpec.getOrderList() ) {
 			sqmOrderByClause.addSortSpecification(
-					new SortSpecification(
+					new SqmSortSpecification(
 							jpaOrder.getExpression().visitExpression( this ),
-							jpaOrder.isAscending() ? SortOrder.ASCENDING : SortOrder.DESCENDING
+							jpaOrder.isAscending() ? SqmSortOrder.ASCENDING : SqmSortOrder.DESCENDING
 					)
 			);
 		}
@@ -391,7 +392,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	private SqmRoot makeSqmRoot(SqmFromClause fromClause, JpaRoot<?> jpaRoot) {
-		final FromElementSpace space = fromClause.makeFromElementSpace();
+		final SqmFromElementSpace space = fromClause.makeFromElementSpace();
 		final SqmRoot sqmRoot = querySpecProcessingStateStack.getCurrent().getFromElementBuilder().makeRootEntityFromElement(
 				space,
 				jpaRoot.getEntityType(),
@@ -405,7 +406,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return sqmRoot;
 	}
 
-	private void bindJoins(JpaFrom<?,?> lhs, SqmNavigableBinding lhsBinding, FromElementSpace space) {
+	private void bindJoins(JpaFrom<?,?> lhs, SqmNavigableBinding lhsBinding, SqmFromElementSpace space) {
 		if ( !SqmNavigableSourceBinding.class.isInstance( lhsBinding ) ) {
 			if ( !lhs.getJoins().isEmpty() ) {
 				throw new ParsingException( "Attempt to bind joins against a NavigableBinding that is not also a NavigableSourceBinding " );
@@ -420,7 +421,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 	}
 
-	private SqmAttributeJoin makeSqmAttributeJoin(SqmNavigableSourceBinding sourceBinding, FromElementSpace space, Join<?, ?> join) {
+	private SqmAttributeJoin makeSqmAttributeJoin(SqmNavigableSourceBinding sourceBinding, SqmFromElementSpace space, Join<?, ?> join) {
 		final JpaAttributeJoin<?,?> jpaAttributeJoin = (JpaAttributeJoin<?, ?>) join;
 		final String alias = jpaAttributeJoin.getAlias();
 
@@ -447,7 +448,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return sqmJoin;
 	}
 
-	private void bindFetches(FetchParent<?, ?> lhs, SqmNavigableBinding lhsBinding, FromElementSpace space) {
+	private void bindFetches(FetchParent<?, ?> lhs, SqmNavigableBinding lhsBinding, SqmFromElementSpace space) {
 		if ( !SqmNavigableSourceBinding.class.isInstance( lhsBinding ) ) {
 			if ( !lhs.getFetches().isEmpty() ) {
 				throw new ParsingException( "Attempt to bind fetches against a NavigableBinding that is not also a NavigableSourceBinding " );
@@ -484,16 +485,16 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 	}
 
-	private org.hibernate.sqm.query.JoinType convert(JoinType joinType) {
+	private SqmJoinType convert(JoinType joinType) {
 		switch ( joinType ) {
 			case INNER: {
-				return org.hibernate.sqm.query.JoinType.INNER;
+				return SqmJoinType.INNER;
 			}
 			case LEFT: {
-				return org.hibernate.sqm.query.JoinType.LEFT;
+				return SqmJoinType.LEFT;
 			}
 			case RIGHT: {
-				return org.hibernate.sqm.query.JoinType.RIGHT;
+				return SqmJoinType.RIGHT;
 			}
 		}
 

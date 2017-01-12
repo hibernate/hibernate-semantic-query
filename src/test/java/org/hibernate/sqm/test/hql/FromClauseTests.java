@@ -7,9 +7,9 @@
 package org.hibernate.sqm.test.hql;
 
 import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -35,7 +35,7 @@ public class FromClauseTests extends StandardModelTest {
 		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
-		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
@@ -52,8 +52,8 @@ public class FromClauseTests extends StandardModelTest {
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 2, fromClause1.getFromElementSpaces().size() );
-		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
-		FromElementSpace space2 = fromClause1.getFromElementSpaces().get( 1 );
+		SqmFromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace space2 = fromClause1.getFromElementSpaces().get( 1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
 		assertNotNull( space2.getRoot() );
@@ -74,7 +74,7 @@ public class FromClauseTests extends StandardModelTest {
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
-		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 0, space1.getJoins().size() );
@@ -89,7 +89,7 @@ public class FromClauseTests extends StandardModelTest {
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
-		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 1, space1.getJoins().size() );
@@ -99,16 +99,16 @@ public class FromClauseTests extends StandardModelTest {
 	public void testSimpleImplicitInnerJoin() throws Exception {
 		simpleJoinAssertions(
 				interpretSelect( "select p.nickName from Person p join p.mate m" ),
-				JoinType.INNER
+				SqmJoinType.INNER
 		);
 	}
 
-	private void simpleJoinAssertions(SqmSelectStatement selectStatement, JoinType joinType) {
+	private void simpleJoinAssertions(SqmSelectStatement selectStatement, SqmJoinType joinType) {
 		final SqmFromClause fromClause1 = selectStatement.getQuerySpec().getFromClause();
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
-		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 1, space1.getJoins().size() );
@@ -119,7 +119,7 @@ public class FromClauseTests extends StandardModelTest {
 	public void testSimpleExplicitInnerJoin() throws Exception {
 		simpleJoinAssertions(
 				interpretSelect( "select a.nickName from Person a inner join a.mate c" ),
-				JoinType.INNER
+				SqmJoinType.INNER
 		);
 	}
 
@@ -127,7 +127,7 @@ public class FromClauseTests extends StandardModelTest {
 	public void testSimpleExplicitOuterJoin() throws Exception {
 		simpleJoinAssertions(
 				interpretSelect( "select a.nickName from Person a outer join a.mate c" ),
-				JoinType.LEFT
+				SqmJoinType.LEFT
 		);
 	}
 
@@ -135,7 +135,7 @@ public class FromClauseTests extends StandardModelTest {
 	public void testSimpleExplicitLeftOuterJoin() throws Exception {
 		simpleJoinAssertions(
 				interpretSelect( "select a.nickName from Person a left outer join a.mate c" ),
-				JoinType.LEFT
+				SqmJoinType.LEFT
 		);
 	}
 
@@ -147,7 +147,7 @@ public class FromClauseTests extends StandardModelTest {
 		assertNotNull( fromClause1 );
 //		assertEquals( 0, fromClause1.getChildFromClauses().size() );
 		assertEquals( 1, fromClause1.getFromElementSpaces().size() );
-		FromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
+		SqmFromElementSpace space1 = fromClause1.getFromElementSpaces().get( 0 );
 		assertNotNull( space1 );
 		assertNotNull( space1.getRoot() );
 		assertEquals( 1, space1.getJoins().size() );

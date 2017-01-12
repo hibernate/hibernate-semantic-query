@@ -9,7 +9,7 @@ package org.hibernate.sqm.parser.common;
 import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
 
@@ -62,7 +62,7 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 	@Override
 	public SqmNavigableBinding findNavigableBindingExposingAttribute(String name) {
 		SqmNavigableBinding found = null;
-		for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
+		for ( SqmFromElementSpace space : fromClause.getFromElementSpaces() ) {
 			if ( definesAttribute( space.getRoot().getBinding(), name ) ) {
 				if ( found != null ) {
 					throw new IllegalStateException( "Multiple from-elements expose unqualified attribute : " + name );

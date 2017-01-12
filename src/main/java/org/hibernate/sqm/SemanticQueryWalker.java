@@ -38,17 +38,16 @@ import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AbstractSingularIndexBinding;
+import org.hibernate.sqm.query.expression.domain.AbstractSpecificSqmCollectionIndexBinding;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBinding;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBinding;
-import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBindingBasic;
 import org.hibernate.sqm.query.expression.domain.SqmEntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.domain.MapEntryBinding;
-import org.hibernate.sqm.query.expression.domain.MaxElementBinding;
-import org.hibernate.sqm.query.expression.domain.MinElementBinding;
-import org.hibernate.sqm.query.expression.domain.MinIndexBindingBasic;
+import org.hibernate.sqm.query.expression.domain.SqmMapEntryBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMaxElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMinElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMinIndexBindingBasic;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
@@ -62,15 +61,15 @@ import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpressio
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.TrimFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.UpperFunctionSqmExpression;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
-import org.hibernate.sqm.query.order.OrderByClause;
-import org.hibernate.sqm.query.order.SortSpecification;
-import org.hibernate.sqm.query.paging.LimitOffsetClause;
+import org.hibernate.sqm.query.order.SqmOrderByClause;
+import org.hibernate.sqm.query.order.SqmSortSpecification;
+import org.hibernate.sqm.query.paging.SqmLimitOffsetClause;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
 import org.hibernate.sqm.query.predicate.BetweenSqmPredicate;
 import org.hibernate.sqm.query.predicate.BooleanExpressionSqmPredicate;
@@ -113,7 +112,7 @@ public interface SemanticQueryWalker<T> {
 
 	T visitFromClause(SqmFromClause fromClause);
 
-	T visitFromElementSpace(FromElementSpace fromElementSpace);
+	T visitFromElementSpace(SqmFromElementSpace fromElementSpace);
 
 	T visitRootEntityFromElement(SqmRoot rootEntityFromElement);
 
@@ -157,11 +156,11 @@ public interface SemanticQueryWalker<T> {
 
 	T visitBooleanExpressionPredicate(BooleanExpressionSqmPredicate predicate);
 
-	T visitOrderByClause(OrderByClause orderByClause);
+	T visitOrderByClause(SqmOrderByClause orderByClause);
 
-	T visitSortSpecification(SortSpecification sortSpecification);
+	T visitSortSpecification(SqmSortSpecification sortSpecification);
 
-	T visitLimitOffsetClause(LimitOffsetClause limitOffsetClause);
+	T visitLimitOffsetClause(SqmLimitOffsetClause limitOffsetClause);
 
 	T visitPositionalParameterExpression(PositionalParameterSqmExpression expression);
 
@@ -195,21 +194,21 @@ public interface SemanticQueryWalker<T> {
 
 	T visitPluralAttributeSizeFunction(CollectionSizeSqmExpression function);
 
-	T visitPluralAttributeElementBinding(CollectionElementBinding binding);
+	T visitPluralAttributeElementBinding(SqmCollectionElementBinding binding);
 
-	T visitPluralAttributeIndexFunction(CollectionIndexBinding function);
+	T visitPluralAttributeIndexFunction(SqmCollectionIndexBinding function);
 
-	T visitMapKeyBinding(CollectionIndexBinding binding);
+	T visitMapKeyBinding(SqmCollectionIndexBinding binding);
 
-	T visitMapEntryFunction(MapEntryBinding function);
+	T visitMapEntryFunction(SqmMapEntryBinding function);
 
-	T visitMaxElementBinding(MaxElementBinding binding);
+	T visitMaxElementBinding(SqmMaxElementBinding binding);
 
-	T visitMinElementBinding(MinElementBinding binding);
+	T visitMinElementBinding(SqmMinElementBinding binding);
 
-	T visitMaxIndexFunction(AbstractSingularIndexBinding function);
+	T visitMaxIndexFunction(AbstractSpecificSqmCollectionIndexBinding function);
 
-	T visitMinIndexFunction(MinIndexBindingBasic function);
+	T visitMinIndexFunction(SqmMinIndexBindingBasic function);
 
 	T visitLiteralStringExpression(LiteralStringSqmExpression expression);
 

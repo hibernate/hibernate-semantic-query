@@ -12,9 +12,9 @@ import org.hibernate.sqm.domain.SqmDomainTypeExporter;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.domain.type.SqmDomainType;
-import org.hibernate.sqm.query.PropertyPath;
+import org.hibernate.sqm.query.SqmPropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.from.Downcast;
+import org.hibernate.sqm.query.from.SqmDowncast;
 
 /**
  * Represents a particular {@link SqmNavigable} reference in regards to a SQM query.
@@ -42,14 +42,14 @@ public interface SqmNavigableBinding extends SqmExpression, SqmDomainTypeExporte
 	/**
 	 * Returns the property path that led to the creation of this Navigable.
 	 */
-	PropertyPath getPropertyPath();
+	SqmPropertyPath getPropertyPath();
 
 
 	// JPA downcast (TREAT .. AS ..) support
 
 	SqmNavigableBinding treatAs(SqmExpressableTypeEntity target);
 
-	void addDowncast(Downcast downcast);
+	void addDowncast(SqmDowncast downcast);
 
-	Collection<Downcast> getDowncasts();
+	Collection<SqmDowncast> getDowncasts();
 }

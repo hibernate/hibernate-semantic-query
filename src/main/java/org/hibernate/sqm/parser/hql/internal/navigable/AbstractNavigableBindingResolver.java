@@ -15,7 +15,7 @@ import org.hibernate.sqm.domain.SqmSingularAttribute;
 import org.hibernate.sqm.domain.SqmSingularAttribute.SingularAttributeClassification;
 import org.hibernate.sqm.parser.SemanticException;
 import org.hibernate.sqm.parser.common.ResolutionContext;
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
@@ -117,8 +117,8 @@ public abstract class AbstractNavigableBindingResolver implements NavigableBindi
 				|| classification == SingularAttributeClassification.ONE_TO_ONE;
 	}
 
-	protected JoinType getIntermediateJoinType() {
-		return JoinType.LEFT;
+	protected SqmJoinType getIntermediateJoinType() {
+		return SqmJoinType.LEFT;
 	}
 
 	protected boolean areIntermediateJoinsFetched() {
@@ -151,7 +151,7 @@ public abstract class AbstractNavigableBindingResolver implements NavigableBindi
 						attributeBinding,
 						null,
 						null,
-						JoinType.INNER,
+						SqmJoinType.INNER,
 						false,
 						true
 				)

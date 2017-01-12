@@ -9,9 +9,8 @@ package org.hibernate.sqm.test.domain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SqmDomainMetamodel;
 import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 
 /**
  * Helper for making the determination of an expression's "type" as sovered by the rules
@@ -33,7 +32,7 @@ public class ExpressionTypeHelper {
 			SqmExpressableTypeBasic firstType,
 			SqmExpressableTypeBasic secondType,
 			boolean isDivision,
-			DomainMetamodel domainMetamodel) {
+			SqmDomainMetamodel domainMetamodel) {
 		if ( isDivision ) {
 			// covered under the note in 6.5.7.1 discussing the unportable
 			// "semantics of the SQL division operation"..
@@ -93,7 +92,7 @@ public class ExpressionTypeHelper {
 
 	public static SqmExpressableTypeBasic resolveSingleNumericType(
 			SqmExpressableTypeBasic typeDescriptor,
-			DomainMetamodel domainMetamodel) {
+			SqmDomainMetamodel domainMetamodel) {
 		if ( matchesJavaType( typeDescriptor, Double.class ) ) {
 			return typeDescriptor;
 		}

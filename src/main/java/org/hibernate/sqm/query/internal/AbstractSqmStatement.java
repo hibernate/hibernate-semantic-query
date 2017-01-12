@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.Parameter;
+import org.hibernate.sqm.query.SqmParameter;
 import org.hibernate.sqm.query.SqmStatement;
 import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
@@ -78,8 +78,8 @@ public abstract class AbstractSqmStatement implements SqmStatement, ParameterCol
 	}
 
 	@Override
-	public Set<Parameter> getQueryParameters() {
-		Set<Parameter> parameters = new HashSet<>();
+	public Set<SqmParameter> getQueryParameters() {
+		Set<SqmParameter> parameters = new HashSet<>();
 		if ( namedQueryParameters != null ) {
 			parameters.addAll( namedQueryParameters.values() );
 		}

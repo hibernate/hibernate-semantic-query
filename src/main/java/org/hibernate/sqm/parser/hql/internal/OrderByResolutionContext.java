@@ -14,7 +14,7 @@ import org.hibernate.sqm.parser.common.FromElementLocator;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.parser.common.ResolutionContext;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
@@ -36,7 +36,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 
 	@Override
 	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
-		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
+		for ( SqmFromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable ) ) {
 				return fromElementSpace.getRoot().getBinding();
 			}
@@ -54,7 +54,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 
 	@Override
 	public SqmNavigableBinding findNavigableBindingExposingAttribute(String attributeName) {
-		for ( FromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
+		for ( SqmFromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( exposesAttribute( fromElementSpace.getRoot(), attributeName ) ) {
 				return fromElementSpace.getRoot().getBinding();
 			}

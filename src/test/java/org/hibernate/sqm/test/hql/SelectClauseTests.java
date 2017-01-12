@@ -13,20 +13,18 @@ import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmPluralAttribute;
 import org.hibernate.sqm.domain.SqmPluralAttribute.CollectionClassification;
-import org.hibernate.sqm.domain.SqmPluralAttributeElement;
 import org.hibernate.sqm.domain.SqmPluralAttributeElement.ElementClassification;
-import org.hibernate.sqm.domain.SqmPluralAttributeIndex;
 import org.hibernate.sqm.domain.SqmPluralAttributeIndex.IndexClassification;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AbstractCollectionIndexBinding;
-import org.hibernate.sqm.query.expression.domain.CollectionElementBinding;
-import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
-import org.hibernate.sqm.query.expression.domain.MapEntryBinding;
+import org.hibernate.sqm.query.expression.domain.AbstractSqmCollectionIndexBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionElementBinding;
+import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
+import org.hibernate.sqm.query.expression.domain.SqmMapEntryBinding;
 import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
 import org.hibernate.sqm.query.select.SqmDynamicInstantiationTarget;
@@ -65,7 +63,7 @@ public class SelectClauseTests extends StandardModelTest {
 		SqmSelectStatement statement = interpretSelect( "select p from Person p" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( EntityBindingImpl.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmEntityBinding.class ) );
 	}
 
 	@Test
@@ -96,7 +94,7 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( EntityBindingImpl.class )
+				instanceOf( SqmEntityBinding.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
@@ -268,7 +266,7 @@ public class SelectClauseTests extends StandardModelTest {
 		final SqmSelection selection = querySpec.getSelectClause().getSelections().get( 0 );
 
 		assertThat( querySpec.getFromClause().getFromElementSpaces().size(), is(1) );
-		final FromElementSpace fromElementSpace = querySpec.getFromClause().getFromElementSpaces().get( 0 );
+		final SqmFromElementSpace fromElementSpace = querySpec.getFromClause().getFromElementSpaces().get( 0 );
 		final SqmRoot root = fromElementSpace.getRoot();
 		assertThat( root.getBinding().getBoundNavigable().getEntityName(), endsWith( "Person" ) );
 		assertThat( fromElementSpace.getJoins().size(), is(0) );
@@ -338,10 +336,10 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( AbstractCollectionIndexBinding.class )
+				instanceOf( AbstractSqmCollectionIndexBinding.class )
 		);
 
-		final AbstractCollectionIndexBinding mapKeyPathExpression = (AbstractCollectionIndexBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final AbstractSqmCollectionIndexBinding mapKeyPathExpression = (AbstractSqmCollectionIndexBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		final SqmPluralAttribute attrRef = mapKeyPathExpression.getPluralAttributeBinding().getBoundNavigable();
 		assertThat( attrRef.getCollectionClassification(), is(collectionClassification) );
 		assertThat( attrRef.getIndexReference().getClassification(), is(indexClassification) );
@@ -446,10 +444,10 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( CollectionElementBinding.class )
+				instanceOf( SqmCollectionElementBinding.class )
 		);
 
-		final CollectionElementBinding elementBinding = (CollectionElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final SqmCollectionElementBinding elementBinding = (SqmCollectionElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		final SqmPluralAttributeBinding attrRef = elementBinding.getSourceBinding();
 
 		assertThat( attrRef.getBoundNavigable().getCollectionClassification(), is(collectionClassification) );
@@ -475,10 +473,10 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( MapEntryBinding.class )
+				instanceOf( SqmMapEntryBinding.class )
 		);
 
-		final MapEntryBinding mapEntryFunction = (MapEntryBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final SqmMapEntryBinding mapEntryFunction = (SqmMapEntryBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 		assertThat( mapEntryFunction.getAttributeBinding().getExportedFromElement(), notNullValue() );
 		assertThat( mapEntryFunction.getAttributeBinding().getExportedFromElement().getIdentificationVariable(), is( "m") );
 

@@ -8,29 +8,29 @@ package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.query.JoinType;
-import org.hibernate.sqm.query.expression.domain.EntityBindingImpl;
+import org.hibernate.sqm.query.SqmJoinType;
+import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 /**
  * @author Steve Ebersole
  */
 public class SqmEntityJoin
-		extends AbstractJoin
+		extends AbstractSqmJoin
 		implements SqmQualifiedJoin {
 	private SqmPredicate onClausePredicate;
 
 	public SqmEntityJoin(
-			FromElementSpace fromElementSpace,
+			SqmFromElementSpace fromElementSpace,
 			String uid,
 			String alias,
 			SqmExpressableTypeEntity joinedEntityDescriptor,
-			JoinType joinType) {
+			SqmJoinType joinType) {
 		super(
 				fromElementSpace,
 				uid,
 				alias,
-				new EntityBindingImpl( joinedEntityDescriptor ),
+				new SqmEntityBinding( joinedEntityDescriptor ),
 				joinedEntityDescriptor,
 				joinType
 		);
@@ -38,12 +38,12 @@ public class SqmEntityJoin
 	}
 
 	@Override
-	public EntityBindingImpl getBinding() {
+	public SqmEntityBinding getBinding() {
 		return getEntityBinding();
 	}
 
-	public EntityBindingImpl getEntityBinding() {
-		return (EntityBindingImpl) super.getBinding();
+	public SqmEntityBinding getEntityBinding() {
+		return (SqmEntityBinding) super.getBinding();
 	}
 
 	public String getEntityName() {

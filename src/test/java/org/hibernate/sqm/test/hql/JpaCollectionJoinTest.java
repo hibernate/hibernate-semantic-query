@@ -7,7 +7,7 @@
 package org.hibernate.sqm.test.hql;
 
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class JpaCollectionJoinTest extends StandardModelTest {
 	public void basicTest() {
 		SqmSelectStatement statement = interpretSelect( "select e from EntityOfMaps e, IN( e.basicToOneToMany ) l" );
 		assertThat( statement.getQuerySpec().getFromClause().getFromElementSpaces().size(), is( 1 ) );
-		FromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
+		SqmFromElementSpace fromElementSpace = statement.getQuerySpec().getFromClause().getFromElementSpaces().get( 0 );
 
 		assertThat( fromElementSpace.getRoot(), notNullValue() );
 		assertThat( fromElementSpace.getJoins().size(), is(1) );

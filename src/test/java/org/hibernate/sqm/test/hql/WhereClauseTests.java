@@ -11,7 +11,7 @@ import org.hibernate.sqm.domain.SqmPluralAttribute;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
-import org.hibernate.sqm.query.expression.domain.CollectionIndexBinding;
+import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBinding;
 import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
 import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
@@ -98,8 +98,8 @@ public class WhereClauseTests extends StandardModelTest {
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( CollectionIndexBinding.class ) );
-		final SqmPluralAttributeBinding collectionBinding = ( (CollectionIndexBinding) relationalPredicate.getLeftHandExpression() ).getSourceBinding();
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( SqmCollectionIndexBinding.class ) );
+		final SqmPluralAttributeBinding collectionBinding = ( (SqmCollectionIndexBinding) relationalPredicate.getLeftHandExpression() ).getSourceBinding();
 		assertThat( collectionBinding.getExportedFromElement().getIdentificationVariable(), is( "l" ) );
 	}
 
@@ -111,7 +111,7 @@ public class WhereClauseTests extends StandardModelTest {
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		final CollectionIndexBinding collectionIndexBinding = (CollectionIndexBinding) relationalPredicate.getLeftHandExpression();
+		final SqmCollectionIndexBinding collectionIndexBinding = (SqmCollectionIndexBinding) relationalPredicate.getLeftHandExpression();
 		final SqmPluralAttributeBinding collectionBinding = collectionIndexBinding.getSourceBinding();
 		final SqmPluralAttribute attributeReference = collectionBinding.getBoundNavigable();
 

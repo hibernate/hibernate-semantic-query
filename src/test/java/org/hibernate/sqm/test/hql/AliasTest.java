@@ -19,7 +19,7 @@ import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.predicate.AndSqmPredicate;
@@ -277,7 +277,7 @@ public class AliasTest {
 
 	private void checkFromClause(SqmQuerySpec querySpec, int fromClauseIndex, String typeName, String alias) {
 		SqmFromClause fromClause = querySpec.getFromClause();
-		FromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( fromClauseIndex );
+		SqmFromElementSpace fromElementSpace = fromClause.getFromElementSpaces().get( fromClauseIndex );
 		SqmRoot root = fromElementSpace.getRoot();
 		assertThat( root.getEntityName(), is( typeName ) );
 		if ( alias == null ) {

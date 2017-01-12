@@ -6,10 +6,10 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import org.hibernate.sqm.query.Parameter;
+import org.hibernate.sqm.query.SqmParameter;
 
 /**
  * @author Steve Ebersole
  */
-public interface ParameterSqmExpression extends Parameter, ImpliedTypeSqmExpression {
+public interface ParameterSqmExpression extends SqmParameter, ImpliedTypeSqmExpression {
 }

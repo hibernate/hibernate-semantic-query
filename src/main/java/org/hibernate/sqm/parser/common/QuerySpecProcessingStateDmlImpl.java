@@ -12,12 +12,11 @@ import java.util.List;
 import org.hibernate.sqm.domain.SqmExpressableTypeEmbedded;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.type.SqmDomainTypeEmbeddable;
 import org.hibernate.sqm.parser.ParsingException;
-import org.hibernate.sqm.query.JoinType;
+import org.hibernate.sqm.query.SqmJoinType;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
-import org.hibernate.sqm.query.from.FromElementSpace;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
 import org.hibernate.sqm.query.from.SqmEntityJoin;
@@ -81,31 +80,31 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 		return fromElementBuilder;
 	}
 
-	public DmlFromElementSpace getDmlFromElementSpace() {
+	public DmlSqmFromElementSpace getDmlFromElementSpace() {
 		return fromClause.fromElementSpace;
 	}
 
 	public static class DmlFromClause extends SqmFromClause {
-		private final DmlFromElementSpace fromElementSpace = new DmlFromElementSpace( this );
+		private final DmlSqmFromElementSpace fromElementSpace = new DmlSqmFromElementSpace( this );
 
 		@Override
-		public List<FromElementSpace> getFromElementSpaces() {
+		public List<SqmFromElementSpace> getFromElementSpaces() {
 			return Collections.singletonList( fromElementSpace );
 		}
 
 		@Override
-		public void addFromElementSpace(FromElementSpace space) {
+		public void addFromElementSpace(SqmFromElementSpace space) {
 			throw new ParsingException( "DML from-clause cannot have additional FromElementSpaces" );
 		}
 
 		@Override
-		public FromElementSpace makeFromElementSpace() {
+		public SqmFromElementSpace makeFromElementSpace() {
 			throw new ParsingException( "DML from-clause cannot have additional FromElementSpaces" );
 		}
 	}
 
-	public static class DmlFromElementSpace extends FromElementSpace {
-		private DmlFromElementSpace(DmlFromClause fromClause) {
+	public static class DmlSqmFromElementSpace extends SqmFromElementSpace {
+		private DmlSqmFromElementSpace(DmlFromClause fromClause) {
 			super( fromClause );
 		}
 
@@ -132,16 +131,16 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 
 		@Override
 		public SqmCrossJoin makeCrossJoinedFromElement(
-				FromElementSpace fromElementSpace, String uid, SqmExpressableTypeEntity entityType, String alias) {
+				SqmFromElementSpace fromElementSpace, String uid, SqmExpressableTypeEntity entityType, String alias) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
 		@Override
 		public SqmEntityJoin buildEntityJoin(
-				FromElementSpace fromElementSpace,
+				SqmFromElementSpace fromElementSpace,
 				String alias,
 				SqmExpressableTypeEntity entityType,
-				JoinType joinType) {
+				SqmJoinType joinType) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
@@ -150,7 +149,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 				SqmAttributeBinding attributeBinding,
 				String alias,
 				SqmExpressableTypeEntity subclassIndicator,
-				JoinType joinType,
+				SqmJoinType joinType,
 				boolean fetched,
 				boolean canReuseImplicitJoins) {
 			if ( SqmExpressableTypeEmbedded.class.isInstance( attributeBinding.getBoundNavigable() ) ) {

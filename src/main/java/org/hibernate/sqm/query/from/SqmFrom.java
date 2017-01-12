@@ -20,7 +20,7 @@ public interface SqmFrom {
 	/**
 	 * Obtain reference to the FromElementSpace that this FromElement belongs to.
 	 */
-	FromElementSpace getContainingSpace();
+	SqmFromElementSpace getContainingSpace();
 
 	SqmNavigableBinding getBinding();
 

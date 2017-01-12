@@ -8,7 +8,7 @@ package org.hibernate.sqm.test.hql;
 
 import org.hibernate.sqm.domain.SqmSingularAttribute;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.Parameter;
+import org.hibernate.sqm.query.SqmParameter;
 import org.hibernate.sqm.query.SqmSelectStatement;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -48,7 +48,7 @@ public class ParameterTests extends StandardModelTest {
 	@Test
 	public void testAnticipatedTypeHandling() {
 		final SqmSelectStatement sqm = interpretSelect( "select a.nickName from Person a where a.numberOfToes = ?1" );
-		final Parameter parameter = sqm.getQueryParameters().iterator().next();
+		final SqmParameter parameter = sqm.getQueryParameters().iterator().next();
 		assertThat( parameter.getAnticipatedType(), is( instanceOf( SqmSingularAttribute.class ) ) );
 		assertThat( parameter.allowMultiValuedBinding(), is(false) );
 	}
@@ -56,7 +56,7 @@ public class ParameterTests extends StandardModelTest {
 	@Test
 	public void testAllowMultiValuedBinding() {
 		final SqmSelectStatement sqm = interpretSelect( "select a.nickName from Person a where a.numberOfToes in (?1)" );
-		final Parameter parameter = sqm.getQueryParameters().iterator().next();
+		final SqmParameter parameter = sqm.getQueryParameters().iterator().next();
 		assertThat( parameter.getAnticipatedType(), is( instanceOf( SqmSingularAttribute.class ) ) );
 		assertThat( parameter.allowMultiValuedBinding(), is(true) );
 	}

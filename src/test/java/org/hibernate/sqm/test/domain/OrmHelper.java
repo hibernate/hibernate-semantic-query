@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.test.domain;
 
-import org.hibernate.HibernateException;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.Namespace;
@@ -14,23 +13,20 @@ import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cache.spi.access.EntityRegionAccessStrategy;
 import org.hibernate.cache.spi.access.NaturalIdRegionAccessStrategy;
 import org.hibernate.cfg.NotYetImplementedException;
-import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.DenormalizedTable;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Table;
-import org.hibernate.orm.persister.collection.spi.CollectionPersister;
 import org.hibernate.orm.persister.common.internal.DatabaseModelImpl;
 import org.hibernate.orm.persister.common.spi.DerivedTable;
 import org.hibernate.orm.persister.common.spi.PhysicalTable;
-import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.spi.PersisterFactory;
-import org.hibernate.sqm.domain.DomainMetamodel;
+import org.hibernate.sqm.domain.SqmDomainMetamodel;
 
 /**
  * @author Steve Ebersole
  */
 public class OrmHelper {
-	public static DomainMetamodel buildDomainMetamodel(Class... managedClasses) {
+	public static SqmDomainMetamodel buildDomainMetamodel(Class... managedClasses) {
 		final MetadataSources metadataSources = new MetadataSources();
 		for ( Class managedClass : managedClasses ) {
 			metadataSources.addAnnotatedClass( managedClass );
@@ -42,7 +38,7 @@ public class OrmHelper {
 		// at this point we have access to the mapping Metadata (PersistentClass, etc)
 		//		use it to build the testing DomainMetamodel/TypeConfiguration
 
-		final ExplicitDomainMetamodel domainMetamodel = new ExplicitDomainMetamodel( metadata );
+		final ExplicitSqmDomainMetamodel domainMetamodel = new ExplicitSqmDomainMetamodel( metadata );
 
 		populateDatabaseModel( metadata, domainMetamodel );
 		populateMappingModel( metadata, domainMetamodel );
@@ -50,7 +46,7 @@ public class OrmHelper {
 		return domainMetamodel;
 	}
 
-	private static void populateMappingModel(MetadataImplementor mappingMetadata, ExplicitDomainMetamodel domainMetamodel) {
+	private static void populateMappingModel(MetadataImplementor mappingMetadata, ExplicitSqmDomainMetamodel domainMetamodel) {
 //		final PersisterFactory persisterFactory = getSessionFactory().getServiceRegistry().getService( PersisterFactory.class );
 		final PersisterFactory persisterFactory = domainMetamodel.getPersisterFactory();
 
@@ -76,7 +72,7 @@ public class OrmHelper {
 		persisterFactory.finishUp( domainMetamodel );
 	}
 
-	private static void populateDatabaseModel(MetadataImplementor metadata, ExplicitDomainMetamodel domainMetamodel) {
+	private static void populateDatabaseModel(MetadataImplementor metadata, ExplicitSqmDomainMetamodel domainMetamodel) {
 		final Database database = metadata.getDatabase();
 		final DatabaseModelImpl databaseModel = (DatabaseModelImpl) domainMetamodel.getDatabaseModel();
 

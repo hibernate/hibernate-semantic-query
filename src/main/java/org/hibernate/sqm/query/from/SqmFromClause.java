@@ -18,17 +18,17 @@ import java.util.List;
  * @author Steve Ebersole
  */
 public class SqmFromClause {
-	private List<FromElementSpace> fromElementSpaces = new ArrayList<FromElementSpace>();
+	private List<SqmFromElementSpace> fromElementSpaces = new ArrayList<SqmFromElementSpace>();
 
-	public List<FromElementSpace> getFromElementSpaces() {
+	public List<SqmFromElementSpace> getFromElementSpaces() {
 		return fromElementSpaces;
 	}
 
-	public void addFromElementSpace(FromElementSpace space) {
+	public void addFromElementSpace(SqmFromElementSpace space) {
 
 	}
-	public FromElementSpace makeFromElementSpace() {
-		final FromElementSpace space = new FromElementSpace( this );
+	public SqmFromElementSpace makeFromElementSpace() {
+		final SqmFromElementSpace space = new SqmFromElementSpace( this );
 		fromElementSpaces.add( space );
 		return space;
 	}

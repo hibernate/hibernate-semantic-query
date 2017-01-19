@@ -72,15 +72,8 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 
 	private boolean exposesAttribute(SqmFrom sqmFrom, String attributeName) {
 		final SqmNavigable navigable = sqmFrom.getBinding().getBoundNavigable();
-		if ( !SqmNavigableSource.class.isInstance( navigable ) ) {
-			return false;
-		}
-
-		final SqmNavigable found = parsingContext.getConsumerContext()
-				.getDomainMetamodel()
-				.locateNavigable( (SqmNavigableSource) navigable, attributeName );
-
-		return found != null;
+		return SqmNavigableSource.class.isInstance( navigable )
+				&& ( (SqmNavigableSource) navigable ).findNavigable( attributeName ) != null;
 	}
 
 	@Override

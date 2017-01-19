@@ -20,20 +20,15 @@ import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.internal.PersisterFactoryImpl;
 import org.hibernate.orm.persister.spi.PersisterCreationContext;
 import org.hibernate.orm.persister.spi.PersisterFactory;
-import org.hibernate.orm.type.descriptor.java.internal.NonStandardBasicJavaTypeDescriptor;
-import org.hibernate.orm.type.descriptor.java.spi.BasicJavaTypeDescriptor;
-import org.hibernate.orm.type.descriptor.java.spi.ImmutableMutabilityPlan;
-import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptor;
-import org.hibernate.orm.type.internal.BasicTypeImpl;
+import org.hibernate.orm.type.spi.BasicType;
 import org.hibernate.orm.type.spi.TypeConfiguration;
-import org.hibernate.sqm.domain.SqmDomainMetamodel;
 import org.hibernate.sqm.domain.NavigableResolutionException;
+import org.hibernate.sqm.domain.SqmDomainMetamodel;
 import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
 import org.hibernate.sqm.domain.SqmNavigableSource;
-import org.hibernate.sqm.domain.type.SqmDomainType;
 import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 
@@ -52,7 +47,6 @@ public class ExplicitSqmDomainMetamodel implements SqmDomainMetamodel, Persister
 	private Map<String, String> importMap = new HashMap<>();
 
 	private Map<String, SqmExpressableTypeEntityPolymorphicEntity> polymorphicEntityReferenceMap = new HashMap<>();
-	private Map<String,SqmDomainType> javaTypeNameToDomainTypeMap = new HashMap<>();
 
 	public ExplicitSqmDomainMetamodel(MetadataImplementor mappingMetadata) {
 		this.mappingMetadata = mappingMetadata;
@@ -91,6 +85,7 @@ public class ExplicitSqmDomainMetamodel implements SqmDomainMetamodel, Persister
 		}
 
 		// todo : explicit/implicit polymorphism...
+		// todo : handle "duplicates" within a hierarchy
 
 		final HashSet<EntityPersister> matchingPersisters = new HashSet<>();
 
@@ -130,7 +125,7 @@ public class ExplicitSqmDomainMetamodel implements SqmDomainMetamodel, Persister
 	}
 
 	@Override
-	public SqmExpressableTypeEntity resolveEntityReference(Class javaType) {
+	public <T> SqmExpressableTypeEntity<T> resolveEntityReference(Class<T> javaType) {
 		final SqmExpressableTypeEntity entityType = typeConfiguration.findEntityPersister( javaType.getName() );
 		if ( entityType == null ) {
 			throw new IllegalArgumentException( "Per JPA spec" );
@@ -139,22 +134,7 @@ public class ExplicitSqmDomainMetamodel implements SqmDomainMetamodel, Persister
 	}
 
 	@Override
-	public SqmNavigable locateNavigable(SqmNavigableSource source, String navigableName) {
-		return source.findNavigable( navigableName );
-	}
-
-	@Override
-	public SqmNavigable resolveNavigable(SqmNavigableSource source, String navigableName) {
-		final SqmNavigable navigable = locateNavigable( source, navigableName );
-		if ( navigable == null ) {
-			throw new NavigableResolutionException( "Could not locate attribute named [" + navigableName + " relative to [" + source.asLoggableText() + "]" );
-		}
-		return navigable;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public SqmDomainTypeBasic resolveBasicType(Class javaType) {
+	public <T> BasicType<T> resolveBasicType(Class<T> javaType) {
 		return typeConfiguration.getBasicTypeRegistry().getBasicType( javaType );
 	}
 
@@ -174,41 +154,6 @@ public class ExplicitSqmDomainMetamodel implements SqmDomainMetamodel, Persister
 	@Override
 	public SqmExpressableTypeBasic resolveSumFunctionType(SqmExpressableTypeBasic argumentType) {
 		return ExpressionTypeHelper.resolveSingleNumericType( argumentType, this );
-	}
-
-	@Override
-	public SqmDomainType javaTypeToDomainType(Class javaType) {
-		SqmDomainType domainType = javaTypeNameToDomainTypeMap.get( javaType.getName() );
-		if ( domainType == null ) {
-			JavaTypeDescriptor javaTypeDescriptor = typeConfiguration.getJavaTypeDescriptorRegistry()
-					.getDescriptor( javaType );
-			// assume it is a BasicDomainType
-			if ( javaTypeDescriptor == null ) {
-				domainType = new NonStandardBasicJavaTypeDescriptor( javaType );
-				typeConfiguration.getJavaTypeDescriptorRegistry().addDescriptor( (JavaTypeDescriptor) domainType );
-				javaTypeNameToDomainTypeMap.put( javaType.getName(), domainType );
-				return domainType;
-			}
-			else {
-				if ( javaTypeDescriptor instanceof SqmDomainType ) {
-					javaTypeNameToDomainTypeMap.put( javaType.getName(), domainType );
-					return (SqmDomainType) javaTypeDescriptor;
-				}
-				domainType = new BasicTypeImpl(
-						javaType.getName(),
-						(BasicJavaTypeDescriptor) javaTypeDescriptor,
-						// assume immutable
-						ImmutableMutabilityPlan.INSTANCE,
-						// assume no Comparator
-						null,
-						javaTypeDescriptor.getJdbcRecommendedSqlType(
-								typeConfiguration.getBasicTypeRegistry().getBaseJdbcRecommendedSqlTypeMappingContext()
-						)
-				);
-				javaTypeNameToDomainTypeMap.put( javaType.getName(), domainType );
-			}
-		}
-		return domainType;
 	}
 
 	@Override

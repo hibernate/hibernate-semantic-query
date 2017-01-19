@@ -9,9 +9,11 @@ package org.hibernate.sqm.domain;
 import org.hibernate.sqm.parser.SemanticException;
 
 /**
- * Indicates that an attribute referenced in the query could not be resolved.
+ * Indicates that an attribute referenced in the query could not be resolved
+ * in a situation where we expect such a navigable to exists (and it is an
+ * error for it to not).
  *
- * @see SqmDomainMetamodel#resolveNavigable
+ * @see SqmNavigableSource#findNavigable
  *
  * @author Steve Ebersole
  */

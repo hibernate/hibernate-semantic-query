@@ -11,10 +11,12 @@ import java.util.function.Consumer;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.ManagedType;
 
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
+
 /**
  * @author Steve Ebersole
  */
-public interface ManagedTypeImplementor<T> extends ManagedType<T>, CompositeContainer<T>, ExpressableType<T> {
+public interface ManagedTypeImplementor<T> extends ManagedType<T>, EmbeddableContainer<T>, ExpressableType<T> {
 	ManagedTypeImplementor<? super T> getSuperType();
 
 	@Override

@@ -25,8 +25,7 @@ import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.RootClass;
 import org.hibernate.orm.persister.collection.internal.CollectionPersisterImpl;
 import org.hibernate.orm.persister.collection.spi.CollectionPersister;
-import org.hibernate.orm.persister.common.internal.PersisterHelper;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
 import org.hibernate.orm.persister.embeddable.internal.EmbeddableMapperImpl;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
@@ -39,10 +38,9 @@ import org.hibernate.orm.persister.spi.PersisterCreationContext;
 import org.hibernate.orm.persister.spi.PersisterFactory;
 import org.hibernate.orm.type.descriptor.java.internal.EntityJavaTypeDescriptorImpl;
 import org.hibernate.orm.type.descriptor.java.spi.EntityJavaTypeDescriptor;
-import org.hibernate.property.access.spi.PropertyAccess;
+import org.hibernate.orm.type.descriptor.java.spi.ManagedJavaTypeDescriptor;
 import org.hibernate.service.spi.ServiceRegistryAwareService;
 import org.hibernate.service.spi.ServiceRegistryImplementor;
-import org.hibernate.sqm.NotYetImplementedException;
 
 /**
  * The standard ORM implementation of the {@link PersisterFactory} contract
@@ -158,13 +156,15 @@ public final class PersisterFactoryImpl implements PersisterFactory, ServiceRegi
 //				creationContext
 //		);
 
-		EntityJavaTypeDescriptor<T> jtd = (EntityJavaTypeDescriptor<T>) creationContext.getTypeConfiguration().getJavaTypeDescriptorRegistry().getDescriptor( entityBinding.getEntityName() );
+		EntityJavaTypeDescriptor<T> jtd = (EntityJavaTypeDescriptor<T>) creationContext.getTypeConfiguration()
+				.getJavaTypeDescriptorRegistry()
+				.getDescriptor( entityBinding.getEntityName() );
 		if ( jtd == null ) {
 			jtd = new EntityJavaTypeDescriptorImpl(
 					entityBinding.getClassName(),
 					entityBinding.getEntityName(),
 					entityBinding.getMappedClass(),
-					null,
+					resolveEntitySuperJavaTypeDescriptor( entityBinding ),
 					null,
 					null
 			);
@@ -172,10 +172,14 @@ public final class PersisterFactoryImpl implements PersisterFactory, ServiceRegi
 		}
 		return new EntityPersisterImpl<>(
 				entityBinding,
-				null,
-				null,
+				entityCacheAccessStrategy,
+				naturalIdCacheAccessStrategy,
 				creationContext
 		);
+	}
+
+	private ManagedJavaTypeDescriptor resolveEntitySuperJavaTypeDescriptor(PersistentClass entityBinding) {
+		return null;
 	}
 
 //	@SuppressWarnings( {"unchecked"})
@@ -365,7 +369,7 @@ public final class PersisterFactoryImpl implements PersisterFactory, ServiceRegi
 	@Override
 	public EmbeddableMapper createEmbeddablePersister(
 			Component componentBinding,
-			CompositeContainer source,
+			EmbeddableContainer source,
 			String localName,
 			PersisterCreationContext creationContext) throws HibernateException {
 		final EmbeddableMapperImpl mapper = new EmbeddableMapperImpl(

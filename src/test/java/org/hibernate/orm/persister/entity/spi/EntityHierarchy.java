@@ -7,7 +7,7 @@
 package org.hibernate.orm.persister.entity.spi;
 
 import org.hibernate.mapping.RootClass;
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeBasic;
+import org.hibernate.orm.persister.common.internal.SingularAttributeBasic;
 import org.hibernate.orm.persister.spi.PersisterCreationContext;
 
 /**
@@ -26,7 +26,7 @@ public interface EntityHierarchy {
 	InheritanceStrategy getInheritanceStrategy();
 
 	IdentifierDescriptor getIdentifierDescriptor();
-	OrmSingularAttributeBasic getVersionAttribute();
+	SingularAttributeBasic getVersionAttribute();
 
 	void finishInitialization(PersisterCreationContext creationContext, RootClass mappingType);
 }

@@ -12,7 +12,6 @@ import javax.persistence.metamodel.EmbeddableType;
 
 import org.hibernate.mapping.Component;
 import org.hibernate.orm.persister.common.spi.Column;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
 import org.hibernate.orm.persister.common.spi.JoinColumnMapping;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
 import org.hibernate.orm.persister.common.spi.OrmAttribute;
@@ -27,7 +26,7 @@ import org.hibernate.orm.type.spi.EmbeddedType;
  * @author Steve Ebersole
  */
 public interface EmbeddableMapper<T>
-		extends ManagedTypeImplementor<T>, OrmTypeExporter, CompositeContainer<T>, EmbeddableType<T> {
+		extends ManagedTypeImplementor<T>, OrmTypeExporter, EmbeddableContainer<T>, EmbeddableType<T> {
 	void afterInitialization(
 			Component embeddableBinding,
 			PersisterCreationContext creationContext);
@@ -42,7 +41,7 @@ public interface EmbeddableMapper<T>
 	}
 
 	@Override
-	CompositeContainer<?> getSource();
+	EmbeddableContainer<?> getSource();
 
 	@Override
 	EmbeddedType getOrmType();

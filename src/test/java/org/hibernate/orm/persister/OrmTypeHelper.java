@@ -6,25 +6,17 @@
  */
 package org.hibernate.orm.persister;
 
-import java.util.Collections;
-
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Component;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.ToOne;
 import org.hibernate.mapping.Value;
 import org.hibernate.orm.persister.collection.spi.CollectionPersister;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
-import org.hibernate.orm.persister.embeddable.internal.EmbeddableMapperImpl;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
-import org.hibernate.orm.persister.entity.spi.IdentifiableTypeImplementor;
 import org.hibernate.orm.persister.spi.PersisterCreationContext;
-import org.hibernate.orm.type.descriptor.java.internal.EmbeddableJavaTypeDescriptorImpl;
-import org.hibernate.orm.type.descriptor.java.spi.EmbeddableJavaTypeDescriptor;
-import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
-import org.hibernate.orm.type.internal.EmbeddedTypeImpl;
 import org.hibernate.orm.type.internal.EntityTypeImpl;
 import org.hibernate.orm.type.spi.CollectionType;
 import org.hibernate.orm.type.spi.EmbeddedType;
@@ -33,7 +25,6 @@ import org.hibernate.orm.type.spi.Type;
 import org.hibernate.orm.type.spi.TypeConfiguration;
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.type.BasicType;
-import org.hibernate.type.CompositeType;
 
 import org.jboss.logging.Logger;
 
@@ -116,7 +107,7 @@ public class OrmTypeHelper {
 
 	private static EmbeddedType convertEmbedded(
 			PersisterCreationContext creationContext,
-			CompositeContainer source,
+			EmbeddableContainer source,
 			String navigableName,
 			Component embeddedValue,
 			TypeConfiguration typeConfiguration) {
@@ -156,7 +147,7 @@ public class OrmTypeHelper {
 			PersisterCreationContext creationContext,
 			String navigableName,
 			Component navigableType,
-			CompositeContainer source,
+			EmbeddableContainer source,
 			TypeConfiguration typeConfiguration) {
 		final String roleName = source.getRolePrefix() + navigableName;
 		EmbeddableMapper mapper = typeConfiguration.findEmbeddableMapper( roleName );

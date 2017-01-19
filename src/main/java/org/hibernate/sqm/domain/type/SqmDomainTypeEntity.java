@@ -11,5 +11,5 @@ package org.hibernate.sqm.domain.type;
  *
  * @author Steve Ebersole
  */
-public interface SqmDomainTypeEntity extends SqmDomainType {
+public interface SqmDomainTypeEntity<T> extends SqmDomainType<T> {
 }

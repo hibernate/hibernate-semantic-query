@@ -11,6 +11,6 @@ import org.hibernate.sqm.domain.type.SqmDomainType;
 /**
  * @author Steve Ebersole
  */
-public interface SqmDomainTypeExporter {
-	SqmDomainType getExportedDomainType();
+public interface SqmDomainTypeExporter<T> {
+	SqmDomainType<T> getExportedDomainType();
 }

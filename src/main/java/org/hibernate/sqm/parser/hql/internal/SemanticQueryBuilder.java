@@ -491,16 +491,16 @@ public class SemanticQueryBuilder extends HqlParserBaseVisitor implements SqmNav
 		final SqmDynamicInstantiation dynamicInstantiation;
 
 		if ( ctx.dynamicInstantiationTarget().MAP() != null ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation( parsingContext );
+			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation();
 		}
 		else if ( ctx.dynamicInstantiationTarget().LIST() != null ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation( parsingContext );
+			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation();
 		}
 		else {
 			final String className = ctx.dynamicInstantiationTarget().dotIdentifierSequence().getText();
 			try {
 				final Class targetJavaType = parsingContext.getConsumerContext().classByName( className );
-				dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( targetJavaType, parsingContext );
+				dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( targetJavaType );
 			}
 			catch (ClassNotFoundException e) {
 				throw new SemanticException( "Unable to resolve class named for dynamic instantiation : " + className );

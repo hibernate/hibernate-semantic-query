@@ -14,7 +14,7 @@ import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Component;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.orm.persister.collection.spi.CollectionPersister;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
@@ -74,7 +74,7 @@ public interface PersisterFactory extends Service {
 	 */
 	EmbeddableMapper createEmbeddablePersister(
 			Component componentBinding,
-			CompositeContainer source,
+			EmbeddableContainer source,
 			String localName,
 			PersisterCreationContext creationContext) throws HibernateException;
 

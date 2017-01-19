@@ -18,7 +18,7 @@ import org.hibernate.sqm.domain.SqmLoggable;
  *
  * @author Steve Ebersole
  */
-public interface SqmDomainType extends SqmLoggable {
+public interface SqmDomainType<T> extends SqmLoggable {
 	/**
 	 * The underlying physical Java type.  May be {@code null}.
 	 * <p/>
@@ -28,5 +28,5 @@ public interface SqmDomainType extends SqmLoggable {
 	 * {@link javax.persistence.metamodel.Type} contract which defines this
 	 * same method name returning just {@code Class} (no Optional).
 	 */
-	Class getJavaType();
+	Class<T> getJavaType();
 }

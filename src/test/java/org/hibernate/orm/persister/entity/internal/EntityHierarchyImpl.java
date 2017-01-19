@@ -17,8 +17,8 @@ import org.hibernate.mapping.RootClass;
 import org.hibernate.mapping.Selectable;
 import org.hibernate.mapping.Value;
 import org.hibernate.orm.persister.OrmTypeHelper;
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeBasic;
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeEmbedded;
+import org.hibernate.orm.persister.common.internal.SingularAttributeBasic;
+import org.hibernate.orm.persister.common.internal.SingularAttributeEmbedded;
 import org.hibernate.orm.persister.common.internal.PersisterHelper;
 import org.hibernate.orm.persister.common.spi.Column;
 import org.hibernate.orm.persister.common.spi.Table;
@@ -99,7 +99,7 @@ public class EntityHierarchyImpl implements EntityHierarchy {
 			// todo : need to pass along that any built sub attributes are part of the id
 			if ( rootEntityBinding.hasIdentifierProperty() ) {
 				return new IdentifierDescriptorAggregatedEmbeddedImpl(
-						(OrmSingularAttributeEmbedded) PersisterHelper.INSTANCE.buildSingularAttribute(
+						(SingularAttributeEmbedded) PersisterHelper.INSTANCE.buildSingularAttribute(
 								creationContext,
 								// the declaring type...
 								///		for now we use the root entity
@@ -221,7 +221,7 @@ public class EntityHierarchyImpl implements EntityHierarchy {
 	}
 
 	@Override
-	public OrmSingularAttributeBasic getVersionAttribute() {
+	public SingularAttributeBasic getVersionAttribute() {
 		return null;
 	}
 

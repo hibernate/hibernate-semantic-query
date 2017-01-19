@@ -11,5 +11,5 @@ package org.hibernate.orm.type.descriptor.java.spi;
  *
  * @author Steve Ebersole
  */
-public interface EmbeddableJavaTypeDescriptor extends ManagedJavaTypeDescriptor {
+public interface EmbeddableJavaTypeDescriptor<T> extends ManagedJavaTypeDescriptor<T> {
 }

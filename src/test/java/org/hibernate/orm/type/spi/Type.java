@@ -15,7 +15,7 @@ import org.hibernate.sqm.domain.type.SqmDomainType;
 /**
  * @author Steve Ebersole
  */
-public interface Type<T> extends SqmDomainType {
+public interface Type<T> extends SqmDomainType<T> {
 	String getTypeName();
 
 	JavaTypeDescriptor getJavaTypeDescriptor();

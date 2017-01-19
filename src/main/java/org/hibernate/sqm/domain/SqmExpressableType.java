@@ -15,5 +15,5 @@ import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
  *
  * @author Steve Ebersole
  */
-public interface SqmExpressableType extends SqmDomainTypeExporter {
+public interface SqmExpressableType<T> extends SqmDomainTypeExporter<T> {
 }

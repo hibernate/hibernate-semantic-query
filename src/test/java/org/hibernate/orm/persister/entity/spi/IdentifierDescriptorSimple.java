@@ -6,7 +6,7 @@
  */
 package org.hibernate.orm.persister.entity.spi;
 
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeBasic;
+import org.hibernate.orm.persister.common.internal.SingularAttributeBasic;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBasic;
 
 /**
@@ -14,5 +14,5 @@ import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBasic;
  */
 public interface IdentifierDescriptorSimple extends IdentifierDescriptorSingleAttribute, SqmEntityIdentifierBasic {
 	@Override
-	OrmSingularAttributeBasic getIdAttribute();
+	SingularAttributeBasic getIdAttribute();
 }

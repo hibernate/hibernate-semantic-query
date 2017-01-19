@@ -8,12 +8,9 @@ package org.hibernate.orm.persister.entity.internal;
 
 import java.util.List;
 
-import javax.persistence.metamodel.Type;
-
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeBasic;
+import org.hibernate.orm.persister.common.internal.SingularAttributeBasic;
 import org.hibernate.orm.persister.common.spi.Column;
-import org.hibernate.orm.persister.common.spi.OrmNavigableSource;
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.entity.spi.IdentifiableTypeImplementor;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorSimple;
@@ -25,20 +22,20 @@ import org.hibernate.sqm.domain.type.SqmDomainType;
  * @author Steve Ebersole
  */
 public class IdentifierDescriptorSimpleImpl implements IdentifierDescriptorSimple {
-	private final OrmSingularAttributeBasic idAttribute;
+	private final SingularAttributeBasic idAttribute;
 
 	public IdentifierDescriptorSimpleImpl(
 			IdentifiableTypeImplementor declaringType,
 			String idAttributeName,
 			BasicType idType,
 			List<Column> columns) {
-		this.idAttribute = new OrmSingularAttributeBasic(
+		this.idAttribute = new SingularAttributeBasic(
 				declaringType,
 				idAttributeName,
 				// for now we just build the EntityMode.MAP accessor for testing
 				PropertyAccessStrategyMapImpl.INSTANCE.buildPropertyAccess( null, idAttributeName ),
 				idType,
-				OrmSingularAttribute.Disposition.ID,
+				SingularAttribute.Disposition.ID,
 				null,
 				columns
 		);
@@ -55,7 +52,7 @@ public class IdentifierDescriptorSimpleImpl implements IdentifierDescriptorSimpl
 	}
 
 	@Override
-	public OrmSingularAttributeBasic getIdAttribute() {
+	public SingularAttributeBasic getIdAttribute() {
 		return idAttribute;
 	}
 

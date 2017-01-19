@@ -14,18 +14,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.hibernate.orm.persister.OrmTypeHelper;
-import org.hibernate.orm.persister.common.internal.AbstractManagedType;
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeBasic;
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeEmbedded;
+import org.hibernate.orm.persister.common.spi.AbstractManagedType;
+import org.hibernate.orm.persister.common.internal.SingularAttributeBasic;
+import org.hibernate.orm.persister.common.internal.SingularAttributeEmbedded;
 import org.hibernate.orm.persister.common.internal.PersisterHelper;
 import org.hibernate.orm.persister.common.spi.OrmNavigable;
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.persister.entity.spi.EntityHierarchy;
 import org.hibernate.orm.persister.entity.spi.IdentifiableTypeImplementor;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorNonAggregatedEmbedded;
@@ -93,13 +92,13 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 	@Override
 	public Type<?> getIdType() {
 		if ( getHierarchy().getIdentifierDescriptor() instanceof IdentifierDescriptorSingleAttribute ) {
-			final OrmSingularAttribute idAttribute = ( (IdentifierDescriptorSingleAttribute) getHierarchy().getIdentifierDescriptor() )
+			final SingularAttribute idAttribute = ( (IdentifierDescriptorSingleAttribute) getHierarchy().getIdentifierDescriptor() )
 					.getIdAttribute();
-			if ( idAttribute instanceof OrmSingularAttributeBasic ) {
-				return ( (OrmSingularAttributeBasic) idAttribute ).getOrmType();
+			if ( idAttribute instanceof SingularAttributeBasic ) {
+				return ( (SingularAttributeBasic) idAttribute ).getOrmType();
 			}
-			else if ( idAttribute instanceof OrmSingularAttributeEmbedded ) {
-				return ( (OrmSingularAttributeEmbedded) idAttribute ).getEmbeddablePersister();
+			else if ( idAttribute instanceof SingularAttributeEmbedded ) {
+				return ( (SingularAttributeEmbedded) idAttribute ).getEmbeddablePersister();
 			}
 			else {
 				throw new IllegalStateException( "Expected BASIC or EMBEDDED attribute type for identifier" );
@@ -109,13 +108,13 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 	}
 
 	@Override
-	public OrmSingularAttribute getId(Class type) {
+	public SingularAttribute getId(Class type) {
 		return findIdAttribute( type );
 	}
 
-	private OrmSingularAttribute findIdAttribute(Class type) {
+	private SingularAttribute findIdAttribute(Class type) {
 		if ( IdentifierDescriptorSingleAttribute.class.isInstance( hierarchy.getIdentifierDescriptor() ) ) {
-			final OrmSingularAttribute idAttribute = ( (IdentifierDescriptorSingleAttribute) hierarchy.getIdentifierDescriptor() )
+			final SingularAttribute idAttribute = ( (IdentifierDescriptorSingleAttribute) hierarchy.getIdentifierDescriptor() )
 					.getIdAttribute();
 
 			if ( idAttribute != null )  {
@@ -129,8 +128,8 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 	}
 
 	@Override
-	public OrmSingularAttribute getDeclaredId(Class type) {
-		final OrmSingularAttribute idAttribute = findIdAttribute( type );
+	public SingularAttribute getDeclaredId(Class type) {
+		final SingularAttribute idAttribute = findIdAttribute( type );
 		if ( idAttribute.getSource() != this ) {
 			throw new IllegalArgumentException(
 					String.format(
@@ -145,11 +144,11 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 	}
 
 	@Override
-	public OrmSingularAttribute getVersion(Class type) {
+	public SingularAttribute getVersion(Class type) {
 		return findIdAttribute( type );
 	}
 
-	private OrmSingularAttribute findVersionAttribute(Class type) {
+	private SingularAttribute findVersionAttribute(Class type) {
 		if ( hierarchy.getVersionAttribute() == null ) {
 			throw new IllegalArgumentException( "Entity hierarchy does not define version attribute" );
 		}
@@ -160,8 +159,8 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 	}
 
 	@Override
-	public OrmSingularAttribute getDeclaredVersion(Class type) {
-		final OrmSingularAttribute versionAttribute = findVersionAttribute( type );
+	public SingularAttribute getDeclaredVersion(Class type) {
+		final SingularAttribute versionAttribute = findVersionAttribute( type );
 		if ( versionAttribute.getSource() != this ) {
 			throw new IllegalArgumentException(
 					String.format(
@@ -192,7 +191,7 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set<SingularAttribute<? super T, ?>> getIdClassAttributes() {
+	public Set<javax.persistence.metamodel.SingularAttribute> getIdClassAttributes() {
 		if ( hierarchy.getIdentifierDescriptor() instanceof IdentifierDescriptorNonAggregatedEmbedded ) {
 			return ( (IdentifierDescriptorNonAggregatedEmbedded<?,? super T>) hierarchy.getIdentifierDescriptor() ).getIdentifierAttributes()
 					.stream()

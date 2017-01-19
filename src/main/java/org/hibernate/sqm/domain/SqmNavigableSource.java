@@ -7,9 +7,19 @@
 package org.hibernate.sqm.domain;
 
 /**
- * The source
+ * Additional contract for SqmNavigable implementors that can in turn contain
+ * SqmNavigable references.
+ *
  * @author Steve Ebersole
  */
 public interface SqmNavigableSource extends SqmNavigable {
+	/**
+	 * Find a contained SqmNavigable.  Returns {@code null} if the given
+	 * "navigable name" cannot be resolved.
+	 *
+	 * @param navigableName The name to resolve relative to this source/container.
+	 *
+	 * @return The resolve navigable, or {@code null}
+	 */
 	SqmNavigable findNavigable(String navigableName);
 }

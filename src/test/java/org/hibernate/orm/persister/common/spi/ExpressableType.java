@@ -11,6 +11,6 @@ import org.hibernate.sqm.domain.SqmExpressableType;
 /**
  * @author Steve Ebersole
  */
-public interface ExpressableType<T> extends SqmExpressableType, javax.persistence.metamodel.Type<T> {
+public interface ExpressableType<T> extends SqmExpressableType<T>, javax.persistence.metamodel.Type<T> {
 	String getTypeName();
 }

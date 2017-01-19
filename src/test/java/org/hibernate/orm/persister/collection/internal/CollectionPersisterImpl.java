@@ -20,10 +20,10 @@ import org.hibernate.mapping.IndexedCollection;
 import org.hibernate.mapping.SimpleValue;
 import org.hibernate.mapping.Value;
 import org.hibernate.orm.persister.collection.spi.CollectionPersister;
-import org.hibernate.orm.persister.collection.spi.OrmPluralAttributeElement;
-import org.hibernate.orm.persister.collection.spi.OrmPluralAttributeId;
-import org.hibernate.orm.persister.collection.spi.OrmPluralAttributeIndex;
-import org.hibernate.orm.persister.collection.spi.OrmPluralAttributeKey;
+import org.hibernate.orm.persister.collection.spi.CollectionElement;
+import org.hibernate.orm.persister.collection.spi.CollectionId;
+import org.hibernate.orm.persister.collection.spi.CollectionIndex;
+import org.hibernate.orm.persister.collection.spi.CollectionKey;
 import org.hibernate.orm.persister.common.internal.PersisterHelper;
 import org.hibernate.orm.persister.common.spi.AbstractOrmAttribute;
 import org.hibernate.orm.persister.common.spi.Column;
@@ -63,10 +63,10 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 
 	private final org.hibernate.orm.type.spi.CollectionType collectionType;
 
-	private final OrmPluralAttributeKey foreignKeyDescriptor;
-	private OrmPluralAttributeId idDescriptor;
-	private OrmPluralAttributeElement elementDescriptor;
-	private OrmPluralAttributeIndex indexDescriptor;
+	private final CollectionKey foreignKeyDescriptor;
+	private CollectionId idDescriptor;
+	private CollectionElement elementDescriptor;
+	private CollectionIndex indexDescriptor;
 
 	private org.hibernate.orm.persister.common.spi.Table separateCollectionTable;
 
@@ -90,7 +90,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 		this.localName = localName;
 		this.role = source.getNavigableName() + '.' + this.localName;
 		this.collectionClassification = PersisterHelper.interpretCollectionClassification( collectionBinding );
-		this.foreignKeyDescriptor = new OrmPluralAttributeKey( this );
+		this.foreignKeyDescriptor = new CollectionKey( this );
 
 		this.typeConfiguration = creationContext.getTypeConfiguration();
 
@@ -171,7 +171,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	@Override
 	public void finishInitialization(Collection collectionBinding, PersisterCreationContext creationContext) {
 		if ( collectionBinding instanceof IdentifierCollection ) {
-			this.idDescriptor = new OrmPluralAttributeId(
+			this.idDescriptor = new CollectionId(
 					convertBasic(
 							(BasicType) ( (IdentifierCollection) collectionBinding ).getIdentifier().getType(),
 							creationContext.getTypeConfiguration()
@@ -193,11 +193,11 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 				throw new NotYetImplementedException(  );
 			}
 			else if ( indexedCollection.getIndex().getType().isComponentType() ) {
-				this.indexDescriptor = new OrmPluralAttributeIndexEmbeddedImpl(
+				this.indexDescriptor = new CollectionIndexEmbeddedImpl(
 						this,
 						convertComposite(
 								creationContext,
-								OrmPluralAttributeIndex.NAVIGABLE_NAME,
+								CollectionIndex.NAVIGABLE_NAME,
 								(Component) indexedCollection.getIndex(),
 								this,
 								typeConfiguration
@@ -206,7 +206,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 				);
 			}
 			else if ( indexedCollection.getIndex().getType().isEntityType() ) {
-				this.indexDescriptor = new OrmPluralAttributeIndexEntityImpl(
+				this.indexDescriptor = new CollectionIndexEntityImpl(
 						this,
 						convertEntity(
 								creationContext,
@@ -217,7 +217,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 				);
 			}
 			else {
-				this.indexDescriptor = new OrmPluralAttributeIndexBasicImpl(
+				this.indexDescriptor = new CollectionIndexBasicImpl(
 						this,
 						convertBasic( (BasicType) indexedCollection.getIndex().getType(), typeConfiguration ),
 						columns
@@ -234,20 +234,20 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 			throw new NotYetImplementedException(  );
 		}
 		else if ( collectionBinding.getElement().getType().isComponentType() ) {
-			this.elementDescriptor = new OrmPluralAttributeElementEmbeddedImpl(
+			this.elementDescriptor = new CollectionElementEmbeddedImpl(
 					this,
 					convertComposite(
 							creationContext,
-							OrmPluralAttributeIndex.NAVIGABLE_NAME,
+							CollectionIndex.NAVIGABLE_NAME,
 							(Component) collectionBinding.getElement(),
-					this,
-					typeConfiguration
+							this,
+							typeConfiguration
 					),
 					elementColumns
 			);
 		}
 		else if ( collectionBinding.getElement().getType().isEntityType() ) {
-			this.elementDescriptor = new OrmPluralAttributeElementEntityImpl(
+			this.elementDescriptor = new CollectionElementEntityImpl(
 					this,
 					convertEntity(
 							creationContext,
@@ -258,7 +258,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 			);
 		}
 		else {
-			this.elementDescriptor = new OrmPluralAttributeElementBasicImpl(
+			this.elementDescriptor = new CollectionElementBasicImpl(
 					this,
 					convertBasic( (BasicType) collectionBinding.getElement().getType(), typeConfiguration ),
 					elementColumns
@@ -272,17 +272,17 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	}
 
 	@Override
-	public OrmPluralAttributeKey getForeignKeyDescriptor() {
+	public CollectionKey getForeignKeyDescriptor() {
 		return foreignKeyDescriptor;
 	}
 
 	@Override
-	public OrmPluralAttributeId getIdDescriptor() {
+	public CollectionId getIdDescriptor() {
 		return idDescriptor;
 	}
 
 	@Override
-	public OrmPluralAttributeIndex getIndexReference() {
+	public CollectionIndex getIndexReference() {
 		return indexDescriptor;
 	}
 
@@ -292,7 +292,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	}
 
 	@Override
-	public OrmPluralAttributeElement getElementReference() {
+	public CollectionElement getElementReference() {
 		return elementDescriptor;
 	}
 

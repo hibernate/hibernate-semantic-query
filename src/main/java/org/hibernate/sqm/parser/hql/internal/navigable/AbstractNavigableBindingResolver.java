@@ -8,6 +8,7 @@ package org.hibernate.sqm.parser.hql.internal.navigable;
 
 import java.util.Locale;
 
+import org.hibernate.sqm.domain.NavigableResolutionException;
 import org.hibernate.sqm.domain.SqmAttribute;
 import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.sqm.domain.SqmNavigable;
@@ -49,14 +50,11 @@ public abstract class AbstractNavigableBindingResolver implements NavigableBindi
 	protected SqmNavigableSourceBinding buildIntermediateAttributeJoin(
 			SqmNavigableSourceBinding sourceBinding,
 			String navigableName) {
-		final SqmAttribute attrRef = (SqmAttribute) context().getParsingContext()
-				.getConsumerContext()
-				.getDomainMetamodel()
-				.resolveNavigable( sourceBinding.getBoundNavigable(), navigableName );
+		final SqmAttribute intermediateNavigable = (SqmAttribute) resolveNavigable( sourceBinding, navigableName );
 
-		validateIntermediateAttributeJoin( sourceBinding, attrRef );
+		validateIntermediateAttributeJoin( sourceBinding, intermediateNavigable );
 
-		return (SqmNavigableSourceBinding) buildAttributeJoin( sourceBinding, attrRef, null );
+		return (SqmNavigableSourceBinding) buildAttributeJoin( sourceBinding, intermediateNavigable, null );
 	}
 
 	protected SqmNavigableBinding buildAttributeJoin(
@@ -126,10 +124,14 @@ public abstract class AbstractNavigableBindingResolver implements NavigableBindi
 	}
 
 	protected SqmNavigable resolveNavigable(SqmNavigableSourceBinding sourceBinding, String navigableName) {
-		return context().getParsingContext()
-				.getConsumerContext()
-				.getDomainMetamodel()
-				.resolveNavigable( sourceBinding.getBoundNavigable(), navigableName );
+		final SqmNavigable navigable = sourceBinding.getBoundNavigable().findNavigable( navigableName );
+		if ( navigable == null ) {
+			throw new NavigableResolutionException(
+					"Could not locate navigable named [" + navigableName + "] relative to [" +
+							sourceBinding.getBoundNavigable().asLoggableText() + "]"
+			);
+		}
+		return navigable;
 	}
 
 	protected void resolveAttributeJoinIfNot(SqmNavigableBinding navigableBinding) {

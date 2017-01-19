@@ -28,9 +28,9 @@ public interface ConsumerContext {
 	 *
 	 * @param name The name of the class to locate
 	 *
-	 * @return The Class reference.  Should never
+	 * @return The Class reference, never {@code null}.
 	 *
-	 * @todo Should this return DomainType?  Ala `DomainMetamodel#javaTypeToDomainType`
+	 * @throws ClassNotFoundException If the Class could not be located by name
 	 */
 	Class classByName(String name) throws ClassNotFoundException;
 

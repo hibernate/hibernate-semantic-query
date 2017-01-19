@@ -16,11 +16,11 @@ import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
  *
  * @author Steve Ebersole
  */
-public interface SqmDomainTypeBasic extends SqmDomainType, SqmExpressableTypeBasic {
+public interface SqmDomainTypeBasic<T> extends SqmDomainType<T>, SqmExpressableTypeBasic<T> {
 	/**
 	 * Returns the Java type represented by this basic type.
 	 * <p/>
 	 * So long story short... this will always return an Optional where isPresent is true
 	 */
-	Class getJavaType();
+	Class<T> getJavaType();
 }

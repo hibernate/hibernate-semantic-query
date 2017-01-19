@@ -6,7 +6,6 @@
  */
 package org.hibernate.sqm.domain;
 
-import org.hibernate.sqm.domain.type.SqmDomainType;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 
 /**
@@ -19,15 +18,12 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
  */
 public interface SqmDomainMetamodel {
 	SqmExpressableTypeEntity resolveEntityReference(String entityName);
-	SqmExpressableTypeEntity resolveEntityReference(Class javaType);
-
-	SqmNavigable locateNavigable(SqmNavigableSource source, String navigableName);
-	SqmNavigable resolveNavigable(SqmNavigableSource source, String navigableName) throws NavigableResolutionException;
+	<T> SqmExpressableTypeEntity<T> resolveEntityReference(Class<T> javaType);
 
 	// - just push the cast target text into the tree.  let the consumer figure out how to interpret it?
 	SqmExpressableTypeBasic resolveCastTargetType(String name);
 
-	SqmExpressableTypeBasic resolveBasicType(Class javaType);
+	<T> SqmExpressableTypeBasic<T> resolveBasicType(Class<T> javaType);
 
 	SqmExpressableTypeBasic resolveArithmeticType(
 			SqmExpressableTypeBasic firstType,
@@ -35,6 +31,4 @@ public interface SqmDomainMetamodel {
 			BinaryArithmeticSqmExpression.Operation operation);
 
 	SqmExpressableTypeBasic resolveSumFunctionType(SqmExpressableTypeBasic argumentType);
-
-	SqmDomainType javaTypeToDomainType(Class javaType);
 }

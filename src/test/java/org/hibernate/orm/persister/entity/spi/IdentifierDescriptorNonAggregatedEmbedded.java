@@ -8,7 +8,7 @@ package org.hibernate.orm.persister.entity.spi;
 
 import java.util.Set;
 
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierEmbedded;
 
 /**
@@ -16,7 +16,7 @@ import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierEmbedded;
  */
 public interface IdentifierDescriptorNonAggregatedEmbedded<I,E>
 		extends IdentifierDescriptor<E>, SqmEntityIdentifierEmbedded {
-	Set<OrmSingularAttribute<? super E,?>> getIdentifierAttributes();
+	Set<SingularAttribute<? super E,?>> getIdentifierAttributes();
 
 	IdClassDescriptor<I> getIdClassDescriptor();
 }

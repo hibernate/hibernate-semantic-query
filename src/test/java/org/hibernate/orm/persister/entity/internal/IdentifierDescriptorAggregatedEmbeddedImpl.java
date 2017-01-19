@@ -6,8 +6,7 @@
  */
 package org.hibernate.orm.persister.entity.internal;
 
-import org.hibernate.orm.persister.common.internal.OrmSingularAttributeEmbedded;
-import org.hibernate.orm.persister.common.spi.OrmNavigableSource;
+import org.hibernate.orm.persister.common.internal.SingularAttributeEmbedded;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorAggregatedEmbedded;
 import org.hibernate.orm.type.spi.EmbeddedType;
@@ -17,9 +16,9 @@ import org.hibernate.sqm.domain.type.SqmDomainType;
  * @author Steve Ebersole
  */
 public class IdentifierDescriptorAggregatedEmbeddedImpl implements IdentifierDescriptorAggregatedEmbedded {
-	private final OrmSingularAttributeEmbedded embeddedIdAttribute;
+	private final SingularAttributeEmbedded embeddedIdAttribute;
 
-	public IdentifierDescriptorAggregatedEmbeddedImpl(OrmSingularAttributeEmbedded embeddedIdAttribute) {
+	public IdentifierDescriptorAggregatedEmbeddedImpl(SingularAttributeEmbedded embeddedIdAttribute) {
 		this.embeddedIdAttribute = embeddedIdAttribute;
 	}
 
@@ -34,7 +33,7 @@ public class IdentifierDescriptorAggregatedEmbeddedImpl implements IdentifierDes
 	}
 
 	@Override
-	public OrmSingularAttributeEmbedded getIdAttribute() {
+	public SingularAttributeEmbedded getIdAttribute() {
 		return embeddedIdAttribute;
 	}
 

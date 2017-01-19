@@ -14,10 +14,10 @@ import java.util.List;
 import org.hibernate.mapping.Component;
 import org.hibernate.mapping.Property;
 import org.hibernate.orm.persister.OrmTypeHelper;
-import org.hibernate.orm.persister.common.internal.AbstractManagedType;
+import org.hibernate.orm.persister.common.spi.AbstractManagedType;
 import org.hibernate.orm.persister.common.internal.PersisterHelper;
 import org.hibernate.orm.persister.common.spi.Column;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
 import org.hibernate.orm.persister.common.spi.JoinColumnMapping;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
 import org.hibernate.orm.persister.common.spi.OrmAttribute;
@@ -30,7 +30,6 @@ import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
 import org.hibernate.orm.type.descriptor.java.spi.MutabilityPlan;
 import org.hibernate.orm.type.internal.EmbeddedTypeImpl;
 import org.hibernate.orm.type.spi.EmbeddedType;
-import org.hibernate.orm.type.spi.TypeConfiguration;
 
 /**
  * @author Steve Ebersole
@@ -38,7 +37,7 @@ import org.hibernate.orm.type.spi.TypeConfiguration;
 public class EmbeddableMapperImpl<T>
 		extends AbstractManagedType<T>
 		implements EmbeddableMapper<T> {
-	private final CompositeContainer compositeContainer;
+	private final EmbeddableContainer compositeContainer;
 	private final String locaName;
 	private final String roleName;
 	private final EmbeddedType ormType;
@@ -48,13 +47,13 @@ public class EmbeddableMapperImpl<T>
 	public EmbeddableMapperImpl(
 			PersisterCreationContext creationContext,
 			ManagedTypeImplementor superTypeDescriptor,
-			CompositeContainer compositeContainer,
+			EmbeddableContainer compositeContainer,
 			String locaName,
 			Component embeddedMapping,
 			MutabilityPlan mutabilityPlan,
 			Comparator comparator,
 			List<Column> allColumns) {
-		super( resolveJtd( creationContext, embeddedMapping ) );
+		super( resolveJtd( creationContext, embeddedMapping, mutabilityPlan, comparator ) );
 
 		this.compositeContainer = compositeContainer;
 		this.locaName = locaName;
@@ -69,7 +68,9 @@ public class EmbeddableMapperImpl<T>
 
 	private static EmbeddableJavaTypeDescriptor resolveJtd(
 			PersisterCreationContext creationContext,
-			Component embeddedMapping) {
+			Component embeddedMapping,
+			MutabilityPlan mutabilityPlan,
+			Comparator comparator) {
 		JavaTypeDescriptorRegistry jtdr = creationContext.getTypeConfiguration().getJavaTypeDescriptorRegistry();
 		EmbeddableJavaTypeDescriptor jtd = (EmbeddableJavaTypeDescriptor) jtdr.getDescriptor( embeddedMapping.getType().getName() );
 		if ( jtd == null ) {
@@ -77,8 +78,8 @@ public class EmbeddableMapperImpl<T>
 					embeddedMapping.getType().getName(),
 					embeddedMapping.getType().getReturnedClass(),
 					null,
-					null,
-					null
+					mutabilityPlan,
+					comparator
 			);
 			jtdr.addDescriptor( jtd );
 		}
@@ -87,8 +88,8 @@ public class EmbeddableMapperImpl<T>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public EmbeddableJavaTypeDescriptor getJavaTypeDescriptor() {
-		return (EmbeddableJavaTypeDescriptor) super.getJavaTypeDescriptor();
+	public EmbeddableJavaTypeDescriptor<T> getJavaTypeDescriptor() {
+		return (EmbeddableJavaTypeDescriptor<T>) super.getJavaTypeDescriptor();
 	}
 
 	@Override
@@ -151,7 +152,7 @@ public class EmbeddableMapperImpl<T>
 	}
 
 	@Override
-	public CompositeContainer getSource() {
+	public EmbeddableContainer getSource() {
 		return compositeContainer;
 	}
 
@@ -183,5 +184,10 @@ public class EmbeddableMapperImpl<T>
 	@Override
 	public List<JoinColumnMapping> resolveJoinColumnMappings(OrmAttribute attribute) {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public Class<T> getJavaType() {
+		return getJavaTypeDescriptor().getJavaType();
 	}
 }

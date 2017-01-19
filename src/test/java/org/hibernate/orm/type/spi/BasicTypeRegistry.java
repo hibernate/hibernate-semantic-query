@@ -84,7 +84,6 @@ import org.hibernate.orm.type.descriptor.sql.spi.VarbinarySqlDescriptor;
 import org.hibernate.orm.type.descriptor.sql.spi.VarcharSqlDescriptor;
 import org.hibernate.orm.type.internal.BasicTypeImpl;
 import org.hibernate.orm.type.internal.TemporalTypeImpl;
-import org.hibernate.orm.type.spi.basic.BasicTypeParameters;
 
 /**
  * Registry for BasicType instances.  Lookup is primarily done by Java type

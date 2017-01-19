@@ -8,7 +8,7 @@ package org.hibernate.orm.persister.entity.spi;
 
 import java.util.Set;
 
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.type.spi.Type;
 
 /**
@@ -17,5 +17,5 @@ import org.hibernate.orm.type.spi.Type;
 public interface IdClassDescriptor<I> {
 	Type getType();
 
-	Set<OrmSingularAttribute<I,?>> getAttributes();
+	Set<SingularAttribute<I,?>> getAttributes();
 }

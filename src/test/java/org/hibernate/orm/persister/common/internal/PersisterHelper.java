@@ -21,11 +21,11 @@ import org.hibernate.mapping.Value;
 import org.hibernate.orm.persister.collection.spi.CollectionPersister;
 import org.hibernate.orm.persister.common.spi.AbstractOrmAttribute;
 import org.hibernate.orm.persister.common.spi.Column;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
 import org.hibernate.orm.persister.common.spi.OrmAttribute;
 import org.hibernate.orm.persister.common.spi.OrmNavigableSource;
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.persister.common.spi.Table;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
@@ -181,14 +181,14 @@ public class PersisterHelper {
 			throw new NotYetImplementedException();
 		}
 		else if ( classification == SingularAttributeClassification.EMBEDDED ) {
-			return new OrmSingularAttributeEmbedded(
+			return new SingularAttributeEmbedded(
 					(ManagedTypeImplementor) source,
 					attributeName,
 					PropertyAccess.DUMMY,
-					OrmSingularAttribute.Disposition.NORMAL,
+					SingularAttribute.Disposition.NORMAL,
 					buildEmbeddablePersister(
 							creationContext,
-							(CompositeContainer) source,
+							(EmbeddableContainer) source,
 							attributeName,
 							(Component) value,
 							columns
@@ -199,23 +199,23 @@ public class PersisterHelper {
 			// todo : need to be able to locate the AttributeConverter (if one) associated with this singular basic attribute
 //			final AttributeConverter attributeConverter = ( (SimpleValue) value ).getAttributeConverterDescriptor().getAttributeConverter();
 			final AttributeConverter attributeConverter = null;
-			return new OrmSingularAttributeBasic(
+			return new SingularAttributeBasic(
 					(ManagedTypeImplementor) source,
 					attributeName,
 					PropertyAccess.DUMMY,
 					(BasicType) attributeType,
-					OrmSingularAttribute.Disposition.NORMAL,
+					SingularAttribute.Disposition.NORMAL,
 					attributeConverter,
 					columns
 			);
 		}
 		else {
 			final EntityType ormEntityType = (EntityType) attributeType;
-			return new OrmSingularAttributeEntity(
+			return new SingularAttributeEntity(
 					(ManagedTypeImplementor) source,
 					attributeName,
 					PropertyAccess.DUMMY,
-					OrmSingularAttribute.Disposition.NORMAL,
+					SingularAttribute.Disposition.NORMAL,
 					classification,
 					ormEntityType,
 					columns
@@ -225,7 +225,7 @@ public class PersisterHelper {
 
 	public EmbeddableMapper buildEmbeddablePersister(
 			PersisterCreationContext creationContext,
-			CompositeContainer compositeContainer,
+			EmbeddableContainer compositeContainer,
 			String localName,
 			Component component,
 			List<Column> columns) {

@@ -22,10 +22,11 @@ import org.hibernate.orm.type.spi.TypeConfiguration;
  */
 public interface PersisterCreationContext {
 	SessionFactoryImplementor getSessionFactory();
+
+	TypeConfiguration getTypeConfiguration();
 	MetadataImplementor getMetadata();
 	DatabaseModel getDatabaseModel();
 
-	TypeConfiguration getTypeConfiguration();
 	PersisterFactory getPersisterFactory();
 
 	void registerEntityPersister(EntityPersister entityPersister);

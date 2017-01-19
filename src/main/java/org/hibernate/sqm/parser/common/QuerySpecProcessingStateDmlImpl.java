@@ -64,10 +64,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	private boolean rootExposesAttribute(String attributeName) {
-		final SqmNavigable sqmNavigable = getParsingContext().getConsumerContext()
-				.getDomainMetamodel()
-				.locateNavigable( fromClause.fromElementSpace.getRoot().getBinding().getBoundNavigable(), attributeName );
-		return sqmNavigable != null;
+		return null != fromClause.fromElementSpace.getRoot().getBinding().getBoundNavigable().findNavigable( attributeName );
 	}
 
 	@Override

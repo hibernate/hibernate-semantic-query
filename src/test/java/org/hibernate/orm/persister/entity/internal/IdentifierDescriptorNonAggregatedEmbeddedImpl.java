@@ -9,7 +9,7 @@ package org.hibernate.orm.persister.entity.internal;
 import java.util.Collections;
 import java.util.Set;
 
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.entity.spi.IdClassDescriptor;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorNonAggregatedEmbedded;
@@ -40,7 +40,7 @@ public class IdentifierDescriptorNonAggregatedEmbeddedImpl implements Identifier
 	}
 
 	@Override
-	public Set<OrmSingularAttribute> getIdentifierAttributes() {
+	public Set<SingularAttribute> getIdentifierAttributes() {
 		throw new NotYetImplementedException(  );
 	}
 
@@ -106,7 +106,7 @@ public class IdentifierDescriptorNonAggregatedEmbeddedImpl implements Identifier
 
 	static class IdClassDescriptorImpl implements IdClassDescriptor {
 		private final EmbeddedType idClassType;
-		private final Set<OrmSingularAttribute> idClassAttributes = Collections.emptySet();
+		private final Set<SingularAttribute> idClassAttributes = Collections.emptySet();
 
 		public IdClassDescriptorImpl(EmbeddedType idClassType) {
 			this.idClassType = idClassType;
@@ -118,7 +118,7 @@ public class IdentifierDescriptorNonAggregatedEmbeddedImpl implements Identifier
 		}
 
 		@Override
-		public Set<OrmSingularAttribute> getAttributes() {
+		public Set<SingularAttribute> getAttributes() {
 			return idClassAttributes;
 		}
 	}

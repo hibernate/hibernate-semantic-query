@@ -14,7 +14,7 @@ import org.hibernate.orm.type.descriptor.java.spi.BasicJavaTypeDescriptor;
 /**
  * @author Steve Ebersole
  */
-public interface BasicType<T> extends Type<T>, SqmDomainTypeBasic, ExpressableType<T>, javax.persistence.metamodel.BasicType<T> {
+public interface BasicType<T> extends Type<T>, SqmDomainTypeBasic<T>, ExpressableType<T>, javax.persistence.metamodel.BasicType<T> {
 	BasicTypeRegistry.Key getRegistryKey();
 
 	@Override

@@ -6,7 +6,7 @@
  */
 package org.hibernate.orm.persister.entity.spi;
 
-import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
+import org.hibernate.orm.persister.common.spi.SingularAttribute;
 
 /**
  * Base information describing an identifier which can be referenced through a single attribute
@@ -14,7 +14,7 @@ import org.hibernate.orm.persister.common.spi.OrmSingularAttribute;
  * @author Steve Ebersole
  */
 public interface IdentifierDescriptorSingleAttribute extends IdentifierDescriptor {
-	OrmSingularAttribute getIdAttribute();
+	SingularAttribute getIdAttribute();
 
 	@Override
 	default boolean hasSingleIdAttribute() {

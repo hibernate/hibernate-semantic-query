@@ -47,8 +47,6 @@ public interface SqmDynamicInstantiationTarget<T> {
 	 */
 	Nature getNature();
 
-	SqmDomainType getDomainType();
-
 	/**
 	 * For {@link Nature#CLASS} this will return the Class to be instantiated.  For
 	 * {@link Nature#MAP} and {@link Nature#LIST} this will return {@code Map.class}
@@ -56,7 +54,5 @@ public interface SqmDynamicInstantiationTarget<T> {
 	 *
 	 * @return The type to be instantiated.
 	 */
-	default Class getJavaType() {
-		return getDomainType().getJavaType();
-	}
+	Class getJavaType();
 }

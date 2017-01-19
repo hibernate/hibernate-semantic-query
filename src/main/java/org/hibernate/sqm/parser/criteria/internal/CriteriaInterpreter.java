@@ -22,6 +22,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
 import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.sqm.domain.SqmExpressableType;
 import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
 import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.sqm.parser.ParsingException;
@@ -76,7 +77,6 @@ import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
 import org.hibernate.sqm.query.expression.domain.SqmAttributeBinding;
-import org.hibernate.sqm.domain.SqmExpressableType;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
 import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
 import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
@@ -89,9 +89,9 @@ import org.hibernate.sqm.query.expression.function.GenericFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.MaxFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.MinFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.SumFunctionSqmExpression;
-import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFromClause;
+import org.hibernate.sqm.query.from.SqmFromElementSpace;
 import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.internal.SqmDeleteStatementImpl;
 import org.hibernate.sqm.query.internal.SqmSelectStatementImpl;
@@ -514,13 +514,13 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		final SqmDynamicInstantiation dynamicInstantiation;
 
 		if ( List.class.equals( target ) ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation( parsingContext );
+			dynamicInstantiation = SqmDynamicInstantiation.forListInstantiation();
 		}
 		else if ( Map.class.equals( target ) ) {
-			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation( parsingContext );
+			dynamicInstantiation = SqmDynamicInstantiation.forMapInstantiation();
 		}
 		else {
-			dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( target, parsingContext );
+			dynamicInstantiation = SqmDynamicInstantiation.forClassInstantiation( target );
 		}
 
 		for ( JpaExpression<?> argument : arguments ) {

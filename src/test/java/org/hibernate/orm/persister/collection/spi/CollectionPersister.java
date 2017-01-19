@@ -8,9 +8,9 @@ package org.hibernate.orm.persister.collection.spi;
 
 import org.hibernate.cache.spi.access.CollectionRegionAccessStrategy;
 import org.hibernate.mapping.Collection;
-import org.hibernate.orm.persister.common.spi.CompositeContainer;
+import org.hibernate.orm.persister.embeddable.spi.EmbeddableContainer;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
-import org.hibernate.orm.persister.common.spi.OrmPluralAttribute;
+import org.hibernate.orm.persister.common.spi.PluralAttribute;
 import org.hibernate.orm.persister.common.spi.OrmTypeExporter;
 import org.hibernate.orm.persister.spi.PersisterCreationContext;
 import org.hibernate.orm.sql.convert.spi.TableGroupProducer;
@@ -56,7 +56,7 @@ import org.hibernate.orm.sql.convert.spi.TableGroupProducer;
  * @author Gavin King
  */
 public interface CollectionPersister<O,C,E>
-		extends OrmPluralAttribute<O,C,E>, TableGroupProducer, OrmTypeExporter, CompositeContainer<C> {
+		extends PluralAttribute<O,C,E>, TableGroupProducer, OrmTypeExporter, EmbeddableContainer<C> {
 
 	Class[] CONSTRUCTOR_SIGNATURE = new Class[] {
 			Collection.class,
@@ -77,10 +77,10 @@ public interface CollectionPersister<O,C,E>
 	void finishInitialization(Collection collectionBinding, PersisterCreationContext creationContext);
 
 	String getRoleName();
-	OrmPluralAttributeKey getForeignKeyDescriptor();
-	OrmPluralAttributeId getIdDescriptor();
-	OrmPluralAttributeIndex getIndexReference();
-	OrmPluralAttributeElement getElementReference();
+	CollectionKey getForeignKeyDescriptor();
+	CollectionId getIdDescriptor();
+	CollectionIndex getIndexReference();
+	CollectionElement getElementReference();
 
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

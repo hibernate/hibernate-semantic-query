@@ -13,7 +13,7 @@ import org.hibernate.sqm.domain.SqmNavigableSource;
 /**
  * @author Steve Ebersole
  */
-public interface OrmNavigableSource<T> extends OrmNavigable<T>, SqmNavigableSource {
+public interface OrmNavigableSource<T> extends OrmNavigable<T>, SqmNavigableSource<T> {
 	@Override
 	OrmNavigable findNavigable(String navigableName);
 

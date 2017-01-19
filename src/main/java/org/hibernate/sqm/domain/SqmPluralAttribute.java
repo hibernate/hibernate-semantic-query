@@ -13,7 +13,7 @@ import javax.persistence.metamodel.PluralAttribute;
  *
  * @author Steve Ebersole
  */
-public interface SqmPluralAttribute extends SqmAttribute, SqmDomainTypeExporter, SqmNavigableSource {
+public interface SqmPluralAttribute<J> extends SqmAttribute<J>, SqmDomainTypeExporter<J>, SqmNavigableSource<J> {
 	/**
 	 * Classifications of the plurality
 	 */

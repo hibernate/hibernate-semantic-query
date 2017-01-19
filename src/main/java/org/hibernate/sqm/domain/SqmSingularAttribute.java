@@ -11,7 +11,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface SqmSingularAttribute extends SqmAttribute, SqmExpressableType {
+public interface SqmSingularAttribute<T> extends SqmAttribute<T>, SqmExpressableType<T> {
 	/**
 	 * Classifications of the singularity
 	 */

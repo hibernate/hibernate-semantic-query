@@ -56,7 +56,7 @@ import org.hibernate.orm.sql.convert.spi.TableGroupProducer;
  * @author Gavin King
  */
 public interface CollectionPersister<O,C,E>
-		extends PluralAttribute<O,C,E>, TableGroupProducer, OrmTypeExporter, EmbeddableContainer<C> {
+		extends PluralAttribute<O,C,E>, TableGroupProducer, OrmTypeExporter<C>, EmbeddableContainer<C> {
 
 	Class[] CONSTRUCTOR_SIGNATURE = new Class[] {
 			Collection.class,

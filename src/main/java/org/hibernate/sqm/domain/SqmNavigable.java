@@ -18,7 +18,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface SqmNavigable extends SqmDomainTypeExporter, SqmLoggable, SqmExpressableType {
+public interface SqmNavigable<J> extends SqmDomainTypeExporter<J>, SqmLoggable, SqmExpressableType<J> {
 	/**
 	 * Returns the "left hand side" of this Navigable.  In the case of a
 	 * "root" reference, this will return {@code null}.

@@ -11,7 +11,7 @@ import org.hibernate.orm.type.spi.Type;
 /**
  * @author Steve Ebersole
  */
-public interface OrmAttribute<O,T> extends OrmNavigable<T>, OrmTypeExporter, javax.persistence.metamodel.Attribute<O,T> {
+public interface OrmAttribute<O,T> extends OrmNavigable<T>, OrmTypeExporter<T>, javax.persistence.metamodel.Attribute<O,T> {
 	@Override
 	ManagedTypeImplementor<O> getSource();
 

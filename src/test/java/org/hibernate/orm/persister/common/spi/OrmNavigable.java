@@ -11,7 +11,7 @@ import org.hibernate.sqm.domain.SqmNavigable;
 /**
  * @author Steve Ebersole
  */
-public interface OrmNavigable<T> extends SqmNavigable, ExpressableType<T> {
+public interface OrmNavigable<T> extends SqmNavigable<T>, ExpressableType<T> {
 	@Override
 	OrmNavigableSource getSource();
 

@@ -12,7 +12,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface SqmNavigableSource extends SqmNavigable {
+public interface SqmNavigableSource<J> extends SqmNavigable<J> {
 	/**
 	 * Find a contained SqmNavigable.  Returns {@code null} if the given
 	 * "navigable name" cannot be resolved.

@@ -20,7 +20,7 @@ import org.hibernate.sqm.domain.type.SqmDomainType;
  */
 public interface EntityPersister<T>
 		extends EntityReference<T>, IdentifiableTypeImplementor<T>, javax.persistence.metamodel.EntityType<T>,
-		SqmDomainType, TableGroupProducer {
+		SqmDomainType<T>, TableGroupProducer {
 
 	/**
 	 * Unless a custom {@link org.hibernate.persister.spi.PersisterFactory} is used, it is expected

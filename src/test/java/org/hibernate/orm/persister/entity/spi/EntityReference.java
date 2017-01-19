@@ -12,7 +12,7 @@ import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
 /**
  * @author Steve Ebersole
  */
-public interface EntityReference<T> extends OrmNavigable<T>, SqmExpressableTypeEntity {
+public interface EntityReference<T> extends OrmNavigable<T>, SqmExpressableTypeEntity<T> {
 	EntityPersister<T> getEntityPersister();
 
 	String getTypeName();

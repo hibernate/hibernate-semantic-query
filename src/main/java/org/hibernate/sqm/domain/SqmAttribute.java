@@ -11,6 +11,6 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface SqmAttribute extends SqmNavigable {
+public interface SqmAttribute<J> extends SqmNavigable<J> {
 	String getAttributeName();
 }

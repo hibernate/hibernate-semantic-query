@@ -13,7 +13,7 @@ import org.hibernate.sqm.domain.type.SqmDomainTypeEntity;
  *
  * @author Steve Ebersole
  */
-public interface SqmExpressableTypeEntity<T> extends SqmExpressableType, SqmNavigableSource {
+public interface SqmExpressableTypeEntity<T> extends SqmExpressableType<T>, SqmNavigableSource<T> {
 	/**
 	 * Obtain the name of the referenced entity
 	 *

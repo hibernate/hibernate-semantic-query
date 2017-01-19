@@ -191,7 +191,7 @@ public abstract class AbstractIdentifiableType<T> extends AbstractManagedType<T>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set<javax.persistence.metamodel.SingularAttribute> getIdClassAttributes() {
+	public Set<javax.persistence.metamodel.SingularAttribute<? super T,?>> getIdClassAttributes() {
 		if ( hierarchy.getIdentifierDescriptor() instanceof IdentifierDescriptorNonAggregatedEmbedded ) {
 			return ( (IdentifierDescriptorNonAggregatedEmbedded<?,? super T>) hierarchy.getIdentifierDescriptor() ).getIdentifierAttributes()
 					.stream()

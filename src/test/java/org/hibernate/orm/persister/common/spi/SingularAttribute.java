@@ -14,7 +14,7 @@ import org.hibernate.sqm.domain.SqmSingularAttribute;
 /**
  * @author Steve Ebersole
  */
-public interface SingularAttribute<O,T> extends SqmSingularAttribute, OrmAttribute<O,T>, javax.persistence.metamodel.SingularAttribute<O,T> {
+public interface SingularAttribute<O,T> extends SqmSingularAttribute<T>, OrmAttribute<O,T>, javax.persistence.metamodel.SingularAttribute<O,T> {
 	enum Disposition {
 		ID,
 		VERSION,

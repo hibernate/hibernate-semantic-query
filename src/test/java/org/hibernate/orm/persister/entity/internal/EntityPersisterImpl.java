@@ -6,7 +6,6 @@
  */
 package org.hibernate.orm.persister.entity.internal;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.hibernate.cache.spi.access.EntityRegionAccessStrategy;
@@ -23,7 +22,6 @@ import org.hibernate.orm.sql.convert.spi.TableGroupProducer;
 import org.hibernate.orm.type.descriptor.java.internal.EntityJavaTypeDescriptorImpl;
 import org.hibernate.orm.type.descriptor.java.spi.EntityJavaTypeDescriptor;
 import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
-import org.hibernate.orm.type.descriptor.java.spi.MutabilityPlan;
 import org.hibernate.sqm.domain.type.SqmDomainTypeEntity;
 
 /**
@@ -31,7 +29,7 @@ import org.hibernate.sqm.domain.type.SqmDomainTypeEntity;
  */
 public class EntityPersisterImpl<T>
 		extends AbstractIdentifiableType<T>
-		implements EntityPersister<T>, SqmDomainTypeEntity {
+		implements EntityPersister<T>, SqmDomainTypeEntity<T> {
 
 	private final String entityName;
 	private final String jpaEntityName;

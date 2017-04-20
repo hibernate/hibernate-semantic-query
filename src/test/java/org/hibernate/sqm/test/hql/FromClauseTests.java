@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
-import org.hibernate.sqm.query.SqmJoinType;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.from.SqmFromElementSpace;
-import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.SqmRoot;
+import org.hibernate.query.sqm.produce.spi.ImplicitAliasGenerator;
+import org.hibernate.query.sqm.tree.SqmJoinType;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
+import org.hibernate.query.sqm.tree.from.SqmFromClause;
+import org.hibernate.query.sqm.tree.from.SqmRoot;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;

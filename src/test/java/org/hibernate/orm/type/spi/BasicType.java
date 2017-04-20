@@ -7,7 +7,7 @@
 package org.hibernate.orm.type.spi;
 
 import org.hibernate.orm.persister.common.spi.ExpressableType;
-import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
 
 import org.hibernate.orm.type.descriptor.java.spi.BasicJavaTypeDescriptor;
 

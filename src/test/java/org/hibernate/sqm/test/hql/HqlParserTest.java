@@ -8,11 +8,11 @@ package org.hibernate.sqm.test.hql;
 
 import java.util.Collection;
 
-import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
-import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser.EqualityPredicateContext;
-import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser.LiteralExpressionContext;
-import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
-import org.hibernate.sqm.parser.hql.internal.antlr.HqlParserBaseVisitor;
+import org.hibernate.query.sqm.hql.internal.antlr.HqlParser;
+import org.hibernate.query.sqm.hql.internal.antlr.HqlParser.EqualityPredicateContext;
+import org.hibernate.query.sqm.hql.internal.antlr.HqlParser.LiteralExpressionContext;
+import org.hibernate.query.sqm.produce.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.query.sqm.hql.internal.antlr.HqlParserBaseVisitor;
 
 import org.junit.Test;
 

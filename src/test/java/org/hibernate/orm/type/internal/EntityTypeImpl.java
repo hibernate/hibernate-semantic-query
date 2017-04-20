@@ -13,7 +13,7 @@ import org.hibernate.orm.type.spi.EntityType;
 import org.hibernate.orm.type.spi.IdentifiableType;
 import org.hibernate.orm.type.spi.JdbcLiteralFormatter;
 import org.hibernate.orm.type.spi.TypeConfiguration;
-import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.NotYetImplementedException;
 
 /**
  * @author Steve Ebersole

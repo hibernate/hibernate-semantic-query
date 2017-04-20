@@ -193,7 +193,7 @@ This is where the `SqmExpressableType` contract mentioned above comes into play.
 expose their `SqmExpressableType`:
 . `p.age` - its `SqmExpressableType` would depend on the exact mapping, but let's assume the persistent
 		attribute is defined as an `Integer` - which means its `SqmExpressableType` would be
-		a `OrmSingularAttributeBasic` (as a `org.hibernate.sqm.domain.SqmExpressableTypeBasic`)
+		a `OrmSingularAttributeBasic` (as a `SqmExpressableTypeBasic`)
 . `10` - its `SqmExpressableType` would be an ORM `BasicType<Integer>` (as an `SqmDomainTypeBasic`)
 
 Ultimately this decision is delegated to `DomainMetamodel#resolveArithmeticType`
@@ -236,7 +236,7 @@ Additionally an explicit downcast can be defined in one of two ways:
 
 . "intrinsic downcasting" happens in the FromClause.  The downcast target is incorporated into the FromElement.  It
 	becomes an "intrinsic" part of the FromElement; any references to that FromElement in any part of the query refers
-	to the downcast form.  See `org.hibernate.sqm.query.from.SqmFrom.getIntrinsicSubclassIndicator`
+	to the downcast form.  See `SqmFrom.getIntrinsicSubclassIndicator`
 . "incidental downcasting" happens outside of the FromClause, as part of a path expression.  Here the downcast is
 	effective just for the path expression.  See `org.hibernate.sqm.path.AttributeBindingSource.getSubclassIndicator`
 

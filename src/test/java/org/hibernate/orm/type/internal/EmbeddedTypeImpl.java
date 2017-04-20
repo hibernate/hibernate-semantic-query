@@ -15,7 +15,7 @@ import org.hibernate.orm.type.spi.ColumnMapping;
 import org.hibernate.orm.type.spi.EmbeddedType;
 import org.hibernate.orm.type.spi.JdbcLiteralFormatter;
 import org.hibernate.orm.type.spi.ManagedType;
-import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.NotYetImplementedException;
 
 /**
  * @author Steve Ebersole

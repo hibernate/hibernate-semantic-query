@@ -6,15 +6,14 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.StrictJpaComplianceViolation;
-import org.hibernate.sqm.parser.InterpretationException;
+import org.hibernate.query.sqm.StrictJpaComplianceViolation;
 
-import org.hibernate.sqm.parser.UnknownEntityException;
+import org.hibernate.query.sqm.UnknownEntityException;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;
 
-import static org.hibernate.sqm.SemanticQueryInterpreter.interpret;
+import static org.hibernate.query.sqm.produce.spi.SemanticQueryProducer.interpret;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

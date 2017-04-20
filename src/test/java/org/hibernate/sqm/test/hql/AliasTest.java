@@ -11,22 +11,22 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.orm.persister.entity.spi.EntityReference;
-import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.parser.common.ImplicitAliasGenerator;
-import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.from.SqmFromElementSpace;
-import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.from.SqmRoot;
-import org.hibernate.sqm.query.predicate.AndSqmPredicate;
-import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.SqmWhereClause;
-import org.hibernate.sqm.query.select.SqmSelection;
+import org.hibernate.query.sqm.produce.spi.SemanticQueryProducer;
+import org.hibernate.query.sqm.AliasCollisionException;
+import org.hibernate.query.sqm.produce.spi.ImplicitAliasGenerator;
+import org.hibernate.query.sqm.tree.SqmQuerySpec;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
+import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
+import org.hibernate.query.sqm.tree.from.SqmFromClause;
+import org.hibernate.query.sqm.tree.from.SqmRoot;
+import org.hibernate.query.sqm.tree.predicate.AndSqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.InSubQuerySqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.SqmWhereClause;
+import org.hibernate.query.sqm.tree.select.SqmSelection;
 import org.hibernate.sqm.test.ConsumerContextImpl;
 import org.hibernate.sqm.test.domain.OrmHelper;
 
@@ -400,7 +400,7 @@ public class AliasTest {
 	}
 
 	private SqmSelectStatement interpretQuery(String query) {
-		return (SqmSelectStatement) SemanticQueryInterpreter.interpret(
+		return (SqmSelectStatement) SemanticQueryProducer.interpret(
 				query,
 				consumerContext
 		);

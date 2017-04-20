@@ -9,7 +9,7 @@ package org.hibernate.orm.persister.common.spi;
 
 import java.util.List;
 
-import org.hibernate.sqm.domain.SqmSingularAttribute;
+import org.hibernate.query.sqm.domain.SqmSingularAttribute;
 
 /**
  * @author Steve Ebersole

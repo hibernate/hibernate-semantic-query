@@ -13,12 +13,13 @@ import org.hibernate.orm.persister.common.spi.Column;
 import org.hibernate.orm.persister.common.spi.OrmNavigable;
 import org.hibernate.orm.persister.common.spi.OrmTypeExporter;
 import org.hibernate.orm.type.spi.Type;
+import org.hibernate.query.sqm.domain.SqmPluralAttributeElement;
 
 /**
  * @author Steve Ebersole
  */
 public interface CollectionElement<O extends Type>
-		extends OrmTypeExporter, org.hibernate.sqm.domain.SqmPluralAttributeElement, OrmNavigable {
+		extends OrmTypeExporter, SqmPluralAttributeElement, OrmNavigable {
 	List<Column> getColumns();
 
 }

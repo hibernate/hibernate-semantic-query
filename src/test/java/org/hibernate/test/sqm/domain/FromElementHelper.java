@@ -6,11 +6,10 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.domain.SqmNavigableBinding;
-import org.hibernate.sqm.query.expression.domain.SqmNavigableSourceBinding;
-import org.hibernate.sqm.query.from.SqmFrom;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.from.SqmFrom;
 
 /**
  * @author Steve Ebersole

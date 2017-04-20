@@ -12,7 +12,7 @@ import java.util.List;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.hibernate.sqm.domain.SqmExpressableType;
+import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 

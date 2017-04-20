@@ -7,7 +7,7 @@
 package org.hibernate.orm.persister.collection.spi;
 
 import org.hibernate.orm.type.spi.BasicType;
-import org.hibernate.sqm.domain.SqmPluralAttributeIndexBasic;
+import org.hibernate.query.sqm.domain.SqmPluralAttributeIndexBasic;
 
 /**
  * @author Steve Ebersole

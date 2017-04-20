@@ -20,7 +20,7 @@ import org.hibernate.orm.persister.common.internal.DatabaseModelImpl;
 import org.hibernate.orm.persister.common.spi.DerivedTable;
 import org.hibernate.orm.persister.common.spi.PhysicalTable;
 import org.hibernate.orm.persister.spi.PersisterFactory;
-import org.hibernate.sqm.domain.SqmDomainMetamodel;
+import org.hibernate.query.sqm.domain.SqmDomainMetamodel;
 
 /**
  * @author Steve Ebersole

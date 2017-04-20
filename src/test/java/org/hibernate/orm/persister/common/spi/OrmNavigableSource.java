@@ -8,7 +8,7 @@ package org.hibernate.orm.persister.common.spi;
 
 import java.util.List;
 
-import org.hibernate.sqm.domain.SqmNavigableSource;
+import org.hibernate.query.sqm.domain.SqmNavigableSource;
 
 /**
  * @author Steve Ebersole

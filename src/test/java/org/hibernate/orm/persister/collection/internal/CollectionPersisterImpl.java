@@ -42,7 +42,7 @@ import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
 import org.hibernate.orm.type.internal.CollectionTypeImpl;
 import org.hibernate.orm.type.spi.TypeConfiguration;
 import org.hibernate.property.access.spi.PropertyAccess;
-import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.NotYetImplementedException;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.EntityType;
 

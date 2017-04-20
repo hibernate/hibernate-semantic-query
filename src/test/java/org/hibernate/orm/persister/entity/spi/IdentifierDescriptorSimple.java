@@ -7,7 +7,7 @@
 package org.hibernate.orm.persister.entity.spi;
 
 import org.hibernate.orm.persister.common.internal.SingularAttributeBasic;
-import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBasic;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierBasic;
 
 /**
  * @author Steve Ebersole

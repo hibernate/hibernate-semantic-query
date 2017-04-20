@@ -66,7 +66,7 @@ public interface CollectionPersister<O,C,E>
 			PersisterCreationContext.class
 	};
 
-	// todo : in terms of org.hibernate.sqm.domain.SqmNavigableSource.findNavigable() impl, be sure to only recognize:
+	// todo : in terms of SqmNavigableSource.findNavigable() impl, be sure to only recognize:
 	//			1) key
 	//			2) index
 	//			3) element

@@ -8,7 +8,7 @@ package org.hibernate.orm.type.spi;
 
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.type.descriptor.java.spi.EntityJavaTypeDescriptor;
-import org.hibernate.sqm.domain.type.SqmDomainTypeEntity;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
 
 /**
  * @author Steve Ebersole

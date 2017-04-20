@@ -12,9 +12,9 @@ import java.math.BigInteger;
 import java.util.Collection;
 import javax.persistence.criteria.Expression;
 
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
-import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
-import org.hibernate.sqm.domain.SqmExpressableType;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaPredicate;
+import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.function.CastFunction;

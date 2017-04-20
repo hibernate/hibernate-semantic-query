@@ -6,14 +6,14 @@
  */
 package org.hibernate.sqm.test.domain;
 
-import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.parser.common.ParsingContext;
-import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
-import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
-import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
-import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.query.sqm.produce.spi.SemanticQueryProducer;
+import org.hibernate.query.sqm.produce.spi.ParsingContext;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaQuery;
+import org.hibernate.query.sqm.produce.internal.hql.HqlParseTreeBuilder;
+import org.hibernate.query.sqm.produce.internal.hql.SemanticQueryBuilder;
+import org.hibernate.query.sqm.hql.internal.antlr.HqlParser;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.SqmStatement;
 import org.hibernate.sqm.test.ConsumerContextImpl;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
@@ -54,7 +54,7 @@ public abstract class StandardModelTest {
 	}
 
 	protected SqmStatement interpret(JpaCriteriaQuery queryCriteria) {
-		return SemanticQueryInterpreter.interpret( queryCriteria, consumerContext );
+		return SemanticQueryProducer.interpret( queryCriteria, consumerContext );
 	}
 
 }

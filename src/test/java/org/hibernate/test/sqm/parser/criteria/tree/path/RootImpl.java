@@ -10,13 +10,12 @@ import java.io.Serializable;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
-import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
-import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
-import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
+import org.hibernate.query.sqm.produce.spi.criteria.CriteriaVisitor;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFrom;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaRoot;
+import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPathSource;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
+import org.hibernate.query.sqm.tree.select.SqmAliasedExpressionContainer;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 

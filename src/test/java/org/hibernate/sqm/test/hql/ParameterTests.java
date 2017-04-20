@@ -6,10 +6,10 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.domain.SqmSingularAttribute;
-import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.SqmParameter;
-import org.hibernate.sqm.query.SqmSelectStatement;
+import org.hibernate.query.sqm.domain.SqmSingularAttribute;
+import org.hibernate.query.sqm.SemanticException;
+import org.hibernate.query.sqm.tree.SqmParameter;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
 import org.junit.Test;

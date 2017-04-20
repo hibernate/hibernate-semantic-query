@@ -6,13 +6,13 @@
  */
 package org.hibernate.sqm.test.hql.dml;
 
-import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.SqmUpdateStatement;
-import org.hibernate.sqm.query.expression.LiteralCharacterSqmExpression;
-import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
-import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.set.SqmAssignment;
+import org.hibernate.query.sqm.tree.SqmStatement;
+import org.hibernate.query.sqm.tree.SqmUpdateStatement;
+import org.hibernate.query.sqm.tree.expression.LiteralCharacterSqmExpression;
+import org.hibernate.query.sqm.tree.expression.NamedParameterSqmExpression;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
+import org.hibernate.query.sqm.tree.set.SqmAssignment;
 import org.hibernate.sqm.test.domain.Person;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 

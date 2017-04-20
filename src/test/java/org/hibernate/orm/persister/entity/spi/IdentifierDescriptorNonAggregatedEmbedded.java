@@ -9,7 +9,7 @@ package org.hibernate.orm.persister.entity.spi;
 import java.util.Set;
 
 import org.hibernate.orm.persister.common.spi.SingularAttribute;
-import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierEmbedded;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierEmbedded;
 
 /**
  * @author Steve Ebersole

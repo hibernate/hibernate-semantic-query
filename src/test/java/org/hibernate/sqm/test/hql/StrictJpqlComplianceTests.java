@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.StrictJpaComplianceViolation;
+import org.hibernate.query.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;

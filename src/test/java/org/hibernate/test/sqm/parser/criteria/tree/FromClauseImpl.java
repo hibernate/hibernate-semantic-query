@@ -9,9 +9,9 @@ package org.hibernate.test.sqm.parser.criteria.tree;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaFromClause;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFrom;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFromClause;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaRoot;
 
 import org.hibernate.test.sqm.parser.criteria.tree.path.RootImpl;
 

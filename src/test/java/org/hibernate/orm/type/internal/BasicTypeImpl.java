@@ -15,7 +15,6 @@ import org.hibernate.orm.type.spi.BasicType;
 import org.hibernate.orm.type.spi.BasicTypeRegistry;
 import org.hibernate.orm.type.spi.ColumnMapping;
 import org.hibernate.orm.type.spi.JdbcLiteralFormatter;
-import org.hibernate.sqm.domain.type.SqmDomainType;
 
 /**
  * @author Steve Ebersole

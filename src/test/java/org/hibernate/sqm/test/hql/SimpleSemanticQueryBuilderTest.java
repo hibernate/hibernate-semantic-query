@@ -6,17 +6,17 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.SqmQuerySpec;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
-import org.hibernate.sqm.query.expression.LiteralLongSqmExpression;
-import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.from.SqmFromElementSpace;
-import org.hibernate.sqm.query.from.SqmFromClause;
-import org.hibernate.sqm.query.predicate.AndSqmPredicate;
-import org.hibernate.sqm.query.predicate.InSubQuerySqmPredicate;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.query.sqm.SemanticException;
+import org.hibernate.query.sqm.tree.SqmQuerySpec;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.LiteralIntegerSqmExpression;
+import org.hibernate.query.sqm.tree.expression.LiteralLongSqmExpression;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
+import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
+import org.hibernate.query.sqm.tree.from.SqmFromClause;
+import org.hibernate.query.sqm.tree.predicate.AndSqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.InSubQuerySqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.test.domain.Person;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 

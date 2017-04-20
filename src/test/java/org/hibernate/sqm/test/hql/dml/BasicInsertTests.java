@@ -6,9 +6,9 @@
  */
 package org.hibernate.sqm.test.hql.dml;
 
-import org.hibernate.sqm.query.SqmInsertSelectStatement;
-import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.SqmInsertSelectStatement;
+import org.hibernate.query.sqm.tree.SqmStatement;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
 import org.hibernate.sqm.test.domain.Person;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 

@@ -9,8 +9,8 @@ package org.hibernate.sqm.test.domain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.hibernate.sqm.domain.SqmDomainMetamodel;
-import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.query.sqm.domain.SqmDomainMetamodel;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * Helper for making the determination of an expression's "type" as sovered by the rules

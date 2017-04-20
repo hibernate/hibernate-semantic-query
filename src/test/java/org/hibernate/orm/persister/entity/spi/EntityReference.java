@@ -7,7 +7,7 @@
 package org.hibernate.orm.persister.entity.spi;
 
 import org.hibernate.orm.persister.common.spi.OrmNavigable;
-import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
 
 /**
  * @author Steve Ebersole

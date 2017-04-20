@@ -36,16 +36,16 @@ import javax.persistence.criteria.SetJoin;
 import javax.persistence.criteria.Subquery;
 
 import org.hibernate.orm.type.internal.BasicTypeImpl;
-import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.sqm.parser.criteria.tree.JpaCriteriaQuery;
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
-import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
-import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
-import org.hibernate.sqm.parser.criteria.tree.select.JpaCompoundSelection;
-import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
-import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
+import org.hibernate.query.sqm.produce.spi.ConsumerContext;
+import org.hibernate.query.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaQuery;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaOrder;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaPredicate;
+import org.hibernate.query.sqm.produce.spi.criteria.select.JpaCompoundSelection;
+import org.hibernate.query.sqm.produce.spi.criteria.select.JpaSelection;
+import org.hibernate.query.sqm.tree.predicate.RelationalPredicateOperator;
 
 import org.hibernate.test.sqm.parser.criteria.tree.expression.LiteralExpression;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.ParameterExpressionImpl;
@@ -223,7 +223,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 			else {
 				throw new CriteriaBuilderException(
 						"Expecting javax.persistence.criteria.Selection to be " +
-								"org.hibernate.sqm.parser.criteria.tree.JpaExpression, but found " +
+								"JpaExpression, but found " +
 								selection.toString()
 				);
 			}
@@ -1573,7 +1573,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 		if ( !JpaSelection.class.isInstance( selection ) ) {
 			throw new CriteriaBuilderException(
 					"Expecting javax.persistence.criteria.Selection to be " +
-							"org.hibernate.sqm.parser.criteria.tree.select.JpaSelection, but was : " +
+							"JpaSelection, but was : " +
 							selection.toString()
 			);
 		}
@@ -1583,7 +1583,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 		if ( !JpaExpression.class.isInstance( expr ) ) {
 			throw new CriteriaBuilderException(
 					"Expecting javax.persistence.criteria.Expression to be " +
-							"org.hibernate.sqm.parser.criteria.tree.JpaExpression, but was : " +
+							"JpaExpression, but was : " +
 							expr.toString()
 			);
 		}
@@ -1593,7 +1593,7 @@ public class CriteriaBuilderImpl implements CriteriaBuilder, Serializable {
 		if ( !JpaOrder.class.isInstance( order ) ) {
 			throw new CriteriaBuilderException(
 					"Expecting javax.persistence.criteria.Order to be " +
-							"org.hibernate.sqm.parser.criteria.tree.JpaOrder, but was : " +
+							"JpaOrder, but was : " +
 							order.toString()
 			);
 		}

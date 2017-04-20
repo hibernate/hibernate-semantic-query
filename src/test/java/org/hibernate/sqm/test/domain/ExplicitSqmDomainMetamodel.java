@@ -22,15 +22,12 @@ import org.hibernate.orm.persister.spi.PersisterCreationContext;
 import org.hibernate.orm.persister.spi.PersisterFactory;
 import org.hibernate.orm.type.spi.BasicType;
 import org.hibernate.orm.type.spi.TypeConfiguration;
-import org.hibernate.sqm.domain.NavigableResolutionException;
-import org.hibernate.sqm.domain.SqmDomainMetamodel;
-import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.SqmNavigableSource;
-import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
-import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
+import org.hibernate.query.sqm.domain.SqmDomainMetamodel;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.query.sqm.tree.expression.BinaryArithmeticSqmExpression;
 
 import org.jboss.logging.Logger;
 

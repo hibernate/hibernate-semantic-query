@@ -18,7 +18,7 @@ import org.hibernate.orm.persister.common.spi.ConvertibleOrmNavigable;
 import org.hibernate.orm.persister.common.spi.ManagedTypeImplementor;
 import org.hibernate.orm.type.spi.BasicType;
 import org.hibernate.property.access.spi.PropertyAccess;
-import org.hibernate.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * @author Steve Ebersole

@@ -6,18 +6,15 @@
  */
 package org.hibernate.sqm.test.domain;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
-import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptor;
-import org.hibernate.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.SqmNavigableSource;
-import org.hibernate.sqm.domain.type.SqmDomainType;
-import org.hibernate.sqm.domain.type.SqmDomainTypeEntity;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
+import org.hibernate.query.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.SqmNavigableSource;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
 
 /**
  * @author Steve Ebersole

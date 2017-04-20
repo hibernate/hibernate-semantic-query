@@ -21,8 +21,8 @@ import org.hibernate.orm.persister.embeddable.spi.EmbeddableReference;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.type.spi.EmbeddedType;
 import org.hibernate.property.access.spi.PropertyAccess;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.SqmSingularAttributeEmbedded;
+import org.hibernate.query.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.SqmSingularAttributeEmbedded;
 
 /**
  * @author Steve Ebersole

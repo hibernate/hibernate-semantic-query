@@ -8,9 +8,9 @@ package org.hibernate.test.sqm.parser.criteria.tree.expression;
 
 import java.io.Serializable;
 
-import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
-import org.hibernate.sqm.query.expression.SqmExpression;
+import org.hibernate.query.sqm.produce.spi.criteria.CriteriaVisitor;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 import org.hibernate.orm.type.internal.BasicTypeImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;

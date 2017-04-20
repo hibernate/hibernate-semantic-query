@@ -14,7 +14,7 @@ import org.hibernate.orm.type.descriptor.java.spi.MutabilityPlan;
 import org.hibernate.orm.type.descriptor.spi.JdbcRecommendedSqlTypeMappingContext;
 import org.hibernate.orm.type.descriptor.spi.WrapperOptions;
 import org.hibernate.orm.type.descriptor.sql.spi.SqlTypeDescriptor;
-import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.NotYetImplementedException;
 
 /**
  * @author Steve Ebersole

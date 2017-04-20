@@ -8,7 +8,7 @@ package org.hibernate.orm.type.spi;
 
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.type.descriptor.java.spi.EmbeddableJavaTypeDescriptor;
-import org.hibernate.sqm.domain.type.SqmDomainTypeEmbeddable;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeEmbeddable;
 
 /**
  * @author Steve Ebersole

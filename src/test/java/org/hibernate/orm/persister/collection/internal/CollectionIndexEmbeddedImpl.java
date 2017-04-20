@@ -14,7 +14,7 @@ import org.hibernate.orm.persister.collection.spi.CollectionIndexEmbedded;
 import org.hibernate.orm.persister.common.spi.Column;
 import org.hibernate.orm.persister.embeddable.spi.EmbeddableMapper;
 import org.hibernate.orm.type.spi.EmbeddedType;
-import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.SqmNavigable;
 
 /**
  * @author Steve Ebersole

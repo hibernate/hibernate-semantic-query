@@ -22,7 +22,7 @@ import org.hibernate.orm.sql.convert.spi.TableGroupProducer;
 import org.hibernate.orm.type.descriptor.java.internal.EntityJavaTypeDescriptorImpl;
 import org.hibernate.orm.type.descriptor.java.spi.EntityJavaTypeDescriptor;
 import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
-import org.hibernate.sqm.domain.type.SqmDomainTypeEntity;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
 
 /**
  * @author Steve Ebersole

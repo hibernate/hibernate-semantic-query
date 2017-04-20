@@ -15,9 +15,9 @@ import org.hibernate.orm.persister.entity.spi.IdClassDescriptor;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorNonAggregatedEmbedded;
 import org.hibernate.orm.type.spi.EmbeddedType;
 import org.hibernate.orm.type.spi.Type;
-import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.type.SqmDomainTypeEmbeddable;
+import org.hibernate.query.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeEmbeddable;
 
 /**
  * @author Steve Ebersole

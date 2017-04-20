@@ -6,10 +6,10 @@
  */
 package org.hibernate.sqm.test.hql.splitting;
 
-import org.hibernate.sqm.QuerySplitter;
-import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.SqmStatement;
+import org.hibernate.query.sqm.consume.spi.QuerySplitter;
+import org.hibernate.query.sqm.produce.spi.SemanticQueryProducer;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.SqmStatement;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class QuerySplittingTest extends StandardModelTest {
 	@Test
 	public void testQuerySplitting() {
 		// first try directly with the 2 mapped classes
-		SqmSelectStatement statement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
+		SqmSelectStatement statement = (SqmSelectStatement) SemanticQueryProducer.interpret(
 				"from Person",
 				consumerContext
 		);
@@ -33,13 +33,13 @@ public class QuerySplittingTest extends StandardModelTest {
 		assertEquals( 1, split.length );
 		assertSame( statement, split[0] );
 
-		statement = (SqmSelectStatement) SemanticQueryInterpreter.interpret( "from Person", consumerContext );
+		statement = (SqmSelectStatement) SemanticQueryProducer.interpret( "from Person", consumerContext );
 		split = QuerySplitter.split( statement );
 		assertEquals( 1, split.length );
 		assertSame( statement, split[0] );
 
 		// Now try with an unmapped reference
-		statement = (SqmSelectStatement) SemanticQueryInterpreter.interpret(
+		statement = (SqmSelectStatement) SemanticQueryProducer.interpret(
 				// NOTE : we added an import for this too
 				"from java.lang.Object",
 				consumerContext

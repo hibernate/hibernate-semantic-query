@@ -6,13 +6,13 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.domain.SqmEntityBinding;
-import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.from.SqmFromElementSpace;
-import org.hibernate.sqm.query.from.SqmRoot;
-import org.hibernate.sqm.query.select.SqmSelection;
+import org.hibernate.query.sqm.SemanticException;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
+import org.hibernate.query.sqm.tree.from.SqmRoot;
+import org.hibernate.query.sqm.tree.select.SqmSelection;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.hibernate.test.sqm.domain.FromElementHelper;

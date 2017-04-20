@@ -8,9 +8,9 @@ package org.hibernate.sqm.test.hql;
 
 import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorSimple;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.domain.SqmEntityIdentifierBindingBasic;
-import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierBindingBasic;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;

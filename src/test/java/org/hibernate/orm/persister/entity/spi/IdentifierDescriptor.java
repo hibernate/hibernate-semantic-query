@@ -8,7 +8,7 @@ package org.hibernate.orm.persister.entity.spi;
 
 import org.hibernate.orm.persister.common.spi.OrmNavigable;
 import org.hibernate.orm.type.spi.Type;
-import org.hibernate.sqm.domain.SqmEntityIdentifier;
+import org.hibernate.query.sqm.domain.SqmEntityIdentifier;
 
 /**
  * Base information describing an identifier

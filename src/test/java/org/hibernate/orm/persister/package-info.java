@@ -8,8 +8,8 @@
 /**
  * Meant as a prototype of the model to use (and how the SQM domain model stuff fits in)
  *
- * Also wanted to note here that how resolution of {@link org.hibernate.sqm.domain.SqmNavigable}
- * is now handled (via visitation pattern) through the {@link org.hibernate.sqm.domain.SqmNavigable#makeBinding}
+ * Also wanted to note here that how resolution of {@link org.hibernate.query.sqm.domain.SqmNavigable}
+ * is now handled (via visitation pattern) through the {@link org.hibernate.query.sqm.domain.SqmNavigable#makeBinding}
  * I believe means we can drop the specific sub-interfaces of {@link org.hibernate.orm.type.descriptor.java.spi.Attribute}
  * beyond just the 2 {@link org.hibernate.orm.type.spi.SingularSqmAttribute} and
  * {@link org.hibernate.test.sqm.domain.PluralSqmAttribute}.  On the ORM side we would need the distinct impls

@@ -6,10 +6,10 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
-import org.hibernate.sqm.query.expression.function.SubstringFunctionSqmExpression;
-import org.hibernate.sqm.query.select.SqmSelection;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.function.ConcatFunctionSqmExpression;
+import org.hibernate.query.sqm.tree.expression.function.SubstringFunctionSqmExpression;
+import org.hibernate.query.sqm.tree.select.SqmSelection;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;
@@ -17,7 +17,7 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hibernate.sqm.SemanticQueryInterpreter.interpret;
+import static org.hibernate.query.sqm.produce.spi.SemanticQueryProducer.interpret;
 
 /**
  * @author Steve Ebersole

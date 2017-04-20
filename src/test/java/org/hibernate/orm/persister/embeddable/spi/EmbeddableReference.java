@@ -8,7 +8,7 @@ package org.hibernate.orm.persister.embeddable.spi;
 
 import org.hibernate.orm.persister.common.spi.ExpressableType;
 import org.hibernate.orm.type.spi.EmbeddedType;
-import org.hibernate.sqm.domain.SqmExpressableTypeEmbedded;
+import org.hibernate.query.sqm.domain.SqmExpressableTypeEmbedded;
 
 /**
  * Describes parts of the domain model that can be composite values.

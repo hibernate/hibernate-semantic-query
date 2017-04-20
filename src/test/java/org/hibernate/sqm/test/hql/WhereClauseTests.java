@@ -6,17 +6,17 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.domain.SqmPluralAttributeIndex.IndexClassification;
-import org.hibernate.sqm.domain.SqmPluralAttribute;
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
-import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
-import org.hibernate.sqm.query.expression.domain.SqmCollectionIndexBinding;
-import org.hibernate.sqm.query.expression.domain.SqmPluralAttributeBinding;
-import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
-import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.predicate.SqmPredicate;
+import org.hibernate.query.sqm.domain.SqmPluralAttributeIndex.IndexClassification;
+import org.hibernate.query.sqm.domain.SqmPluralAttribute;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.CollectionSizeSqmExpression;
+import org.hibernate.query.sqm.tree.expression.LiteralIntegerSqmExpression;
+import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionIndexBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
+import org.hibernate.query.sqm.tree.predicate.NullnessSqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.RelationalPredicateOperator;
+import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
+import org.hibernate.query.sqm.tree.predicate.SqmPredicate;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;

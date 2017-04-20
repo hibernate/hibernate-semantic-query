@@ -16,7 +16,7 @@ import org.hibernate.orm.persister.entity.spi.IdentifiableTypeImplementor;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorSimple;
 import org.hibernate.orm.type.spi.BasicType;
 import org.hibernate.property.access.internal.PropertyAccessStrategyMapImpl;
-import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.query.sqm.domain.type.SqmDomainType;
 
 /**
  * @author Steve Ebersole

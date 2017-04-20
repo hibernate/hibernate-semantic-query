@@ -6,12 +6,12 @@
  */
 package org.hibernate.sqm.test.hql.dml;
 
-import org.hibernate.sqm.SemanticQueryInterpreter;
-import org.hibernate.sqm.query.SqmDeleteStatement;
-import org.hibernate.sqm.query.SqmStatement;
-import org.hibernate.sqm.query.expression.NamedParameterSqmExpression;
-import org.hibernate.sqm.query.expression.domain.SqmSingularAttributeBinding;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.query.sqm.produce.spi.SemanticQueryProducer;
+import org.hibernate.query.sqm.tree.SqmDeleteStatement;
+import org.hibernate.query.sqm.tree.SqmStatement;
+import org.hibernate.query.sqm.tree.expression.NamedParameterSqmExpression;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.test.ConsumerContextImpl;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
@@ -39,7 +39,7 @@ public class BasicDeleteTests extends StandardModelTest {
 	}
 
 	private void basicDeleteAssertions(String query, ConsumerContextImpl consumerContext) {
-		final SqmStatement statement = SemanticQueryInterpreter.interpret( query, consumerContext );
+		final SqmStatement statement = SemanticQueryProducer.interpret( query, consumerContext );
 
 		assertThat( statement, instanceOf( SqmDeleteStatement.class ) );
 		SqmDeleteStatement deleteStatement = (SqmDeleteStatement) statement;

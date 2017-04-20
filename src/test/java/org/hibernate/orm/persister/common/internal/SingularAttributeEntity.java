@@ -18,8 +18,8 @@ import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.entity.spi.EntityReference;
 import org.hibernate.orm.type.spi.EntityType;
 import org.hibernate.property.access.spi.PropertyAccess;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.domain.SqmSingularAttributeEntity;
+import org.hibernate.query.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.SqmSingularAttributeEntity;
 
 
 /**

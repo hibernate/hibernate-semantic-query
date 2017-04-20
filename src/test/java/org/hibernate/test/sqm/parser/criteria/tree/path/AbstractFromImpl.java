@@ -23,16 +23,16 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaAttributeJoin;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaCollectionJoin;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaFetch;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaListJoin;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaMapJoin;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaSetJoin;
-import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
+import org.hibernate.query.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaAttributeJoin;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaCollectionJoin;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFetch;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFrom;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaListJoin;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaMapJoin;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaSetJoin;
+import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPathSource;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 

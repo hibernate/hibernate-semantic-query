@@ -6,7 +6,7 @@
  */
 package org.hibernate.orm.persister.common.spi;
 
-import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.SqmNavigable;
 
 /**
  * @author Steve Ebersole

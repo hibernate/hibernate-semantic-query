@@ -10,7 +10,7 @@ import java.util.Comparator;
 
 import org.hibernate.orm.type.descriptor.java.spi.JavaTypeDescriptor;
 import org.hibernate.orm.type.descriptor.java.spi.MutabilityPlan;
-import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.query.sqm.domain.type.SqmDomainType;
 
 /**
  * @author Steve Ebersole

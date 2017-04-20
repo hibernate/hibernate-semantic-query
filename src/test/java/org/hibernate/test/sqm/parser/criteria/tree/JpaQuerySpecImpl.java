@@ -21,15 +21,15 @@ import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.EntityType;
 
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
-import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
-import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
-import org.hibernate.sqm.parser.criteria.tree.JpaPredicate;
-import org.hibernate.sqm.parser.criteria.tree.JpaQuerySpec;
-import org.hibernate.sqm.parser.criteria.tree.JpaSubquery;
-import org.hibernate.sqm.parser.criteria.tree.from.JpaFromClause;
-import org.hibernate.sqm.parser.criteria.tree.select.JpaSelectClause;
-import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
+import org.hibernate.query.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaOrder;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaPredicate;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaQuerySpec;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaSubquery;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFromClause;
+import org.hibernate.query.sqm.produce.spi.criteria.select.JpaSelectClause;
+import org.hibernate.query.sqm.produce.spi.criteria.select.JpaSelection;
 
 import org.hibernate.test.sqm.parser.criteria.tree.path.RootImpl;
 

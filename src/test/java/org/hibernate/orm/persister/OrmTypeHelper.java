@@ -23,7 +23,7 @@ import org.hibernate.orm.type.spi.EmbeddedType;
 import org.hibernate.orm.type.spi.EntityType;
 import org.hibernate.orm.type.spi.Type;
 import org.hibernate.orm.type.spi.TypeConfiguration;
-import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.NotYetImplementedException;
 import org.hibernate.type.BasicType;
 
 import org.jboss.logging.Logger;

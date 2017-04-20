@@ -10,18 +10,17 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.SqmNavigable;
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
-import org.hibernate.sqm.parser.criteria.tree.path.JpaPath;
-import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
+import org.hibernate.query.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
+import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPath;
+import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPathSource;
 
 import org.hibernate.test.sqm.parser.criteria.tree.CriteriaBuilderImpl;
 import org.hibernate.test.sqm.parser.criteria.tree.expression.AbstractJpaExpressionImpl;

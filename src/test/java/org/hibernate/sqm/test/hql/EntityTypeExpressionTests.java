@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.EntityTypeLiteralSqmExpression;
-import org.hibernate.sqm.query.expression.domain.SqmEntityTypeSqmExpression;
-import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
-import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.expression.EntityTypeLiteralSqmExpression;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityTypeSqmExpression;
+import org.hibernate.query.sqm.tree.expression.ParameterizedEntityTypeSqmExpression;
+import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
 import org.junit.Test;

@@ -13,7 +13,7 @@ import org.hibernate.orm.persister.common.spi.OrmNavigableSource;
 import org.hibernate.orm.sql.convert.spi.TableGroupProducer;
 import org.hibernate.orm.type.descriptor.java.spi.EntityJavaTypeDescriptor;
 import org.hibernate.persister.spi.PersisterCreationContext;
-import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.query.sqm.domain.type.SqmDomainType;
 
 /**
  * @author Steve Ebersole

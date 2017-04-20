@@ -10,8 +10,7 @@ import org.hibernate.orm.type.descriptor.java.spi.AbstractBasicTypeDescriptor;
 import org.hibernate.orm.type.descriptor.spi.JdbcRecommendedSqlTypeMappingContext;
 import org.hibernate.orm.type.descriptor.spi.WrapperOptions;
 import org.hibernate.orm.type.descriptor.sql.spi.SqlTypeDescriptor;
-import org.hibernate.sqm.domain.type.SqmDomainType;
-import org.hibernate.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
 
 /**
  * @author Steve Ebersole

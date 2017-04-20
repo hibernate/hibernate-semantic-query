@@ -6,7 +6,7 @@
  */
 package org.hibernate.orm.persister.common.spi;
 
-import org.hibernate.sqm.domain.SqmExpressableType;
+import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole

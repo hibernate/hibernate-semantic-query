@@ -14,10 +14,9 @@ import org.hibernate.internal.util.collections.CollectionHelper;
 import org.hibernate.orm.persister.common.spi.Column;
 import org.hibernate.orm.persister.common.spi.JoinColumnMapping;
 import org.hibernate.orm.persister.common.spi.OrmTypeExporter;
-import org.hibernate.orm.persister.common.spi.Table;
 import org.hibernate.orm.type.spi.Type;
 import org.hibernate.persister.entity.Joinable;
-import org.hibernate.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.NotYetImplementedException;
 
 /**
  * @author Steve Ebersole

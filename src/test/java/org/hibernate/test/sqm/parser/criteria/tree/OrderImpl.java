@@ -9,8 +9,8 @@ package org.hibernate.test.sqm.parser.criteria.tree;
 import java.io.Serializable;
 import javax.persistence.criteria.Order;
 
-import org.hibernate.sqm.parser.criteria.tree.JpaExpression;
-import org.hibernate.sqm.parser.criteria.tree.JpaOrder;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaOrder;
 
 /**
  * Represents an <tt>ORDER BY</tt> fragment.

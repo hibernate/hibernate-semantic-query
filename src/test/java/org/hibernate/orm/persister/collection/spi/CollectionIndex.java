@@ -13,7 +13,7 @@ import org.hibernate.orm.persister.common.spi.Column;
 import org.hibernate.orm.persister.common.spi.OrmNavigable;
 import org.hibernate.orm.persister.common.spi.OrmTypeExporter;
 import org.hibernate.orm.type.spi.Type;
-import org.hibernate.sqm.domain.SqmPluralAttributeIndex;
+import org.hibernate.query.sqm.domain.SqmPluralAttributeIndex;
 
 /**
  * @author Steve Ebersole

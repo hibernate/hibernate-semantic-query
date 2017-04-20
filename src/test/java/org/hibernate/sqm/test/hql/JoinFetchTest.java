@@ -6,9 +6,9 @@
  */
 package org.hibernate.sqm.test.hql;
 
-import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.from.SqmFromElementSpace;
-import org.hibernate.sqm.query.from.SqmAttributeJoin;
+import org.hibernate.query.sqm.tree.SqmSelectStatement;
+import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
+import org.hibernate.query.sqm.tree.from.SqmAttributeJoin;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
 import org.junit.Test;

@@ -14,7 +14,7 @@ import org.hibernate.orm.persister.collection.spi.CollectionIndexEntity;
 import org.hibernate.orm.persister.common.spi.Column;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.type.spi.EntityType;
-import org.hibernate.sqm.domain.SqmNavigable;
+import org.hibernate.query.sqm.domain.SqmNavigable;
 
 /**
  * @author Steve Ebersole

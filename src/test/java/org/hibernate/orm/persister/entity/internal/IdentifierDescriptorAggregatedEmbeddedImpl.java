@@ -10,7 +10,7 @@ import org.hibernate.orm.persister.common.internal.SingularAttributeEmbedded;
 import org.hibernate.orm.persister.entity.spi.EntityPersister;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorAggregatedEmbedded;
 import org.hibernate.orm.type.spi.EmbeddedType;
-import org.hibernate.sqm.domain.type.SqmDomainType;
+import org.hibernate.query.sqm.domain.type.SqmDomainType;
 
 /**
  * @author Steve Ebersole

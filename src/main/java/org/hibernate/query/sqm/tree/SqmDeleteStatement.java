@@ -7,11 +7,10 @@
 package org.hibernate.query.sqm.tree;
 
 import org.hibernate.query.sqm.tree.from.SqmRoot;
-import org.hibernate.query.sqm.tree.predicate.SqmWhereClauseContainer;
 
 /**
  * @author Steve Ebersole
  */
-public interface SqmDeleteStatement extends SqmNonSelectStatement, SqmWhereClauseContainer {
+public interface SqmDeleteStatement extends SqmNonSelectStatement {
 	SqmRoot getEntityFromElement();
 }

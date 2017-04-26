@@ -6,16 +6,13 @@
  */
 package org.hibernate.query.sqm.tree;
 
-import org.hibernate.query.sqm.tree.predicate.SqmWhereClause;
 import org.hibernate.query.sqm.tree.from.SqmRoot;
-import org.hibernate.query.sqm.tree.predicate.SqmWhereClauseContainer;
 import org.hibernate.query.sqm.tree.set.SqmSetClause;
 
 /**
  * @author Steve Ebersole
  */
-public interface SqmUpdateStatement extends SqmNonSelectStatement, SqmWhereClauseContainer {
+public interface SqmUpdateStatement extends SqmNonSelectStatement{
 	SqmRoot getEntityFromElement();
 	SqmSetClause getSetClause();
-	SqmWhereClause getWhereClause();
 }

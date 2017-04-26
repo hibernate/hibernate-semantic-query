@@ -6,8 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression.function;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 /**
@@ -18,7 +18,7 @@ public class CastFunctionSqmExpression extends AbstractFunctionSqmExpression imp
 
 	private final SqmExpression expressionToCast;
 
-	public CastFunctionSqmExpression(SqmExpression expressionToCast, SqmExpressableTypeBasic castTargetType) {
+	public CastFunctionSqmExpression(SqmExpression expressionToCast, BasicValuedExpressableType castTargetType) {
 		super( castTargetType );
 		this.expressionToCast = expressionToCast;
 	}

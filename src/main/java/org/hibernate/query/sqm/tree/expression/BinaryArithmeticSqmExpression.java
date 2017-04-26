@@ -6,9 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.ExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.type.SqmDomainType;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -18,22 +17,17 @@ public class BinaryArithmeticSqmExpression implements SqmExpression {
 	private final SqmExpression lhsOperand;
 	private final SqmExpression rhsOperand;
 
-	private SqmExpressableType expressionType;
+	private ExpressableType expressionType;
 
 	public BinaryArithmeticSqmExpression(
 			Operation operation,
 			SqmExpression lhsOperand,
 			SqmExpression rhsOperand,
-			SqmExpressableType expressionType) {
+			ExpressableType expressionType) {
 		this.operation = operation;
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
 		this.expressionType = expressionType;
-	}
-
-	@Override
-	public SqmDomainType getExportedDomainType() {
-		return expressionType.getExportedDomainType();
 	}
 
 	public enum Operation {
@@ -110,12 +104,12 @@ public class BinaryArithmeticSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public SqmExpressableType getExpressionType() {
+	public ExpressableType getExpressionType() {
 		return expressionType;
 	}
 
 	@Override
-	public SqmExpressableType getInferableType() {
+	public ExpressableType getInferableType() {
 		return expressionType;
 	}
 

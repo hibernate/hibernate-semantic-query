@@ -282,7 +282,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	}
 
 	@Override
-	public CollectionIndex getIndexReference() {
+	public org.hibernate.persister.collection.spi.CollectionIndex getIndexDescriptor() {
 		return indexDescriptor;
 	}
 
@@ -292,7 +292,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	}
 
 	@Override
-	public CollectionElement getElementReference() {
+	public org.hibernate.persister.collection.spi.CollectionElement getElementDescriptor() {
 		return elementDescriptor;
 	}
 
@@ -309,12 +309,12 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	@Override
 	@SuppressWarnings("unchecked")
 	public Type<E> getElementType() {
-		return getElementReference();
+		return getElementDescriptor();
 	}
 
 	@Override
 	public PersistentAttributeType getPersistentAttributeType() {
-		switch ( getElementReference().getClassification() ) {
+		switch ( getElementDescriptor().getClassification() ) {
 			case MANY_TO_MANY: {
 				return PersistentAttributeType.MANY_TO_MANY;
 			}
@@ -345,7 +345,7 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 	@Override
 	@SuppressWarnings("unchecked")
 	public Class<E> getBindableJavaType() {
-		return getElementReference().getJavaType();
+		return getElementDescriptor().getJavaType();
 	}
 
 	@Override
@@ -365,10 +365,10 @@ public class CollectionPersisterImpl<O,C,E> extends AbstractOrmAttribute<O,C> im
 		//		2) "{element}"
 
 		if ( INDEX_NAVIGABLE_NAME.equals( navigableName ) ) {
-			return getIndexReference();
+			return getIndexDescriptor();
 		}
 		else if ( ELEMENT_NAVIGABLE_NAME.equals( navigableName ) ) {
-			return getElementReference();
+			return getElementDescriptor();
 		}
 
 		throw new HibernateException(

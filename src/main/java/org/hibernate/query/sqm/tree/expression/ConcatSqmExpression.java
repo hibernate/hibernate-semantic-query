@@ -6,9 +6,9 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
-import org.hibernate.query.sqm.tree.internal.Helper;
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.query.sqm.tree.internal.Helper;
 
 /**
  * @author Steve Ebersole
@@ -17,13 +17,13 @@ public class ConcatSqmExpression implements SqmExpression {
 	private final SqmExpression lhsOperand;
 	private final SqmExpression rhsOperand;
 
-	private final SqmDomainTypeBasic resultType;
+	private final BasicValuedExpressableType resultType;
 
 	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand) {
-		this( lhsOperand, rhsOperand, (SqmDomainTypeBasic) lhsOperand.getExpressionType() );
+		this( lhsOperand, rhsOperand, (BasicValuedExpressableType) lhsOperand.getExpressionType() );
 	}
 
-	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand, SqmDomainTypeBasic resultType) {
+	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand, BasicValuedExpressableType resultType) {
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
 		this.resultType = resultType;
@@ -38,18 +38,13 @@ public class ConcatSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public SqmDomainTypeBasic getExportedDomainType() {
+	public BasicValuedExpressableType getExpressionType() {
 		return resultType;
 	}
 
 	@Override
-	public SqmDomainTypeBasic getExpressionType() {
-		return getExportedDomainType();
-	}
-
-	@Override
-	public SqmDomainTypeBasic getInferableType() {
-		return (SqmDomainTypeBasic) Helper.firstNonNull( lhsOperand.getInferableType(), rhsOperand.getInferableType() ) ;
+	public BasicValuedExpressableType getInferableType() {
+		return (BasicValuedExpressableType) Helper.firstNonNull( lhsOperand.getInferableType(), rhsOperand.getInferableType() ) ;
 	}
 
 	@Override

@@ -17,7 +17,10 @@ import org.hibernate.query.sqm.domain.SqmLoggable;
  * for the consumer to be able to map back to its "type system"
  *
  * @author Steve Ebersole
+ *
+ * @deprecated {@link org.hibernate.type.spi.Type}
  */
+@Deprecated
 public interface SqmDomainType<T> extends SqmLoggable {
 	/**
 	 * The underlying physical Java type.  May be {@code null}.

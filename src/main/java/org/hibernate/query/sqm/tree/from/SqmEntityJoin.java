@@ -6,10 +6,10 @@
  */
 package org.hibernate.query.sqm.tree.from;
 
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.query.sqm.tree.SqmJoinType;
-import org.hibernate.query.sqm.tree.expression.domain.SqmEntityBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityReference;
 import org.hibernate.query.sqm.tree.predicate.SqmPredicate;
 
 /**
@@ -24,13 +24,13 @@ public class SqmEntityJoin
 			SqmFromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			SqmExpressableTypeEntity joinedEntityDescriptor,
+			EntityValuedExpressableType joinedEntityDescriptor,
 			SqmJoinType joinType) {
 		super(
 				fromElementSpace,
 				uid,
 				alias,
-				new SqmEntityBinding( joinedEntityDescriptor ),
+				new SqmEntityReference( joinedEntityDescriptor ),
 				joinedEntityDescriptor,
 				joinType
 		);
@@ -38,16 +38,16 @@ public class SqmEntityJoin
 	}
 
 	@Override
-	public SqmEntityBinding getBinding() {
+	public SqmEntityReference getBinding() {
 		return getEntityBinding();
 	}
 
-	public SqmEntityBinding getEntityBinding() {
-		return (SqmEntityBinding) super.getBinding();
+	public SqmEntityReference getEntityBinding() {
+		return (SqmEntityReference) super.getBinding();
 	}
 
 	public String getEntityName() {
-		return getEntityBinding().getBoundNavigable().getEntityName();
+		return getEntityBinding().getReferencedNavigable().getEntityName();
 	}
 
 	@Override

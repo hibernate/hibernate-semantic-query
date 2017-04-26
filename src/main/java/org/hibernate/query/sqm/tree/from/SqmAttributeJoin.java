@@ -6,11 +6,11 @@
  */
 package org.hibernate.query.sqm.tree.from;
 
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.query.sqm.tree.SqmJoinType;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 import org.hibernate.query.sqm.tree.predicate.SqmPredicate;
 
 import org.jboss.logging.Logger;
@@ -26,22 +26,22 @@ public class SqmAttributeJoin
 	private static final Logger log = Logger.getLogger( SqmAttributeJoin.class );
 
 	private final SqmFrom lhs;
-	private final SqmAttributeBinding attributeBinding;
-	private final SqmExpressableTypeEntity intrinsicSubclassIndicator;
+	private final SqmAttributeReference attributeBinding;
+	private final EntityValuedExpressableType intrinsicSubclassIndicator;
 	private final boolean fetched;
 
 	private SqmPredicate onClausePredicate;
 
 	public SqmAttributeJoin(
 			SqmFrom lhs,
-			SqmAttributeBinding attributeBinding,
+			SqmAttributeReference attributeBinding,
 			String uid,
 			String alias,
-			SqmExpressableTypeEntity intrinsicSubclassIndicator,
+			EntityValuedExpressableType intrinsicSubclassIndicator,
 			SqmJoinType joinType,
 			boolean fetched) {
 		super(
-				attributeBinding.getSourceBinding().getExportedFromElement().getContainingSpace(),
+				attributeBinding.getSourceReference().getExportedFromElement().getContainingSpace(),
 				uid,
 				alias,
 				attributeBinding,
@@ -61,17 +61,17 @@ public class SqmAttributeJoin
 		return lhs;
 	}
 
-	public SqmAttributeBinding getAttributeBinding() {
+	public SqmAttributeReference getAttributeBinding() {
 		return attributeBinding;
 	}
 
 	@Override
-	public SqmNavigableBinding getBinding() {
+	public SqmNavigableReference getBinding() {
 		return getAttributeBinding();
 	}
 
 	@Override
-	public SqmExpressableTypeEntity getIntrinsicSubclassIndicator() {
+	public EntityValuedExpressableType getIntrinsicSubclassIndicator() {
 		return intrinsicSubclassIndicator;
 	}
 

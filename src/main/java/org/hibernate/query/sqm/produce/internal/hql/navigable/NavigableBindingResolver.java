@@ -6,9 +6,9 @@
  */
 package org.hibernate.query.sqm.produce.internal.hql.navigable;
 
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmFrom;
 
 /**
@@ -28,7 +28,7 @@ public interface NavigableBindingResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	SqmNavigableBinding resolvePath(String... pathParts);
+	SqmNavigableReference resolvePath(String... pathParts);
 
 	/**
 	 * Resolve the given path relative to a given left-hand side.
@@ -39,7 +39,7 @@ public interface NavigableBindingResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	SqmNavigableBinding resolvePath(SqmNavigableSourceBinding sourceBinding, String... pathParts);
+	SqmNavigableReference resolvePath(SqmNavigableSourceReference sourceBinding, String... pathParts);
 
 	/**
 	 * Resolve the given path applying the specified "intrinsic" subclass indicator to the
@@ -52,7 +52,7 @@ public interface NavigableBindingResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	SqmNavigableBinding resolveTreatedPath(SqmExpressableTypeEntity subclassIndicator, String... pathParts);
+	SqmNavigableReference resolveTreatedPath(EntityValuedExpressableType subclassIndicator, String... pathParts);
 
 	/**
 	 * Resolve the given path relative to a given left-hand side applying the specified
@@ -66,7 +66,7 @@ public interface NavigableBindingResolver {
 	 *
 	 * @return The resolve path, or {@code null}.
 	 */
-	SqmNavigableBinding resolveTreatedPath(SqmNavigableSourceBinding sourceBinding, SqmExpressableTypeEntity subclassIndicator, String... pathParts);
+	SqmNavigableReference resolveTreatedPath(SqmNavigableSourceReference sourceBinding, EntityValuedExpressableType subclassIndicator, String... pathParts);
 
 	boolean canReuseImplicitJoins();
 }

@@ -32,7 +32,7 @@ public class JoinFetchTest extends StandardModelTest {
 		final SqmAttributeJoin sqmJoin = (SqmAttributeJoin) space.getJoins().get( 0 );
 		assertThat( sqmJoin.isFetched(), is(true) );
 		assertThat(
-				sqmJoin.getAttributeBinding().getSourceBinding().getExportedFromElement().getUniqueIdentifier(),
+				sqmJoin.getAttributeBinding().getSourceReference().getExportedFromElement().getUniqueIdentifier(),
 				is( space.getRoot().getUniqueIdentifier() )
 		);
 

@@ -17,8 +17,8 @@ import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.query.sqm.ParsingException;
 import org.hibernate.query.sqm.produce.spi.AbstractQuerySpecProcessingState;
 import org.hibernate.query.sqm.tree.SqmJoinType;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmAttributeJoin;
 import org.hibernate.query.sqm.tree.from.SqmCrossJoin;
@@ -50,14 +50,14 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	@Override
-	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableReference findNavigableBindingByIdentificationVariable(String identificationVariable) {
 		return fromClause.fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable )
 				? fromClause.fromElementSpace.getRoot().getBinding()
 				: null;
 	}
 
 	@Override
-	public SqmNavigableBinding findNavigableBindingExposingAttribute(String attributeName) {
+	public SqmNavigableReference findNavigableBindingExposingAttribute(String attributeName) {
 		if ( rootExposesAttribute( attributeName ) ) {
 			return fromClause.fromElementSpace.getRoot().getBinding();
 		}
@@ -67,7 +67,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	private boolean rootExposesAttribute(String attributeName) {
-		return null != fromClause.fromElementSpace.getRoot().getBinding().getBoundNavigable().findNavigable( attributeName );
+		return null != fromClause.fromElementSpace.getRoot().getBinding().getReferencedNavigable().findNavigable( attributeName );
 	}
 
 	@Override
@@ -146,13 +146,13 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 
 		@Override
 		public SqmAttributeJoin buildAttributeJoin(
-				SqmAttributeBinding attributeBinding,
+				SqmAttributeReference attributeBinding,
 				String alias,
 				SqmExpressableTypeEntity subclassIndicator,
 				SqmJoinType joinType,
 				boolean fetched,
 				boolean canReuseImplicitJoins) {
-			if ( SqmExpressableTypeEmbedded.class.isInstance( attributeBinding.getBoundNavigable() ) ) {
+			if ( SqmExpressableTypeEmbedded.class.isInstance( attributeBinding.getReferencedNavigable() ) ) {
 				return super.buildAttributeJoin(
 						attributeBinding,
 						alias,

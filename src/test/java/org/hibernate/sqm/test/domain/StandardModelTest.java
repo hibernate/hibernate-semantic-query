@@ -6,6 +6,7 @@
  */
 package org.hibernate.sqm.test.domain;
 
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.query.sqm.produce.spi.SemanticQueryProducer;
 import org.hibernate.query.sqm.produce.spi.ParsingContext;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaQuery;
@@ -27,6 +28,16 @@ import static org.junit.Assert.assertThat;
  * @author Steve Ebersole
  */
 public abstract class StandardModelTest {
+	protected final SessionFactoryImplementor sessionFactory;
+
+	public StandardModelTest() {
+		sessionFactory = buildSessionFactory();
+	}
+
+	private SessionFactoryImplementor buildSessionFactory() {
+
+	}
+
 	protected final ConsumerContextImpl consumerContext = new ConsumerContextImpl(
 			OrmHelper.buildDomainMetamodel(
 					Person.class,

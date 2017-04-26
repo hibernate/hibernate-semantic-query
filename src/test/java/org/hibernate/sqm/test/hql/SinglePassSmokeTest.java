@@ -7,7 +7,7 @@
 package org.hibernate.sqm.test.hql;
 
 import org.hibernate.query.sqm.tree.SqmSelectStatement;
-import org.hibernate.query.sqm.tree.expression.domain.SqmEntityBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityReference;
 import org.hibernate.query.sqm.tree.select.SqmSelection;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
@@ -31,6 +31,6 @@ public class SinglePassSmokeTest extends StandardModelTest {
 		SqmSelectStatement statement = interpretSelect( "select o from Person o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmEntityBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmEntityReference.class ) );
 	}
 }

@@ -10,7 +10,7 @@ import org.hibernate.query.sqm.produce.spi.SemanticQueryProducer;
 import org.hibernate.query.sqm.tree.SqmDeleteStatement;
 import org.hibernate.query.sqm.tree.SqmStatement;
 import org.hibernate.query.sqm.tree.expression.NamedParameterSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.test.ConsumerContextImpl;
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -49,9 +49,9 @@ public class BasicDeleteTests extends StandardModelTest {
 		assertThat( deleteStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) deleteStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( SqmSingularAttributeBinding.class ) );
-		SqmSingularAttributeBinding binding = (SqmSingularAttributeBinding) predicate.getLeftHandExpression();
-		assertSame( binding.getSourceBinding().getExportedFromElement(), deleteStatement.getEntityFromElement() );
+		assertThat( predicate.getLeftHandExpression(), instanceOf( SqmSingularAttributeReference.class ) );
+		SqmSingularAttributeReference binding = (SqmSingularAttributeReference) predicate.getLeftHandExpression();
+		assertSame( binding.getSourceReference().getExportedFromElement(), deleteStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 	}

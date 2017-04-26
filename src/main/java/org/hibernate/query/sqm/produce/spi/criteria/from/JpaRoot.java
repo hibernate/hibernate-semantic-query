@@ -8,11 +8,11 @@ package org.hibernate.query.sqm.produce.spi.criteria.from;
 
 import javax.persistence.criteria.Root;
 
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 
 /**
  * @author Steve Ebersole
  */
 public interface JpaRoot<X> extends Root<X>, JpaFrom<X,X> {
-	SqmExpressableTypeEntity getEntityType();
+	EntityValuedExpressableType getEntityType();
 }

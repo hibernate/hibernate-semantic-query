@@ -8,8 +8,8 @@ package org.hibernate.sqm.test.hql;
 
 import org.hibernate.query.sqm.SemanticException;
 import org.hibernate.query.sqm.tree.SqmSelectStatement;
-import org.hibernate.query.sqm.tree.expression.domain.SqmEntityBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmRoot;
 import org.hibernate.query.sqm.tree.select.SqmSelection;
@@ -42,7 +42,7 @@ public class FromElementContainmentTests extends StandardModelTest {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmSingularAttributeBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmSingularAttributeReference.class ) );
 
 		assertSame( fromElementSpace.getJoins().get( 0 ), FromElementHelper.extractExpressionFromElement( selection.getExpression() ) );
 	}
@@ -58,7 +58,7 @@ public class FromElementContainmentTests extends StandardModelTest {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmEntityBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmEntityReference.class ) );
 
 		assertSame( fromElement, FromElementHelper.extractExpressionFromElement( selection.getExpression() ) );
 	}
@@ -74,7 +74,7 @@ public class FromElementContainmentTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
-				instanceOf( SqmEntityBinding.class )
+				instanceOf( SqmEntityReference.class )
 		);
 
 		assertSame(

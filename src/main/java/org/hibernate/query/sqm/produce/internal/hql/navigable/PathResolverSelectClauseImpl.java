@@ -7,8 +7,8 @@
 package org.hibernate.query.sqm.produce.internal.hql.navigable;
 
 import org.hibernate.query.sqm.produce.spi.ResolutionContext;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 
 /**
  * @author Steve Ebersole
@@ -24,8 +24,8 @@ public class PathResolverSelectClauseImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected SqmNavigableBinding resolveTerminalAttributeBinding(SqmNavigableSourceBinding sourceBinding, String terminalName) {
-		SqmNavigableBinding attrBinding = context().getParsingContext().findOrCreateNavigableBinding( sourceBinding, terminalName );
+	protected SqmNavigableReference resolveTerminalAttributeBinding(SqmNavigableSourceReference sourceBinding, String terminalName) {
+		SqmNavigableReference attrBinding = context().getParsingContext().findOrCreateNavigableBinding( sourceBinding, terminalName );
 		resolveAttributeJoinIfNot( attrBinding );
 		return attrBinding;
 	}

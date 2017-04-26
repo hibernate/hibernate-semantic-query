@@ -11,9 +11,9 @@ import org.hibernate.query.sqm.domain.SqmNavigable;
 import org.hibernate.query.sqm.SemanticException;
 import org.hibernate.query.sqm.produce.spi.ResolutionContext;
 import org.hibernate.query.sqm.tree.SqmJoinType;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmFromExporter;
 
@@ -57,18 +57,18 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected SqmNavigableBinding resolveTerminalAttributeBinding(
-			SqmNavigableSourceBinding sourceBinding,
+	protected SqmNavigableReference resolveTerminalAttributeBinding(
+			SqmNavigableSourceReference sourceBinding,
 			String terminalName) {
 		final SqmNavigable attribute = resolveNavigable( sourceBinding, terminalName );
 		return resolveTerminal( sourceBinding, attribute, null );
 	}
 
-	private SqmAttributeBinding resolveTerminal(
-			SqmNavigableSourceBinding sourceBinding,
+	private SqmAttributeReference resolveTerminal(
+			SqmNavigableSourceReference sourceBinding,
 			SqmNavigable navigable,
 			SqmExpressableTypeEntity subclassIndicator) {
-		final SqmAttributeBinding attributeBinding = (SqmAttributeBinding) context().getParsingContext()
+		final SqmAttributeReference attributeBinding = (SqmAttributeReference) context().getParsingContext()
 				.findOrCreateNavigableBinding(
 						sourceBinding,
 						navigable
@@ -92,9 +92,9 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected SqmNavigableBinding resolveTreatedTerminal(
+	protected SqmNavigableReference resolveTreatedTerminal(
 			ResolutionContext context,
-			SqmNavigableSourceBinding sourceBinding,
+			SqmNavigableSourceReference sourceBinding,
 			String terminalName,
 			SqmExpressableTypeEntity subclassIndicator) {
 		final SqmNavigable attribute = resolveNavigable( sourceBinding, terminalName );
@@ -102,7 +102,7 @@ public class PathResolverJoinAttributeImpl extends PathResolverBasicImpl {
 	}
 
 	@Override
-	protected SqmNavigableBinding resolveFromElementAliasAsTerminal(SqmFromExporter exporter) {
+	protected SqmNavigableReference resolveFromElementAliasAsTerminal(SqmFromExporter exporter) {
 		// this can never be valid...
 		throw new SemanticException( "Cannot join to aliased FromElement [" + exporter.getExportedFromElement().getIdentificationVariable() + "]" );
 	}

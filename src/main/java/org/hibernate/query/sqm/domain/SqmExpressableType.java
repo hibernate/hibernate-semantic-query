@@ -6,6 +6,8 @@
  */
 package org.hibernate.query.sqm.domain;
 
+import org.hibernate.persister.queryable.spi.ExpressableType;
+import org.hibernate.query.sqm.domain.type.SqmDomainType;
 import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
 
 /**
@@ -15,8 +17,9 @@ import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
  *
  * @author Steve Ebersole
  *
- * @deprecated {@link  org.hibernate.persister.common.spi.ExpressableType}
+ * @deprecated {@link  ExpressableType}
  */
 @Deprecated
 public interface SqmExpressableType<T> extends SqmDomainTypeExporter<T> {
+	SqmDomainType<T> getExportedDomainType();
 }

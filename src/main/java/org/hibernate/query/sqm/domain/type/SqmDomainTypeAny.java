@@ -7,9 +7,11 @@
 package org.hibernate.query.sqm.domain.type;
 
 /**
- * Models an "any" type in the consumer's "type system"
+ * Models an "any" type
  *
  * @author Steve Ebersole
+ *
+ * @deprecated todo (6.0) : define an AnyType *and* a new AnyPersister
  */
 public interface SqmDomainTypeAny extends SqmDomainType {
 }

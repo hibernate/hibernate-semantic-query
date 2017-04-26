@@ -8,6 +8,9 @@ package org.hibernate.query.sqm.domain;
 
 import javax.persistence.metamodel.PluralAttribute;
 
+import org.hibernate.persister.collection.spi.CollectionElement;
+import org.hibernate.persister.collection.spi.CollectionIndex;
+
 /**
  * Models references to plural attributes (persistent collections)
  *
@@ -39,9 +42,9 @@ public interface SqmPluralAttribute<J> extends SqmAttribute<J>, SqmDomainTypeExp
 
 	CollectionClassification getCollectionClassification();
 
-	SqmPluralAttributeElement getElementReference();
+	CollectionElement getElementDescriptor();
 
-	SqmPluralAttributeIndex getIndexReference();
+	CollectionIndex getIndexDescriptor();
 
 	String getRole();
 }

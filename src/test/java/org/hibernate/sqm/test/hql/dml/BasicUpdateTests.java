@@ -10,7 +10,7 @@ import org.hibernate.query.sqm.tree.SqmStatement;
 import org.hibernate.query.sqm.tree.SqmUpdateStatement;
 import org.hibernate.query.sqm.tree.expression.LiteralCharacterSqmExpression;
 import org.hibernate.query.sqm.tree.expression.NamedParameterSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 import org.hibernate.query.sqm.tree.set.SqmAssignment;
 import org.hibernate.sqm.test.domain.Person;
@@ -48,16 +48,16 @@ public class BasicUpdateTests extends StandardModelTest {
 		assertThat( updateStatement.getWhereClause().getPredicate(), instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) updateStatement.getWhereClause().getPredicate();
 
-		assertThat( predicate.getLeftHandExpression(), instanceOf( SqmSingularAttributeBinding.class ) );
-		SqmSingularAttributeBinding binding = (SqmSingularAttributeBinding) predicate.getLeftHandExpression();
-		assertSame( binding.getSourceBinding().getExportedFromElement(), updateStatement.getEntityFromElement() );
+		assertThat( predicate.getLeftHandExpression(), instanceOf( SqmSingularAttributeReference.class ) );
+		SqmSingularAttributeReference binding = (SqmSingularAttributeReference) predicate.getLeftHandExpression();
+		assertSame( binding.getSourceReference().getExportedFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( predicate.getRightHandExpression(), instanceOf( NamedParameterSqmExpression.class ) );
 
 		assertEquals( 1, updateStatement.getSetClause().getAssignments().size() );
 
 		SqmAssignment assignment = updateStatement.getSetClause().getAssignments().get( 0 );
-		assertSame( assignment.getStateField().getSourceBinding().getExportedFromElement(), updateStatement.getEntityFromElement() );
+		assertSame( assignment.getStateField().getSourceReference().getExportedFromElement(), updateStatement.getEntityFromElement() );
 
 		assertThat( assignment.getValue(), instanceOf( LiteralCharacterSqmExpression.class ) );
 	}

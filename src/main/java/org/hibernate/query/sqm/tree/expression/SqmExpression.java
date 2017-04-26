@@ -6,9 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.ExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmDomainTypeExporter;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 /**
  * The base contract for any kind of expression node in the SQM tree.
@@ -16,7 +15,7 @@ import org.hibernate.query.sqm.domain.SqmExpressableType;
  *
  * @author Steve Ebersole
  */
-public interface SqmExpression extends SqmDomainTypeExporter {
+public interface SqmExpression {
 	// todo : contemplate way to incorporate DomainReference into expressions in place of the removed types.
 
 	/**
@@ -24,7 +23,7 @@ public interface SqmExpression extends SqmDomainTypeExporter {
 	 *
 	 * @return The expression's type.
 	 */
-	SqmExpressableType getExpressionType();
+	ExpressableType getExpressionType();
 
 	/**
 	 * Obtain reference to the type, or {@code null}, for this expression that can be used
@@ -35,7 +34,7 @@ public interface SqmExpression extends SqmDomainTypeExporter {
 	 *
 	 * @see ImpliedTypeSqmExpression#impliedType
 	 */
-	SqmExpressableType getInferableType();
+	ExpressableType getInferableType();
 
 	/**
 	 * Visitation method

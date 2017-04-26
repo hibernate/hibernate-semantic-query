@@ -6,13 +6,13 @@
  */
 package org.hibernate.query.sqm.domain;
 
-import org.hibernate.persister.embedded.spi.EmbeddedReference;
+import org.hibernate.persister.embedded.spi.EmbeddedValuedNavigable;
 import org.hibernate.query.sqm.domain.type.SqmDomainTypeEmbeddable;
 
 /**
  * @author Steve Ebersole
  *
- * @deprecated {@link EmbeddedReference}
+ * @deprecated {@link EmbeddedValuedNavigable}
  */
 @Deprecated
 public interface SqmExpressableTypeEmbedded extends SqmExpressableType, SqmNavigableSource, SqmLoggable {

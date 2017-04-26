@@ -12,8 +12,8 @@ import org.hibernate.query.sqm.produce.spi.ParsingContext;
 import org.hibernate.query.sqm.domain.SqmNavigable;
 import org.hibernate.query.sqm.produce.spi.AbstractQuerySpecProcessingState;
 import org.hibernate.query.sqm.produce.spi.QuerySpecProcessingState;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmFromClause;
 import org.hibernate.query.sqm.tree.from.SqmJoin;
@@ -60,13 +60,13 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 	}
 
 	@Override
-	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableReference findNavigableBindingByIdentificationVariable(String identificationVariable) {
 		return fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 	}
 
 	@Override
-	public SqmNavigableBinding findNavigableBindingExposingAttribute(String name) {
-		SqmNavigableBinding found = null;
+	public SqmNavigableReference findNavigableBindingExposingAttribute(String name) {
+		SqmNavigableReference found = null;
 		for ( SqmFromElementSpace space : fromClause.getFromElementSpaces() ) {
 			if ( definesAttribute( space.getRoot().getBinding(), name ) ) {
 				if ( found != null ) {
@@ -95,17 +95,17 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 		return found;
 	}
 
-	private boolean definesAttribute(SqmNavigableBinding sourceBinding, String name) {
-		if ( !SqmNavigableSourceBinding.class.isInstance( sourceBinding ) ) {
+	private boolean definesAttribute(SqmNavigableReference sourceBinding, String name) {
+		if ( !SqmNavigableSourceReference.class.isInstance( sourceBinding ) ) {
 			return false;
 		}
 
-		final SqmNavigable navigable = ( (SqmNavigableSourceBinding) sourceBinding ).getBoundNavigable().findNavigable( name );
+		final SqmNavigable navigable = ( (SqmNavigableSourceReference) sourceBinding ).getReferencedNavigable().findNavigable( name );
 		return navigable != null;
 	}
 
-	private boolean definesAttribute(SqmNavigableSourceBinding sourceBinding, String name) {
-		final SqmNavigable navigable = sourceBinding.getBoundNavigable().findNavigable( name );
+	private boolean definesAttribute(SqmNavigableSourceReference sourceBinding, String name) {
+		final SqmNavigable navigable = sourceBinding.getReferencedNavigable().findNavigable( name );
 		return navigable != null;
 	}
 

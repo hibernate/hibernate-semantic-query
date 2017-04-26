@@ -43,6 +43,6 @@ public abstract class AbstractFunctionExpression<X>
 	}
 
 	public SqmExpressableType getFunctionResultType() {
-		return getExpressionSqmType();
+		return getExpressionType();
 	}
 }

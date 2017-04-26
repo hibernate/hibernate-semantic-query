@@ -8,8 +8,8 @@ package org.hibernate.query.sqm.tree.expression.function;
 
 import java.util.List;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.query.sqm.tree.expression.ConcatSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
@@ -27,7 +27,7 @@ public class ConcatFunctionSqmExpression extends AbstractFunctionSqmExpression {
 	private final List<SqmExpression> expressions;
 
 	public ConcatFunctionSqmExpression(
-			SqmDomainTypeBasic resultType,
+			BasicValuedExpressableType resultType,
 			List<SqmExpression> expressions) {
 		super( resultType );
 		this.expressions = expressions;

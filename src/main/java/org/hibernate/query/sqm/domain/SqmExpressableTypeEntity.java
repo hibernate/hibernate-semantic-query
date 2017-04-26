@@ -6,7 +6,7 @@
  */
 package org.hibernate.query.sqm.domain;
 
-import org.hibernate.persister.entity.spi.EntityReference;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
 
 /**
@@ -14,7 +14,7 @@ import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
  *
  * @author Steve Ebersole
  *
- * @deprecated {@link EntityReference}
+ * @deprecated {@link EntityValuedExpressableType}
  */
 @Deprecated
 public interface SqmExpressableTypeEntity<T> extends SqmExpressableType<T>, SqmNavigableSource<T> {

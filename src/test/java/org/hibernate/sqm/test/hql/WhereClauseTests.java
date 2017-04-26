@@ -11,8 +11,8 @@ import org.hibernate.query.sqm.domain.SqmPluralAttribute;
 import org.hibernate.query.sqm.tree.SqmSelectStatement;
 import org.hibernate.query.sqm.tree.expression.CollectionSizeSqmExpression;
 import org.hibernate.query.sqm.tree.expression.LiteralIntegerSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionIndexBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionIndexReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeReference;
 import org.hibernate.query.sqm.tree.predicate.NullnessSqmPredicate;
 import org.hibernate.query.sqm.tree.predicate.RelationalPredicateOperator;
 import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
@@ -76,11 +76,11 @@ public class WhereClauseTests extends StandardModelTest {
 		);
 		final CollectionSizeSqmExpression func = (CollectionSizeSqmExpression) relationalPredicate.getLeftHandExpression();
 		assertThat(
-				func.getPluralAttributeBinding().getSourceBinding().getExportedFromElement().getIdentificationVariable(),
+				func.getPluralAttributeBinding().getSourceReference().getExportedFromElement().getIdentificationVariable(),
 				is( "t" )
 		);
 		assertThat(
-				func.getPluralAttributeBinding().getBoundNavigable().getAttributeName(),
+				func.getPluralAttributeBinding().getReferencedNavigable().getAttributeName(),
 				is( "setOfBasics" )
 		);
 	}
@@ -98,8 +98,8 @@ public class WhereClauseTests extends StandardModelTest {
 		assertThat( relationalPredicate.getRightHandExpression(), instanceOf( LiteralIntegerSqmExpression.class ) );
 		assertThat( ( (LiteralIntegerSqmExpression) relationalPredicate.getRightHandExpression() ).getLiteralValue(), is( 2 ) );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( SqmCollectionIndexBinding.class ) );
-		final SqmPluralAttributeBinding collectionBinding = ( (SqmCollectionIndexBinding) relationalPredicate.getLeftHandExpression() ).getSourceBinding();
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( SqmCollectionIndexReference.class ) );
+		final SqmPluralAttributeReference collectionBinding = ( (SqmCollectionIndexReference) relationalPredicate.getLeftHandExpression() ).getSourceReference();
 		assertThat( collectionBinding.getExportedFromElement().getIdentificationVariable(), is( "l" ) );
 	}
 
@@ -111,14 +111,14 @@ public class WhereClauseTests extends StandardModelTest {
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		final SqmCollectionIndexBinding collectionIndexBinding = (SqmCollectionIndexBinding) relationalPredicate.getLeftHandExpression();
-		final SqmPluralAttributeBinding collectionBinding = collectionIndexBinding.getSourceBinding();
-		final SqmPluralAttribute attributeReference = collectionBinding.getBoundNavigable();
+		final SqmCollectionIndexReference collectionIndexBinding = (SqmCollectionIndexReference) relationalPredicate.getLeftHandExpression();
+		final SqmPluralAttributeReference collectionBinding = collectionIndexBinding.getSourceReference();
+		final SqmPluralAttribute attributeReference = collectionBinding.getReferencedNavigable();
 
-		assertThat( collectionIndexBinding.getExpressionType(), is( attributeReference.getIndexReference() ) );
+		assertThat( collectionIndexBinding.getExpressionType(), is( attributeReference.getIndexDescriptor() ) );
 
-		assertThat( attributeReference.getIndexReference().getClassification(), is( IndexClassification.BASIC ) );
-		assertEquals( String.class, attributeReference.getIndexReference().getExportedDomainType().getJavaType() );
+		assertThat( attributeReference.getIndexDescriptor().getClassification(), is( IndexClassification.BASIC ) );
+		assertEquals( String.class, attributeReference.getIndexDescriptor().getExportedDomainType().getJavaType() );
 
 		assertThat( collectionBinding.getExportedFromElement().getIdentificationVariable(), is( "m" ) );
 	}

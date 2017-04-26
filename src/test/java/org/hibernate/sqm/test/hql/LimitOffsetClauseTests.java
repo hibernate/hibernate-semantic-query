@@ -11,7 +11,7 @@ import org.hibernate.query.sqm.tree.expression.LiteralIntegerSqmExpression;
 import org.hibernate.query.sqm.tree.expression.ParameterSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
@@ -54,7 +54,7 @@ public class LimitOffsetClauseTests extends StandardModelTest {
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		SubQuerySqmExpression subQuery = (SubQuerySqmExpression) predicate.getRightHandExpression();
 		SqmExpression sortExpression = subQuery.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression();
-		assertEquals( "numberOfToes", SqmSingularAttributeBinding.class.cast( sortExpression ).getBoundNavigable().getAttributeName() );
+		assertEquals( "numberOfToes", SqmSingularAttributeReference.class.cast( sortExpression ).getReferencedNavigable().getAttributeName() );
 		assertEquals( Integer.valueOf( 1 ), LiteralIntegerSqmExpression.class.cast( subQuery.getQuerySpec().getLimitOffsetClause().getLimitExpression() ).getLiteralValue() );
 	}
 

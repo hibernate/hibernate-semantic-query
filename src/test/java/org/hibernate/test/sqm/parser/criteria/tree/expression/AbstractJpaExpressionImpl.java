@@ -39,7 +39,7 @@ public abstract class AbstractJpaExpressionImpl<T>
 	}
 
 	@Override
-	public SqmExpressableType getExpressionSqmType() {
+	public SqmExpressableType getExpressionType() {
 		return sqmType;
 	}
 

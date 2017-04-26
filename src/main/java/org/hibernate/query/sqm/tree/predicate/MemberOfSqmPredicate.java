@@ -7,25 +7,27 @@
 package org.hibernate.query.sqm.tree.predicate;
 
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeReference;
 
 /**
  * @author Steve Ebersole
  */
 public class MemberOfSqmPredicate extends AbstractNegatableSqmPredicate {
-	private final SqmSingularAttributeBinding attributeBinding;
+	private final SqmPluralAttributeReference pluralAttributeReference;
 
-	public MemberOfSqmPredicate(SqmSingularAttributeBinding attributeBinding) {
-		this( attributeBinding, false );
+	public MemberOfSqmPredicate(SqmPluralAttributeReference pluralAttributeReference) {
+		this( pluralAttributeReference, false );
 	}
 
-	public MemberOfSqmPredicate(SqmSingularAttributeBinding attributeBinding, boolean negated) {
+	public MemberOfSqmPredicate(SqmPluralAttributeReference pluralAttributeReference, boolean negated) {
 		super( negated );
-		this.attributeBinding = attributeBinding;
+
+		assert pluralAttributeReference != null;
+		this.pluralAttributeReference = pluralAttributeReference;
 	}
 
-	public SqmSingularAttributeBinding getAttributeBinding() {
-		return attributeBinding;
+	public SqmPluralAttributeReference getPluralAttributeReference() {
+		return pluralAttributeReference;
 	}
 
 	@Override

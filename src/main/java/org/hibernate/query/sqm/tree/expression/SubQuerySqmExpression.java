@@ -6,35 +6,29 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
-import org.hibernate.query.sqm.tree.SqmQuerySpec;
+import org.hibernate.persister.queryable.spi.ExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.type.SqmDomainType;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
+import org.hibernate.query.sqm.tree.SqmQuerySpec;
 
 /**
  * @author Steve Ebersole
  */
 public class SubQuerySqmExpression implements SqmExpression {
 	private final SqmQuerySpec querySpec;
-	private final SqmExpressableType expressableType;
+	private final ExpressableType expressableType;
 
-	public SubQuerySqmExpression(SqmQuerySpec querySpec, SqmExpressableType expressableType) {
+	public SubQuerySqmExpression(SqmQuerySpec querySpec, ExpressableType expressableType) {
 		this.querySpec = querySpec;
 		this.expressableType = expressableType;
 	}
 
 	@Override
-	public SqmDomainType getExportedDomainType() {
-		return expressableType.getExportedDomainType();
-	}
-
-	@Override
-	public SqmExpressableType getExpressionType() {
+	public ExpressableType getExpressionType() {
 		return expressableType;
 	}
 
 	@Override
-	public SqmExpressableType getInferableType() {
+	public ExpressableType getInferableType() {
 		return getExpressionType();
 	}
 

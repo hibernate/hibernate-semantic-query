@@ -6,9 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.query.sqm.domain.type.SqmDomainType;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
+import org.hibernate.persister.queryable.spi.ExpressableType;
 import org.hibernate.query.sqm.SemanticException;
 
 /**
@@ -17,13 +16,13 @@ import org.hibernate.query.sqm.SemanticException;
 public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmExpression<T> {
 	private final T value;
 
-	private SqmExpressableTypeBasic type;
+	private BasicValuedExpressableType type;
 
 	public AbstractLiteralSqmExpressionImpl(T value) {
 		this.value = value;
 	}
 
-	public AbstractLiteralSqmExpressionImpl(T value, SqmExpressableTypeBasic type) {
+	public AbstractLiteralSqmExpressionImpl(T value, BasicValuedExpressableType type) {
 		this.value = value;
 		this.type = type;
 	}
@@ -34,33 +33,28 @@ public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmE
 	}
 
 	@Override
-	public SqmExpressableTypeBasic getExpressionType() {
+	public BasicValuedExpressableType getExpressionType() {
 		return type;
 	}
 
 	@Override
-	public SqmExpressableTypeBasic getInferableType() {
+	public BasicValuedExpressableType getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(SqmExpressableType type) {
+	public void impliedType(ExpressableType type) {
 		if ( type != null ) {
-			if ( !SqmExpressableTypeBasic.class.isInstance( type ) ) {
+			if ( !BasicValuedExpressableType.class.isInstance( type ) ) {
 				throw new SemanticException( "Inferrable type for literal was found to be a non-basic value : " + type );
 			}
-			this.type = (SqmExpressableTypeBasic) type;
+			this.type = (BasicValuedExpressableType) type;
 		}
 	}
 
 	@Override
 	public String asLoggableText() {
 		return "Literal( " + value + ")";
-	}
-
-	@Override
-	public SqmDomainType getExportedDomainType() {
-		return type.getExportedDomainType();
 	}
 }

@@ -6,8 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression.function;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 /**
@@ -17,7 +17,7 @@ public class SumFunctionSqmExpression extends AbstractAggregateFunctionSqmExpres
 		implements AggregateFunctionSqmExpression {
 	public static final String NAME = "sum";
 
-	public SumFunctionSqmExpression(SqmExpression argument, boolean distinct, SqmExpressableTypeBasic resultType) {
+	public SumFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicValuedExpressableType resultType) {
 		super( argument, distinct, resultType );
 	}
 

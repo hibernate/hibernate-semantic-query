@@ -8,6 +8,7 @@ package org.hibernate.query.sqm.domain;
 
 import java.util.Set;
 
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.QuerySplitter;
 
 /**
@@ -25,7 +26,7 @@ import org.hibernate.query.sqm.consume.spi.QuerySplitter;
  *
  * @see QuerySplitter
  *
- * @deprecated need a polymorphic form of {@link org.hibernate.persister.entity.spi.EntityReference}
+ * @deprecated need a polymorphic form of {@link EntityValuedExpressableType}
  */
 @Deprecated
 public interface SqmExpressableTypeEntityPolymorphicEntity extends SqmExpressableTypeEntity {

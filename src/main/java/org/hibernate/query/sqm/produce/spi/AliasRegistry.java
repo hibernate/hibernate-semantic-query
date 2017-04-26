@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.hibernate.query.sqm.AliasCollisionException;
 import org.hibernate.query.sqm.produce.internal.NavigableBindingHelper;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 import org.hibernate.query.sqm.tree.from.SqmFrom;
 import org.hibernate.query.sqm.tree.select.SqmSelection;
 
@@ -20,7 +20,7 @@ import org.hibernate.query.sqm.tree.select.SqmSelection;
  * @author Andrea Boriero
  */
 public class AliasRegistry {
-	private Map<String, SqmNavigableBinding> navigableBindingsByAlias = new HashMap<>();
+	private Map<String, SqmNavigableReference> navigableBindingsByAlias = new HashMap<>();
 	private Map<String, SqmSelection> selectionsByAlias = new HashMap<>();
 
 	private AliasRegistry parent;
@@ -43,9 +43,9 @@ public class AliasRegistry {
 		}
 	}
 
-	public void registerAlias(SqmNavigableBinding binding) {
+	public void registerAlias(SqmNavigableReference binding) {
 		final SqmFrom exportedFromElement = NavigableBindingHelper.resolveExportedFromElement( binding );
-		final SqmNavigableBinding old = navigableBindingsByAlias.put( exportedFromElement.getIdentificationVariable(), binding );
+		final SqmNavigableReference old = navigableBindingsByAlias.put( exportedFromElement.getIdentificationVariable(), binding );
 		if ( old != null ) {
 			throw new AliasCollisionException(
 					String.format(
@@ -63,7 +63,7 @@ public class AliasRegistry {
 		return selectionsByAlias.get( alias );
 	}
 
-	public SqmNavigableBinding findFromElementByAlias(String alias) {
+	public SqmNavigableReference findFromElementByAlias(String alias) {
 		if ( navigableBindingsByAlias.containsKey( alias ) ) {
 			return navigableBindingsByAlias.get( alias );
 		}
@@ -84,9 +84,9 @@ public class AliasRegistry {
 					)
 			);
 		}
-		final SqmNavigableBinding binding = navigableBindingsByAlias.get( alias );
+		final SqmNavigableReference binding = navigableBindingsByAlias.get( alias );
 		if ( binding != null ) {
-			if ( !selection.getExpression().getExpressionType().equals( binding.getBoundNavigable().getExportedDomainType() ) ) {
+			if ( !selection.getExpression().getExpressionType().equals( binding.getReferencedNavigable().getExportedDomainType() ) ) {
 				throw new AliasCollisionException(
 						String.format(
 								Locale.ENGLISH,
@@ -94,7 +94,7 @@ public class AliasRegistry {
 								alias,
 								selection.getExpression().getExpressionType(),
 								binding,
-								binding.getBoundNavigable()
+								binding.getReferencedNavigable()
 						)
 				);
 			}

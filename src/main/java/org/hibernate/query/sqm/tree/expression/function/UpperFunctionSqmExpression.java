@@ -6,8 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression.function;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 /**
@@ -18,7 +18,7 @@ public class UpperFunctionSqmExpression extends AbstractFunctionSqmExpression {
 
 	private SqmExpression expression;
 
-	public UpperFunctionSqmExpression(SqmDomainTypeBasic resultType, SqmExpression expression) {
+	public UpperFunctionSqmExpression(BasicValuedExpressableType resultType, SqmExpression expression) {
 		super( resultType );
 		this.expression = expression;
 

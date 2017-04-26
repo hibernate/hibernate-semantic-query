@@ -38,7 +38,7 @@ public class BooleanExpressionPredicate
 			CriteriaBuilderImpl criteriaBuilder,
 			JpaExpression<Boolean> expression,
 			Boolean assertedValue) {
-		super( criteriaBuilder, (BasicType<Boolean>) expression.getExpressionSqmType() );
+		super( criteriaBuilder, (BasicType<Boolean>) expression.getExpressionType() );
 		this.expression = expression;
 		this.assertedValue = assertedValue;
 	}

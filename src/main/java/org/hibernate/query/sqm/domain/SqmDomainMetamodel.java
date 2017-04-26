@@ -6,6 +6,8 @@
  */
 package org.hibernate.query.sqm.domain;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.tree.expression.BinaryArithmeticSqmExpression;
 
 /**
@@ -21,18 +23,18 @@ import org.hibernate.query.sqm.tree.expression.BinaryArithmeticSqmExpression;
  */
 @Deprecated
 public interface SqmDomainMetamodel {
-	SqmExpressableTypeEntity resolveEntityReference(String entityName);
-	<T> SqmExpressableTypeEntity<T> resolveEntityReference(Class<T> javaType);
+	EntityValuedExpressableType resolveEntityReference(String entityName);
+	<T> EntityValuedExpressableType<T> resolveEntityReference(Class<T> javaType);
 
 	// - just push the cast target text into the tree.  let the consumer figure out how to interpret it?
-	SqmExpressableTypeBasic resolveCastTargetType(String name);
+	BasicValuedExpressableType resolveCastTargetType(String name);
 
-	<T> SqmExpressableTypeBasic<T> resolveBasicType(Class<T> javaType);
+	<T> BasicValuedExpressableType<T> resolveBasicType(Class<T> javaType);
 
-	SqmExpressableTypeBasic resolveArithmeticType(
-			SqmExpressableTypeBasic firstType,
-			SqmExpressableTypeBasic secondType,
+	BasicValuedExpressableType resolveArithmeticType(
+			BasicValuedExpressableType firstType,
+			BasicValuedExpressableType secondType,
 			BinaryArithmeticSqmExpression.Operation operation);
 
-	SqmExpressableTypeBasic resolveSumFunctionType(SqmExpressableTypeBasic argumentType);
+	BasicValuedExpressableType resolveSumFunctionType(BasicValuedExpressableType argumentType);
 }

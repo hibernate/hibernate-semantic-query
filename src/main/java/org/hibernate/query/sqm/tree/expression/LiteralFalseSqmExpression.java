@@ -6,6 +6,7 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
 import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
 
@@ -13,7 +14,7 @@ import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
  * @author Steve Ebersole
  */
 public class LiteralFalseSqmExpression extends AbstractLiteralSqmExpressionImpl<Boolean> {
-	public LiteralFalseSqmExpression(SqmExpressableTypeBasic expressionType) {
+	public LiteralFalseSqmExpression(BasicValuedExpressableType expressionType) {
 		super( Boolean.FALSE, expressionType );
 	}
 

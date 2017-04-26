@@ -18,7 +18,7 @@ import org.hibernate.query.sqm.tree.SqmQuerySpec;
 import org.hibernate.query.sqm.tree.SqmSelectStatement;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmFromClause;
 import org.hibernate.query.sqm.tree.from.SqmRoot;
@@ -296,8 +296,8 @@ public class AliasTest {
 			String alias) {
 		List<SqmSelection> selections = querySpect.getSelectClause().getSelections();
 		SqmSelection selection = selections.get( attributeIndex );
-		SqmSingularAttributeBinding expression = (SqmSingularAttributeBinding) selection.getExpression();
-		assertThat( expression.getBoundNavigable().getAttributeName(), is( attributeName ) );
+		SqmSingularAttributeReference expression = (SqmSingularAttributeReference) selection.getExpression();
+		assertThat( expression.getReferencedNavigable().getAttributeName(), is( attributeName ) );
 		if ( alias == null ) {
 			assertTrue( ImplicitAliasGenerator.isImplicitAlias( selection.getAlias() ) );
 		}
@@ -328,11 +328,11 @@ public class AliasTest {
 	) {
 		SqmWhereClause whereClause = querySpec.getWhereClause();
 		InSubQuerySqmPredicate predicate = (InSubQuerySqmPredicate) whereClause.getPredicate();
-		SqmSingularAttributeBinding testExpression = (SqmSingularAttributeBinding) predicate.getTestExpression();
-		assertThat( testExpression.getBoundNavigable().getAttributeName(), is( attributeName ) );
-		assertThat( testExpression.getSourceBinding(), notNullValue() );
+		SqmSingularAttributeReference testExpression = (SqmSingularAttributeReference) predicate.getTestExpression();
+		assertThat( testExpression.getReferencedNavigable().getAttributeName(), is( attributeName ) );
+		assertThat( testExpression.getSourceReference(), notNullValue() );
 		assertThat(
-				testExpression.getSourceBinding().getExportedFromElement().getIdentificationVariable(),
+				testExpression.getSourceReference().getExportedFromElement().getIdentificationVariable(),
 				is( alias )
 		);
 	}
@@ -344,10 +344,10 @@ public class AliasTest {
 			String alias) {
 		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
-		SqmSingularAttributeBinding leftHandExpression = (SqmSingularAttributeBinding) predicate.getLeftHandExpression();
-		assertThat( leftHandExpression.getBoundNavigable().getAttributeName(), is( attributeName ) );
+		SqmSingularAttributeReference leftHandExpression = (SqmSingularAttributeReference) predicate.getLeftHandExpression();
+		assertThat( leftHandExpression.getReferencedNavigable().getAttributeName(), is( attributeName ) );
 		assertThat(
-				leftHandExpression.getSourceBinding().getExportedFromElement().getIdentificationVariable(),
+				leftHandExpression.getSourceReference().getExportedFromElement().getIdentificationVariable(),
 				is( alias )
 		);
 	}
@@ -359,13 +359,13 @@ public class AliasTest {
 			String alias) {
 		SqmWhereClause whereClause = querySpec.getWhereClause();
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) whereClause.getPredicate();
-		SqmSingularAttributeBinding leftHandExpression = (SqmSingularAttributeBinding) predicate.getRightHandExpression();
-		assertThat( leftHandExpression.getBoundNavigable().getAttributeName(), is( attributeName ) );
+		SqmSingularAttributeReference leftHandExpression = (SqmSingularAttributeReference) predicate.getRightHandExpression();
+		assertThat( leftHandExpression.getReferencedNavigable().getAttributeName(), is( attributeName ) );
 		assertThat(
-				leftHandExpression.getSourceBinding().getExportedFromElement().getIdentificationVariable(),
+				leftHandExpression.getSourceReference().getExportedFromElement().getIdentificationVariable(),
 				is( alias )
 		);
-//		assertThat( leftHandExpression.getAttributeBinding().getExpressionType().getTypeName(), is( typeName ) );
+//		assertThat( leftHandExpression.getPluralAttributeReference().getExpressionType().getTypeName(), is( typeName ) );
 	}
 
 	private SubQuerySqmExpression getInSubQueryExpression(SqmSelectStatement selectStatement) {

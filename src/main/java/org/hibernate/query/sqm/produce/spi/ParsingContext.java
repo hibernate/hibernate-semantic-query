@@ -11,11 +11,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.persister.common.spi.Navigable;
 import org.hibernate.query.sqm.ParsingException;
 import org.hibernate.query.sqm.produce.internal.NavigableBindingHelper;
-import org.hibernate.query.sqm.domain.SqmNavigable;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmFrom;
 
 import org.jboss.logging.Logger;
@@ -33,7 +33,7 @@ public class ParsingContext {
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
 	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
 
-	private Map<SqmNavigableSourceBinding,Map<SqmNavigable,SqmNavigableBinding>> navigableBindingMapBySource;
+	private Map<SqmNavigableSourceReference,Map<Navigable,SqmNavigableReference>> navigableReferenceMapBySource;
 
 	public ParsingContext(SessionFactoryImplementor sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -62,23 +62,23 @@ public class ParsingContext {
 		globalFromElementMap.get( uid );
 	}
 
-	public void cacheNavigableBinding(SqmNavigableBinding binding) {
-		assert binding.getSourceBinding() != null;
+	public void cacheNavigableBinding(SqmNavigableReference binding) {
+		assert binding.getSourceReference() != null;
 
-		Map<SqmNavigable, SqmNavigableBinding> navigableBindingMap = null;
-		if ( navigableBindingMapBySource == null ) {
-			navigableBindingMapBySource = new HashMap<>();
+		Map<Navigable, SqmNavigableReference> navigableBindingMap = null;
+		if ( navigableReferenceMapBySource == null ) {
+			navigableReferenceMapBySource = new HashMap<>();
 		}
 		else {
-			navigableBindingMap = navigableBindingMapBySource.get( binding.getSourceBinding() );
+			navigableBindingMap = navigableReferenceMapBySource.get( binding.getSourceReference() );
 		}
 
 		if ( navigableBindingMap == null ) {
 			navigableBindingMap = new HashMap<>();
-			navigableBindingMapBySource.put( binding.getSourceBinding(), navigableBindingMap );
+			navigableReferenceMapBySource.put( binding.getSourceReference(), navigableBindingMap );
 		}
 
-		final SqmNavigableBinding previous = navigableBindingMap.put( binding.getBoundNavigable(), binding );
+		final SqmNavigableReference previous = navigableBindingMap.put( binding.getReferencedNavigable(), binding );
 		if ( previous != null ) {
 			log.debugf(
 					"Caching NavigableBinding [%s] over-wrote previous cache entry [%s]",
@@ -88,12 +88,12 @@ public class ParsingContext {
 		}
 	}
 
-	public SqmNavigableBinding getCachedNavigableBinding(SqmNavigableSourceBinding source, SqmNavigable navigable) {
-		if ( navigableBindingMapBySource == null ) {
+	public SqmNavigableReference getCachedNavigableBinding(SqmNavigableSourceReference source, Navigable navigable) {
+		if ( navigableReferenceMapBySource == null ) {
 			return null;
 		}
 
-		final Map<SqmNavigable, SqmNavigableBinding> navigableBindingMap = navigableBindingMapBySource.get( source );
+		final Map<Navigable, SqmNavigableReference> navigableBindingMap = navigableReferenceMapBySource.get( source );
 
 		if ( navigableBindingMap == null ) {
 			return null;
@@ -102,17 +102,17 @@ public class ParsingContext {
 		return navigableBindingMap.get( navigable );
 	}
 
-	public SqmNavigableBinding findOrCreateNavigableBinding(
-			SqmNavigableSourceBinding lhs,
+	public SqmNavigableReference findOrCreateNavigableBinding(
+			SqmNavigableSourceReference lhs,
 			String navigableName) {
-		final SqmNavigable sqmNavigable = lhs.getBoundNavigable().findNavigable( navigableName );
+		final Navigable sqmNavigable = lhs.getReferencedNavigable().findNavigable( navigableName );
 
 		if ( sqmNavigable == null ) {
 			throw new ParsingException(
 					String.format(
 							Locale.ROOT,
 							"Could not resolve SqmNavigable for [%s].[%s]",
-							lhs.getPropertyPath().getFullPath(),
+							lhs.getNavigablePath().getFullPath(),
 							navigableName
 					)
 			);
@@ -121,28 +121,28 @@ public class ParsingContext {
 		return findOrCreateNavigableBinding( lhs, sqmNavigable );
 	}
 
-	public SqmNavigableBinding findOrCreateNavigableBinding(
-			SqmNavigableSourceBinding lhs,
-			SqmNavigable sqmNavigable) {
-		Map<SqmNavigable,SqmNavigableBinding> bindingsMap = null;
+	public SqmNavigableReference findOrCreateNavigableBinding(
+			SqmNavigableSourceReference lhs,
+			Navigable navigable) {
+		Map<Navigable,SqmNavigableReference> bindingsMap = null;
 
-		if ( navigableBindingMapBySource == null ) {
-			navigableBindingMapBySource = new HashMap<>();
+		if ( navigableReferenceMapBySource == null ) {
+			navigableReferenceMapBySource = new HashMap<>();
 		}
 		else {
-			bindingsMap = navigableBindingMapBySource.get( lhs );
+			bindingsMap = navigableReferenceMapBySource.get( lhs );
 		}
 
 		if ( bindingsMap == null ) {
 			bindingsMap = new HashMap<>();
-			navigableBindingMapBySource.put( lhs, bindingsMap );
+			navigableReferenceMapBySource.put( lhs, bindingsMap );
 		}
 
 		return bindingsMap.computeIfAbsent(
-				sqmNavigable,
+				navigable,
 				k -> NavigableBindingHelper.createNavigableBinding(
 						lhs,
-						sqmNavigable
+						navigable
 				)
 		);
 	}

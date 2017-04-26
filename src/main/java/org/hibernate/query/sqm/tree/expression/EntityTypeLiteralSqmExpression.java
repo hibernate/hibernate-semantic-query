@@ -6,9 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
 
 /**
  * Represents an reference to an entity type as a literal.  This is the JPA
@@ -18,19 +17,19 @@ import org.hibernate.query.sqm.domain.type.SqmDomainTypeEntity;
  * @author Steve Ebersole
  */
 public class EntityTypeLiteralSqmExpression implements SqmExpression {
-	private final SqmExpressableTypeEntity entityType;
+	private final EntityValuedExpressableType entityType;
 
-	public EntityTypeLiteralSqmExpression(SqmExpressableTypeEntity entityType) {
+	public EntityTypeLiteralSqmExpression(EntityValuedExpressableType entityType) {
 		this.entityType = entityType;
 	}
 
 	@Override
-	public SqmExpressableTypeEntity getExpressionType() {
+	public EntityValuedExpressableType getExpressionType() {
 		return entityType;
 	}
 
 	@Override
-	public SqmExpressableTypeEntity getInferableType() {
+	public EntityValuedExpressableType getInferableType() {
 		return getExpressionType();
 	}
 
@@ -42,10 +41,5 @@ public class EntityTypeLiteralSqmExpression implements SqmExpression {
 	@Override
 	public String asLoggableText() {
 		return "TYPE(" + entityType + ")";
-	}
-
-	@Override
-	public SqmDomainTypeEntity getExportedDomainType() {
-		return (SqmDomainTypeEntity) getExpressionType().getExportedDomainType();
 	}
 }

@@ -102,7 +102,7 @@ public class CollectionKey implements OrmTypeExporter {
 //		}
 //		else {
 //			// otherwise we just need to resolve the column names in the element table(s) (as the "collection table")
-//			final EntityPersister elementPersister = ( (PluralAttributeElementEntity) collectionPersister.getElementReference() ).getElementPersister();
+//			final EntityPersister elementPersister = ( (PluralAttributeElementEntity) collectionPersister.getElementDescriptor() ).getElementPersister();
 //
 //			for ( int i = 0; i < columnNames.length; i++ ) {
 //				// it is conceivable that the column already exists

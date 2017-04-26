@@ -8,12 +8,11 @@ package org.hibernate.query.sqm.produce.spi.criteria;
 
 import java.util.List;
 
-import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPluralAttributePath;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.produce.spi.ParsingContext;
 import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFrom;
 import org.hibernate.query.sqm.produce.spi.criteria.from.JpaRoot;
+import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPluralAttributePath;
 import org.hibernate.query.sqm.tree.expression.BinaryArithmeticSqmExpression;
 import org.hibernate.query.sqm.tree.expression.CoalesceSqmExpression;
 import org.hibernate.query.sqm.tree.expression.ConcatSqmExpression;
@@ -23,7 +22,7 @@ import org.hibernate.query.sqm.tree.expression.LiteralSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
 import org.hibernate.query.sqm.tree.expression.UnaryOperationSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.CastFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.CountFunctionSqmExpression;
@@ -64,7 +63,7 @@ public interface CriteriaVisitor {
 	UnaryOperationSqmExpression visitUnaryOperation(
 			UnaryOperationSqmExpression.Operation operation,
 			JpaExpression<?> expression,
-			SqmDomainTypeBasic resultType);
+			BasicValuedExpressableType resultType);
 
 	BinaryArithmeticSqmExpression visitArithmetic(
 			BinaryArithmeticSqmExpression.Operation operation,
@@ -75,34 +74,34 @@ public interface CriteriaVisitor {
 			BinaryArithmeticSqmExpression.Operation operation,
 			JpaExpression<?> expression1,
 			JpaExpression<?> expression2,
-			SqmDomainTypeBasic resultType);
+			BasicValuedExpressableType resultType);
 
 //	SingularAttributeBinding visitSingularAttributePath(JpaSingularAttributePath attributePath);
 //	SingularAttributeBinding visitPluralAttributePath(JpaPluralAttributePath attributePath);
 //	// todo : visitPluralAttributeElementPath and visitPluralAttributeIndex
 
-	SqmSingularAttributeBinding visitAttributeReference(JpaFrom<?,?> attributeSource, String attributeName);
+	SqmSingularAttributeReference visitAttributeReference(JpaFrom<?,?> attributeSource, String attributeName);
 
-	GenericFunctionSqmExpression visitFunction(String name, SqmDomainTypeBasic resultTypeDescriptor, List<JpaExpression<?>> arguments);
-	GenericFunctionSqmExpression visitFunction(String name, SqmDomainTypeBasic resultTypeDescriptor, JpaExpression<?>... arguments);
+	GenericFunctionSqmExpression visitFunction(String name, BasicValuedExpressableType resultTypeDescriptor, List<JpaExpression<?>> arguments);
+	GenericFunctionSqmExpression visitFunction(String name, BasicValuedExpressableType resultTypeDescriptor, JpaExpression<?>... arguments);
 
 	AvgFunctionSqmExpression visitAvgFunction(JpaExpression<?> expression, boolean distinct);
-	AvgFunctionSqmExpression visitAvgFunction(JpaExpression<?> expression, boolean distinct, SqmDomainTypeBasic resultType);
+	AvgFunctionSqmExpression visitAvgFunction(JpaExpression<?> expression, boolean distinct, BasicValuedExpressableType resultType);
 
 	CountFunctionSqmExpression visitCountFunction(JpaExpression<?> expression, boolean distinct);
-	CountFunctionSqmExpression visitCountFunction(JpaExpression<?> expression, boolean distinct, SqmDomainTypeBasic resultType);
+	CountFunctionSqmExpression visitCountFunction(JpaExpression<?> expression, boolean distinct, BasicValuedExpressableType resultType);
 
 	CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct);
-	CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct, SqmDomainTypeBasic resultType);
+	CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct, BasicValuedExpressableType resultType);
 
 	MaxFunctionSqmExpression visitMaxFunction(JpaExpression<?> expression, boolean distinct);
-	MaxFunctionSqmExpression visitMaxFunction(JpaExpression<?> expression, boolean distinct, SqmDomainTypeBasic resultType);
+	MaxFunctionSqmExpression visitMaxFunction(JpaExpression<?> expression, boolean distinct, BasicValuedExpressableType resultType);
 
 	MinFunctionSqmExpression visitMinFunction(JpaExpression<?> expression, boolean distinct);
-	MinFunctionSqmExpression visitMinFunction(JpaExpression<?> expression, boolean distinct, SqmDomainTypeBasic resultType);
+	MinFunctionSqmExpression visitMinFunction(JpaExpression<?> expression, boolean distinct, BasicValuedExpressableType resultType);
 
 	SumFunctionSqmExpression visitSumFunction(JpaExpression<?> expression, boolean distinct);
-	SumFunctionSqmExpression visitSumFunction(JpaExpression<?> expression, boolean distinct, SqmDomainTypeBasic resultType);
+	SumFunctionSqmExpression visitSumFunction(JpaExpression<?> expression, boolean distinct, BasicValuedExpressableType resultType);
 
 	ConcatSqmExpression visitConcat(
 			JpaExpression<?> expression1,
@@ -111,7 +110,7 @@ public interface CriteriaVisitor {
 	ConcatSqmExpression visitConcat(
 			JpaExpression<?> expression1,
 			JpaExpression<?> expression2,
-			SqmDomainTypeBasic resultType);
+			BasicValuedExpressableType resultType);
 
 	CoalesceSqmExpression visitCoalesce(List<JpaExpression<?>> expressions);
 
@@ -161,7 +160,7 @@ public interface CriteriaVisitor {
 
 	<T,C> CastFunctionSqmExpression visitCastFunction(JpaExpression<T> expressionToCast, Class<C> castTarget);
 
-	GenericFunctionSqmExpression visitGenericFunction(String functionName, SqmExpressableTypeBasic resultType, List<JpaExpression<?>> arguments);
+	GenericFunctionSqmExpression visitGenericFunction(String functionName, BasicValuedExpressableType resultType, List<JpaExpression<?>> arguments);
 
 	NegatedSqmPredicate visitNegatedPredicate(JpaPredicate affirmativePredicate);
 

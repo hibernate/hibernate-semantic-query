@@ -6,9 +6,9 @@
  */
 package org.hibernate.query.sqm.tree.from;
 
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.tree.SqmJoinType;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 
 /**
  * @author Steve Ebersole
@@ -20,8 +20,8 @@ public abstract class AbstractSqmJoin extends AbstractSqmFrom implements SqmJoin
 			SqmFromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			SqmNavigableBinding navigableBinding,
-			SqmExpressableTypeEntity intrinsicSubclassIndicator,
+			SqmNavigableReference navigableBinding,
+			EntityValuedExpressableType intrinsicSubclassIndicator,
 			SqmJoinType joinType) {
 		super( fromElementSpace, uid, alias, navigableBinding, intrinsicSubclassIndicator );
 		this.joinType = joinType;

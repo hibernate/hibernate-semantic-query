@@ -13,7 +13,7 @@ import org.hibernate.query.sqm.produce.internal.FromElementBuilder;
 import org.hibernate.query.sqm.produce.spi.FromElementLocator;
 import org.hibernate.query.sqm.produce.spi.ParsingContext;
 import org.hibernate.query.sqm.produce.spi.ResolutionContext;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmFrom;
 import org.hibernate.query.sqm.tree.from.SqmFromClause;
@@ -35,7 +35,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	@Override
-	public SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableReference findNavigableBindingByIdentificationVariable(String identificationVariable) {
 		for ( SqmFromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable ) ) {
 				return fromElementSpace.getRoot().getBinding();
@@ -53,7 +53,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	@Override
-	public SqmNavigableBinding findNavigableBindingExposingAttribute(String attributeName) {
+	public SqmNavigableReference findNavigableBindingExposingAttribute(String attributeName) {
 		for ( SqmFromElementSpace fromElementSpace : fromClause.getFromElementSpaces() ) {
 			if ( exposesAttribute( fromElementSpace.getRoot(), attributeName ) ) {
 				return fromElementSpace.getRoot().getBinding();
@@ -71,7 +71,7 @@ public class OrderByResolutionContext implements ResolutionContext, FromElementL
 	}
 
 	private boolean exposesAttribute(SqmFrom sqmFrom, String attributeName) {
-		final SqmNavigable navigable = sqmFrom.getBinding().getBoundNavigable();
+		final SqmNavigable navigable = sqmFrom.getBinding().getReferencedNavigable();
 		return SqmNavigableSource.class.isInstance( navigable )
 				&& ( (SqmNavigableSource) navigable ).findNavigable( attributeName ) != null;
 	}

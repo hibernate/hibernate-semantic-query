@@ -18,19 +18,19 @@ import org.hibernate.query.sqm.tree.expression.SqmExpression;
  * @author Steve Ebersole
  */
 public class SqmEntityTypeSqmExpression implements SqmExpression {
-	private final SqmNavigableBinding binding;
+	private final SqmNavigableReference binding;
 
-	public SqmEntityTypeSqmExpression(SqmNavigableBinding binding) {
+	public SqmEntityTypeSqmExpression(SqmNavigableReference binding) {
 		this.binding = binding;
 	}
 
-	public SqmNavigableBinding getBinding() {
+	public SqmNavigableReference getBinding() {
 		return binding;
 	}
 
 	@Override
 	public SqmNavigable getExpressionType() {
-		return binding.getBoundNavigable();
+		return binding.getReferencedNavigable();
 	}
 
 	@Override

@@ -6,8 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.expression.function;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -18,7 +18,7 @@ public abstract class AbstractAggregateFunctionSqmExpression
 	private final SqmExpression argument;
 	private final boolean distinct;
 
-	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, SqmExpressableType resultType) {
+	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, BasicValuedExpressableType resultType) {
 		super( resultType );
 		this.argument = argument;
 		this.distinct = distinct;

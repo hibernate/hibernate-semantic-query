@@ -8,7 +8,7 @@ package org.hibernate.query.sqm.tree;
 
 import java.util.List;
 
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.from.SqmRoot;
 
 /**
@@ -19,5 +19,5 @@ import org.hibernate.query.sqm.tree.from.SqmRoot;
  */
 public interface SqmInsertStatement extends SqmStatement {
 	SqmRoot getInsertTarget();
-	List<SqmSingularAttributeBinding> getStateFields();
+	List<SqmSingularAttributeReference> getStateFields();
 }

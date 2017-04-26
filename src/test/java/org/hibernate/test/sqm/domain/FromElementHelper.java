@@ -7,8 +7,8 @@
 package org.hibernate.test.sqm.domain;
 
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmFrom;
 
 /**
@@ -16,13 +16,13 @@ import org.hibernate.query.sqm.tree.from.SqmFrom;
  */
 public class FromElementHelper {
 	public static SqmFrom extractSourceFromElement(SqmExpression expression) {
-		if ( expression instanceof SqmNavigableBinding ) {
-			SqmNavigableBinding navigableBinding = (SqmNavigableBinding) expression;
-			if ( navigableBinding.getSourceBinding() != null ) {
-				return navigableBinding.getSourceBinding().getExportedFromElement();
+		if ( expression instanceof SqmNavigableReference ) {
+			SqmNavigableReference navigableBinding = (SqmNavigableReference) expression;
+			if ( navigableBinding.getSourceReference() != null ) {
+				return navigableBinding.getSourceReference().getExportedFromElement();
 			}
-			else if ( navigableBinding instanceof SqmNavigableSourceBinding ) {
-				return ( (SqmNavigableSourceBinding) navigableBinding ).getExportedFromElement();
+			else if ( navigableBinding instanceof SqmNavigableSourceReference ) {
+				return ( (SqmNavigableSourceReference) navigableBinding ).getExportedFromElement();
 			}
 
 			return null;
@@ -34,13 +34,13 @@ public class FromElementHelper {
 	}
 
 	public static SqmFrom extractExpressionFromElement(SqmExpression expression) {
-		if ( expression instanceof SqmNavigableSourceBinding ) {
-			return ( (SqmNavigableSourceBinding) expression ).getExportedFromElement();
+		if ( expression instanceof SqmNavigableSourceReference ) {
+			return ( (SqmNavigableSourceReference) expression ).getExportedFromElement();
 		}
-		else if ( expression instanceof SqmNavigableBinding ) {
-			final SqmNavigableBinding navigableBinding = (SqmNavigableBinding) expression;
-			if ( navigableBinding.getSourceBinding() != null ) {
-				return navigableBinding.getSourceBinding().getExportedFromElement();
+		else if ( expression instanceof SqmNavigableReference ) {
+			final SqmNavigableReference navigableBinding = (SqmNavigableReference) expression;
+			if ( navigableBinding.getSourceReference() != null ) {
+				return navigableBinding.getSourceReference().getExportedFromElement();
 			}
 
 			return null;
@@ -51,9 +51,9 @@ public class FromElementHelper {
 		throw new RuntimeException( "Don't know how to extract SqmFrom element from given SqmExpression : " + expression );
 	}
 
-	public static SqmFrom extractExpressionExportedFromElement(SqmNavigableBinding expression) {
-		if ( expression instanceof SqmNavigableSourceBinding ) {
-			return ( (SqmNavigableSourceBinding) expression ).getExportedFromElement();
+	public static SqmFrom extractExpressionExportedFromElement(SqmNavigableReference expression) {
+		if ( expression instanceof SqmNavigableSourceReference ) {
+			return ( (SqmNavigableSourceReference) expression ).getExportedFromElement();
 		}
 		return null;
 	}

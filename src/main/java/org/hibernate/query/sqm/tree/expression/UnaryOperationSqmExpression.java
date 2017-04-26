@@ -6,10 +6,9 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
+import org.hibernate.persister.queryable.spi.ExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
-import org.hibernate.query.sqm.domain.type.SqmDomainType;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
 
 /**
  * @author Steve Ebersole
@@ -23,32 +22,32 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 	private final Operation operation;
 	private final SqmExpression operand;
 
-	private SqmDomainTypeBasic typeDescriptor;
+	private BasicValuedExpressableType typeDescriptor;
 
 	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand) {
-		this( operation, operand, (SqmDomainTypeBasic) operand.getExpressionType() );
+		this( operation, operand, (BasicValuedExpressableType) operand.getExpressionType() );
 	}
 
-	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, SqmDomainTypeBasic typeDescriptor) {
+	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, BasicValuedExpressableType typeDescriptor) {
 		this.operation = operation;
 		this.operand = operand;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override
-	public SqmDomainTypeBasic getExpressionType() {
+	public BasicValuedExpressableType getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public SqmDomainTypeBasic getInferableType() {
-		return (SqmDomainTypeBasic) operand.getExpressionType();
+	public BasicValuedExpressableType getInferableType() {
+		return (BasicValuedExpressableType) operand.getExpressionType();
 	}
 
 	@Override
-	public void impliedType(SqmExpressableType type) {
+	public void impliedType(ExpressableType type) {
 		if ( type != null ) {
-			this.typeDescriptor = (SqmDomainTypeBasic) type;
+			this.typeDescriptor = (BasicValuedExpressableType) type;
 			if ( operand instanceof ImpliedTypeSqmExpression ) {
 				( (ImpliedTypeSqmExpression) operand ).impliedType( type );
 			}
@@ -71,10 +70,5 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 
 	public Operation getOperation() {
 		return operation;
-	}
-
-	@Override
-	public SqmDomainType getExportedDomainType() {
-		return getExpressionType();
 	}
 }

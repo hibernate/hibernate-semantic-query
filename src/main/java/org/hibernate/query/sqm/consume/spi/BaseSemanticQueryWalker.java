@@ -39,17 +39,17 @@ import org.hibernate.query.sqm.tree.expression.PositionalParameterSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
 import org.hibernate.query.sqm.tree.expression.UnaryOperationSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.AbstractSpecificSqmCollectionIndexBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionElementBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionIndexBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierBinding;
+import org.hibernate.query.sqm.tree.expression.domain.AbstractSpecificSqmCollectionIndexReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionElementReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionIndexReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierReference;
 import org.hibernate.query.sqm.tree.expression.domain.SqmEntityTypeSqmExpression;
 import org.hibernate.query.sqm.tree.expression.domain.SqmMapEntryBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmMaxElementBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmMinElementBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmMinIndexBindingBasic;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmMaxElementReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmMinElementReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmMinIndexReferenceBasic;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.CastFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.ConcatFunctionSqmExpression;
@@ -135,7 +135,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
 	public T visitInsertSelectStatement(SqmInsertSelectStatement statement) {
 		visitRootEntityFromElement( statement.getInsertTarget() );
-		for ( SqmSingularAttributeBinding stateField : statement.getStateFields() ) {
+		for ( SqmSingularAttributeReference stateField : statement.getStateFields() ) {
 			stateField.accept( this );
 		}
 		visitQuerySpec( statement.getSelectQuery() );
@@ -278,7 +278,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 
 	@Override
 	public T visitMemberOfPredicate(MemberOfSqmPredicate predicate) {
-		predicate.getAttributeBinding().accept( this );
+		predicate.getPluralAttributeReference().accept( this );
 		return (T) predicate;
 	}
 
@@ -371,7 +371,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitAttributeReferenceExpression(SqmAttributeBinding expression) {
+	public T visitAttributeReferenceExpression(SqmAttributeReference expression) {
 		return (T) expression;
 	}
 
@@ -421,17 +421,17 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitPluralAttributeElementBinding(SqmCollectionElementBinding binding) {
+	public T visitPluralAttributeElementBinding(SqmCollectionElementReference binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitPluralAttributeIndexFunction(SqmCollectionIndexBinding binding) {
+	public T visitPluralAttributeIndexFunction(SqmCollectionIndexReference binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMapKeyBinding(SqmCollectionIndexBinding binding) {
+	public T visitMapKeyBinding(SqmCollectionIndexReference binding) {
 		return (T) binding;
 	}
 
@@ -441,22 +441,22 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitMaxElementBinding(SqmMaxElementBinding binding) {
+	public T visitMaxElementBinding(SqmMaxElementReference binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMinElementBinding(SqmMinElementBinding binding) {
+	public T visitMinElementBinding(SqmMinElementReference binding) {
 		return (T) binding;
 	}
 
 	@Override
-	public T visitMaxIndexFunction(AbstractSpecificSqmCollectionIndexBinding function) {
+	public T visitMaxIndexFunction(AbstractSpecificSqmCollectionIndexReference function) {
 		return (T) function;
 	}
 
 	@Override
-	public T visitMinIndexFunction(SqmMinIndexBindingBasic function) {
+	public T visitMinIndexFunction(SqmMinIndexReferenceBasic function) {
 		return (T) function;
 	}
 
@@ -586,7 +586,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitEntityIdentifierBinding(SqmEntityIdentifierBinding expression) {
+	public T visitEntityIdentifierBinding(SqmEntityIdentifierReference expression) {
 		return (T) expression;
 	}
 

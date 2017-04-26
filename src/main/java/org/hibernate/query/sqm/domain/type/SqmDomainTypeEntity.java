@@ -6,10 +6,15 @@
  */
 package org.hibernate.query.sqm.domain.type;
 
+import org.hibernate.type.spi.EntityType;
+
 /**
  * Models an entity type in the consumer's "type system"
  *
  * @author Steve Ebersole
+ *
+ * @deprecated {@link EntityType}
  */
+@Deprecated
 public interface SqmDomainTypeEntity<T> extends SqmDomainType<T> {
 }

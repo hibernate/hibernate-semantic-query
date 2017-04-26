@@ -6,7 +6,7 @@
  */
 package org.hibernate.query.sqm.produce.spi;
 
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 
 /**
  * Context for PathResolver implementations to locate FromElements
@@ -21,7 +21,7 @@ public interface FromElementLocator {
 	 *
 	 * @return matching FromElement, or {@code null}
 	 */
-	SqmNavigableBinding findNavigableBindingByIdentificationVariable(String identificationVariable);
+	SqmNavigableReference findNavigableBindingByIdentificationVariable(String identificationVariable);
 
 	/**
 	 * Find a FromElement which exposes the given attribute.  Will search any parent contexts
@@ -30,5 +30,5 @@ public interface FromElementLocator {
 	 *
 	 * @return matching FromElement, or {@code null}
 	 */
-	SqmNavigableBinding findNavigableBindingExposingAttribute(String attributeName);
+	SqmNavigableReference findNavigableBindingExposingAttribute(String attributeName);
 }

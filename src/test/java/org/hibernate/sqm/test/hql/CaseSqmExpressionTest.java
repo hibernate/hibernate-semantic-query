@@ -12,7 +12,7 @@ import org.hibernate.query.sqm.tree.expression.CaseSimpleSqmExpression;
 import org.hibernate.query.sqm.tree.expression.CoalesceSqmExpression;
 import org.hibernate.query.sqm.tree.expression.LiteralIntegerSqmExpression;
 import org.hibernate.query.sqm.tree.expression.NullifSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.predicate.RelationalSqmPredicate;
 
 import org.hibernate.sqm.test.domain.StandardModelTest;
@@ -37,7 +37,7 @@ public class CaseSqmExpressionTest extends StandardModelTest {
 		assertThat( predicate.getRightHandExpression(), instanceOf( CaseSimpleSqmExpression.class ) );
 		CaseSimpleSqmExpression caseStatement = (CaseSimpleSqmExpression) predicate.getRightHandExpression();
 		assertThat( caseStatement.getFixture(), notNullValue() );
-		assertThat( caseStatement.getFixture(), instanceOf( SqmSingularAttributeBinding.class ) );
+		assertThat( caseStatement.getFixture(), instanceOf( SqmSingularAttributeReference.class ) );
 
 		assertThat( caseStatement.getOtherwise(), notNullValue() );
 		assertThat( caseStatement.getOtherwise(), instanceOf( LiteralIntegerSqmExpression.class ) );

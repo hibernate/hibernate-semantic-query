@@ -6,10 +6,10 @@
  */
 package org.hibernate.query.sqm.tree.from;
 
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
 import org.hibernate.query.sqm.produce.spi.ParsingContext;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 
 /**
  * Models a Bindable's inclusion in the {@code FROM} clause.
@@ -22,7 +22,7 @@ public interface SqmFrom {
 	 */
 	SqmFromElementSpace getContainingSpace();
 
-	SqmNavigableBinding getBinding();
+	SqmNavigableReference getBinding();
 
 	/**
 	 * A unique identifier for this SqmFrom element  across all QuerySpecs (all
@@ -58,7 +58,7 @@ public interface SqmFrom {
 	 * @todo - will need a wrapper approach to handle non-intrinsic attribute references
 	 * 		^^ assuming attribute references expect SqmFrom objects as their "lhs"
 	 */
-	SqmExpressableTypeEntity getIntrinsicSubclassIndicator();
+	EntityValuedExpressableType getIntrinsicSubclassIndicator();
 
 	<T> T accept(SemanticQueryWalker<T> walker);
 }

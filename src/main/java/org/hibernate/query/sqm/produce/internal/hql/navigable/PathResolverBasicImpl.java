@@ -6,14 +6,14 @@
  */
 package org.hibernate.query.sqm.produce.internal.hql.navigable;
 
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.query.sqm.domain.SqmNavigable;
-import org.hibernate.query.sqm.domain.SqmSingularAttribute;
-import org.hibernate.query.sqm.domain.SqmSingularAttribute.SingularAttributeClassification;
+import org.hibernate.persister.common.spi.Navigable;
+import org.hibernate.persister.common.spi.SingularPersistentAttribute;
+import org.hibernate.persister.common.spi.SingularPersistentAttribute.SingularAttributeClassification;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
 import org.hibernate.query.sqm.produce.spi.ResolutionContext;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmDowncast;
 import org.hibernate.query.sqm.tree.from.SqmFromExporter;
 
@@ -39,12 +39,12 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 	}
 
 	@Override
-	public SqmNavigableBinding resolvePath(String... pathParts) {
+	public SqmNavigableReference resolvePath(String... pathParts) {
 		return resolveTreatedPath( null, pathParts );
 	}
 
 	@Override
-	public SqmNavigableBinding resolvePath(SqmNavigableSourceBinding sourceBinding, String... pathParts) {
+	public SqmNavigableReference resolvePath(SqmNavigableSourceReference sourceBinding, String... pathParts) {
 		return resolveTreatedPath( sourceBinding, null, pathParts );
 	}
 
@@ -57,7 +57,7 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 	}
 
 	@Override
-	public SqmNavigableBinding resolveTreatedPath(SqmExpressableTypeEntity subclassIndicator, String... pathParts) {
+	public SqmNavigableReference resolveTreatedPath(EntityValuedExpressableType subclassIndicator, String... pathParts) {
 		assert pathParts.length > 0;
 
 		// The given pathParts indicate either:
@@ -72,7 +72,7 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 			// we had a dot-identifier sequence...
 
 			// see if the root is an identification variable
-			final SqmNavigableSourceBinding identifiedBinding = (SqmNavigableSourceBinding) context().getFromElementLocator()
+			final SqmNavigableSourceReference identifiedBinding = (SqmNavigableSourceReference) context().getFromElementLocator()
 					.findNavigableBindingByIdentificationVariable( pathParts[0] );
 			if ( identifiedBinding != null ) {
 				validatePathRoot( identifiedBinding );
@@ -80,7 +80,7 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 			}
 
 			// otherwise see if the root might be the name of an attribute exposed from a FromElement
-			final SqmNavigableSourceBinding root = (SqmNavigableSourceBinding) context().getFromElementLocator()
+			final SqmNavigableSourceReference root = (SqmNavigableSourceReference) context().getFromElementLocator()
 					.findNavigableBindingExposingAttribute( pathParts[0] );
 			if ( root != null ) {
 				validatePathRoot( root );
@@ -91,37 +91,37 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 			// we had a single identifier...
 
 			// see if the identifier is an identification variable
-			final SqmNavigableBinding identifiedFromElement = context().getFromElementLocator()
+			final SqmNavigableReference identifiedFromElement = context().getFromElementLocator()
 					.findNavigableBindingByIdentificationVariable( pathParts[0] );
 			if ( identifiedFromElement != null ) {
 				return resolveFromElementAliasAsTerminal( (SqmFromExporter) identifiedFromElement );
 			}
 
 			// otherwise see if the identifier might be the name of an attribute exposed from a FromElement
-			final SqmNavigableBinding root = context().getFromElementLocator().findNavigableBindingExposingAttribute( pathParts[0] );
+			final SqmNavigableReference root = context().getFromElementLocator().findNavigableBindingExposingAttribute( pathParts[0] );
 			if ( root != null ) {
 				// todo : consider passing along subclassIndicator
-				return resolveTerminalAttributeBinding( (SqmNavigableSourceBinding) root, pathParts[0], subclassIndicator );
+				return resolveTerminalAttributeBinding( (SqmNavigableSourceReference) root, pathParts[0], subclassIndicator );
 			}
 		}
 
 		return null;
 	}
 
-	protected void validatePathRoot(SqmNavigableBinding root) {
+	protected void validatePathRoot(SqmNavigableReference root) {
 	}
 
 	@Override
-	public SqmNavigableBinding resolveTreatedPath(
-			SqmNavigableSourceBinding sourceBinding,
-			SqmExpressableTypeEntity subclassIndicator,
+	public SqmNavigableReference resolveTreatedPath(
+			SqmNavigableSourceReference sourceBinding,
+			EntityValuedExpressableType subclassIndicator,
 			String... pathParts) {
-		final SqmNavigableSourceBinding intermediateJoinBindings = resolveAnyIntermediateAttributePathJoins( sourceBinding, pathParts );
+		final SqmNavigableSourceReference intermediateJoinBindings = resolveAnyIntermediateAttributePathJoins( sourceBinding, pathParts );
 		return resolveTerminalAttributeBinding( intermediateJoinBindings, pathParts[pathParts.length-1] );
 	}
 
-	protected SqmNavigableBinding resolveTerminalAttributeBinding(
-			SqmNavigableSourceBinding sourceBinding,
+	protected SqmNavigableReference resolveTerminalAttributeBinding(
+			SqmNavigableSourceReference sourceBinding,
 			String terminalName) {
 		return resolveTerminalAttributeBinding(
 				sourceBinding,
@@ -130,44 +130,44 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 		);
 	}
 
-	protected SqmNavigableBinding resolveTerminalAttributeBinding(
-			SqmNavigableSourceBinding sourceBinding,
+	protected SqmNavigableReference resolveTerminalAttributeBinding(
+			SqmNavigableSourceReference sourceBinding,
 			String terminalName,
-			SqmExpressableTypeEntity intrinsicSubclassIndicator) {
-		final SqmNavigable attribute = resolveNavigable( sourceBinding, terminalName );
-		if ( shouldRenderTerminalAttributeBindingAsJoin() && isJoinable( attribute ) ) {
+			EntityValuedExpressableType intrinsicSubclassIndicator) {
+		final Navigable navigable = resolveNavigable( sourceBinding, terminalName );
+		if ( shouldRenderTerminalAttributeBindingAsJoin() && isJoinable( navigable ) ) {
 			log.debugf(
-					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-join",
+					"Resolved terminal navigable-binding [%s.%s ->%s] as navigable-join",
 					sourceBinding.asLoggableText(),
 					terminalName,
-					attribute
+					navigable
 			);
 			return buildAttributeJoin(
 					// see note in #resolveTreatedTerminal regarding cast
 					sourceBinding,
-					attribute,
+					navigable,
 					intrinsicSubclassIndicator
 			);
 		}
 		else {
 			log.debugf(
-					"Resolved terminal attribute-binding [%s.%s ->%s] as attribute-reference",
+					"Resolved terminal navigable-binding [%s.%s ->%s] as navigable-reference",
 					sourceBinding.asLoggableText(),
 					terminalName,
-					attribute
+					navigable
 			);
 
 			// todo (6.0) : we should probably force these to forcefully resolve the join.
 			return context().getParsingContext().findOrCreateNavigableBinding(
 					sourceBinding,
-					attribute
+					navigable
 			);
 		}
 	}
 
-	private boolean isJoinable(SqmNavigable attribute) {
-		if ( SqmSingularAttribute.class.isInstance( attribute ) ) {
-			final SqmSingularAttribute attrRef = (SqmSingularAttribute) attribute;
+	private boolean isJoinable(Navigable attribute) {
+		if ( SingularPersistentAttribute.class.isInstance( attribute ) ) {
+			final SingularPersistentAttribute attrRef = (SingularPersistentAttribute) attribute;
 			return attrRef.getAttributeTypeClassification() == SingularAttributeClassification.EMBEDDED
 					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.MANY_TO_ONE
 					|| attrRef.getAttributeTypeClassification() == SingularAttributeClassification.ONE_TO_ONE;
@@ -178,7 +178,7 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 		}
 	}
 
-	protected SqmNavigableBinding resolveFromElementAliasAsTerminal(SqmFromExporter exporter) {
+	protected SqmNavigableReference resolveFromElementAliasAsTerminal(SqmFromExporter exporter) {
 		log.debugf(
 				"Resolved terminal as from-element alias : %s",
 				exporter.getExportedFromElement().getIdentificationVariable()
@@ -186,14 +186,14 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 		return exporter.getExportedFromElement().getBinding();
 	}
 
-	protected SqmNavigableBinding resolveTreatedTerminal(
+	protected SqmNavigableReference resolveTreatedTerminal(
 			ResolutionContext context,
-			SqmNavigableSourceBinding lhs,
+			SqmNavigableSourceReference lhs,
 			String terminalName,
-			SqmExpressableTypeEntity subclassIndicator) {
-		final SqmNavigable joinedAttribute = resolveNavigable( lhs, terminalName );
+			EntityValuedExpressableType subclassIndicator) {
+		final Navigable joinedAttribute = resolveNavigable( lhs, terminalName );
 		log.debugf( "Resolved terminal treated-path : %s -> %s", joinedAttribute, subclassIndicator );
-		final SqmAttributeBinding joinBinding = (SqmAttributeBinding) buildAttributeJoin(
+		final SqmAttributeReference joinBinding = (SqmAttributeReference) buildAttributeJoin(
 				// todo : just do a cast for now, but this needs to be thought out (Binding -> SqmFrom)
 				//		^^ SqmFrom specifically needed mainly needed for "FromElementSpace"
 				//		but perhaps that resolution could be delayed
@@ -204,6 +204,6 @@ public class PathResolverBasicImpl extends AbstractNavigableBindingResolver {
 
 		joinBinding.addDowncast( new SqmDowncast( subclassIndicator ) );
 
-		return new TreatedNavigableBinding( joinBinding, subclassIndicator );
+		return new TreatedNavigableReference( joinBinding, subclassIndicator );
 	}
 }

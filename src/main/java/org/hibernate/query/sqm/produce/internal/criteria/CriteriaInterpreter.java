@@ -21,35 +21,34 @@ import javax.persistence.criteria.FetchParent;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
+import org.hibernate.internal.util.collections.Stack;
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
+import org.hibernate.persister.queryable.spi.ExpressableType;
+import org.hibernate.query.sqm.NotYetImplementedException;
+import org.hibernate.query.sqm.ParsingException;
+import org.hibernate.query.sqm.QueryException;
+import org.hibernate.query.sqm.produce.internal.QuerySpecProcessingStateDmlImpl;
+import org.hibernate.query.sqm.produce.internal.QuerySpecProcessingStateStandardImpl;
+import org.hibernate.query.sqm.produce.spi.ParsingContext;
+import org.hibernate.query.sqm.produce.spi.QuerySpecProcessingState;
 import org.hibernate.query.sqm.produce.spi.criteria.CriteriaVisitor;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaDelete;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaQuery;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaUpdate;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaExpression;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaOrder;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaPredicate;
+import org.hibernate.query.sqm.produce.spi.criteria.JpaQuerySpec;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaSubquery;
 import org.hibernate.query.sqm.produce.spi.criteria.JpaUpdateAssignment;
 import org.hibernate.query.sqm.produce.spi.criteria.from.JpaAttributeJoin;
 import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFetch;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFrom;
+import org.hibernate.query.sqm.produce.spi.criteria.from.JpaRoot;
 import org.hibernate.query.sqm.produce.spi.criteria.path.JpaAttributePath;
 import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPath;
 import org.hibernate.query.sqm.produce.spi.criteria.path.JpaPluralAttributePath;
 import org.hibernate.query.sqm.produce.spi.criteria.path.JpaSingularAttributePath;
-import org.hibernate.query.sqm.NotYetImplementedException;
-import org.hibernate.query.sqm.domain.SqmExpressableType;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
-import org.hibernate.query.sqm.ParsingException;
-import org.hibernate.query.sqm.QueryException;
-import org.hibernate.query.sqm.produce.spi.ParsingContext;
-import org.hibernate.query.sqm.produce.spi.QuerySpecProcessingState;
-import org.hibernate.query.sqm.produce.internal.QuerySpecProcessingStateDmlImpl;
-import org.hibernate.query.sqm.produce.internal.QuerySpecProcessingStateStandardImpl;
-import org.hibernate.internal.util.collections.Stack;
-import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaQuery;
-import org.hibernate.query.sqm.produce.spi.criteria.JpaCriteriaUpdate;
-import org.hibernate.query.sqm.produce.spi.criteria.JpaQuerySpec;
-import org.hibernate.query.sqm.produce.spi.criteria.from.JpaFrom;
-import org.hibernate.query.sqm.produce.spi.criteria.from.JpaRoot;
 import org.hibernate.query.sqm.tree.SqmDeleteStatement;
 import org.hibernate.query.sqm.tree.SqmJoinType;
 import org.hibernate.query.sqm.tree.SqmQuerySpec;
@@ -76,11 +75,11 @@ import org.hibernate.query.sqm.tree.expression.PositionalParameterSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
 import org.hibernate.query.sqm.tree.expression.UnaryOperationSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.CastFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.CountFunctionSqmExpression;
@@ -211,7 +210,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 			for ( JpaUpdateAssignment assignment : jpaCriteria.getAssignments() ) {
 				sqmStatement.getSetClause().addAssignment(
-						(SqmSingularAttributeBinding) resolveNavigableBinding( entityToUpdate.getBinding(), assignment.getTargetAttributePath() ),
+						(SqmSingularAttributeReference) resolveNavigableBinding( entityToUpdate.getBinding(), assignment.getTargetAttributePath() ),
 						assignment.getUpdatedValue().visitExpression( this )
 				);
 			}
@@ -227,10 +226,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 	}
 
-	private final Map<JpaPath,SqmNavigableBinding> jpaPathResolutionMap = new HashMap<>();
+	private final Map<JpaPath,SqmNavigableReference> jpaPathResolutionMap = new HashMap<>();
 
-	private SqmNavigableBinding resolvePath(JpaPath jpaPath) {
-		final SqmNavigableBinding existing = jpaPathResolutionMap.get( jpaPath );
+	private SqmNavigableReference resolvePath(JpaPath jpaPath) {
+		final SqmNavigableReference existing = jpaPathResolutionMap.get( jpaPath );
 		if ( existing != null ) {
 			return existing;
 		}
@@ -246,8 +245,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		throw new ParsingException( "Could not determine how to resolve JpaPath : " + jpaPath );
 	}
 
-	private SqmNavigableBinding resolveJpaFrom(JpaFrom jpaFrom) {
-		final SqmNavigableBinding existing = jpaPathResolutionMap.get( jpaFrom );
+	private SqmNavigableReference resolveJpaFrom(JpaFrom jpaFrom) {
+		final SqmNavigableReference existing = jpaPathResolutionMap.get( jpaFrom );
 		if ( existing != null ) {
 			return existing;
 		}
@@ -255,7 +254,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return resolveJpaFrom0( jpaFrom );
 	}
 
-	private SqmNavigableBinding resolveJpaFrom0(JpaFrom jpaFrom) {
+	private SqmNavigableReference resolveJpaFrom0(JpaFrom jpaFrom) {
 		if ( jpaFrom instanceof JpaRoot ) {
 			return makeSqmRoot(
 					querySpecProcessingStateStack.getCurrent().getFromClause(),
@@ -264,10 +263,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 		else if ( jpaFrom instanceof JpaAttributeJoin ) {
 			final JpaAttributeJoin jpaAttributeJoin = (JpaAttributeJoin) jpaFrom;
-			final SqmNavigableBinding parentPathBinding = resolvePath( jpaAttributeJoin.getParentPath() );
+			final SqmNavigableReference parentPathBinding = resolvePath( jpaAttributeJoin.getParentPath() );
 			return makeSqmAttributeJoin(
-					parentPathBinding.getSourceBinding(),
-					parentPathBinding.getSourceBinding().getExportedFromElement().getContainingSpace(),
+					parentPathBinding.getSourceReference(),
+					parentPathBinding.getSourceReference().getExportedFromElement().getContainingSpace(),
 					jpaAttributeJoin
 			).getBinding();
 		}
@@ -275,8 +274,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		throw new ParsingException( "Could not determine how to resolve JpaFrom : " + jpaFrom );
 	}
 
-	private SqmNavigableBinding resolveJpaAttributePath(JpaAttributePath jpaPath) {
-		final SqmNavigableBinding existing = jpaPathResolutionMap.get( jpaPath );
+	private SqmNavigableReference resolveJpaAttributePath(JpaAttributePath jpaPath) {
+		final SqmNavigableReference existing = jpaPathResolutionMap.get( jpaPath );
 		if ( existing != null ) {
 			return existing;
 		}
@@ -284,7 +283,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return resolveJpaAttributePath0( jpaPath );
 	}
 
-	private SqmNavigableBinding resolveJpaAttributePath0(JpaAttributePath jpaPath) {
+	private SqmNavigableReference resolveJpaAttributePath0(JpaAttributePath jpaPath) {
 		if ( jpaPath instanceof JpaSingularAttributePath ) {
 			return resolveSingularAttributePath0( (JpaSingularAttributePath) jpaPath );
 		}
@@ -296,18 +295,18 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		throw new ParsingException( "Could not determine how to resolve JpaAttributePath : " + jpaPath );
 	}
 
-	private SqmSingularAttributeBinding resolveSingularAttributePath(JpaSingularAttributePath jpaAttributePath) {
-		final SqmNavigableBinding existing = jpaPathResolutionMap.get( jpaAttributePath );
+	private SqmSingularAttributeReference resolveSingularAttributePath(JpaSingularAttributePath jpaAttributePath) {
+		final SqmNavigableReference existing = jpaPathResolutionMap.get( jpaAttributePath );
 		if ( existing != null ) {
-			return (SqmSingularAttributeBinding) existing;
+			return (SqmSingularAttributeReference) existing;
 		}
 
 		return resolveSingularAttributePath0( jpaAttributePath );
 	}
 
-	private SqmSingularAttributeBinding resolveSingularAttributePath0(JpaSingularAttributePath jpaAttributePath) {
-		final SqmNavigableSourceBinding attributeSourceBinding = (SqmNavigableSourceBinding) resolvePath( jpaAttributePath.getParentPath() );
-		final SqmSingularAttributeBinding attributeBinding = (SqmSingularAttributeBinding) parsingContext.findOrCreateNavigableBinding(
+	private SqmSingularAttributeReference resolveSingularAttributePath0(JpaSingularAttributePath jpaAttributePath) {
+		final SqmNavigableSourceReference attributeSourceBinding = (SqmNavigableSourceReference) resolvePath( jpaAttributePath.getParentPath() );
+		final SqmSingularAttributeReference attributeBinding = (SqmSingularAttributeReference) parsingContext.findOrCreateNavigableBinding(
 				attributeSourceBinding,
 				jpaAttributePath.getNavigable().getAttributeName()
 		);
@@ -315,18 +314,18 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return attributeBinding;
 	}
 
-	private SqmPluralAttributeBinding resolvePluralAttributePath(JpaPluralAttributePath jpaAttributePath) {
-		final SqmNavigableSourceBinding existing = (SqmNavigableSourceBinding) jpaPathResolutionMap.get( jpaAttributePath );
+	private SqmPluralAttributeReference resolvePluralAttributePath(JpaPluralAttributePath jpaAttributePath) {
+		final SqmNavigableSourceReference existing = (SqmNavigableSourceReference) jpaPathResolutionMap.get( jpaAttributePath );
 		if ( existing != null ) {
-			return (SqmPluralAttributeBinding) existing;
+			return (SqmPluralAttributeReference) existing;
 		}
 
 		return resolvePluralAttributePath0( jpaAttributePath );
 	}
 
-	private SqmPluralAttributeBinding resolvePluralAttributePath0(JpaPluralAttributePath jpaAttributePath) {
-		final SqmNavigableSourceBinding attributeSourceBinding = (SqmNavigableSourceBinding) resolvePath( jpaAttributePath.getParentPath() );
-		final SqmPluralAttributeBinding attributeBinding = (SqmPluralAttributeBinding) parsingContext.findOrCreateNavigableBinding(
+	private SqmPluralAttributeReference resolvePluralAttributePath0(JpaPluralAttributePath jpaAttributePath) {
+		final SqmNavigableSourceReference attributeSourceBinding = (SqmNavigableSourceReference) resolvePath( jpaAttributePath.getParentPath() );
+		final SqmPluralAttributeReference attributeBinding = (SqmPluralAttributeReference) parsingContext.findOrCreateNavigableBinding(
 				attributeSourceBinding,
 				jpaAttributePath.getNavigable().getAttributeName()
 		);
@@ -334,7 +333,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return attributeBinding;
 	}
 
-	private SqmNavigableBinding resolveNavigableBinding(SqmNavigableSourceBinding sqmFrom, JpaAttributePath attributePath) {
+	private SqmNavigableReference resolveNavigableBinding(SqmNavigableSourceReference sqmFrom, JpaAttributePath attributePath) {
 		return parsingContext.findOrCreateNavigableBinding(
 				sqmFrom,
 				attributePath.getNavigable().getAttributeName()
@@ -406,8 +405,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return sqmRoot;
 	}
 
-	private void bindJoins(JpaFrom<?,?> lhs, SqmNavigableBinding lhsBinding, SqmFromElementSpace space) {
-		if ( !SqmNavigableSourceBinding.class.isInstance( lhsBinding ) ) {
+	private void bindJoins(JpaFrom<?,?> lhs, SqmNavigableReference lhsBinding, SqmFromElementSpace space) {
+		if ( !SqmNavigableSourceReference.class.isInstance( lhsBinding ) ) {
 			if ( !lhs.getJoins().isEmpty() ) {
 				throw new ParsingException( "Attempt to bind joins against a NavigableBinding that is not also a NavigableSourceBinding " );
 			}
@@ -417,15 +416,15 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		}
 
 		for ( Join<?, ?> join : lhs.getJoins() ) {
-			makeSqmAttributeJoin( (SqmNavigableSourceBinding) lhsBinding, space, join );
+			makeSqmAttributeJoin( (SqmNavigableSourceReference) lhsBinding, space, join );
 		}
 	}
 
-	private SqmAttributeJoin makeSqmAttributeJoin(SqmNavigableSourceBinding sourceBinding, SqmFromElementSpace space, Join<?, ?> join) {
+	private SqmAttributeJoin makeSqmAttributeJoin(SqmNavigableSourceReference sourceBinding, SqmFromElementSpace space, Join<?, ?> join) {
 		final JpaAttributeJoin<?,?> jpaAttributeJoin = (JpaAttributeJoin<?, ?>) join;
 		final String alias = jpaAttributeJoin.getAlias();
 
-		final SqmAttributeBinding attributeBinding = (SqmAttributeBinding) parsingContext.findOrCreateNavigableBinding(
+		final SqmAttributeReference attributeBinding = (SqmAttributeReference) parsingContext.findOrCreateNavigableBinding(
 				sourceBinding,
 				jpaAttributeJoin.getAttribute().getName()
 		);
@@ -448,8 +447,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return sqmJoin;
 	}
 
-	private void bindFetches(FetchParent<?, ?> lhs, SqmNavigableBinding lhsBinding, SqmFromElementSpace space) {
-		if ( !SqmNavigableSourceBinding.class.isInstance( lhsBinding ) ) {
+	private void bindFetches(FetchParent<?, ?> lhs, SqmNavigableReference lhsBinding, SqmFromElementSpace space) {
+		if ( !SqmNavigableSourceReference.class.isInstance( lhsBinding ) ) {
 			if ( !lhs.getFetches().isEmpty() ) {
 				throw new ParsingException( "Attempt to bind fetches against a NavigableBinding that is not also a NavigableSourceBinding " );
 			}
@@ -458,12 +457,12 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			}
 		}
 
-		final SqmNavigableSourceBinding sourceBinding = (SqmNavigableSourceBinding) lhsBinding;
+		final SqmNavigableSourceReference sourceBinding = (SqmNavigableSourceReference) lhsBinding;
 
 		for ( Fetch<?, ?> fetch : lhs.getFetches() ) {
 			final JpaFetch<?,?> jpaFetch = (JpaFetch<?, ?>) fetch;
 
-			final SqmAttributeBinding attrBinding = (SqmAttributeBinding) parsingContext.findOrCreateNavigableBinding(
+			final SqmAttributeReference attrBinding = (SqmAttributeReference) parsingContext.findOrCreateNavigableBinding(
 					sourceBinding,
 					fetch.getAttribute().getName()
 			);
@@ -551,7 +550,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public <T extends Enum> ConstantEnumSqmExpression<T> visitEnumConstant(T value) {
 		return new ConstantEnumSqmExpression<T>(
 				value,
-				parsingContext.getSessionFactory().getDomainMetamodel().resolveBasicType( value.getClass() )
+				parsingContext.getSessionFactory().getTypeConfiguration().getBasicTypeRegistry().getBasicType( value.getClass() )
 		);
 	}
 
@@ -637,8 +636,8 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		);
 	}
 
-	private SqmExpressableTypeBasic resolveBasicExpressionType(Class typeClass) {
-		return parsingContext.getSessionFactory().getDomainMetamodel().resolveBasicType( typeClass );
+	private <T> BasicValuedExpressableType<T> resolveBasicExpressionType(Class<T> typeClass) {
+		return parsingContext.getSessionFactory().getTypeConfiguration().getBasicTypeRegistry().getBasicType( typeClass );
 	}
 
 	@Override
@@ -652,7 +651,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public UnaryOperationSqmExpression visitUnaryOperation(
 			UnaryOperationSqmExpression.Operation operation,
 			JpaExpression<?> expression,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new UnaryOperationSqmExpression( operation, expression.visitExpression( this ), resultType );
 	}
 
@@ -667,10 +666,10 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 				operation,
 				firstOperand,
 				secondOperand,
-				parsingContext.getSessionFactory().getDomainMetamodel().resolveArithmeticType(
-						(SqmDomainTypeBasic) firstOperand.getExpressionType(),
-						(SqmDomainTypeBasic) secondOperand.getExpressionType(),
-						operation
+				parsingContext.getSessionFactory().getTypeConfiguration().resolveArithmeticType(
+						(BasicValuedExpressableType) firstOperand.getExpressionType(),
+						(BasicValuedExpressableType) secondOperand.getExpressionType(),
+						operation == BinaryArithmeticSqmExpression.Operation.DIVIDE
 				)
 		);
 	}
@@ -680,7 +679,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			BinaryArithmeticSqmExpression.Operation operation,
 			JpaExpression<?> expression1,
 			JpaExpression<?> expression2,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new BinaryArithmeticSqmExpression(
 				operation,
 				expression1.visitExpression( this ),
@@ -690,7 +689,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SqmSingularAttributeBinding visitAttributeReference(JpaFrom<?, ?> attributeSource, String attributeName) {
+	public SqmSingularAttributeReference visitAttributeReference(JpaFrom<?, ?> attributeSource, String attributeName) {
 		// todo : see
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
@@ -713,7 +712,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	@Override
 	public GenericFunctionSqmExpression visitFunction(
 			String name,
-			SqmDomainTypeBasic resultTypeDescriptor,
+			BasicValuedExpressableType resultTypeDescriptor,
 			List<JpaExpression<?>> arguments) {
 		final List<SqmExpression> sqmExpressions = new ArrayList<>();
 		for ( JpaExpression<?> argument : arguments ) {
@@ -726,7 +725,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	@Override
 	public GenericFunctionSqmExpression visitFunction(
 			String name,
-			SqmDomainTypeBasic resultTypeDescriptor,
+			BasicValuedExpressableType resultTypeDescriptor,
 			JpaExpression<?>[] arguments) {
 		// todo : handle the standard function calls specially...
 		// for now always use the generic expression
@@ -750,7 +749,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new AvgFunctionSqmExpression(
 				sqmExpression,
 				distinct,
-				(SqmDomainTypeBasic) sqmExpression.getExpressionType()
+				(BasicValuedExpressableType) sqmExpression.getExpressionType()
 		);
 	}
 
@@ -758,7 +757,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public AvgFunctionSqmExpression visitAvgFunction(
 			JpaExpression<?> expression,
 			boolean distinct,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new AvgFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
@@ -768,7 +767,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new CountFunctionSqmExpression(
 				sqmExpression,
 				distinct,
-				(SqmDomainTypeBasic) sqmExpression.getExpressionType()
+				(BasicValuedExpressableType) sqmExpression.getExpressionType()
 		);
 	}
 
@@ -776,7 +775,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public CountFunctionSqmExpression visitCountFunction(
 			JpaExpression<?> expression,
 			boolean distinct,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new CountFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
@@ -784,12 +783,12 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct) {
 		return new CountStarFunctionSqmExpression(
 				distinct,
-				parsingContext.getSessionFactory().getDomainMetamodel().resolveBasicType( Long.class )
+				parsingContext.getSessionFactory().getTypeConfiguration().getBasicTypeRegistry().getBasicType( Long.class )
 		);
 	}
 
 	@Override
-	public CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct, SqmDomainTypeBasic resultType) {
+	public CountStarFunctionSqmExpression visitCountStarFunction(boolean distinct, BasicValuedExpressableType resultType) {
 		return new CountStarFunctionSqmExpression( distinct, resultType );
 	}
 
@@ -799,7 +798,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new MaxFunctionSqmExpression(
 				sqmExpression,
 				distinct,
-				(SqmDomainTypeBasic) sqmExpression.getExpressionType()
+				(BasicValuedExpressableType) sqmExpression.getExpressionType()
 		);
 	}
 
@@ -807,7 +806,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public MaxFunctionSqmExpression visitMaxFunction(
 			JpaExpression<?> expression,
 			boolean distinct,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new MaxFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
@@ -817,7 +816,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new MinFunctionSqmExpression(
 				sqmExpression,
 				distinct,
-				(SqmDomainTypeBasic) sqmExpression.getExpressionType()
+				(BasicValuedExpressableType) sqmExpression.getExpressionType()
 		);
 	}
 
@@ -825,7 +824,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public MinFunctionSqmExpression visitMinFunction(
 			JpaExpression<?> expression,
 			boolean distinct,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new MinFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
@@ -835,7 +834,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new SumFunctionSqmExpression(
 				sqmExpression,
 				distinct,
-				parsingContext.getSessionFactory().getDomainMetamodel().resolveSumFunctionType( (SqmDomainTypeBasic) sqmExpression.getExpressionType() )
+				parsingContext.getSessionFactory().getTypeConfiguration().resolveSumFunctionType( (BasicValuedExpressableType) sqmExpression.getExpressionType() )
 		);
 	}
 
@@ -843,7 +842,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public SumFunctionSqmExpression visitSumFunction(
 			JpaExpression<?> expression,
 			boolean distinct,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new SumFunctionSqmExpression( expression.visitExpression( this ), distinct, resultType );
 	}
 
@@ -856,7 +855,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	public ConcatSqmExpression visitConcat(
 			JpaExpression<?> expression1,
 			JpaExpression<?> expression2,
-			SqmDomainTypeBasic resultType) {
+			BasicValuedExpressableType resultType) {
 		return new ConcatSqmExpression(
 				expression1.visitExpression( this ),
 				expression2.visitExpression( this ),
@@ -896,7 +895,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new SubQuerySqmExpression( subQuerySpec, determineSelectedExpressableType( subQuerySpec.getSelectClause() ) );
 	}
 
-	private static SqmExpressableType determineSelectedExpressableType(SqmSelectClause selectClause) {
+	private static ExpressableType determineSelectedExpressableType(SqmSelectClause selectClause) {
 		if ( selectClause.getSelections().size() != 0 ) {
 			return null;
 		}
@@ -975,16 +974,16 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	@Override
 	public EmptinessSqmPredicate visitEmptinessPredicate(JpaPluralAttributePath pluralAttributePath, boolean negated) {
 		// resolve the plural attribute binding
-		final SqmNavigableSourceBinding lhs = (SqmNavigableSourceBinding) resolvePath( pluralAttributePath.getParentPath() );
+		final SqmNavigableSourceReference lhs = (SqmNavigableSourceReference) resolvePath( pluralAttributePath.getParentPath() );
 
-		final SqmAttributeBinding attributeBinding = (SqmAttributeBinding) parsingContext.findOrCreateNavigableBinding(
+		final SqmAttributeReference attributeBinding = (SqmAttributeReference) parsingContext.findOrCreateNavigableBinding(
 				lhs,
 				pluralAttributePath.getNavigable().getAttributeName()
 		);
-		if ( !SqmPluralAttributeBinding.class.isInstance( attributeBinding ) ) {
+		if ( !SqmPluralAttributeReference.class.isInstance( attributeBinding ) ) {
 			throw new ParsingException( "JpaPluralAttributePath resolved to non-PluralAttributeBinding : " + attributeBinding );
 		}
-		return new EmptinessSqmPredicate( (SqmPluralAttributeBinding) attributeBinding, negated );
+		return new EmptinessSqmPredicate( (SqmPluralAttributeReference) attributeBinding, negated );
 	}
 
 	@Override
@@ -1091,14 +1090,14 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 				expressionToCast.visitExpression( this ),
 				// ugh
 				// todo : decide how we want to handle basic types in SQM
-				parsingContext.getSessionFactory().getDomainMetamodel().resolveCastTargetType( castTarget.getName() )
+				parsingContext.getSessionFactory().getTypeConfiguration().resolveCastTargetType( castTarget.getName() )
 		);
 	}
 
 	@Override
 	public GenericFunctionSqmExpression visitGenericFunction(
 			String functionName,
-			SqmExpressableTypeBasic resultType,
+			BasicValuedExpressableType resultType,
 			List<JpaExpression<?>> jpaArguments) {
 		final List<SqmExpression> arguments;
 		if ( jpaArguments != null && !jpaArguments.isEmpty() ) {

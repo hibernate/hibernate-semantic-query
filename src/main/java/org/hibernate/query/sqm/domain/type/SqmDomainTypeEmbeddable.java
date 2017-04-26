@@ -6,10 +6,15 @@
  */
 package org.hibernate.query.sqm.domain.type;
 
+import org.hibernate.type.spi.EmbeddedType;
+
 /**
  * Models an embeddable/composite type in the consumer's "type system"
  *
  * @author Steve Ebersole
+ *
+ * @deprecated {@link EmbeddedType}
  */
+@Deprecated
 public interface SqmDomainTypeEmbeddable extends SqmDomainType {
 }

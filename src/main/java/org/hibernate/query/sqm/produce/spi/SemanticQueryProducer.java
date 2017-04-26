@@ -28,39 +28,35 @@ public interface SemanticQueryProducer {
 	 * Performs the interpretation of a HQL/JPQL query string to SQM.
 	 *
 	 * @param query The HQL/JPQL query string to interpret
-	 * @param consumerContext Callback information
 	 *
 	 * @return The semantic representation of the incoming query.
 	 */
-	SqmStatement interpret(String query, ConsumerContext consumerContext);
+	SqmStatement interpret(String query);
 
 	/**
 	 * Perform the interpretation of a (select) criteria query.
 	 *
 	 * @param query The criteria query
-	 * @param consumerContext Callback information
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	SqmSelectStatement interpret(CriteriaQuery query, ConsumerContext consumerContext);
+	SqmSelectStatement interpret(CriteriaQuery query);
 
 	/**
 	 * Perform the interpretation of a (delete) criteria query.
 	 *
 	 * @param criteria The DELETE criteria
-	 * @param consumerContext Callback information
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	SqmDeleteStatement interpret(CriteriaDelete criteria, ConsumerContext consumerContext);
+	SqmDeleteStatement interpret(CriteriaDelete criteria);
 
 	/**
 	 * Perform the interpretation of a (update) criteria query.
 	 *
 	 * @param criteria The criteria query
-	 * @param consumerContext Callback information
 	 *
 	 * @return The semantic representation of the incoming criteria query.
 	 */
-	SqmUpdateStatement interpret(CriteriaUpdate criteria, ConsumerContext consumerContext);
+	SqmUpdateStatement interpret(CriteriaUpdate criteria);
 }

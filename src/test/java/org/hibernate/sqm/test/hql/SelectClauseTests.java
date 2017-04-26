@@ -18,12 +18,12 @@ import org.hibernate.query.sqm.domain.SqmPluralAttributeIndex.IndexClassificatio
 import org.hibernate.query.sqm.tree.SqmQuerySpec;
 import org.hibernate.query.sqm.tree.SqmSelectStatement;
 import org.hibernate.query.sqm.tree.expression.BinaryArithmeticSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.AbstractSqmCollectionIndexBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionElementBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmEntityBinding;
+import org.hibernate.query.sqm.tree.expression.domain.AbstractSqmCollectionIndexReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmCollectionElementReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityReference;
 import org.hibernate.query.sqm.tree.expression.domain.SqmMapEntryBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmRoot;
 import org.hibernate.query.sqm.tree.select.SqmDynamicInstantiation;
@@ -63,7 +63,7 @@ public class SelectClauseTests extends StandardModelTest {
 		SqmSelectStatement statement = interpretSelect( "select p from Person p" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmEntityBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmEntityReference.class ) );
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class SelectClauseTests extends StandardModelTest {
 		SqmSelectStatement statement = interpretSelect( "select p.nickName from Person p" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SqmSingularAttributeBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SqmSingularAttributeReference.class ) );
 	}
 
 	@Test
@@ -80,11 +80,11 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 	}
 
@@ -94,11 +94,11 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( SqmEntityBinding.class )
+				instanceOf( SqmEntityReference.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 	}
 
@@ -144,7 +144,7 @@ public class SelectClauseTests extends StandardModelTest {
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 	}
 
@@ -177,11 +177,11 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 3, dynamicInstantiation.getArguments().size() );
 		assertThat(
 				dynamicInstantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
@@ -220,11 +220,11 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 	}
 
@@ -249,11 +249,11 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( SqmSingularAttributeBinding.class )
+				instanceOf( SqmSingularAttributeReference.class )
 		);
 	}
 
@@ -268,18 +268,18 @@ public class SelectClauseTests extends StandardModelTest {
 		assertThat( querySpec.getFromClause().getFromElementSpaces().size(), is(1) );
 		final SqmFromElementSpace fromElementSpace = querySpec.getFromClause().getFromElementSpaces().get( 0 );
 		final SqmRoot root = fromElementSpace.getRoot();
-		assertThat( root.getBinding().getBoundNavigable().getEntityName(), endsWith( "Person" ) );
+		assertThat( root.getBinding().getReferencedNavigable().getEntityName(), endsWith( "Person" ) );
 		assertThat( fromElementSpace.getJoins().size(), is(0) );
 
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
-		SqmSingularAttributeBinding leftHandOperand = (SqmSingularAttributeBinding) expression.getLeftHandOperand();
-		assertThat( leftHandOperand.getSourceBinding().getExportedFromElement(), sameInstance( root ) );
-		assertThat( leftHandOperand.getBoundNavigable().getAttributeName(), is( "numberOfToes" ) );
+		SqmSingularAttributeReference leftHandOperand = (SqmSingularAttributeReference) expression.getLeftHandOperand();
+		assertThat( leftHandOperand.getSourceReference().getExportedFromElement(), sameInstance( root ) );
+		assertThat( leftHandOperand.getReferencedNavigable().getAttributeName(), is( "numberOfToes" ) );
 //		assertThat( leftHandOperand.getFromElement(), nullValue() );
 
-		SqmSingularAttributeBinding rightHandOperand = (SqmSingularAttributeBinding) expression.getRightHandOperand();
-		assertThat( rightHandOperand.getSourceBinding().getExportedFromElement(), sameInstance( root ) );
-		assertThat( rightHandOperand.getBoundNavigable().getAttributeName(), is( "numberOfToes" ) );
+		SqmSingularAttributeReference rightHandOperand = (SqmSingularAttributeReference) expression.getRightHandOperand();
+		assertThat( rightHandOperand.getSourceReference().getExportedFromElement(), sameInstance( root ) );
+		assertThat( rightHandOperand.getReferencedNavigable().getAttributeName(), is( "numberOfToes" ) );
 //		assertThat( leftHandOperand.getFromElement(), nullValue() );
 	}
 
@@ -294,21 +294,21 @@ public class SelectClauseTests extends StandardModelTest {
 		assertThat( querySpec.getFromClause().getFromElementSpaces().size(), is(2) );
 
 		final SqmRoot entityRoot = querySpec.getFromClause().getFromElementSpaces().get( 0 ).getRoot();
-		assertThat( entityRoot.getBinding().getBoundNavigable().getEntityName(), endsWith( "Person" ) );
+		assertThat( entityRoot.getBinding().getReferencedNavigable().getEntityName(), endsWith( "Person" ) );
 
 		final SqmRoot entity2Root = querySpec.getFromClause().getFromElementSpaces().get( 1 ).getRoot();
-		assertThat( entity2Root.getBinding().getBoundNavigable().getEntityName(), endsWith( "Person" ) );
+		assertThat( entity2Root.getBinding().getReferencedNavigable().getEntityName(), endsWith( "Person" ) );
 
 		BinaryArithmeticSqmExpression addExpression = (BinaryArithmeticSqmExpression) selection.getExpression();
 
-		SqmSingularAttributeBinding leftHandOperand = (SqmSingularAttributeBinding) addExpression.getLeftHandOperand();
-		assertThat( leftHandOperand.getSourceBinding().getExportedFromElement(), sameInstance( entityRoot ) );
-		assertThat( leftHandOperand.getBoundNavigable().getAttributeName(), is( "numberOfToes" ) );
+		SqmSingularAttributeReference leftHandOperand = (SqmSingularAttributeReference) addExpression.getLeftHandOperand();
+		assertThat( leftHandOperand.getSourceReference().getExportedFromElement(), sameInstance( entityRoot ) );
+		assertThat( leftHandOperand.getReferencedNavigable().getAttributeName(), is( "numberOfToes" ) );
 		assertThat( FromElementHelper.extractExpressionExportedFromElement( leftHandOperand ), nullValue() );
 
-		SqmSingularAttributeBinding rightHandOperand = (SqmSingularAttributeBinding) addExpression.getRightHandOperand();
-		assertThat( rightHandOperand.getSourceBinding().getExportedFromElement(), sameInstance( entity2Root ) );
-		assertThat( rightHandOperand.getBoundNavigable().getAttributeName(), is( "numberOfToes" ) );
+		SqmSingularAttributeReference rightHandOperand = (SqmSingularAttributeReference) addExpression.getRightHandOperand();
+		assertThat( rightHandOperand.getSourceReference().getExportedFromElement(), sameInstance( entity2Root ) );
+		assertThat( rightHandOperand.getReferencedNavigable().getAttributeName(), is( "numberOfToes" ) );
 		assertThat( FromElementHelper.extractExpressionExportedFromElement( rightHandOperand ), nullValue() );
 	}
 
@@ -336,14 +336,14 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( AbstractSqmCollectionIndexBinding.class )
+				instanceOf( AbstractSqmCollectionIndexReference.class )
 		);
 
-		final AbstractSqmCollectionIndexBinding mapKeyPathExpression = (AbstractSqmCollectionIndexBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final SqmPluralAttribute attrRef = mapKeyPathExpression.getPluralAttributeBinding().getBoundNavigable();
+		final AbstractSqmCollectionIndexReference mapKeyPathExpression = (AbstractSqmCollectionIndexReference) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final SqmPluralAttribute attrRef = mapKeyPathExpression.getPluralAttributeBinding().getReferencedNavigable();
 		assertThat( attrRef.getCollectionClassification(), is(collectionClassification) );
-		assertThat( attrRef.getIndexReference().getClassification(), is(indexClassification) );
-		assertThat( mapKeyPathExpression.getExpressionType(), sameInstance( attrRef.getIndexReference() ) );
+		assertThat( attrRef.getIndexDescriptor().getClassification(), is( indexClassification) );
+		assertThat( mapKeyPathExpression.getExpressionType(), sameInstance( attrRef.getIndexDescriptor() ) );
 
 		assertThat(
 				FromElementHelper.extractExpressionExportedFromElement( mapKeyPathExpression.getPluralAttributeBinding() ).getIdentificationVariable(),
@@ -444,15 +444,15 @@ public class SelectClauseTests extends StandardModelTest {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( SqmCollectionElementBinding.class )
+				instanceOf( SqmCollectionElementReference.class )
 		);
 
-		final SqmCollectionElementBinding elementBinding = (SqmCollectionElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final SqmPluralAttributeBinding attrRef = elementBinding.getSourceBinding();
+		final SqmCollectionElementReference elementBinding = (SqmCollectionElementReference) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final SqmPluralAttributeReference attrRef = elementBinding.getSourceReference();
 
-		assertThat( attrRef.getBoundNavigable().getCollectionClassification(), is(collectionClassification) );
-//		assertThat( elementBinding.getExpressionType(), sameInstance( attrRef.getElementReference().getType() ) );
-		assertThat( attrRef.getBoundNavigable().getElementReference().getClassification(), is( elementClassification ) );
+		assertThat( attrRef.getReferencedNavigable().getCollectionClassification(), is( collectionClassification) );
+//		assertThat( elementBinding.getExpressionType(), sameInstance( attrRef.getElementDescriptor().getType() ) );
+		assertThat( attrRef.getReferencedNavigable().getElementDescriptor().getClassification(), is( elementClassification ) );
 		assertThat( attrRef.getExportedFromElement().getIdentificationVariable(), is( collectionIdentificationVariable ) );
 	}
 
@@ -480,17 +480,17 @@ public class SelectClauseTests extends StandardModelTest {
 		assertThat( mapEntryFunction.getAttributeBinding().getExportedFromElement(), notNullValue() );
 		assertThat( mapEntryFunction.getAttributeBinding().getExportedFromElement().getIdentificationVariable(), is( "m") );
 
-		final SqmPluralAttribute attrRef = mapEntryFunction.getAttributeBinding().getBoundNavigable();
+		final SqmPluralAttribute attrRef = mapEntryFunction.getAttributeBinding().getReferencedNavigable();
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 
 		// Key
-		assertThat( attrRef.getIndexReference().getClassification(), is( IndexClassification.BASIC) );
-		assertEquals( String.class, attrRef.getIndexReference().getExportedDomainType().getJavaType() );
+		assertThat( attrRef.getIndexDescriptor().getClassification(), is( IndexClassification.BASIC) );
+		assertEquals( String.class, attrRef.getIndexDescriptor().getExportedDomainType().getJavaType() );
 
 		// value/element
-		assertThat( attrRef.getElementReference().getClassification(), is( ElementClassification.ONE_TO_MANY) );
-		assertThat( ( (SqmExpressableTypeEntity) attrRef.getElementReference() ).getEntityName(), is( "org.hibernate.sqm.test.domain.EntityOfMaps" ) );
-		assertEquals( EntityOfMaps.class, attrRef.getElementReference().getExportedDomainType().getJavaType() );
+		assertThat( attrRef.getElementDescriptor().getClassification(), is( ElementClassification.ONE_TO_MANY) );
+		assertThat( ( (SqmExpressableTypeEntity) attrRef.getElementDescriptor() ).getEntityName(), is( "org.hibernate.sqm.test.domain.EntityOfMaps" ) );
+		assertEquals( EntityOfMaps.class, attrRef.getElementDescriptor().getExportedDomainType().getJavaType() );
 	}
 
 	public static class DTO {

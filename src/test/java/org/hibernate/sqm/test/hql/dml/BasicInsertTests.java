@@ -8,7 +8,7 @@ package org.hibernate.sqm.test.hql.dml;
 
 import org.hibernate.query.sqm.tree.SqmInsertSelectStatement;
 import org.hibernate.query.sqm.tree.SqmStatement;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.sqm.test.domain.Person;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
@@ -36,8 +36,8 @@ public class BasicInsertTests extends StandardModelTest {
 
 		assertThat( insertStatement.getInsertTarget().getEntityName(), equalTo( Person.class.getName() ) );
 
-		for ( SqmSingularAttributeBinding stateField : insertStatement.getStateFields() ) {
-			assertSame( insertStatement.getInsertTarget(), stateField.getSourceBinding().getExportedFromElement() );
+		for ( SqmSingularAttributeReference stateField : insertStatement.getStateFields() ) {
+			assertSame( insertStatement.getInsertTarget(), stateField.getSourceReference().getExportedFromElement() );
 		}
 	}
 }

@@ -6,14 +6,14 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
 
 /**
  * @author Steve Ebersole
  */
 public class LiteralIntegerSqmExpression extends AbstractLiteralSqmExpressionImpl<Integer> {
-	public LiteralIntegerSqmExpression(Integer value, SqmExpressableTypeBasic sqmExpressableTypeBasic) {
+	public LiteralIntegerSqmExpression(Integer value, BasicValuedExpressableType sqmExpressableTypeBasic) {
 		super( value, sqmExpressableTypeBasic );
 	}
 

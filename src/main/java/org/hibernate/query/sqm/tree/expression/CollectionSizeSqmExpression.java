@@ -6,10 +6,9 @@
  */
 package org.hibernate.query.sqm.tree.expression;
 
+import org.hibernate.persister.queryable.spi.BasicValuedExpressableType;
 import org.hibernate.query.sqm.consume.spi.SemanticQueryWalker;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
-import org.hibernate.query.sqm.domain.type.SqmDomainType;
-import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeReference;
 
 /**
  * Represents the {@code SIZE()} function.
@@ -18,31 +17,26 @@ import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
  * @author Gunnar Morling
  */
 public class CollectionSizeSqmExpression implements SqmExpression {
-	private final SqmPluralAttributeBinding pluralAttributeBinding;
-	private final SqmExpressableTypeBasic sizeType;
+	private final SqmPluralAttributeReference pluralAttributeBinding;
+	private final BasicValuedExpressableType sizeType;
 
-	public CollectionSizeSqmExpression(SqmPluralAttributeBinding pluralAttributeBinding, SqmExpressableTypeBasic sizeType) {
+	public CollectionSizeSqmExpression(SqmPluralAttributeReference pluralAttributeBinding, BasicValuedExpressableType sizeType) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 		this.sizeType = sizeType;
 	}
 
-	public SqmPluralAttributeBinding getPluralAttributeBinding() {
+	public SqmPluralAttributeReference getPluralAttributeBinding() {
 		return pluralAttributeBinding;
 	}
 
 	@Override
-	public SqmExpressableTypeBasic getExpressionType() {
+	public BasicValuedExpressableType getExpressionType() {
 		return sizeType;
 	}
 
 	@Override
-	public SqmExpressableTypeBasic getInferableType() {
+	public BasicValuedExpressableType getInferableType() {
 		return getExpressionType();
-	}
-
-	@Override
-	public SqmDomainType getExportedDomainType() {
-		return getExpressionType().getExportedDomainType();
 	}
 
 	@Override

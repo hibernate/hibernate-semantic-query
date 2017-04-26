@@ -9,8 +9,8 @@ package org.hibernate.sqm.test.hql;
 import org.hibernate.orm.persister.common.spi.SingularAttribute;
 import org.hibernate.orm.persister.entity.spi.IdentifierDescriptorSimple;
 import org.hibernate.query.sqm.tree.SqmSelectStatement;
-import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierBindingBasic;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmEntityIdentifierReferenceSimple;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.sqm.test.domain.StandardModelTest;
 
 import org.junit.Test;
@@ -32,27 +32,27 @@ public class EntityIdReferenceTest extends StandardModelTest {
 	@Test
 	public void testReferenceSimpleIdAttributeNamedId() {
 		SqmSelectStatement sqm = interpretSelect( "select p.id from Person p" );
-		SqmEntityIdentifierBindingBasic idBinding = (SqmEntityIdentifierBindingBasic) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SqmEntityIdentifierReferenceSimple idBinding = (SqmEntityIdentifierReferenceSimple) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 //		assertThat( idReference.getExpressionType().getTypeName(), is(Integer.class.getName() ) );
 
 		sqm = (SqmSelectStatement) interpret( "select p.pk from Person p" );
-		SqmEntityIdentifierBindingBasic pkReference = (SqmEntityIdentifierBindingBasic) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SqmEntityIdentifierReferenceSimple pkReference = (SqmEntityIdentifierReferenceSimple) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
 //		assertThat( pkReference.getExpressionType().getTypeName(), is(Integer.class.getName() ) );
 
-		assertThat( idBinding.getBoundNavigable(), sameInstance( pkReference.getBoundNavigable() ) );
+		assertThat( idBinding.getReferencedNavigable(), sameInstance( pkReference.getReferencedNavigable() ) );
 	}
 
 	@Test
 	public void testEntityWithNonIdAttributeNamedId() {
 		SqmSelectStatement sqm = interpretSelect( "select p.id from EntityWithNonIdAttributeNamedId p" );
-		SqmSingularAttributeBinding idReference = (SqmSingularAttributeBinding) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		SingularAttribute idOrmSingularAttribute = (SingularAttribute) idReference.getBoundNavigable();
+		SqmSingularAttributeReference idReference = (SqmSingularAttributeReference) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SingularAttribute idOrmSingularAttribute = (SingularAttribute) idReference.getReferencedNavigable();
 		assertFalse( idOrmSingularAttribute.isId() );
 //		assertThat( idReference.getExpressionType().getTypeName(), is( String.class.getName() ) );
 
 		sqm = interpretSelect( "select p.pk from EntityWithNonIdAttributeNamedId p" );
-		SqmEntityIdentifierBindingBasic pkReference = (SqmEntityIdentifierBindingBasic) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		SingularAttribute pkOrmSingularAttribute = ( (IdentifierDescriptorSimple) pkReference.getBoundNavigable() ).getIdAttribute();
+		SqmEntityIdentifierReferenceSimple pkReference = (SqmEntityIdentifierReferenceSimple) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SingularAttribute pkOrmSingularAttribute = ( (IdentifierDescriptorSimple) pkReference.getReferencedNavigable() ).getIdAttribute();
 		assertTrue( pkOrmSingularAttribute.isId() );
 //		assertThat( pkReference.getExpressionType().getTypeName(), is( Integer.class.getName() ) );
 	}
@@ -60,8 +60,8 @@ public class EntityIdReferenceTest extends StandardModelTest {
 	@Test
 	public void testNonAggregatedCompositeIdReference() {
 		SqmSelectStatement sqm = interpretSelect( "select e.id from NonAggregatedCompositeIdEntityWithNonIdAttributeNamedId e" );
-		SqmSingularAttributeBinding idReference = (SqmSingularAttributeBinding) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		SingularAttribute attribute = (SingularAttribute) idReference.getBoundNavigable();
+		SqmSingularAttributeReference idReference = (SqmSingularAttributeReference) sqm.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		SingularAttribute attribute = (SingularAttribute) idReference.getReferencedNavigable();
 		assertFalse( attribute.isId() );
 //		assertThat( idReference.getExpressionType().getTypeName(), is(String.class.getName() ) );
 	}

@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntityPolymorphicEntity;
-import org.hibernate.query.sqm.domain.type.SqmDomainTypeBasic;
+import org.hibernate.persister.entity.spi.EntityPersister;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
+import org.hibernate.persister.queryable.spi.PolymorphicEntityValuedExpressableType;
 import org.hibernate.query.sqm.ParsingException;
 import org.hibernate.query.sqm.produce.internal.NavigableBindingHelper;
 import org.hibernate.query.sqm.tree.SqmDeleteStatement;
@@ -42,11 +42,11 @@ import org.hibernate.query.sqm.tree.expression.PositionalParameterSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SubQuerySqmExpression;
 import org.hibernate.query.sqm.tree.expression.UnaryOperationSqmExpression;
-import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmPluralAttributeReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmSingularAttributeReference;
 import org.hibernate.query.sqm.tree.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.ConcatFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.CountFunctionSqmExpression;
@@ -55,12 +55,12 @@ import org.hibernate.query.sqm.tree.expression.function.GenericFunctionSqmExpres
 import org.hibernate.query.sqm.tree.expression.function.MaxFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.MinFunctionSqmExpression;
 import org.hibernate.query.sqm.tree.expression.function.SumFunctionSqmExpression;
-import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmAttributeJoin;
 import org.hibernate.query.sqm.tree.from.SqmCrossJoin;
 import org.hibernate.query.sqm.tree.from.SqmEntityJoin;
 import org.hibernate.query.sqm.tree.from.SqmFrom;
 import org.hibernate.query.sqm.tree.from.SqmFromClause;
+import org.hibernate.query.sqm.tree.from.SqmFromElementSpace;
 import org.hibernate.query.sqm.tree.from.SqmRoot;
 import org.hibernate.query.sqm.tree.internal.SqmSelectStatementImpl;
 import org.hibernate.query.sqm.tree.order.SqmOrderByClause;
@@ -99,7 +99,7 @@ public class QuerySplitter {
 		// root.  Use that restriction to locate the unmapped polymorphic reference
 		SqmRoot unmappedPolymorphicReference = null;
 		for ( SqmFromElementSpace fromElementSpace : statement.getQuerySpec().getFromClause().getFromElementSpaces() ) {
-			if ( SqmExpressableTypeEntityPolymorphicEntity.class.isInstance( fromElementSpace.getRoot().getBinding().getBoundNavigable() ) ) {
+			if ( PolymorphicEntityValuedExpressableType.class.isInstance( fromElementSpace.getRoot().getBinding().getReferencedNavigable() ) ) {
 				unmappedPolymorphicReference = fromElementSpace.getRoot();
 			}
 		}
@@ -108,11 +108,11 @@ public class QuerySplitter {
 			return new SqmSelectStatement[] { statement };
 		}
 
-		final SqmExpressableTypeEntityPolymorphicEntity unmappedPolymorphicDescriptor = (SqmExpressableTypeEntityPolymorphicEntity) unmappedPolymorphicReference.getBinding().getBoundNavigable();
+		final PolymorphicEntityValuedExpressableType<?> unmappedPolymorphicDescriptor = (PolymorphicEntityValuedExpressableType) unmappedPolymorphicReference.getBinding().getReferencedNavigable();
 		final SqmSelectStatement[] expanded = new SqmSelectStatement[ unmappedPolymorphicDescriptor.getImplementors().size() ];
 
 		int i = -1;
-		for ( SqmExpressableTypeEntity mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
+		for ( EntityPersister<?> mappedDescriptor : unmappedPolymorphicDescriptor.getImplementors() ) {
 			i++;
 			final UnmappedPolymorphismReplacer replacer = new UnmappedPolymorphismReplacer(
 					statement,
@@ -128,15 +128,15 @@ public class QuerySplitter {
 	@SuppressWarnings("unchecked")
 	private static class UnmappedPolymorphismReplacer extends BaseSemanticQueryWalker {
 		private final SqmRoot unmappedPolymorphicFromElement;
-		private final SqmExpressableTypeEntity mappedDescriptor;
+		private final EntityValuedExpressableType mappedDescriptor;
 
 		private Map<SqmFrom,SqmFrom> sqmFromSqmCopyMap = new HashMap<>();
-		private Map<SqmNavigableBinding, SqmNavigableBinding> navigableBindingCopyMap = new HashMap<>();
+		private Map<SqmNavigableReference, SqmNavigableReference> navigableBindingCopyMap = new HashMap<>();
 
 		private UnmappedPolymorphismReplacer(
 				SqmSelectStatement selectStatement,
 				SqmRoot unmappedPolymorphicFromElement,
-				SqmExpressableTypeEntity mappedDescriptor) {
+				EntityValuedExpressableType mappedDescriptor) {
 			this.unmappedPolymorphicFromElement = unmappedPolymorphicFromElement;
 			this.mappedDescriptor = mappedDescriptor;
 		}
@@ -228,7 +228,7 @@ public class QuerySplitter {
 
 		@Override
 		public SqmRoot visitRootEntityFromElement(SqmRoot rootEntityFromElement) {
-			final SqmNavigableSourceBinding existingCopy = (SqmNavigableSourceBinding) navigableBindingCopyMap.get( rootEntityFromElement.getBinding() );
+			final SqmNavigableSourceReference existingCopy = (SqmNavigableSourceReference) navigableBindingCopyMap.get( rootEntityFromElement.getBinding() );
 			if ( existingCopy != null ) {
 				return (SqmRoot) existingCopy.getExportedFromElement();
 			}
@@ -254,7 +254,7 @@ public class QuerySplitter {
 						currentFromElementSpaceCopy,
 						rootEntityFromElement.getUniqueIdentifier(),
 						rootEntityFromElement.getIdentificationVariable(),
-						rootEntityFromElement.getBinding().getBoundNavigable()
+						rootEntityFromElement.getBinding().getReferencedNavigable()
 				);
 			}
 			navigableBindingCopyMap.put( rootEntityFromElement.getBinding(), copy.getBinding() );
@@ -263,7 +263,7 @@ public class QuerySplitter {
 
 		@Override
 		public SqmCrossJoin visitCrossJoinedFromElement(SqmCrossJoin joinedFromElement) {
-			final SqmNavigableSourceBinding existingCopy = (SqmNavigableSourceBinding) navigableBindingCopyMap.get( joinedFromElement.getBinding() );
+			final SqmNavigableSourceReference existingCopy = (SqmNavigableSourceReference) navigableBindingCopyMap.get( joinedFromElement.getBinding() );
 			if ( existingCopy != null ) {
 				return (SqmCrossJoin) existingCopy.getExportedFromElement();
 			}
@@ -276,7 +276,7 @@ public class QuerySplitter {
 					currentFromElementSpaceCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getBinding().getBoundNavigable()
+					joinedFromElement.getBinding().getReferencedNavigable()
 			);
 			navigableBindingCopyMap.put( joinedFromElement.getBinding(), copy.getBinding() );
 			return copy;
@@ -284,7 +284,7 @@ public class QuerySplitter {
 
 		@Override
 		public SqmEntityJoin visitQualifiedEntityJoinFromElement(SqmEntityJoin joinedFromElement) {
-			final SqmNavigableSourceBinding existingCopy = (SqmNavigableSourceBinding) navigableBindingCopyMap.get( joinedFromElement.getBinding() );
+			final SqmNavigableSourceReference existingCopy = (SqmNavigableSourceReference) navigableBindingCopyMap.get( joinedFromElement.getBinding() );
 			if ( existingCopy != null ) {
 				return (SqmEntityJoin) existingCopy.getExportedFromElement();
 			}
@@ -297,7 +297,7 @@ public class QuerySplitter {
 					currentFromElementSpaceCopy,
 					joinedFromElement.getUniqueIdentifier(),
 					joinedFromElement.getIdentificationVariable(),
-					joinedFromElement.getBinding().getBoundNavigable(),
+					joinedFromElement.getBinding().getReferencedNavigable(),
 					joinedFromElement.getJoinType()
 			);
 			navigableBindingCopyMap.put( joinedFromElement.getBinding(), copy.getBinding() );
@@ -306,7 +306,7 @@ public class QuerySplitter {
 
 		@Override
 		public SqmAttributeJoin visitQualifiedAttributeJoinFromElement(SqmAttributeJoin joinedFromElement) {
-			final SqmSingularAttributeBinding existingCopy = (SqmSingularAttributeBinding) navigableBindingCopyMap.get( joinedFromElement.getBinding() );
+			final SqmSingularAttributeReference existingCopy = (SqmSingularAttributeReference) navigableBindingCopyMap.get( joinedFromElement.getBinding() );
 			if ( existingCopy != null ) {
 				return (SqmAttributeJoin) existingCopy.getExportedFromElement();
 			}
@@ -323,14 +323,14 @@ public class QuerySplitter {
 		}
 
 		private SqmAttributeJoin makeCopy(SqmAttributeJoin fromElement) {
-			assert fromElement.getAttributeBinding().getSourceBinding() != null;
+			assert fromElement.getAttributeBinding().getSourceReference() != null;
 
 			if ( fromElement == null ) {
 				return null;
 			}
 
-			final SqmNavigableSourceBinding sourceBindingCopy = (SqmNavigableSourceBinding) navigableBindingCopyMap.get(
-					fromElement.getAttributeBinding().getSourceBinding()
+			final SqmNavigableSourceReference sourceBindingCopy = (SqmNavigableSourceReference) navigableBindingCopyMap.get(
+					fromElement.getAttributeBinding().getSourceReference()
 			);
 
 			if ( sourceBindingCopy == null ) {
@@ -339,9 +339,9 @@ public class QuerySplitter {
 
 			assert NavigableBindingHelper.resolveExportedFromElement( sourceBindingCopy ).getContainingSpace() == currentFromElementSpaceCopy;
 
-			final SqmAttributeBinding attributeBindingCopy = (SqmAttributeBinding) NavigableBindingHelper.createNavigableBinding(
+			final SqmAttributeReference attributeBindingCopy = (SqmAttributeReference) NavigableBindingHelper.createNavigableBinding(
 					sourceBindingCopy,
-					fromElement.getAttributeBinding().getBoundNavigable()
+					fromElement.getAttributeBinding().getReferencedNavigable()
 			);
 
 			final SqmAttributeJoin copy = new SqmAttributeJoin(
@@ -429,7 +429,7 @@ public class QuerySplitter {
 		@Override
 		public EmptinessSqmPredicate visitIsEmptyPredicate(EmptinessSqmPredicate predicate) {
 			return new EmptinessSqmPredicate(
-					(SqmPluralAttributeBinding) predicate.getExpression().accept( this ),
+					(SqmPluralAttributeReference) predicate.getExpression().accept( this ),
 					predicate.isNegated()
 			);
 		}
@@ -463,9 +463,10 @@ public class QuerySplitter {
 
 		@Override
 		public MemberOfSqmPredicate visitMemberOfPredicate(MemberOfSqmPredicate predicate) {
-			final SqmSingularAttributeBinding attributeBindingCopy = resolveAttributeBinding( predicate.getAttributeBinding() );
-
-			return new MemberOfSqmPredicate( attributeBindingCopy );
+			final SqmAttributeReference attributeReferenceCopy = resolveAttributeReference( predicate.getPluralAttributeReference() );
+			// NOTE : no type check b4 cast as it is assumed that the initial SQM producer
+			//		already verified that the path resolves to a plural attribute
+			return new MemberOfSqmPredicate( (SqmPluralAttributeReference) attributeReferenceCopy );
 		}
 
 //		private DomainReferenceBinding resolveDomainReferenceBinding(DomainReferenceBinding binding) {
@@ -489,11 +490,14 @@ public class QuerySplitter {
 //			else if ( binding instanceof )
 //		}
 
-		private SqmSingularAttributeBinding resolveAttributeBinding(SqmSingularAttributeBinding attributeBinding) {
-			// its an attribute join... there has to be a source
-			assert attributeBinding.getSourceBinding() != null;
 
-			SqmSingularAttributeBinding attributeBindingCopy = (SqmSingularAttributeBinding) navigableBindingCopyMap.get( attributeBinding );
+		// todo (6.0) : broker in SqmNavigableReference instead?
+
+		private SqmAttributeReference resolveAttributeReference(SqmAttributeReference attributeBinding) {
+			// its an attribute join... there has to be a source
+			assert attributeBinding.getSourceReference() != null;
+
+			SqmAttributeReference attributeBindingCopy = (SqmAttributeReference) navigableBindingCopyMap.get( attributeBinding );
 			if ( attributeBindingCopy == null ) {
 				attributeBindingCopy = makeCopy( attributeBinding );
 			}
@@ -501,26 +505,26 @@ public class QuerySplitter {
 			return attributeBindingCopy;
 		}
 
-		private SqmSingularAttributeBinding makeCopy(SqmSingularAttributeBinding attributeBinding) {
+		private SqmAttributeReference makeCopy(SqmAttributeReference attributeReference) {
 			// its an attribute join... there has to be a source
-			assert attributeBinding.getSourceBinding() != null;
+			assert attributeReference.getSourceReference() != null;
 
-			assert !navigableBindingCopyMap.containsKey( attributeBinding );
+			assert !navigableBindingCopyMap.containsKey( attributeReference );
 
-			final SqmAttributeJoin originalJoin = (SqmAttributeJoin) sqmFromSqmCopyMap.get( attributeBinding.getExportedFromElement() );
-			final SqmNavigableSourceBinding sourceBindingCopy = (SqmNavigableSourceBinding) navigableBindingCopyMap.get(
-					attributeBinding.getSourceBinding()
+			final SqmAttributeJoin originalJoin = (SqmAttributeJoin) sqmFromSqmCopyMap.get( attributeReference.getExportedFromElement() );
+			final SqmNavigableSourceReference sourceBindingCopy = (SqmNavigableSourceReference) navigableBindingCopyMap.get(
+					attributeReference.getSourceReference()
 			);
 
 			if ( sourceBindingCopy == null ) {
 				throw new ParsingException( "Could not resolve NavigableSourceBinding copy during query splitting" );
 			}
 
-			final SqmSingularAttributeBinding attributeBindingCopy = NavigableBindingHelper.createSingularAttributeBinding(
+			final SqmSingularAttributeReference attributeBindingCopy = NavigableBindingHelper.createSingularAttributeBinding(
 					sourceBindingCopy,
-					attributeBinding.getBoundNavigable()
+					attributeReference.getReferencedNavigable()
 			);
-			navigableBindingCopyMap.put( attributeBinding, attributeBindingCopy );
+			navigableBindingCopyMap.put( attributeReference, attributeBindingCopy );
 			return attributeBindingCopy;
 		}
 
@@ -608,14 +612,14 @@ public class QuerySplitter {
 		}
 
 		@Override
-		public Object visitAttributeReferenceExpression(SqmAttributeBinding attributeBinding) {
-			assert attributeBinding.getSourceBinding() != null;
+		public Object visitAttributeReferenceExpression(SqmAttributeReference attributeBinding) {
+			assert attributeBinding.getSourceReference() != null;
 
-			SqmAttributeBinding attributeBindingCopy = (SqmAttributeBinding) navigableBindingCopyMap.get( attributeBinding );
+			SqmAttributeReference attributeBindingCopy = (SqmAttributeReference) navigableBindingCopyMap.get( attributeBinding );
 			if ( attributeBindingCopy == null ) {
-				attributeBindingCopy = (SqmAttributeBinding) NavigableBindingHelper.createNavigableBinding(
-						attributeBinding.getSourceBinding(),
-						attributeBinding.getBoundNavigable()
+				attributeBindingCopy = (SqmAttributeReference) NavigableBindingHelper.createNavigableBinding(
+						attributeBinding.getSourceReference(),
+						attributeBinding.getReferencedNavigable()
 				);
 				navigableBindingCopyMap.put( attributeBinding, attributeBindingCopy );
 			}
@@ -630,7 +634,7 @@ public class QuerySplitter {
 			}
 			return new GenericFunctionSqmExpression(
 					expression.getFunctionName(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType(),
+					expression.getExpressionType(),
 					argumentsCopy
 			);
 		}
@@ -640,7 +644,7 @@ public class QuerySplitter {
 			return new AvgFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -648,7 +652,7 @@ public class QuerySplitter {
 		public CountStarFunctionSqmExpression visitCountStarFunction(CountStarFunctionSqmExpression expression) {
 			return new CountStarFunctionSqmExpression(
 					expression.isDistinct(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -657,7 +661,7 @@ public class QuerySplitter {
 			return new CountFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -666,7 +670,7 @@ public class QuerySplitter {
 			return new MaxFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -675,7 +679,7 @@ public class QuerySplitter {
 			return new MinFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -684,7 +688,7 @@ public class QuerySplitter {
 			return new SumFunctionSqmExpression(
 					(SqmExpression) expression.getArgument().accept( this ),
 					expression.isDistinct(),
-					(SqmDomainTypeBasic) expression.getExpressionType().getExportedDomainType()
+					expression.getExpressionType()
 			);
 		}
 
@@ -759,7 +763,7 @@ public class QuerySplitter {
 			}
 
 			return new ConcatFunctionSqmExpression(
-					(SqmDomainTypeBasic) expression.getFunctionResultType().getExportedDomainType(),
+					expression.getFunctionResultType(),
 					arguments
 			);
 		}

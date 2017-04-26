@@ -7,6 +7,7 @@
 package org.hibernate.query.sqm.domain.type;
 
 import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
+import org.hibernate.type.spi.BasicType;
 
 /**
  * Models a basic type in the consumer's "type system",
@@ -15,7 +16,10 @@ import org.hibernate.query.sqm.domain.SqmExpressableTypeBasic;
  * (EntityMode.MAP) types.
  *
  * @author Steve Ebersole
+ *
+ * @deprecated {@link BasicType}
  */
+@Deprecated
 public interface SqmDomainTypeBasic<T> extends SqmDomainType<T>, SqmExpressableTypeBasic<T> {
 	/**
 	 * Returns the Java type represented by this basic type.

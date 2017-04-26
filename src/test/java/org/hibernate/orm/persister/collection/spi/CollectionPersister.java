@@ -79,8 +79,8 @@ public interface CollectionPersister<O,C,E>
 	String getRoleName();
 	CollectionKey getForeignKeyDescriptor();
 	CollectionId getIdDescriptor();
-	CollectionIndex getIndexReference();
-	CollectionElement getElementReference();
+	org.hibernate.persister.collection.spi.CollectionIndex getIndexDescriptor();
+	org.hibernate.persister.collection.spi.CollectionElement getElementDescriptor();
 
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -386,7 +386,7 @@ public class PersisterHelper {
 	}
 
 	private static ElementClassification interpretElementClassification(CollectionPersister collectionPersister) {
-		switch ( collectionPersister.getElementReference().getClassification() ) {
+		switch ( collectionPersister.getElementDescriptor().getClassification() ) {
 			case ANY: {
 				return ElementClassification.ANY;
 			}

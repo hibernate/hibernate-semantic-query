@@ -6,8 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.from;
 
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.domain.SqmExpressableTypeEntity;
+import org.hibernate.persister.queryable.spi.EntityValuedExpressableType;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
 
 import org.jboss.logging.Logger;
 
@@ -22,15 +22,15 @@ public abstract class AbstractSqmFrom implements SqmFrom {
 	private final SqmFromElementSpace fromElementSpace;
 	private final String uid;
 	private final String alias;
-	private final SqmNavigableBinding binding;
-	private final SqmExpressableTypeEntity subclassIndicator;
+	private final SqmNavigableReference binding;
+	private final EntityValuedExpressableType subclassIndicator;
 
 	protected AbstractSqmFrom(
 			SqmFromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			SqmNavigableBinding binding,
-			SqmExpressableTypeEntity subclassIndicator) {
+			SqmNavigableReference binding,
+			EntityValuedExpressableType subclassIndicator) {
 		this.fromElementSpace = fromElementSpace;
 		this.uid = uid;
 		this.alias = alias;
@@ -39,13 +39,13 @@ public abstract class AbstractSqmFrom implements SqmFrom {
 	}
 
 	@Override
-	public SqmNavigableBinding getBinding() {
+	public SqmNavigableReference getBinding() {
 		return binding;
 	}
 
 //	@Override
-//	public SqmNavigableSource getBoundNavigable() {
-//		return binding.getBoundNavigable();
+//	public SqmNavigableSource getReferencedNavigable() {
+//		return binding.getReferencedNavigable();
 //	}
 
 	@Override
@@ -64,7 +64,7 @@ public abstract class AbstractSqmFrom implements SqmFrom {
 	}
 
 	@Override
-	public SqmExpressableTypeEntity getIntrinsicSubclassIndicator() {
+	public EntityValuedExpressableType getIntrinsicSubclassIndicator() {
 		return subclassIndicator;
 	}
 }

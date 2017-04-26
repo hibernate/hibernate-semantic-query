@@ -13,8 +13,8 @@ import org.hibernate.query.sqm.domain.SqmSingularAttribute;
 import org.hibernate.query.sqm.domain.SqmSingularAttribute.SingularAttributeClassification;
 import org.hibernate.query.sqm.SemanticException;
 import org.hibernate.query.sqm.produce.spi.ResolutionContext;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableBinding;
-import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceBinding;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableReference;
+import org.hibernate.query.sqm.tree.expression.domain.SqmNavigableSourceReference;
 import org.hibernate.query.sqm.tree.from.SqmFromExporter;
 import org.hibernate.query.sqm.tree.from.SqmQualifiedJoin;
 
@@ -40,7 +40,7 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 
 	@Override
 	@SuppressWarnings("StatementWithEmptyBody")
-	protected void validatePathRoot(SqmNavigableBinding binding) {
+	protected void validatePathRoot(SqmNavigableReference binding) {
 		// make sure no incoming FromElement comes from a FromElementSpace other
 		// than the FromElementSpace joinRhs comes from
 		if ( joinRhs.getContainingSpace() != ( (SqmFromExporter) binding ).getExportedFromElement().getContainingSpace() ) {
@@ -53,7 +53,7 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 
 	@Override
 	protected void validateIntermediateAttributeJoin(
-			SqmNavigableSourceBinding sourceBinding,
+			SqmNavigableSourceReference sourceBinding,
 			SqmAttribute joinedAttribute) {
 		super.validateIntermediateAttributeJoin( sourceBinding, joinedAttribute );
 
@@ -70,9 +70,9 @@ public class PathResolverJoinPredicateImpl extends PathResolverBasicImpl {
 		}
 		else {
 			final SqmPluralAttribute attrRef = (SqmPluralAttribute) joinedAttribute;
-			if ( attrRef.getElementReference().getClassification() == ElementClassification.ANY
-					|| attrRef.getElementReference().getClassification() == ElementClassification.ONE_TO_MANY
-					|| attrRef.getElementReference().getClassification() == ElementClassification.MANY_TO_MANY ) {
+			if ( attrRef.getElementDescriptor().getClassification() == ElementClassification.ANY
+					|| attrRef.getElementDescriptor().getClassification() == ElementClassification.ONE_TO_MANY
+					|| attrRef.getElementDescriptor().getClassification() == ElementClassification.MANY_TO_MANY ) {
 				throw new SemanticException(
 						"On-clause predicate of a qualified join cannot contain implicit collection joins : " +
 								joinedAttribute.getAttributeName()

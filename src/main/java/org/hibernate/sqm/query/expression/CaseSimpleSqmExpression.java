@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
@@ -20,8 +20,8 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	private List<WhenFragment> whenFragments = new ArrayList<>();
 	private SqmExpression otherwise;
 
-	private DomainReference type;
-	private DomainReference impliedType;
+	private Navigable type;
+	private Navigable impliedType;
 
 	public CaseSimpleSqmExpression(SqmExpression fixture) {
 		this.fixture = fixture;
@@ -50,13 +50,13 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		this.impliedType = type;
 		// todo : visit whenFragments and elseExpression
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		if ( impliedType != null ) {
 			return impliedType;
 		}
@@ -75,7 +75,7 @@ public class CaseSimpleSqmExpression implements SqmExpression, ImpliedTypeSqmExp
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		if ( otherwise != null ) {
 			return otherwise.getInferableType();
 		}

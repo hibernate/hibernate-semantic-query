@@ -7,14 +7,14 @@
 package org.hibernate.sqm.query.expression.function;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class CountStarFunctionSqmExpression extends AbstractAggregateFunctionSqmExpression {
-	public CountStarFunctionSqmExpression(boolean distinct, DomainReference resultType) {
+	public CountStarFunctionSqmExpression(boolean distinct, Navigable resultType) {
 		super( STAR, distinct, resultType );
 	}
 
@@ -35,12 +35,12 @@ public class CountStarFunctionSqmExpression extends AbstractAggregateFunctionSqm
 
 	private static SqmExpression STAR = new SqmExpression() {
 		@Override
-		public DomainReference getExpressionType() {
+		public Navigable getExpressionType() {
 			return null;
 		}
 
 		@Override
-		public DomainReference getInferableType() {
+		public Navigable getInferableType() {
 			return null;
 		}
 

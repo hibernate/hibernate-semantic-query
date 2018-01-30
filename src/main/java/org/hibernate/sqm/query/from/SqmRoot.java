@@ -7,9 +7,9 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.EntityReference;
 
 /**
  * @author Steve Ebersole
@@ -19,12 +19,12 @@ public class SqmRoot extends AbstractFrom {
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			EntityReference entityReference) {
+			EntityDescriptor entityReference) {
 		super(
 				fromElementSpace,
 				uid,
 				alias,
-				new EntityBinding( entityReference ),
+				new EntityReference( entityReference ),
 				entityReference,
 				new PropertyPath( null, entityReference.getEntityName() + "(" + alias + ")" )
 		);
@@ -33,8 +33,8 @@ public class SqmRoot extends AbstractFrom {
 	}
 
 	@Override
-	public EntityBinding getDomainReferenceBinding() {
-		return (EntityBinding) super.getDomainReferenceBinding();
+	public EntityReference getDomainReferenceBinding() {
+		return (EntityReference) super.getDomainReferenceBinding();
 	}
 
 	public String getEntityName() {
@@ -42,7 +42,7 @@ public class SqmRoot extends AbstractFrom {
 	}
 
 	@Override
-	public EntityReference getIntrinsicSubclassIndicator() {
+	public EntityDescriptor getIntrinsicSubclassIndicator() {
 		// a root FromElement cannot indicate a subclass intrinsically (as part of its declaration)
 		return null;
 	}

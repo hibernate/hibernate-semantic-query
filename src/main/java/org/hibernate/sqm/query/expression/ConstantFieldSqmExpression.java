@@ -9,7 +9,7 @@ package org.hibernate.sqm.query.expression;
 import java.lang.reflect.Field;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * Represents a constant that came from a static field reference.
@@ -20,13 +20,13 @@ public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
 	private final Field sourceField;
 	private final T value;
 
-	private DomainReference typeDescriptor;
+	private Navigable typeDescriptor;
 
 	public ConstantFieldSqmExpression(Field sourceField, T value) {
 		this( sourceField, value, null );
 	}
 
-	public ConstantFieldSqmExpression(Field sourceField, T value, DomainReference typeDescriptor) {
+	public ConstantFieldSqmExpression(Field sourceField, T value, Navigable typeDescriptor) {
 		this.sourceField = sourceField;
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
@@ -42,18 +42,18 @@ public class ConstantFieldSqmExpression<T> implements ConstantSqmExpression<T> {
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		if ( type != null ) {
 			this.typeDescriptor = type;
 		}

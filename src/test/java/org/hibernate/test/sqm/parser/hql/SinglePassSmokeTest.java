@@ -7,11 +7,11 @@
 package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
+import org.hibernate.sqm.query.expression.domain.EntityReference;
 import org.hibernate.sqm.parser.common.ParsingContext;
-import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
-import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
+import org.hibernate.query.sqm.produce.spi.HqlParseTreeBuilder;
+import org.hibernate.query.sqm.produce.spi.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.select.SqmSelection;
@@ -102,7 +102,7 @@ public class SinglePassSmokeTest {
 		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( EntityBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( EntityReference.class ) );
 	}
 
 	private SqmSelectStatement interpret(String query) {

@@ -8,8 +8,8 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.common.ParsingContext;
-import org.hibernate.sqm.parser.hql.internal.HqlParseTreeBuilder;
-import org.hibernate.sqm.parser.hql.internal.SemanticQueryBuilder;
+import org.hibernate.query.sqm.produce.spi.HqlParseTreeBuilder;
+import org.hibernate.query.sqm.produce.spi.SemanticQueryBuilder;
 import org.hibernate.sqm.parser.hql.internal.antlr.HqlParser;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.SqmStatement;

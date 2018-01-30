@@ -7,20 +7,20 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
  */
 public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExpression<T> {
 	private final T value;
-	private DomainReference typeDescriptor;
+	private Navigable typeDescriptor;
 
 	public ConstantEnumSqmExpression(T value) {
 		this( value, null );
 	}
 
-	public ConstantEnumSqmExpression(T value, DomainReference typeDescriptor) {
+	public ConstantEnumSqmExpression(T value, Navigable typeDescriptor) {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
@@ -31,18 +31,18 @@ public class ConstantEnumSqmExpression<T extends Enum> implements ConstantSqmExp
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		this.typeDescriptor = type;
 	}
 

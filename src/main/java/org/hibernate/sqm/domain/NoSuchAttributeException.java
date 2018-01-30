@@ -11,7 +11,7 @@ import org.hibernate.sqm.parser.SemanticException;
 /**
  * Indicates that an attribute referenced in the query could not be resolved.
  *
- * @see DomainMetamodel#resolveAttributeReference
+ * @see DomainMetamodel#resolveAttributeDescriptor
  *
  * @author Steve Ebersole
  */

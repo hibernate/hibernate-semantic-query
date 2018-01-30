@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 
 /**
  * @author Steve Ebersole
@@ -28,7 +28,7 @@ public class PolymorphicEntityTypeImpl extends EntityTypeImpl implements Polymor
 	}
 
 	@Override
-	public Set<EntityReference> getImplementors() {
+	public Set<EntityDescriptor> getImplementors() {
 		return implementors.stream().collect( Collectors.toSet() );
 	}
 
@@ -56,7 +56,7 @@ public class PolymorphicEntityTypeImpl extends EntityTypeImpl implements Polymor
 	}
 
 	@Override
-	public Optional<EntityReference> toEntityReference() {
+	public Optional<EntityDescriptor> toEntityReference() {
 		return Optional.empty();
 	}
 }

@@ -8,13 +8,13 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.LiteralIntegerSqmExpression;
 import org.hibernate.sqm.query.expression.ParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.test.sqm.ConsumerContextImpl;
 import org.hibernate.test.sqm.domain.EntityTypeImpl;
@@ -74,7 +74,7 @@ public class LimitOffsetClauseTests {
 		RelationalSqmPredicate predicate = (RelationalSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
 		SubQuerySqmExpression subQuery = (SubQuerySqmExpression) predicate.getRightHandExpression();
 		SqmExpression sortExpression = subQuery.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression();
-		assertEquals( "basic", SingularAttributeBinding.class.cast( sortExpression ).getAttribute().getAttributeName() );
+		assertEquals( "basic", SingularAttributeReference.class.cast( sortExpression ).getAttribute().getAttributeName() );
 		assertEquals( Integer.valueOf( 1 ), LiteralIntegerSqmExpression.class.cast( subQuery.getQuerySpec().getLimitOffsetClause().getLimitExpression() ).getLiteralValue() );
 	}
 

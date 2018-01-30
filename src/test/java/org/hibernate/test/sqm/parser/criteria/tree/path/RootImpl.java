@@ -13,7 +13,6 @@ import org.hibernate.sqm.parser.criteria.tree.CriteriaVisitor;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaFrom;
 import org.hibernate.sqm.parser.criteria.tree.from.JpaRoot;
 import org.hibernate.sqm.parser.criteria.tree.path.JpaPathSource;
-import org.hibernate.sqm.parser.criteria.tree.select.JpaSelection;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.select.SqmAliasedExpressionContainer;
 
@@ -104,7 +103,7 @@ public class RootImpl<X> extends AbstractFromImpl<X,X> implements JpaRoot<X>, Se
 		public TreatedRoot(RootImpl<? super T> original, Class<T> treatAsType) {
 			super(
 					original.criteriaBuilder(),
-					(EntityType) original.criteriaBuilder().consumerContext().getDomainMetamodel().resolveEntityReference( treatAsType )
+					(EntityType) original.criteriaBuilder().consumerContext().getDomainMetamodel().resolveEntityDescriptor( treatAsType )
 			);
 			this.original = original;
 			this.treatAsType = treatAsType;

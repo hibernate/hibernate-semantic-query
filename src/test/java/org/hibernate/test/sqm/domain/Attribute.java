@@ -6,14 +6,14 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.AttributeDescriptor;
 
 /**
  * Represents an attribute in the domain model.
  *
  * @author Steve Ebersole
  */
-public interface Attribute extends Bindable, AttributeReference {
+public interface Attribute extends Bindable, AttributeDescriptor {
 	@Override
 	default ManagedType getLeftHandSide() {
 		return getDeclaringType();

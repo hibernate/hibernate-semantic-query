@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.query.SqmSelectStatement;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeElementReference;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;
@@ -43,7 +43,7 @@ public class CollectionPathExpressionsTest {
 		assertThat( statement.getQuerySpec().getSelectClause().getSelections().size(), is(1) );
 
 		final SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( PluralAttributeElementBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( PluralAttributeElementReference.class ) );
 	}
 
 	@Test

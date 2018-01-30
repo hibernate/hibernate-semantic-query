@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.expression.function;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -14,6 +14,6 @@ import org.hibernate.sqm.query.expression.SqmExpression;
  */
 public interface FunctionSqmExpression extends SqmExpression {
 	String getFunctionName();
-	DomainReference getFunctionResultType();
+	Navigable getFunctionResultType();
 	boolean hasArguments();
 }

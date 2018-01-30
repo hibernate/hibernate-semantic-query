@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 /**
@@ -20,8 +20,8 @@ public class CaseSearchedSqmExpression implements SqmExpression, ImpliedTypeSqmE
 	private List<WhenFragment> whenFragments = new ArrayList<>();
 	private SqmExpression otherwise;
 
-	private DomainReference type;
-	private DomainReference impliedType;
+	private Navigable type;
+	private Navigable impliedType;
 
 	public List<WhenFragment> getWhenFragments() {
 		return whenFragments;
@@ -41,13 +41,13 @@ public class CaseSearchedSqmExpression implements SqmExpression, ImpliedTypeSqmE
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		this.impliedType = type;
 		// todo : visit whenFragments and otherwise
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		if ( impliedType != null ) {
 			return impliedType;
 		}
@@ -66,7 +66,7 @@ public class CaseSearchedSqmExpression implements SqmExpression, ImpliedTypeSqmE
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		if ( otherwise != null ) {
 			return otherwise.getInferableType();
 		}

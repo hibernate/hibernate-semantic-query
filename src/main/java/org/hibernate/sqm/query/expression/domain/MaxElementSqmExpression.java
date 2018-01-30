@@ -7,31 +7,31 @@
 package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class MaxElementSqmExpression implements SqmExpression {
-	private final PluralAttributeBinding attributeBinding;
+	private final PluralAttributeReference attributeBinding;
 
-	public MaxElementSqmExpression(PluralAttributeBinding attributeBinding) {
+	public MaxElementSqmExpression(PluralAttributeReference attributeBinding) {
 		this.attributeBinding = attributeBinding;
 	}
 
-	public PluralAttributeBinding getAttributeBinding() {
+	public PluralAttributeReference getAttributeBinding() {
 		return attributeBinding;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
-		return ( (PluralAttributeReference) attributeBinding ).getElementReference();
+	public Navigable getExpressionType() {
+		return ( (PluralAttributeDescriptor) attributeBinding ).getElementReference();
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 

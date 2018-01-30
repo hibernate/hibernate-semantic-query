@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.domain;
 
 import java.util.Optional;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 
 /**
  * @author Steve Ebersole
@@ -80,10 +80,10 @@ public class SingularAttributeImpl implements SingularAttribute {
 	}
 
 	@Override
-	public Optional<EntityReference> toEntityReference() {
+	public Optional<EntityDescriptor> toEntityReference() {
 		if ( classification == SingularAttributeClassification.MANY_TO_ONE
 				|| classification == SingularAttributeClassification.ONE_TO_ONE ) {
-			return Optional.of( (EntityReference) getType() );
+			return Optional.of( (EntityDescriptor) getType() );
 		}
 
 		return Optional.empty();

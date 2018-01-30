@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.SqmInsertStatement;
 import org.hibernate.sqm.query.from.SqmRoot;
 
@@ -21,7 +21,7 @@ import org.hibernate.sqm.query.from.SqmRoot;
  */
 public abstract class AbstractSqmInsertStatement extends AbstractSqmStatement implements SqmInsertStatement {
 	private final SqmRoot insertTarget;
-	private List<SingularAttributeBinding> stateFields;
+	private List<SingularAttributeReference> stateFields;
 
 	public AbstractSqmInsertStatement(SqmRoot insertTarget) {
 		this.insertTarget = insertTarget;
@@ -33,7 +33,7 @@ public abstract class AbstractSqmInsertStatement extends AbstractSqmStatement im
 	}
 
 	@Override
-	public List<SingularAttributeBinding> getStateFields() {
+	public List<SingularAttributeReference> getStateFields() {
 		if ( stateFields == null ) {
 			return Collections.emptyList();
 		}
@@ -42,7 +42,7 @@ public abstract class AbstractSqmInsertStatement extends AbstractSqmStatement im
 		}
 	}
 
-	public void addInsertTargetStateField(SingularAttributeBinding stateField) {
+	public void addInsertTargetStateField(SingularAttributeReference stateField) {
 		if ( stateFields == null ) {
 			stateFields = new ArrayList<>();
 		}

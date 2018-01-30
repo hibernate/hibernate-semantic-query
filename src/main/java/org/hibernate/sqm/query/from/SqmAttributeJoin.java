@@ -7,11 +7,11 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
 import org.jboss.logging.Logger;
@@ -26,8 +26,8 @@ public class SqmAttributeJoin
 		implements SqmQualifiedJoin {
 	private static final Logger log = Logger.getLogger( SqmAttributeJoin.class );
 
-	private final AttributeBinding attributeBinding;
-	private final EntityReference intrinsicSubclassIndicator;
+	private final AttributeReference attributeBinding;
+	private final EntityDescriptor intrinsicSubclassIndicator;
 	private final String lhsUniqueIdentifier;
 	private final boolean fetched;
 
@@ -35,10 +35,10 @@ public class SqmAttributeJoin
 
 	public SqmAttributeJoin(
 			FromElementSpace containingSpace,
-			AttributeBinding attributeBinding,
+			AttributeReference attributeBinding,
 			String uid,
 			String alias,
-			EntityReference intrinsicSubclassIndicator,
+			EntityDescriptor intrinsicSubclassIndicator,
 			PropertyPath sourcePath,
 			JoinType joinType,
 			String lhsUniqueIdentifier,
@@ -65,17 +65,17 @@ public class SqmAttributeJoin
 		attributeBinding.injectAttributeJoin( this );
 	}
 
-	public AttributeBinding getAttributeBinding() {
+	public AttributeReference getAttributeBinding() {
 		return attributeBinding;
 	}
 
 	@Override
-	public AttributeBinding getDomainReferenceBinding() {
+	public AttributeReference getDomainReferenceBinding() {
 		return getAttributeBinding();
 	}
 
 	@Override
-	public EntityReference getIntrinsicSubclassIndicator() {
+	public EntityDescriptor getIntrinsicSubclassIndicator() {
 		return intrinsicSubclassIndicator;
 	}
 
@@ -103,12 +103,12 @@ public class SqmAttributeJoin
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return attributeBinding.getAttribute();
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return attributeBinding.getAttribute();
 	}
 

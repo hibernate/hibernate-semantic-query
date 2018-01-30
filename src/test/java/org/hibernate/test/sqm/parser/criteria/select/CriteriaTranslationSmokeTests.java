@@ -11,7 +11,7 @@ import javax.persistence.criteria.Root;
 import org.hibernate.sqm.ConsumerContext;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
 import org.hibernate.sqm.query.SqmSelectStatement;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;

@@ -137,6 +137,7 @@ resultIdentifier
 selectExpression
 	:	dynamicInstantiation
 	|	jpaSelectObjectSyntax
+	|	mapEntrySyntax
 	|	expression
 	;
 
@@ -148,45 +149,6 @@ dynamicInstantiationTarget
 	: LIST
 	| MAP
 	| dotIdentifierSequence
-	;
-
-dotIdentifierSequence
-	: identifier (DOT identifier)*
-	;
-
-path
-	// a SimplePath may be any number of things like:
-	//		* Class FQN
-	//		* Java constant (enum/static)
-	//		* a simple dotIdentifierSequence-style path
-	// :(
-	: dotIdentifierSequence												# SimplePath
-	// a Map.Entry cannot be further dereferenced
-	| ENTRY LEFT_PAREN pathAsMap RIGHT_PAREN							# MapEntryPath
-	// only one index-access is allowed per path
-	| path LEFT_BRACKET expression RIGHT_BRACKET (pathTerminal)?		# IndexedPath
-	| pathRoot (pathTerminal)?											# CompoundPath
-	;
-
-pathRoot
-	: identifier																			# SimplePathRoot
-	| TREAT LEFT_PAREN dotIdentifierSequence AS dotIdentifierSequence RIGHT_PAREN			# TreatedPathRoot
-	| KEY LEFT_PAREN pathAsMap RIGHT_PAREN												# MapKeyPathRoot
-	| VALUE LEFT_PAREN collectionReference RIGHT_PAREN				   						# CollectionValuePathRoot
-	;
-
-pathTerminal
-	: (DOT identifier)+
-	;
-
-collectionReference
-// having as a separate rule allows us to validate that the path indeed resolves to a Collection attribute
-	: path
-	;
-
-pathAsMap
-// having as a separate rule allows us to validate that the path indeed resolves to a Map attribute
-	: path
 	;
 
 dynamicInstantiationArgs
@@ -204,6 +166,67 @@ dynamicInstantiationArgExpression
 
 jpaSelectObjectSyntax
 	:	OBJECT LEFT_PAREN identifier RIGHT_PAREN
+	;
+
+mapEntrySyntax
+	: ENTRY LEFT_PAREN path RIGHT_PAREN
+	;
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Path structures
+
+dotIdentifierSequence
+	: identifier (DOT dotIdentifierSequence)?
+	;
+
+/**
+ * A path which needs to be resolved semantically
+ */
+path
+	: syntacticNavigablePath
+	| nonSyntacticNavigablePath
+	;
+
+/**
+ * Rule for path case where we syntactically know that a path is a
+ * navigable path because it starts with one of the special cases:
+ *
+ * 		* TREAT
+ * 		* ELEMENTS or VALUE (collection)
+ * 		* KEY (map)
+ */
+syntacticNavigablePath
+	: (treatedNavigablePath | collectionElementNavigablePath | mapKeyNavigablePath)
+	;
+
+/**
+ * The main path rule.  Recognition for all normal path structures including
+ * class, field and enum references as well as navigable paths.
+ *
+ * NOTE : this rule does *not* cover the special syntactic navigable path
+ * cases: TREAT, KEY, ELEMENTS, VALUES
+ */
+nonSyntacticNavigablePath
+	: dotIdentifierSequence (semanticNavigablePathFragment)?
+	;
+
+treatedNavigablePath
+	: TREAT LEFT_PAREN path AS dotIdentifierSequence RIGHT_PAREN ( (AS identifier) | (DOT nonSyntacticNavigablePath) )?
+	;
+
+
+collectionElementNavigablePath
+	: (VALUE | ELEMENTS) LEFT_PAREN path RIGHT_PAREN (DOT nonSyntacticNavigablePath)?
+	;
+
+mapKeyNavigablePath
+	: KEY LEFT_PAREN path RIGHT_PAREN (DOT nonSyntacticNavigablePath)?
+	;
+
+semanticNavigablePathFragment
+	: LEFT_BRACKET expression RIGHT_BRACKET (DOT nonSyntacticNavigablePath)?
 	;
 
 

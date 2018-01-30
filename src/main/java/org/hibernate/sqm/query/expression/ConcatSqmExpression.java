@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.Helper;
 
 /**
@@ -17,13 +17,13 @@ public class ConcatSqmExpression implements SqmExpression {
 	private final SqmExpression lhsOperand;
 	private final SqmExpression rhsOperand;
 
-	private final DomainReference resultType;
+	private final Navigable resultType;
 
 	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand) {
 		this( lhsOperand, rhsOperand, lhsOperand.getExpressionType() );
 	}
 
-	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand, DomainReference resultType) {
+	public ConcatSqmExpression(SqmExpression lhsOperand, SqmExpression rhsOperand, Navigable resultType) {
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
 		this.resultType = resultType;
@@ -38,12 +38,12 @@ public class ConcatSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return resultType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return Helper.firstNonNull( lhsOperand.getInferableType(), rhsOperand.getInferableType() ) ;
 	}
 

@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.expression;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
@@ -14,13 +14,13 @@ import org.hibernate.sqm.domain.DomainReference;
 public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmExpression<T> {
 	private final T value;
 
-	private DomainReference type;
+	private Navigable type;
 
 	public AbstractLiteralSqmExpressionImpl(T value) {
 		this.value = value;
 	}
 
-	public AbstractLiteralSqmExpressionImpl(T value, DomainReference type) {
+	public AbstractLiteralSqmExpressionImpl(T value, Navigable type) {
 		this.value = value;
 	}
 
@@ -30,18 +30,18 @@ public abstract class AbstractLiteralSqmExpressionImpl<T> implements LiteralSqmE
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return type;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		if ( type != null ) {
 			this.type = type;
 		}

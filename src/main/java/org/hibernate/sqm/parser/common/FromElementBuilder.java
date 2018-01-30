@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
@@ -52,7 +52,7 @@ public class FromElementBuilder {
 	 */
 	public SqmRoot makeRootEntityFromElement(
 			FromElementSpace fromElementSpace,
-			EntityReference entityBinding,
+			EntityDescriptor entityBinding,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
@@ -81,7 +81,7 @@ public class FromElementBuilder {
 	public SqmCrossJoin makeCrossJoinedFromElement(
 			FromElementSpace fromElementSpace,
 			String uid,
-			EntityReference entityBinding,
+			EntityDescriptor entityBinding,
 			String alias) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
@@ -107,7 +107,7 @@ public class FromElementBuilder {
 	public SqmEntityJoin buildEntityJoin(
 			FromElementSpace fromElementSpace,
 			String alias,
-			EntityReference entityType,
+			EntityDescriptor entityType,
 			JoinType joinType) {
 		if ( alias == null ) {
 			alias = parsingContext.getImplicitAliasGenerator().buildUniqueImplicitAlias();
@@ -132,9 +132,9 @@ public class FromElementBuilder {
 	}
 
 	public SqmAttributeJoin buildAttributeJoin(
-			AttributeBinding attributeBinding,
+			AttributeReference attributeBinding,
 			String alias,
-			EntityReference subclassIndicator,
+			EntityDescriptor subclassIndicator,
 			PropertyPath sourcePath,
 			JoinType joinType,
 			String lhsUniqueId,
@@ -148,7 +148,7 @@ public class FromElementBuilder {
 		}
 
 		if ( alias != null && canReuseImplicitJoins ) {
-			throw new ParsingException( "Unexpected combination of [non-null alias] and [canReuseImplicitJoins=true] passed to #buildAttributeJoin" );
+			throw new ParsingException( "Unexpected combination of non-null alias (`" + alias + "`) and `canReuseImplicitJoins=true` passed to #buildAttributeJoin" );
 		}
 
 		// todo : validate alias & fetched?  JPA at least disallows specifying an alias for fetched associations

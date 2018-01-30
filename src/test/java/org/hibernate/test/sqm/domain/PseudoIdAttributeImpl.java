@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.domain;
 
 import java.util.Optional;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 
 /**
  * Used to model an entity's non-aggregated composite identifier as a SingularAttribute for binding
@@ -72,7 +72,7 @@ public class PseudoIdAttributeImpl implements SingularAttribute {
 	}
 
 	@Override
-	public Optional<EntityReference> toEntityReference() {
+	public Optional<EntityDescriptor> toEntityReference() {
 		return Optional.empty();
 	}
 }

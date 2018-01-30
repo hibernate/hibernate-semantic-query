@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * Describes a parameter declared in the query.
@@ -52,5 +52,5 @@ public interface Parameter {
 	 *
 	 * @return The anticipated Type.
 	 */
-	DomainReference getAnticipatedType();
+	Navigable getAnticipatedType();
 }

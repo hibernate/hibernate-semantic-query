@@ -6,14 +6,14 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.SingularAttributeReference;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor;
 
 /**
  * Specialization of Attribute for non-collection (in the persistent sense) values
  *
  * @author Steve Ebersole
  */
-public interface SingularAttribute extends Attribute, Bindable, SingularAttributeReference {
+public interface SingularAttribute extends Attribute, Bindable, SingularAttributeDescriptor {
 	/**
 	 * Obtain the attribute's type.
 	 *

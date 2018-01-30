@@ -45,9 +45,9 @@ import org.hibernate.sqm.query.expression.ParameterizedEntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
+import org.hibernate.sqm.query.expression.domain.MapKeyReference;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeElementReference;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
@@ -174,7 +174,7 @@ public interface SemanticQueryWalker<T> {
 
 	T visitUnaryOperationExpression(UnaryOperationSqmExpression expression);
 
-	T visitAttributeReferenceExpression(AttributeBinding expression);
+	T visitAttributeReferenceExpression(AttributeReference expression);
 
 	T visitGenericFunction(GenericFunctionSqmExpression expression);
 
@@ -194,11 +194,11 @@ public interface SemanticQueryWalker<T> {
 
 	T visitPluralAttributeSizeFunction(CollectionSizeSqmExpression function);
 
-	T visitPluralAttributeElementBinding(PluralAttributeElementBinding binding);
+	T visitPluralAttributeElementBinding(PluralAttributeElementReference binding);
 
 	T visitPluralAttributeIndexFunction(PluralAttributeIndexSqmExpression function);
 
-	T visitMapKeyBinding(MapKeyBinding binding);
+	T visitMapKeyBinding(MapKeyReference binding);
 
 	T visitMapEntryFunction(MapEntrySqmExpression function);
 

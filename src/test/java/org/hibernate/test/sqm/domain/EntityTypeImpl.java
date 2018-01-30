@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.domain;
 
 import java.util.Optional;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 
 /**
  * @author Steve Ebersole
@@ -47,7 +47,7 @@ public class EntityTypeImpl extends AbstractIdentifiableType implements EntityTy
 	}
 
 	@Override
-	public Optional<EntityReference> toEntityReference() {
+	public Optional<EntityDescriptor> toEntityReference() {
 		return Optional.of( this );
 	}
 }

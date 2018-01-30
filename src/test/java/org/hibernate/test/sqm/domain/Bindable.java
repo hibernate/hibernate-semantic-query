@@ -6,7 +6,7 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * Represents something that can be incorporated into a query "path".
@@ -33,7 +33,7 @@ import org.hibernate.sqm.domain.DomainReference;
  * Bindable (see {@link javax.persistence.metamodel.Bindable}).  I
  * personally think "Navigable" or "Path-able" when I see "Bindable".
  *
- * @see DomainReference
+ * @see Navigable
  *
  * @author Steve Ebersole
  */

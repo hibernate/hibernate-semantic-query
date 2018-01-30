@@ -6,7 +6,7 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.PolymorphicEntityReference;
+import org.hibernate.sqm.domain.PolymorphicEntityDescriptor;
 
 /**
  * EntityType extension for representing the "abstract schema type" in polymorphic
@@ -14,5 +14,5 @@ import org.hibernate.sqm.domain.PolymorphicEntityReference;
  *
  * @author Steve Ebersole
  */
-public interface PolymorphicEntityType<T> extends EntityType, PolymorphicEntityReference {
+public interface PolymorphicEntityType<T> extends EntityType, PolymorphicEntityDescriptor {
 }

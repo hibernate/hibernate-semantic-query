@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 
 /**
  * Represents an reference to an entity type as a literal.  This is the JPA
@@ -17,19 +17,19 @@ import org.hibernate.sqm.domain.EntityReference;
  * @author Steve Ebersole
  */
 public class EntityTypeLiteralSqmExpression implements SqmExpression {
-	private final EntityReference entityType;
+	private final EntityDescriptor entityType;
 
-	public EntityTypeLiteralSqmExpression(EntityReference entityType) {
+	public EntityTypeLiteralSqmExpression(EntityDescriptor entityType) {
 		this.entityType = entityType;
 	}
 
 	@Override
-	public EntityReference getExpressionType() {
+	public EntityDescriptor getExpressionType() {
 		return entityType;
 	}
 
 	@Override
-	public EntityReference getInferableType() {
+	public EntityDescriptor getInferableType() {
 		return getExpressionType();
 	}
 

@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
 import org.hibernate.sqm.parser.InterpretationException;
 
 import org.hibernate.test.sqm.ConsumerContextImpl;

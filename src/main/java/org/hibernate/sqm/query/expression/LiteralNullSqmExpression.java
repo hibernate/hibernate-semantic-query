@@ -8,7 +8,7 @@ package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
@@ -31,7 +31,7 @@ public class LiteralNullSqmExpression implements LiteralSqmExpression<Void> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 	}
 
 	@Override

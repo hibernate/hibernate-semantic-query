@@ -8,7 +8,7 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 

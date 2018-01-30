@@ -9,13 +9,13 @@ package org.hibernate.sqm.parser.common;
 import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.sqm.domain.AttributeReference;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.AttributeDescriptor;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmCrossJoin;
@@ -47,14 +47,14 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableReference findFromElementByIdentificationVariable(String identificationVariable) {
 		return fromClause.fromElementSpace.getRoot().getIdentificationVariable().equals( identificationVariable )
 				? fromClause.fromElementSpace.getRoot().getDomainReferenceBinding()
 				: null;
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementExposingAttribute(String attributeName) {
+	public SqmNavigableReference findFromElementExposingAttribute(String attributeName) {
 		if ( rootExposesAttribute( attributeName ) ) {
 			return fromClause.fromElementSpace.getRoot().getDomainReferenceBinding();
 		}
@@ -64,9 +64,9 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 	}
 
 	private boolean rootExposesAttribute(String attributeName) {
-		final AttributeReference attrRef = getParsingContext().getConsumerContext()
+		final AttributeDescriptor attrRef = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.locateAttributeReference( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
+				.locateAttributeDescriptor( fromClause.fromElementSpace.getRoot().getDomainReferenceBinding().getBoundDomainReference(), attributeName );
 		return attrRef != null;
 	}
 
@@ -127,7 +127,7 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 
 		@Override
 		public SqmCrossJoin makeCrossJoinedFromElement(
-				FromElementSpace fromElementSpace, String uid, EntityReference entityType, String alias) {
+				FromElementSpace fromElementSpace, String uid, EntityDescriptor entityType, String alias) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
@@ -135,16 +135,16 @@ public class QuerySpecProcessingStateDmlImpl extends AbstractQuerySpecProcessing
 		public SqmEntityJoin buildEntityJoin(
 				FromElementSpace fromElementSpace,
 				String alias,
-				EntityReference entityType,
+				EntityDescriptor entityType,
 				JoinType joinType) {
 			throw new ParsingException( "DML from-clause cannot define joins" );
 		}
 
 		@Override
 		public SqmAttributeJoin buildAttributeJoin(
-				AttributeBinding attributeBinding,
+				AttributeReference attributeBinding,
 				String alias,
-				EntityReference subclassIndicator,
+				EntityDescriptor subclassIndicator,
 				PropertyPath path,
 				JoinType joinType,
 				String lhsUniqueIdentifier,

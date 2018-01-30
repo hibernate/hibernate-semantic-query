@@ -15,21 +15,21 @@ import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
  * @author Steve Ebersole
  */
 public interface DomainMetamodel {
-	EntityReference resolveEntityReference(String entityName);
-	EntityReference resolveEntityReference(Class javaType);
+	EntityDescriptor resolveEntityDescriptor(String entityName);
+	EntityDescriptor resolveEntityDescriptor(Class javaType);
 
-	AttributeReference locateAttributeReference(DomainReference sourceBinding, String attributeName);
-	AttributeReference resolveAttributeReference(DomainReference sourceBinding, String attributeName) throws NoSuchAttributeException;
+	AttributeDescriptor locateAttributeDescriptor(Navigable sourceBinding, String attributeName);
+	AttributeDescriptor resolveAttributeDescriptor(Navigable sourceBinding, String attributeName) throws NoSuchAttributeException;
 
 	// - just push the cast target text into the tree.  let the consumer figure out how to interpret it?
-	DomainReference resolveCastTargetType(String name);
+	Navigable resolveCastTargetType(String name);
 
 	BasicType resolveBasicType(Class javaType);
 
 	BasicType resolveArithmeticType(
-			DomainReference firstType,
-			DomainReference secondType,
+			Navigable firstType,
+			Navigable secondType,
 			BinaryArithmeticSqmExpression.Operation operation);
 
-	BasicType resolveSumFunctionType(DomainReference argumentType);
+	BasicType resolveSumFunctionType(Navigable argumentType);
 }

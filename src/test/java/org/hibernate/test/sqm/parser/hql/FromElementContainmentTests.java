@@ -8,8 +8,8 @@ package org.hibernate.test.sqm.parser.hql;
 
 import org.hibernate.sqm.domain.DomainMetamodel;
 import org.hibernate.sqm.parser.SemanticException;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
+import org.hibernate.sqm.query.expression.domain.EntityReference;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmRoot;
@@ -47,9 +47,9 @@ public class FromElementContainmentTests {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SingularAttributeBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SingularAttributeReference.class ) );
 
-		assertSame( fromElementSpace.getJoins().get( 0 ), ( (SingularAttributeBinding) selection.getExpression() ).getFromElement() );
+		assertSame( fromElementSpace.getJoins().get( 0 ), ( (SingularAttributeReference) selection.getExpression() ).getFromElement() );
 	}
 
 	@Test
@@ -63,9 +63,9 @@ public class FromElementContainmentTests {
 
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( EntityBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( EntityReference.class ) );
 
-		assertSame( fromElement, ( (EntityBinding) selection.getExpression() ).getFromElement() );
+		assertSame( fromElement, ( (EntityReference) selection.getExpression() ).getFromElement() );
 	}
 
 	@Test
@@ -79,12 +79,12 @@ public class FromElementContainmentTests {
 		assertEquals( 1, statement.getQuerySpec().getOrderByClause().getSortSpecifications().size() );
 		assertThat(
 				statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression(),
-				instanceOf( EntityBinding.class )
+				instanceOf( EntityReference.class )
 		);
 
 		assertSame(
 				fromElement,
-				( (EntityBinding) statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() ).getFromElement()
+				( (EntityReference) statement.getQuerySpec().getOrderByClause().getSortSpecifications().get( 0 ).getSortExpression() ).getFromElement()
 		);
 	}
 

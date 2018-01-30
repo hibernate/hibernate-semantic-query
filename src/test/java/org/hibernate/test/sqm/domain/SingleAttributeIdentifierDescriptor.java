@@ -6,7 +6,7 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
 
 /**
  * @author Steve Ebersole

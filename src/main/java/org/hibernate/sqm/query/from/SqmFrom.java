@@ -6,11 +6,11 @@
  */
 package org.hibernate.sqm.query.from;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.parser.common.ParsingContext;
 import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
 
 /**
  * Models a Bindable's inclusion in the {@code FROM} clause.
@@ -26,7 +26,7 @@ public interface SqmFrom extends SqmExpression, Downcastable {
 	/**
 	 * Obtain the DomainReferenceBinding represented by this from-element.
 	 */
-	DomainReferenceBinding getDomainReferenceBinding();
+	SqmNavigableReference getDomainReferenceBinding();
 
 	/**
 	 * Obtains the property path that led to the creation of this SqmFrom element.
@@ -67,5 +67,5 @@ public interface SqmFrom extends SqmExpression, Downcastable {
 	 * @todo - will need a wrapper approach to handle non-intrinsic attribute references
 	 * 		^^ assuming attribute references expect SqmFrom objects as their "lhs"
 	 */
-	EntityReference getIntrinsicSubclassIndicator();
+	EntityDescriptor getIntrinsicSubclassIndicator();
 }

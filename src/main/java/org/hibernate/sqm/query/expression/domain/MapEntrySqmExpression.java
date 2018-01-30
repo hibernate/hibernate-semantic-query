@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -17,23 +17,23 @@ import org.hibernate.sqm.query.expression.SqmExpression;
  * @author Steve Ebersole
  */
 public class MapEntrySqmExpression implements SqmExpression {
-	private final PluralAttributeBinding attributeBinding;
+	private final PluralAttributeReference attributeBinding;
 
-	public MapEntrySqmExpression(PluralAttributeBinding attributeBinding) {
+	public MapEntrySqmExpression(PluralAttributeReference attributeBinding) {
 		this.attributeBinding = attributeBinding;
 	}
 
-	public PluralAttributeBinding getAttributeBinding() {
+	public PluralAttributeReference getAttributeBinding() {
 		return attributeBinding;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return null;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return null;
 	}
 

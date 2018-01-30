@@ -6,8 +6,8 @@
  */
 package org.hibernate.sqm.parser.common;
 
-import org.hibernate.sqm.domain.AttributeReference;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.domain.AttributeDescriptor;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFromClause;
 import org.hibernate.sqm.query.from.SqmJoin;
@@ -54,13 +54,13 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementByIdentificationVariable(String identificationVariable) {
+	public SqmNavigableReference findFromElementByIdentificationVariable(String identificationVariable) {
 		return fromElementBuilder.getAliasRegistry().findFromElementByAlias( identificationVariable );
 	}
 
 	@Override
-	public DomainReferenceBinding findFromElementExposingAttribute(String name) {
-		DomainReferenceBinding found = null;
+	public SqmNavigableReference findFromElementExposingAttribute(String name) {
+		SqmNavigableReference found = null;
 		for ( FromElementSpace space : fromClause.getFromElementSpaces() ) {
 			if ( definesAttribute( space.getRoot().getDomainReferenceBinding(), name ) ) {
 				if ( found != null ) {
@@ -89,10 +89,10 @@ public class QuerySpecProcessingStateStandardImpl extends AbstractQuerySpecProce
 		return found;
 	}
 
-	private boolean definesAttribute(DomainReferenceBinding domainReferenceBinding, String name) {
-		final AttributeReference resolvedAttributeReference = getParsingContext().getConsumerContext()
+	private boolean definesAttribute(SqmNavigableReference domainReferenceBinding, String name) {
+		final AttributeDescriptor resolvedAttributeReference = getParsingContext().getConsumerContext()
 				.getDomainMetamodel()
-				.locateAttributeReference( domainReferenceBinding.getBoundDomainReference(), name );
+				.locateAttributeDescriptor( domainReferenceBinding.getBoundDomainReference(), name );
 		return resolvedAttributeReference != null;
 	}
 

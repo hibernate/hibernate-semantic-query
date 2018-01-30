@@ -6,7 +6,7 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * A type-safe representation of a domain model type.  Generally, this type
@@ -15,7 +15,7 @@ import org.hibernate.sqm.domain.DomainReference;
  *
  * @author Steve Ebersole
  */
-public interface Type extends DomainReference {
+public interface Type extends Navigable {
 	/**
 	 * The name of the type.  For a Java type this would be the same as the type's Class name
 	 *

@@ -7,8 +7,8 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeReference;
 
 /**
  * Represents the {@code SIZE()} function.
@@ -17,25 +17,25 @@ import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
  * @author Gunnar Morling
  */
 public class CollectionSizeSqmExpression implements SqmExpression {
-	private final PluralAttributeBinding pluralAttributeBinding;
+	private final PluralAttributeReference pluralAttributeBinding;
 
-	public CollectionSizeSqmExpression(PluralAttributeBinding pluralAttributeBinding) {
+	public CollectionSizeSqmExpression(PluralAttributeReference pluralAttributeBinding) {
 		this.pluralAttributeBinding = pluralAttributeBinding;
 	}
 
-	public PluralAttributeBinding getPluralAttributeBinding() {
+	public PluralAttributeReference getPluralAttributeBinding() {
 		return pluralAttributeBinding;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		// we'd need some form of "basic type memento" and to be able to ask the
 		// consumer for the "basic type memento" for a Long.class
 		return null;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 

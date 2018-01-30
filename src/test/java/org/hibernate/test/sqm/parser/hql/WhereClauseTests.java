@@ -9,9 +9,9 @@ package org.hibernate.test.sqm.parser.hql;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
-import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor;
+import org.hibernate.sqm.domain.PluralAttributeIndexDescriptor.IndexClassification;
+import org.hibernate.sqm.query.expression.domain.MapKeyReference;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.PluralAttributeIndexSqmExpression;
 import org.hibernate.sqm.query.expression.CollectionSizeSqmExpression;
@@ -119,9 +119,9 @@ public class WhereClauseTests {
 		assertThat( predicate, instanceOf( RelationalSqmPredicate.class ) );
 		RelationalSqmPredicate relationalPredicate = ( (RelationalSqmPredicate) predicate );
 
-		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyBinding.class ) );
-		final MapKeyBinding mapKeyExpression = (MapKeyBinding) relationalPredicate.getLeftHandExpression();
-		final PluralAttributeReference attributeReference = (PluralAttributeReference) mapKeyExpression.getPluralAttributeBinding().getAttribute();
+		assertThat( relationalPredicate.getLeftHandExpression(), instanceOf( MapKeyReference.class ) );
+		final MapKeyReference mapKeyExpression = (MapKeyReference) relationalPredicate.getLeftHandExpression();
+		final PluralAttributeDescriptor attributeReference = (PluralAttributeDescriptor) mapKeyExpression.getPluralAttributeBinding().getAttribute();
 
 		assertThat( attributeReference.getIndexReference().getClassification(), is( IndexClassification.BASIC) );
 		assertThat( attributeReference.getIndexReference().getType(), instanceOf( BasicType.class ) );

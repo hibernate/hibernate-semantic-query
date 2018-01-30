@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * The base contract for any kind of expression node in the SQM tree.
@@ -23,7 +23,7 @@ public interface SqmExpression {
 	 *
 	 * @return The expression's type.
 	 */
-	DomainReference getExpressionType();
+	Navigable getExpressionType();
 
 	/**
 	 * Obtain reference to the type, or {@code null}, for this expression that can be used
@@ -32,9 +32,9 @@ public interface SqmExpression {
 	 *
 	 * @return The inferable type
 	 *
-	 * @see ImpliedTypeSqmExpression#impliedType(DomainReference)
+	 * @see ImpliedTypeSqmExpression#impliedType(Navigable)
 	 */
-	DomainReference getInferableType();
+	Navigable getInferableType();
 
 	/**
 	 * Visitation method

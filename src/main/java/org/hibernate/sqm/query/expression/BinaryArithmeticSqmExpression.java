@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
@@ -17,13 +17,13 @@ public class BinaryArithmeticSqmExpression implements SqmExpression {
 	private final SqmExpression lhsOperand;
 	private final SqmExpression rhsOperand;
 
-	private DomainReference expressionType;
+	private Navigable expressionType;
 
 	public BinaryArithmeticSqmExpression(
 			Operation operation,
 			SqmExpression lhsOperand,
 			SqmExpression rhsOperand,
-			DomainReference expressionType) {
+			Navigable expressionType) {
 		this.operation = operation;
 		this.lhsOperand = lhsOperand;
 		this.rhsOperand = rhsOperand;
@@ -104,12 +104,12 @@ public class BinaryArithmeticSqmExpression implements SqmExpression {
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return expressionType;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return expressionType;
 	}
 

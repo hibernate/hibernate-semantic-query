@@ -11,10 +11,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
 
 import org.jboss.logging.Logger;
 
@@ -29,18 +29,18 @@ public abstract class AbstractFrom implements SqmFrom {
 	private final FromElementSpace fromElementSpace;
 	private final String uid;
 	private final String alias;
-	private final DomainReferenceBinding binding;
-	private final EntityReference subclassIndicator;
+	private final SqmNavigableReference binding;
+	private final EntityDescriptor subclassIndicator;
 	private final PropertyPath sourcePath;
 
-	private Map<EntityReference,Downcast> downcastMap;
+	private Map<EntityDescriptor,Downcast> downcastMap;
 
 	protected AbstractFrom(
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			DomainReferenceBinding binding,
-			EntityReference subclassIndicator,
+			SqmNavigableReference binding,
+			EntityDescriptor subclassIndicator,
 			PropertyPath sourcePath) {
 		this.fromElementSpace = fromElementSpace;
 		this.uid = uid;
@@ -66,22 +66,22 @@ public abstract class AbstractFrom implements SqmFrom {
 	}
 
 	@Override
-	public DomainReferenceBinding getDomainReferenceBinding() {
+	public SqmNavigableReference getDomainReferenceBinding() {
 		return binding;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return binding.getBoundDomainReference();
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 
 	@Override
-	public EntityReference getIntrinsicSubclassIndicator() {
+	public EntityDescriptor getIntrinsicSubclassIndicator() {
 		return subclassIndicator;
 	}
 

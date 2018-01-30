@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.sqm.ConsumerContext;
-import org.hibernate.sqm.domain.AttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.SingularAttributeReference;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.domain.AttributeDescriptor;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeReference;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.from.SqmAttributeJoin;
 import org.hibernate.sqm.query.from.SqmFrom;
 
@@ -34,7 +34,7 @@ public class ParsingContext {
 	private final ImplicitAliasGenerator aliasGenerator = new ImplicitAliasGenerator();
 	private final Map<String,SqmFrom> globalFromElementMap = new HashMap<>();
 
-	private Map<SqmFrom,Map<AttributeReference,SqmAttributeJoin>> attributeJoinMapByFromElement;
+	private Map<SqmFrom,Map<AttributeDescriptor,SqmAttributeJoin>> attributeJoinMapByFromElement;
 
 	public ParsingContext(ConsumerContext consumerContext) {
 		this.consumerContext = consumerContext;
@@ -64,7 +64,7 @@ public class ParsingContext {
 	}
 
 	public void cacheAttributeJoin(SqmFrom lhs, SqmAttributeJoin join) {
-		Map<AttributeReference,SqmAttributeJoin> attributeJoinMap = null;
+		Map<AttributeDescriptor,SqmAttributeJoin> attributeJoinMap = null;
 		if ( attributeJoinMapByFromElement == null ) {
 			attributeJoinMapByFromElement = new HashMap<>();
 		}
@@ -87,12 +87,12 @@ public class ParsingContext {
 		}
 	}
 
-	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, AttributeReference attribute) {
+	public SqmAttributeJoin getCachedAttributeJoin(SqmFrom lhs, AttributeDescriptor attribute) {
 		if ( attributeJoinMapByFromElement == null ) {
 			return null;
 		}
 
-		final Map<AttributeReference,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
+		final Map<AttributeDescriptor,SqmAttributeJoin> attributeJoinMap = attributeJoinMapByFromElement.get( lhs );
 
 		if ( attributeJoinMap == null ) {
 			return null;
@@ -101,21 +101,21 @@ public class ParsingContext {
 		return attributeJoinMap.get( attribute );
 	}
 
-	private Map<SqmFrom,Map<AttributeReference,AttributeBinding>> attributeBindingsMap;
+	private Map<SqmFrom,Map<AttributeDescriptor,AttributeReference>> attributeBindingsMap;
 
-	public AttributeBinding findOrCreateAttributeBinding(
-			DomainReferenceBinding lhs,
+	public AttributeReference findOrCreateAttributeBinding(
+			SqmNavigableReference lhs,
 			String attributeName) {
 		return findOrCreateAttributeBinding(
 				lhs,
-				consumerContext.getDomainMetamodel().resolveAttributeReference( lhs.getBoundDomainReference(), attributeName )
+				consumerContext.getDomainMetamodel().resolveAttributeDescriptor( lhs.getBoundDomainReference(), attributeName )
 		);
 	}
 
-	public AttributeBinding findOrCreateAttributeBinding(
-			DomainReferenceBinding lhs,
-			AttributeReference attribute) {
-		Map<AttributeReference,AttributeBinding> bindingsMap = null;
+	public AttributeReference findOrCreateAttributeBinding(
+			SqmNavigableReference lhs,
+			AttributeDescriptor attribute) {
+		Map<AttributeDescriptor,AttributeReference> bindingsMap = null;
 
 		if ( attributeBindingsMap == null ) {
 			attributeBindingsMap = new HashMap<>();
@@ -129,13 +129,13 @@ public class ParsingContext {
 			attributeBindingsMap.put( lhs.getFromElement(), bindingsMap );
 		}
 
-		AttributeBinding attributeBinding = bindingsMap.get( attribute );
+		AttributeReference attributeBinding = bindingsMap.get( attribute );
 		if ( attributeBinding == null ) {
-			if ( attribute instanceof PluralAttributeReference ) {
-				attributeBinding = new PluralAttributeBinding( lhs, (PluralAttributeReference) attribute );
+			if ( attribute instanceof PluralAttributeDescriptor ) {
+				attributeBinding = new PluralAttributeReference( lhs, (PluralAttributeDescriptor) attribute );
 			}
 			else {
-				attributeBinding = new SingularAttributeBinding( lhs, (SingularAttributeReference) attribute );
+				attributeBinding = new SingularAttributeReference( lhs, (SingularAttributeDescriptor) attribute );
 			}
 			bindingsMap.put( attribute, attributeBinding );
 		}

@@ -7,9 +7,9 @@
 package org.hibernate.sqm.query.from;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.query.PropertyPath;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
+import org.hibernate.sqm.query.expression.domain.EntityReference;
 import org.hibernate.sqm.query.JoinType;
 import org.hibernate.sqm.query.predicate.SqmPredicate;
 
@@ -25,13 +25,13 @@ public class SqmEntityJoin
 			FromElementSpace fromElementSpace,
 			String uid,
 			String alias,
-			EntityReference joinedEntityDescriptor,
+			EntityDescriptor joinedEntityDescriptor,
 			JoinType joinType) {
 		super(
 				fromElementSpace,
 				uid,
 				alias,
-				new EntityBinding( joinedEntityDescriptor ),
+				new EntityReference( joinedEntityDescriptor ),
 				joinedEntityDescriptor,
 				new PropertyPath( null, joinedEntityDescriptor.getEntityName() + "(" + alias + ")" ),
 				joinType
@@ -40,8 +40,8 @@ public class SqmEntityJoin
 	}
 
 	@Override
-	public EntityBinding getDomainReferenceBinding() {
-		return (EntityBinding) super.getDomainReferenceBinding();
+	public EntityReference getDomainReferenceBinding() {
+		return (EntityReference) super.getDomainReferenceBinding();
 	}
 
 	public String getEntityName() {

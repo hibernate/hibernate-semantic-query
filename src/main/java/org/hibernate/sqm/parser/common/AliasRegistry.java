@@ -11,14 +11,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.sqm.parser.AliasCollisionException;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
 import org.hibernate.sqm.query.select.SqmSelection;
 
 /**
  * @author Andrea Boriero
  */
 public class AliasRegistry {
-	private Map<String, DomainReferenceBinding> fromBindingsByAlias = new HashMap<>();
+	private Map<String, SqmNavigableReference> fromBindingsByAlias = new HashMap<>();
 	private Map<String, SqmSelection> selectionsByAlias = new HashMap<>();
 
 	private AliasRegistry parent;
@@ -41,8 +41,8 @@ public class AliasRegistry {
 		}
 	}
 
-	public void registerAlias(DomainReferenceBinding binding) {
-		final DomainReferenceBinding old = fromBindingsByAlias.put( binding.getFromElement().getIdentificationVariable(), binding );
+	public void registerAlias(SqmNavigableReference binding) {
+		final SqmNavigableReference old = fromBindingsByAlias.put( binding.getFromElement().getIdentificationVariable(), binding );
 		if ( old != null ) {
 			throw new AliasCollisionException(
 					String.format(
@@ -60,7 +60,7 @@ public class AliasRegistry {
 		return selectionsByAlias.get( alias );
 	}
 
-	public DomainReferenceBinding findFromElementByAlias(String alias) {
+	public SqmNavigableReference findFromElementByAlias(String alias) {
 		if ( fromBindingsByAlias.containsKey( alias ) ) {
 			return fromBindingsByAlias.get( alias );
 		}
@@ -81,7 +81,7 @@ public class AliasRegistry {
 					)
 			);
 		}
-		final DomainReferenceBinding fromElement = fromBindingsByAlias.get( alias );
+		final SqmNavigableReference fromElement = fromBindingsByAlias.get( alias );
 		if ( fromElement != null ) {
 			if ( !selection.getExpression().getExpressionType().equals( fromElement.getBoundDomainReference() ) ) {
 				throw new AliasCollisionException(

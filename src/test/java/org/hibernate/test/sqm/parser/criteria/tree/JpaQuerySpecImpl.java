@@ -88,7 +88,7 @@ public class JpaQuerySpecImpl<T> implements JpaQuerySpec<T>, Serializable {
 	public <X> Root<X> from(Class<X> entityClass) {
 		org.hibernate.test.sqm.domain.EntityType entityType = (org.hibernate.test.sqm.domain.EntityType) criteriaBuilder.consumerContext()
 				.getDomainMetamodel()
-				.resolveEntityReference( entityClass );
+				.resolveEntityDescriptor( entityClass );
 		if ( entityType == null ) {
 			throw new IllegalArgumentException( entityClass + " is not an entity" );
 		}
@@ -104,7 +104,7 @@ public class JpaQuerySpecImpl<T> implements JpaQuerySpec<T>, Serializable {
 	public <X> Root<X> from(String entityName) {
 		org.hibernate.test.sqm.domain.EntityType entityType = (org.hibernate.test.sqm.domain.EntityType) criteriaBuilder.consumerContext()
 				.getDomainMetamodel()
-				.resolveEntityReference( entityName );
+				.resolveEntityDescriptor( entityName );
 		if ( entityType == null ) {
 			throw new IllegalArgumentException( entityName + " is not an entity" );
 		}

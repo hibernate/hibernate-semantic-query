@@ -11,11 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.sqm.NotYetImplementedException;
-import org.hibernate.sqm.domain.AttributeReference;
+import org.hibernate.sqm.domain.AttributeDescriptor;
 import org.hibernate.sqm.domain.BasicType;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.domain.EntityDescriptor;
 import org.hibernate.sqm.domain.NoSuchAttributeException;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
 
@@ -48,7 +48,7 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public EntityReference resolveEntityReference(String entityName) {
+	public EntityDescriptor resolveEntityDescriptor(String entityName) {
 		if ( importMap.containsKey( entityName ) ) {
 			entityName = importMap.get( entityName );
 		}
@@ -63,7 +63,7 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public EntityReference resolveEntityReference(Class javaType) {
+	public EntityDescriptor resolveEntityDescriptor(Class javaType) {
 		final EntityTypeImpl entityType = entityTypeMap.get( javaType.getName() );
 		if ( entityType == null ) {
 			throw new IllegalArgumentException( "Per JPA spec" );
@@ -72,8 +72,8 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public AttributeReference resolveAttributeReference(DomainReference source, String attributeName) {
-		final AttributeReference attrRef = locateAttributeReference( source, attributeName );
+	public AttributeDescriptor resolveAttributeDescriptor(Navigable source, String attributeName) {
+		final AttributeDescriptor attrRef = locateAttributeDescriptor( source, attributeName );
 		if ( attrRef == null ) {
 			throw new NoSuchAttributeException( "Could not locate attribute named [" + attributeName + " relative to [" + source.asLoggableText() + "]" );
 		}
@@ -81,7 +81,7 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public AttributeReference locateAttributeReference(DomainReference source, String attributeName) {
+	public AttributeDescriptor locateAttributeDescriptor(Navigable source, String attributeName) {
 		final Type type = extractType( source, Type.class );
 		if ( !ManagedType.class.isInstance( type ) ) {
 			throw new IllegalArgumentException( "Passed DomainReference [" + source + "] not known to expose attributes" );
@@ -102,8 +102,8 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 
 	@Override
 	public BasicType resolveArithmeticType(
-			DomainReference firstType,
-			DomainReference secondType,
+			Navigable firstType,
+			Navigable secondType,
 			BinaryArithmeticSqmExpression.Operation operation) {
 		return ExpressionTypeHelper.resolveArithmeticType(
 				extractType( firstType, org.hibernate.test.sqm.domain.BasicType.class ),
@@ -114,7 +114,7 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Type> T extractType(DomainReference reference, Class<T> expectedType) {
+	private <T extends Type> T extractType(Navigable reference, Class<T> expectedType) {
 		if ( reference == null ) {
 			log.warn( "DomainReference from which to extract Type was null" );
 			return null;
@@ -155,7 +155,7 @@ public class ExplicitDomainMetamodel implements DomainMetamodel {
 	}
 
 	@Override
-	public BasicType resolveSumFunctionType(DomainReference argumentType) {
+	public BasicType resolveSumFunctionType(Navigable argumentType) {
 		return ExpressionTypeHelper.resolveSingleNumericType(
 				extractType( argumentType, org.hibernate.test.sqm.domain.BasicType.class ),
 				this

@@ -6,30 +6,30 @@
  */
 package org.hibernate.sqm.query.expression.function;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
  */
 public abstract class AbstractFunctionSqmExpression implements FunctionSqmExpression {
-	private final DomainReference resultType;
+	private final Navigable resultType;
 
-	public AbstractFunctionSqmExpression(DomainReference resultType) {
+	public AbstractFunctionSqmExpression(Navigable resultType) {
 		this.resultType = resultType;
 	}
 
 	@Override
-	public DomainReference getFunctionResultType() {
+	public Navigable getFunctionResultType() {
 		return resultType;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return getFunctionResultType();
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getFunctionResultType();
 	}
 }

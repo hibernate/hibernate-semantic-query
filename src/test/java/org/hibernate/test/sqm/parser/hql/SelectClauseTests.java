@@ -12,16 +12,16 @@ import java.util.Map;
 import org.hibernate.sqm.SemanticQueryInterpreter;
 import org.hibernate.sqm.StrictJpaComplianceViolation;
 import org.hibernate.sqm.domain.DomainMetamodel;
-import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.domain.PluralAttributeReference.CollectionClassification;
-import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
-import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
-import org.hibernate.sqm.query.expression.domain.EntityBinding;
-import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
+import org.hibernate.sqm.domain.EntityDescriptor;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor.CollectionClassification;
+import org.hibernate.sqm.domain.PluralAttributeElementDescriptor.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeIndexDescriptor.IndexClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
+import org.hibernate.sqm.query.expression.domain.EntityReference;
+import org.hibernate.sqm.query.expression.domain.MapKeyReference;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeElementReference;
 import org.hibernate.sqm.query.SqmQuerySpec;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.expression.BinaryArithmeticSqmExpression;
@@ -127,7 +127,7 @@ public class SelectClauseTests {
 		SqmSelectStatement statement = interpret( "select o from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( EntityBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( EntityReference.class ) );
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class SelectClauseTests {
 		SqmSelectStatement statement = interpret( "select o.basic from Entity o" );
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SingularAttributeBinding.class ) );
+		assertThat( selection.getExpression(), instanceOf( SingularAttributeReference.class ) );
 	}
 
 	@Test
@@ -144,11 +144,11 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 	}
 
@@ -158,11 +158,11 @@ public class SelectClauseTests {
 		assertEquals( 2, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( EntityBinding.class )
+				instanceOf( EntityReference.class )
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 	}
 
@@ -206,7 +206,7 @@ public class SelectClauseTests {
 		);
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 1 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 	}
 
@@ -239,11 +239,11 @@ public class SelectClauseTests {
 		assertEquals( 3, dynamicInstantiation.getArguments().size() );
 		assertThat(
 				dynamicInstantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 		assertThat(
 				dynamicInstantiation.getArguments().get( 2 ).getExpression(),
@@ -282,11 +282,11 @@ public class SelectClauseTests {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 	}
 
@@ -311,11 +311,11 @@ public class SelectClauseTests {
 		assertEquals( 2, instantiation.getArguments().size() );
 		assertThat(
 				instantiation.getArguments().get( 0 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 		assertThat(
 				instantiation.getArguments().get( 1 ).getExpression(),
-				instanceOf( SingularAttributeBinding.class )
+				instanceOf( SingularAttributeReference.class )
 		);
 	}
 
@@ -334,12 +334,12 @@ public class SelectClauseTests {
 		assertThat( fromElementSpace.getJoins().size(), is(0) );
 
 		BinaryArithmeticSqmExpression expression = (BinaryArithmeticSqmExpression) selection.getExpression();
-		SingularAttributeBinding leftHandOperand = (SingularAttributeBinding) expression.getLeftHandOperand();
+		SingularAttributeReference leftHandOperand = (SingularAttributeReference) expression.getLeftHandOperand();
 		assertThat( leftHandOperand.getLhs().getFromElement(), sameInstance( root ) );
 		assertThat( leftHandOperand.getAttribute().getAttributeName(), is( "basic" ) );
 		assertThat( leftHandOperand.getFromElement(), nullValue() );
 
-		SingularAttributeBinding rightHandOperand = (SingularAttributeBinding) expression.getRightHandOperand();
+		SingularAttributeReference rightHandOperand = (SingularAttributeReference) expression.getRightHandOperand();
 		assertThat( rightHandOperand.getLhs().getFromElement(), sameInstance( root ) );
 		assertThat( rightHandOperand.getAttribute().getAttributeName(), is( "basic1" ) );
 		assertThat( leftHandOperand.getFromElement(), nullValue() );
@@ -363,12 +363,12 @@ public class SelectClauseTests {
 
 		BinaryArithmeticSqmExpression addExpression = (BinaryArithmeticSqmExpression) selection.getExpression();
 
-		SingularAttributeBinding leftHandOperand = (SingularAttributeBinding) addExpression.getLeftHandOperand();
+		SingularAttributeReference leftHandOperand = (SingularAttributeReference) addExpression.getLeftHandOperand();
 		assertThat( leftHandOperand.getLhs().getFromElement(), sameInstance( entityRoot ) );
 		assertThat( leftHandOperand.getAttribute().getAttributeName(), is( "basic" ) );
 		assertThat( leftHandOperand.getFromElement(), nullValue() );
 
-		SingularAttributeBinding rightHandOperand = (SingularAttributeBinding) addExpression.getRightHandOperand();
+		SingularAttributeReference rightHandOperand = (SingularAttributeReference) addExpression.getRightHandOperand();
 		assertThat( rightHandOperand.getLhs().getFromElement(), sameInstance( entity2Root ) );
 		assertThat( rightHandOperand.getAttribute().getAttributeName(), is( "basic1" ) );
 		assertThat( rightHandOperand.getFromElement(), nullValue() );
@@ -381,11 +381,11 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( MapKeyBinding.class )
+				instanceOf( MapKeyReference.class )
 		);
 
-		final MapKeyBinding mapKeyPathExpression = (MapKeyBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final PluralAttributeReference attrRef = (PluralAttributeReference) mapKeyPathExpression.getPluralAttributeBinding().getAttribute();
+		final MapKeyReference mapKeyPathExpression = (MapKeyReference) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final PluralAttributeDescriptor attrRef = (PluralAttributeDescriptor) mapKeyPathExpression.getPluralAttributeBinding().getAttribute();
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 		assertThat( attrRef.getIndexReference().getClassification(), is( IndexClassification.BASIC) );
 		assertThat( mapKeyPathExpression.getExpressionType(), sameInstance( attrRef.getIndexReference().getType() ) );
@@ -400,11 +400,11 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( PluralAttributeElementBinding.class )
+				instanceOf( PluralAttributeElementReference.class )
 		);
 
-		final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final PluralAttributeReference attrRef = elementBinding.getPluralAttributeReference();
+		final PluralAttributeElementReference elementBinding = (PluralAttributeElementReference) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final PluralAttributeDescriptor attrRef = elementBinding.getPluralAttributeReference();
 
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 //		assertThat( elementBinding.getExpressionType(), sameInstance( attrRef.getElementReference().getType() ) );
@@ -419,11 +419,11 @@ public class SelectClauseTests {
 		assertEquals( 1, statement.getQuerySpec().getSelectClause().getSelections().size() );
 		assertThat(
 				statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression(),
-				instanceOf( PluralAttributeElementBinding.class )
+				instanceOf( PluralAttributeElementReference.class )
 		);
 
-		final PluralAttributeElementBinding elementBinding = (PluralAttributeElementBinding) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
-		final PluralAttributeReference attrRef = elementBinding.getPluralAttributeReference();
+		final PluralAttributeElementReference elementBinding = (PluralAttributeElementReference) statement.getQuerySpec().getSelectClause().getSelections().get( 0 ).getExpression();
+		final PluralAttributeDescriptor attrRef = elementBinding.getPluralAttributeReference();
 
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.LIST) );
 //		assertThat( elementBinding.getExpressionType(), sameInstance( attrRef.getElementReference().getType() ) );
@@ -436,7 +436,7 @@ public class SelectClauseTests {
 		consumerContext.enableStrictJpaCompliance();
 
 		expectedException.expect( StrictJpaComplianceViolation.class );
-		expectedException.expectMessage( "Encountered application of value() function to path expression which does not resolve to a persistent Map" );
+//		expectedException.expectMessage( "Encountered application of value() function to path expression which does not resolve to a persistent Map" );
 
 		interpret( "SELECT VALUE( l ) FROM Trip t JOIN t.collectionLegs l" );
 	}
@@ -455,7 +455,7 @@ public class SelectClauseTests {
 		assertThat( mapEntryFunction.getAttributeBinding().getFromElement(), notNullValue() );
 		assertThat( mapEntryFunction.getAttributeBinding().getFromElement().getIdentificationVariable(), is( "l") );
 
-		final PluralAttributeReference attrRef = (PluralAttributeReference) mapEntryFunction.getAttributeBinding().getAttribute();
+		final PluralAttributeDescriptor attrRef = (PluralAttributeDescriptor) mapEntryFunction.getAttributeBinding().getAttribute();
 		assertThat( attrRef.getCollectionClassification(), is(CollectionClassification.MAP) );
 
 		// Key
@@ -464,7 +464,7 @@ public class SelectClauseTests {
 
 		// value/element
 		assertThat( attrRef.getElementReference().getClassification(), is( ElementClassification.ONE_TO_MANY) );
-		assertThat( ( (EntityReference) attrRef.getElementReference().getType() ).getEntityName(), is( "com.acme.Leg" ) );
+		assertThat( ( (EntityDescriptor) attrRef.getElementReference().getType() ).getEntityName(), is( "com.acme.Leg" ) );
 	}
 
 	private SqmSelectStatement interpret(String query) {

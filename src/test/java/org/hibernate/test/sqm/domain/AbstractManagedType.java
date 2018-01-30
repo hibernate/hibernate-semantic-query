@@ -10,9 +10,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.sqm.domain.PluralAttributeElementReference.ElementClassification;
-import org.hibernate.sqm.domain.PluralAttributeIndexReference.IndexClassification;
-import org.hibernate.sqm.domain.SingularAttributeReference.SingularAttributeClassification;
+import org.hibernate.sqm.domain.PluralAttributeElementDescriptor.ElementClassification;
+import org.hibernate.sqm.domain.PluralAttributeIndexDescriptor.IndexClassification;
+import org.hibernate.sqm.domain.SingularAttributeDescriptor.SingularAttributeClassification;
 
 /**
  * Base support for all ManagedType implementations.managed types, which is the JPA term for commonality between entity, embeddable and

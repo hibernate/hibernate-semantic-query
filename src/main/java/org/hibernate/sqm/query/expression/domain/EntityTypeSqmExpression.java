@@ -7,30 +7,30 @@
 package org.hibernate.sqm.query.expression.domain;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
  * @author Steve Ebersole
  */
 public class EntityTypeSqmExpression implements SqmExpression {
-	private final DomainReferenceBinding binding;
+	private final SqmNavigableReference binding;
 
-	public EntityTypeSqmExpression(DomainReferenceBinding binding) {
+	public EntityTypeSqmExpression(SqmNavigableReference binding) {
 		this.binding = binding;
 	}
 
-	public DomainReferenceBinding getBinding() {
+	public SqmNavigableReference getBinding() {
 		return binding;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return binding.getBoundDomainReference();
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return binding.getBoundDomainReference();
 	}
 

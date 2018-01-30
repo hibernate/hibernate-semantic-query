@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
@@ -15,26 +15,26 @@ import org.hibernate.sqm.domain.DomainReference;
 public class PositionalParameterSqmExpression implements ParameterSqmExpression {
 	private final int position;
 	private final boolean canBeMultiValued;
-	private DomainReference typeDescriptor;
+	private Navigable typeDescriptor;
 
 	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued) {
 		this.position = position;
 		this.canBeMultiValued = canBeMultiValued;
 	}
 
-	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued, DomainReference typeDescriptor) {
+	public PositionalParameterSqmExpression(int position, boolean canBeMultiValued, Navigable typeDescriptor) {
 		this.position = position;
 		this.canBeMultiValued = canBeMultiValued;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return null;
 	}
 
@@ -59,7 +59,7 @@ public class PositionalParameterSqmExpression implements ParameterSqmExpression 
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		if ( type != null ) {
 			this.typeDescriptor = type;
 		}
@@ -71,7 +71,7 @@ public class PositionalParameterSqmExpression implements ParameterSqmExpression 
 	}
 
 	@Override
-	public DomainReference getAnticipatedType() {
+	public Navigable getAnticipatedType() {
 		return getExpressionType();
 	}
 }

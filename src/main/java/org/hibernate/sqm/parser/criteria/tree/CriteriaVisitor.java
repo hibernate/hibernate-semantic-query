@@ -19,7 +19,7 @@ import org.hibernate.sqm.query.expression.LiteralSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
@@ -42,7 +42,6 @@ import org.hibernate.sqm.query.predicate.NullnessSqmPredicate;
 import org.hibernate.sqm.query.predicate.OrSqmPredicate;
 import org.hibernate.sqm.query.predicate.RelationalPredicateOperator;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
-import org.hibernate.sqm.query.select.SqmDynamicInstantiation;
 
 /**
  * @author Steve Ebersole
@@ -75,7 +74,7 @@ public interface CriteriaVisitor {
 			BasicType resultType);
 
 	SqmFrom visitIdentificationVariableReference(JpaFrom<?,?> reference);
-	SingularAttributeBinding visitAttributeReference(JpaFrom<?,?> attributeSource, String attributeName);
+	SingularAttributeReference visitAttributeReference(JpaFrom<?,?> attributeSource, String attributeName);
 
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, List<JpaExpression<?>> arguments);
 	GenericFunctionSqmExpression visitFunction(String name, BasicType resultTypeDescriptor, JpaExpression<?>... arguments);

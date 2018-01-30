@@ -8,35 +8,35 @@ package org.hibernate.sqm.query.expression;
 
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.PluralAttributeReference;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeBinding;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeReference;
 
 /**
  * @author Steve Ebersole
  */
 public class PluralAttributeIndexSqmExpression implements SqmExpression {
-	private final PluralAttributeBinding attributeBinding;
+	private final PluralAttributeReference attributeBinding;
 
-	public PluralAttributeIndexSqmExpression(PluralAttributeBinding attributeBinding) {
+	public PluralAttributeIndexSqmExpression(PluralAttributeReference attributeBinding) {
 		this.attributeBinding = attributeBinding;
 	}
 
-	public PluralAttributeBinding getAttributeBinding() {
+	public PluralAttributeReference getAttributeBinding() {
 		return attributeBinding;
 	}
 
-	private PluralAttributeReference pluralAttributeReference() {
+	private PluralAttributeDescriptor pluralAttributeReference() {
 		return attributeBinding.getAttribute();
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return pluralAttributeReference().getIndexReference();
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return getExpressionType();
 	}
 

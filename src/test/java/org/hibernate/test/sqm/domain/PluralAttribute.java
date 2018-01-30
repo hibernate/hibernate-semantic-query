@@ -7,14 +7,14 @@
 package org.hibernate.test.sqm.domain;
 
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.PluralAttributeReference;
+import org.hibernate.sqm.domain.PluralAttributeDescriptor;
 
 /**
  * Specialization of Attribute for persistent collection values
  *
  * @author Steve Ebersole
  */
-public interface PluralAttribute extends Attribute, Bindable, PluralAttributeReference {
+public interface PluralAttribute extends Attribute, Bindable, PluralAttributeDescriptor {
 	/**
 	 * Really only used for "id bag" mappings.  Defines the type for the identifier
 	 * value used to uniquely identify each collection row

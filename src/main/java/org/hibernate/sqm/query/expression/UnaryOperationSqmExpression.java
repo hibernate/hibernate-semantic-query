@@ -7,7 +7,7 @@
 package org.hibernate.sqm.query.expression;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 
 /**
  * @author Steve Ebersole
@@ -21,30 +21,30 @@ public class UnaryOperationSqmExpression implements ImpliedTypeSqmExpression {
 	private final Operation operation;
 	private final SqmExpression operand;
 
-	private DomainReference typeDescriptor;
+	private Navigable typeDescriptor;
 
 	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand) {
 		this( operation, operand, operand.getExpressionType() );
 	}
 
-	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, DomainReference typeDescriptor) {
+	public UnaryOperationSqmExpression(Operation operation, SqmExpression operand, Navigable typeDescriptor) {
 		this.operation = operation;
 		this.operand = operand;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return typeDescriptor;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return operand.getExpressionType();
 	}
 
 	@Override
-	public void impliedType(DomainReference type) {
+	public void impliedType(Navigable type) {
 		if ( type != null ) {
 			this.typeDescriptor = type;
 			if ( operand instanceof ImpliedTypeSqmExpression ) {

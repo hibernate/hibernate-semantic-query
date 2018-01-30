@@ -12,7 +12,7 @@ package org.hibernate.sqm.domain;
  *
  * @author Steve Ebersole
  */
-public interface BasicType extends DomainReference {
+public interface BasicType extends Navigable {
 	/**
 	 * Return the represented Java type.
 	 *

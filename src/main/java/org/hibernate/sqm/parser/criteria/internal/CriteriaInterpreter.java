@@ -22,7 +22,7 @@ import javax.persistence.criteria.Path;
 
 import org.hibernate.sqm.NotYetImplementedException;
 import org.hibernate.sqm.domain.BasicType;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.parser.ParsingException;
 import org.hibernate.sqm.parser.QueryException;
 import org.hibernate.sqm.parser.common.ParsingContext;
@@ -62,9 +62,9 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CountFunctionSqmExpression;
@@ -130,7 +130,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	private final Stack<QuerySpecProcessingState> querySpecProcessingStateStack = new Stack<>();
 
 	// todo : hook up this structure for tracking DomainReferenceBindings
-	private Map<Path,DomainReferenceBinding> pathToDomainBindingXref = new HashMap<>();
+	private Map<Path,SqmNavigableReference> pathToDomainBindingXref = new HashMap<>();
 
 	private CriteriaInterpreter(ParsingContext parsingContext) {
 		this.parsingContext = parsingContext;
@@ -200,7 +200,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 			final JpaAttributeJoin<?,?> jpaAttributeJoin = (JpaAttributeJoin<?, ?>) join;
 			final String alias = jpaAttributeJoin.getAlias();
 
-			final AttributeBinding attributeBinding = parsingContext.findOrCreateAttributeBinding(
+			final AttributeReference attributeBinding = parsingContext.findOrCreateAttributeBinding(
 					sqmLhs.getDomainReferenceBinding(),
 					jpaAttributeJoin.getAttribute().getName()
 			);
@@ -227,7 +227,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		for ( Fetch<?, ?> fetch : lhs.getFetches() ) {
 			final JpaFetch<?,?> jpaFetch = (JpaFetch<?, ?>) fetch;
 
-			final AttributeBinding attrBinding = parsingContext.findOrCreateAttributeBinding(
+			final AttributeReference attrBinding = parsingContext.findOrCreateAttributeBinding(
 					sqmLhs.getDomainReferenceBinding(),
 					fetch.getAttribute().getName()
 			);
@@ -430,7 +430,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 	}
 
 	@Override
-	public SingularAttributeBinding visitAttributeReference(JpaFrom<?, ?> attributeSource, String attributeName) {
+	public SingularAttributeReference visitAttributeReference(JpaFrom<?, ?> attributeSource, String attributeName) {
 		// todo : implement (especially leveraging the new pathToDomainBindingXref map)
 		throw new NotYetImplementedException();
 
@@ -620,7 +620,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 		return new SubQuerySqmExpression( subQuerySpec, determineTypeDescriptor( subQuerySpec.getSelectClause() ) );
 	}
 
-	private static DomainReference determineTypeDescriptor(SqmSelectClause selectClause) {
+	private static Navigable determineTypeDescriptor(SqmSelectClause selectClause) {
 		if ( selectClause.getSelections().size() != 0 ) {
 			return null;
 		}
@@ -698,7 +698,7 @@ public class CriteriaInterpreter implements CriteriaVisitor {
 
 	@Override
 	public EmptinessSqmPredicate visitEmptinessPredicate(JpaFrom attributeSource, String attributeName, boolean negated) {
-		final SingularAttributeBinding attributeReference = visitAttributeReference( attributeSource, attributeName );
+		final SingularAttributeReference attributeReference = visitAttributeReference( attributeSource, attributeName );
 		return new EmptinessSqmPredicate( attributeReference, negated );
 	}
 

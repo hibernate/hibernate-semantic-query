@@ -40,16 +40,16 @@ import org.hibernate.sqm.query.expression.PositionalParameterSqmExpression;
 import org.hibernate.sqm.query.expression.SqmExpression;
 import org.hibernate.sqm.query.expression.SubQuerySqmExpression;
 import org.hibernate.sqm.query.expression.UnaryOperationSqmExpression;
-import org.hibernate.sqm.query.expression.domain.AttributeBinding;
+import org.hibernate.sqm.query.expression.domain.AttributeReference;
 import org.hibernate.sqm.query.expression.domain.EntityTypeSqmExpression;
 import org.hibernate.sqm.query.expression.domain.MapEntrySqmExpression;
-import org.hibernate.sqm.query.expression.domain.MapKeyBinding;
+import org.hibernate.sqm.query.expression.domain.MapKeyReference;
 import org.hibernate.sqm.query.expression.domain.MaxElementSqmExpression;
 import org.hibernate.sqm.query.expression.domain.MaxIndexSqmExpression;
 import org.hibernate.sqm.query.expression.domain.MinElementSqmExpression;
 import org.hibernate.sqm.query.expression.domain.MinIndexSqmExpression;
-import org.hibernate.sqm.query.expression.domain.PluralAttributeElementBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.PluralAttributeElementReference;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.expression.function.AvgFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.CastFunctionSqmExpression;
 import org.hibernate.sqm.query.expression.function.ConcatFunctionSqmExpression;
@@ -135,7 +135,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	@Override
 	public T visitInsertSelectStatement(SqmInsertSelectStatement statement) {
 		visitRootEntityFromElement( statement.getInsertTarget() );
-		for ( SingularAttributeBinding stateField : statement.getStateFields() ) {
+		for ( SingularAttributeReference stateField : statement.getStateFields() ) {
 			stateField.accept( this );
 		}
 		visitQuerySpec( statement.getSelectQuery() );
@@ -371,7 +371,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitAttributeReferenceExpression(AttributeBinding expression) {
+	public T visitAttributeReferenceExpression(AttributeReference expression) {
 		return (T) expression;
 	}
 
@@ -421,7 +421,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitPluralAttributeElementBinding(PluralAttributeElementBinding binding) {
+	public T visitPluralAttributeElementBinding(PluralAttributeElementReference binding) {
 		return (T) binding;
 	}
 
@@ -431,7 +431,7 @@ public class BaseSemanticQueryWalker<T> implements SemanticQueryWalker<T> {
 	}
 
 	@Override
-	public T visitMapKeyBinding(MapKeyBinding binding) {
+	public T visitMapKeyBinding(MapKeyReference binding) {
 		return (T) binding;
 	}
 

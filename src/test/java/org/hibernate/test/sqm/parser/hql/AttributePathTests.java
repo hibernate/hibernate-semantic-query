@@ -8,14 +8,12 @@ package org.hibernate.test.sqm.parser.hql;
 
 import java.util.List;
 
-import org.hibernate.sqm.query.PropertyPath;
 import org.hibernate.sqm.query.expression.SqmExpression;
-import org.hibernate.sqm.query.expression.domain.DomainReferenceBinding;
-import org.hibernate.sqm.query.expression.domain.SingularAttributeBinding;
+import org.hibernate.sqm.query.expression.domain.SqmNavigableReference;
+import org.hibernate.sqm.query.expression.domain.SingularAttributeReference;
 import org.hibernate.sqm.query.SqmSelectStatement;
 import org.hibernate.sqm.query.from.FromElementSpace;
 import org.hibernate.sqm.query.from.SqmFrom;
-import org.hibernate.sqm.query.from.SqmRoot;
 import org.hibernate.sqm.query.predicate.RelationalSqmPredicate;
 import org.hibernate.sqm.query.select.SqmSelection;
 
@@ -57,8 +55,8 @@ public class AttributePathTests extends StandardModelTest {
 	}
 
 	private void assertPropertyPath(SqmExpression expression, String expectedFullPath) {
-		assertThat( expression, instanceOf( DomainReferenceBinding.class ) );
-		final DomainReferenceBinding domainReferenceBinding = (DomainReferenceBinding) expression;
+		assertThat( expression, instanceOf( SqmNavigableReference.class ) );
+		final SqmNavigableReference domainReferenceBinding = (SqmNavigableReference) expression;
 		assertThat( domainReferenceBinding.getPropertyPath().getFullPath(), is(expectedFullPath) );
 	}
 
@@ -72,12 +70,12 @@ public class AttributePathTests extends StandardModelTest {
 		assertThat( space.getJoins().size(), is(1) );
 
 		final SqmSelection selection = statement.getQuerySpec().getSelectClause().getSelections().get( 0 );
-		assertThat( selection.getExpression(), instanceOf( SingularAttributeBinding.class ) );
-		final SingularAttributeBinding selectExpression = (SingularAttributeBinding) selection.getExpression();
+		assertThat( selection.getExpression(), instanceOf( SingularAttributeReference.class ) );
+		final SingularAttributeReference selectExpression = (SingularAttributeReference) selection.getExpression();
 		assertThat( selectExpression.getFromElement(), notNullValue() );
 
 		final RelationalSqmPredicate predicate = (RelationalSqmPredicate) statement.getQuerySpec().getWhereClause().getPredicate();
-		final SingularAttributeBinding predicateLhs = (SingularAttributeBinding) predicate.getLeftHandExpression();
+		final SingularAttributeReference predicateLhs = (SingularAttributeReference) predicate.getLeftHandExpression();
 		assertThat( predicateLhs.getLhs().getFromElement(), notNullValue() );
 
 		assertThat( predicateLhs.getLhs().getFromElement(), sameInstance( selectExpression.getFromElement() ) );

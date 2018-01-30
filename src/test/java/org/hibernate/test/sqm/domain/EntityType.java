@@ -6,12 +6,12 @@
  */
 package org.hibernate.test.sqm.domain;
 
-import org.hibernate.sqm.domain.EntityReference;
+import org.hibernate.sqm.domain.EntityDescriptor;
 
 /**
  * Models information about an entity
  *
  * @author Steve Ebersole
  */
-public interface EntityType extends IdentifiableType, Bindable, EntityReference {
+public interface EntityType extends IdentifiableType, Bindable, EntityDescriptor {
 }

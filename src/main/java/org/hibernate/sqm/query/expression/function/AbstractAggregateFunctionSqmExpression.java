@@ -6,7 +6,7 @@
  */
 package org.hibernate.sqm.query.expression.function;
 
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 /**
@@ -18,7 +18,7 @@ public abstract class AbstractAggregateFunctionSqmExpression
 	private final SqmExpression argument;
 	private final boolean distinct;
 
-	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, DomainReference resultType) {
+	public AbstractAggregateFunctionSqmExpression(SqmExpression argument, boolean distinct, Navigable resultType) {
 		super( resultType );
 		this.argument = argument;
 		this.distinct = distinct;

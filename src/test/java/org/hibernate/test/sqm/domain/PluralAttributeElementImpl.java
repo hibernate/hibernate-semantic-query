@@ -8,14 +8,14 @@ package org.hibernate.test.sqm.domain;
 
 import java.util.Optional;
 
-import org.hibernate.sqm.domain.DomainReference;
-import org.hibernate.sqm.domain.EntityReference;
-import org.hibernate.sqm.domain.PluralAttributeElementReference;
+import org.hibernate.sqm.domain.Navigable;
+import org.hibernate.sqm.domain.EntityDescriptor;
+import org.hibernate.sqm.domain.PluralAttributeElementDescriptor;
 
 /**
  * @author Steve Ebersole
  */
-class PluralAttributeElementImpl implements PluralAttributeElementReference {
+class PluralAttributeElementImpl implements PluralAttributeElementDescriptor {
 	private final PluralAttributeImpl pluralAttribute;
 	private final ElementClassification classification;
 	private final Type elementType;
@@ -41,15 +41,15 @@ class PluralAttributeElementImpl implements PluralAttributeElementReference {
 	}
 
 	@Override
-	public DomainReference getType() {
+	public Navigable getType() {
 		return getElementType();
 	}
 
 	@Override
-	public Optional<EntityReference> toEntityReference() {
+	public Optional<EntityDescriptor> toEntityReference() {
 		if ( classification == ElementClassification.MANY_TO_MANY
 				|| classification == ElementClassification.ONE_TO_MANY ) {
-			return Optional.of( (EntityReference) elementType );
+			return Optional.of( (EntityDescriptor) elementType );
 		}
 
 		return Optional.empty();

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.sqm.SemanticQueryWalker;
-import org.hibernate.sqm.domain.DomainReference;
+import org.hibernate.sqm.domain.Navigable;
 import org.hibernate.sqm.query.expression.SqmExpression;
 
 import org.jboss.logging.Logger;
@@ -54,12 +54,12 @@ public class SqmDynamicInstantiation
 	}
 
 	@Override
-	public DomainReference getExpressionType() {
+	public Navigable getExpressionType() {
 		return null;
 	}
 
 	@Override
-	public DomainReference getInferableType() {
+	public Navigable getInferableType() {
 		return null;
 	}
 
